@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Spacers Bénévoles — Version Bêta v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 <style>
 :root {
   --blue:#185FA5;--bd:#0C447C;--bdd:#042C53;
@@ -221,13 +223,13 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;display:flex;align-items:c
     <div class="login-logo">🏐</div>
     <h1 style="font-size:26px;font-weight:800;color:white;text-align:center;margin-bottom:6px;">Spacers Bénévoles</h1>
     <p style="font-size:12px;color:var(--bm);text-align:center;margin-bottom:20px;line-height:1.5;">Votre espace bénévole · Saison 2026-2027</p>
-    <input class="inp" type="email" placeholder="Email" value="sarah.dupont@gmail.com">
-    <input class="inp" type="password" placeholder="Mot de passe" value="••••••••">
-    <button class="login-btn" onclick="goScreen('s-ob1')" id="login-btn">Se connecter →</button>
+    <input class="inp" type="email" placeholder="Email" value="sarah.dupont@gmail.com" id="login-email">
+    <input class="inp" type="password" placeholder="Mot de passe" value="••••••••" id="login-password">
+    <button class="login-btn" onclick="handleLogin()" id="login-btn">Se connecter →</button>
     <div style="width:100%;height:1px;background:rgba(255,255,255,0.1);margin:16px 0;"></div>
     <div style="font-size:11px;color:rgba(181,212,244,0.5);text-align:center;margin-bottom:10px;">Pas encore de compte ?</div>
     <button style="width:100%;padding:12px;background:transparent;border:1.5px solid rgba(255,255,255,0.2);border-radius:50px;color:white;font-family:'Sora',sans-serif;font-size:13px;font-weight:600;cursor:pointer;" onclick="goScreen('s-profil-type')">Je découvre le bénévolat →</button>
-    <div style="font-size:11px;color:rgba(181,212,244,0.4);text-align:center;margin-top:12px;cursor:pointer;">Mot de passe oublié ?</div>
+    <div style="font-size:11px;color:rgba(181,212,244,0.4);text-align:center;margin-top:12px;cursor:pointer;" onclick="handlePasswordReset()">Mot de passe oublié ?</div>
   </div>
 </div>
 
@@ -1413,7 +1415,8 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;display:flex;align-items:c
         <strong>Compte actif ✅</strong><br>Vous avez 420 pts · 7 matchs. Bien au-dessus du minimum de 150 pts requis. Continuez ainsi !
       </div>
       <button class="btn btn-s btn-full" style="margin-bottom:8px;" onclick="showToast('Attestation générée et envoyée par email ✓')">📄 Demander une attestation</button>
-      <button class="btn btn-full" style="background:var(--lt);color:var(--md);margin-bottom:14px;">⚙️ Paramètres du compte</button>
+      <button class="btn btn-full" style="background:var(--lt);color:var(--md);margin-bottom:8px;">⚙️ Paramètres du compte</button>
+      <button class="btn btn-full" style="background:var(--redl);color:var(--red);border:1px solid var(--red);margin-bottom:14px;" onclick="handleLogout()">🚪 Se déconnecter</button>
     </div>
 
   </div>
@@ -2010,6 +2013,131 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;display:flex;align-items:c
 <script>
 let isDash = false;
 
+// SUPABASE CONFIGURATION
+const supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
+let currentUser = null;
+
+// AUTHENTICATION FUNCTIONS
+async function signIn(email, password) {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+    
+    if (error) throw error;
+    
+    currentUser = data.user;
+    showToast('Connexion réussie !');
+    goScreen('s-home');
+    return data;
+  } catch (error) {
+    showToast('Erreur de connexion : ' + error.message);
+    return null;
+  }
+}
+
+async function signUp(email, password) {
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password
+    });
+    
+    if (error) throw error;
+    
+    showToast('Inscription réussie ! Vérifiez votre email.');
+    return data;
+  } catch (error) {
+    showToast('Erreur d\'inscription : ' + error.message);
+    return null;
+  }
+}
+
+async function signOut() {
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    
+    currentUser = null;
+    showToast('Déconnexion réussie');
+    goScreen('s-login');
+  } catch (error) {
+    showToast('Erreur de déconnexion : ' + error.message);
+  }
+}
+
+async function resetPassword(email) {
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) throw error;
+    
+    showToast('Email de réinitialisation envoyé !');
+  } catch (error) {
+    showToast('Erreur : ' + error.message);
+  }
+}
+
+// Check current session
+async function checkSession() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      goScreen('s-home');
+    }
+  } catch (error) {
+    console.error('Session check error:', error);
+  }
+}
+
+// Listen for auth changes
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session) {
+    currentUser = session.user;
+  } else if (event === 'SIGNED_OUT') {
+    currentUser = null;
+  }
+});
+
+// UI HANDLERS
+async function handleLogin() {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  
+  if (!email || !password) {
+    showToast('Veuillez remplir tous les champs');
+    return;
+  }
+  
+  const btn = document.getElementById('login-btn');
+  btn.textContent = 'Connexion...';
+  btn.disabled = true;
+  
+  await signIn(email, password);
+  
+  btn.textContent = 'Se connecter →';
+  btn.disabled = false;
+}
+
+async function handlePasswordReset() {
+  const email = document.getElementById('login-email').value;
+  
+  if (!email) {
+    showToast('Veuillez entrer votre email');
+    return;
+  }
+  
+  await resetPassword(email);
+}
+
+async function handleLogout() {
+  if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+    await signOut();
+  }
+}
+
 // ONBOARDING
 let obPts = 50;
 function skipTuto(){showScr('s-home');}
@@ -2164,6 +2292,11 @@ function joelDispo(oui){
   setTimeout(()=>showToast(oui?'✅ Disponibilité confirmée — Clément est notifié':'Réponse enregistrée — merci Joël !'),200);
 }
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// Initialize authentication on page load
+document.addEventListener('DOMContentLoaded', function() {
+  checkSession();
+});
 </script>
 </body>
 </html>
