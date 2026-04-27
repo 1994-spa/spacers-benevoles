@@ -46,6 +46,32 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;padding:2
 .btn-dispo{background:#3B6D11;color:white;border:none;border-radius:50px;padding:8px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
 .btn-dispo:hover{background:#2d540d;}
 .btn-dispo:disabled{background:#D3D1C7;color:#5F5E5A;cursor:not-allowed;}
+.main-content{transition:all 0.3s ease;}
+.back-btn{background:#5F5E5A;color:white;border:none;border-radius:50px;padding:8px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:20px;}
+.back-btn:hover{background:#3d3c38;}
+.points-section{background:white;border-radius:16px;padding:24px;margin-bottom:20px;}
+.points-header{text-align:center;margin-bottom:24px;}
+.points-title{font-size:24px;font-weight:800;color:#0C447C;margin-bottom:8px;}
+.points-subtitle{font-size:14px;color:#5F5E5A;}
+.points-display{display:flex;justify-content:space-around;align-items:center;margin-bottom:32px;}
+.points-circle{text-align:center;}
+.points-value{font-size:48px;font-weight:800;color:#185FA5;font-family:monospace;line-height:1;}
+.points-label{font-size:12px;color:#5F5E5A;margin-top:8px;}
+.level-info{text-align:center;}
+.level-name{font-size:20px;font-weight:700;margin-bottom:8px;}
+.level-bronze{color:#7A4F26;}
+.level-argent{color:#5B8C5A;}
+.level-or{color:#C9821A;}
+.progress-section{margin-bottom:24px;}
+.progress-label{font-size:12px;color:#5F5E5A;margin-bottom:8px;display:flex;justify-content:space-between;}
+.progress-bar{height:8px;background:#F1EFE8;border-radius:4px;overflow:hidden;margin-bottom:4px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#185FA5,#0C447C);border-radius:4px;transition:width 0.5s ease;}
+.matchs-info{font-size:11px;color:#5F5E5A;text-align:center;}
+.badges-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:16px;margin-top:24px;}
+.badge-item{text-align:center;}
+.badge-icon{width:60px;height:60px;background:#F1EFE8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 8px;}
+.badge-icon.earned{background:#EAF3DE;}
+.badge-name{font-size:11px;color:#5F5E5A;}
 </style>
 </head>
 <body>
@@ -67,13 +93,15 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;padding:2
   </div>
   <div style="text-align:right;font-size:12px;color:#5F5E5A;" id="pts-info"></div>
 </div>
-<div class="grid">
-  <div class="card"><h2>📅 Planning</h2><p>Consultez le calendrier des matchs et indiquez vos disponibilités.</p><button class="btn" onclick="showPlanning()">Voir le planning</button></div>
-  <div class="card"><h2>✅ Mes disponibilités</h2><p>Gérez votre présence pour les prochains matchs.</p><button class="btn">Gérer mes dispos</button></div>
-  <div class="card"><h2>🏆 Points et badges</h2><p>Suivez votre progression et vos récompenses.</p><button class="btn">Voir mes badges</button></div>
-  <div class="card"><h2>🛍️ Boutique</h2><p>Équipements et goodies exclusifs bénévoles.</p><button class="btn">Visiter la boutique</button></div>
-  <div class="card"><h2>💬 Communauté</h2><p>Échangez avec les autres bénévoles.</p><button class="btn">Accéder au forum</button></div>
-  <div class="card"><h2>👤 Mon profil</h2><p>Mettez à jour vos informations personnelles.</p><button class="btn" onclick="showProfileForm()">Modifier mon profil</button></div>
+<div class="main-content" id="main-content">
+  <div class="grid" id="dashboard-grid">
+    <div class="card"><h2>📅 Planning</h2><p>Consultez le calendrier des matchs et indiquez vos disponibilités.</p><button class="btn" onclick="showPlanningView()">Voir le planning</button></div>
+    <div class="card"><h2>✅ Mes disponibilités</h2><p>Gérez votre présence pour les prochains matchs.</p><button class="btn">Gérer mes dispos</button></div>
+    <div class="card"><h2>🏆 Points et badges</h2><p>Suivez votre progression et vos récompenses.</p><button class="btn" onclick="showPointsView()">Voir mes badges</button></div>
+    <div class="card"><h2>🛍️ Boutique</h2><p>Équipements et goodies exclusifs bénévoles.</p><button class="btn">Visiter la boutique</button></div>
+    <div class="card"><h2>💬 Communauté</h2><p>Échangez avec les autres bénévoles.</p><button class="btn">Accéder au forum</button></div>
+    <div class="card"><h2>👤 Mon profil</h2><p>Mettez à jour vos informations personnelles.</p><button class="btn" onclick="showProfileForm()">Modifier mon profil</button></div>
+  </div>
 </div>
 
 <!-- Modal Profil -->
@@ -108,6 +136,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;padding:2
         </select>
       </div>
       <button type="submit" class="btn-save">💾 Sauvegarder</button>
+      <button type="button" class="btn-logout" style="margin-top:10px;background:#5F5E5A;" onclick="closeModal('profile-modal')">Fermer</button>
     </form>
   </div>
 </div>
@@ -202,6 +231,62 @@ async function saveProfile(event){
 }
 
 // Fonctions Planning
+async function showPlanningView(){
+  const mainContent = document.getElementById('main-content')
+  mainContent.innerHTML = `
+    <button class="back-btn" onclick="showDashboard()">← Retour au dashboard</button>
+    <div class="match-list" id="planning-list">
+      <div style="text-align:center;color:#5F5E5A;padding:40px;">Chargement...</div>
+    </div>
+  `
+  await loadMatchesForPlanning()
+}
+
+async function loadMatchesForPlanning(){
+  try{
+    const{data:matches,error}=await sb.from('matchs').select('*').order('date_match', {ascending: true})
+    if(error) throw error
+    
+    const matchList = document.getElementById('planning-list')
+    
+    if(!matches || matches.length === 0){
+      matchList.innerHTML = '<div style="text-align:center;color:#5F5E5A;padding:40px;">Aucun match prévu</div>'
+      return
+    }
+    
+    matchList.innerHTML = matches.map(match => {
+      const date = new Date(match.date_match)
+      const dateStr = date.toLocaleDateString('fr-FR', {day: 'numeric', month: 'long', year: 'numeric'})
+      const timeStr = match.heure ? match.heure.substring(0,5) : ''
+      const lieu = match.lieu || 'Palais des Sports'
+      
+      const statusClass = match.statut_inscriptions === 'ouvert' ? 'status-open' : 'status-closed'
+      const statusText = match.statut_inscriptions === 'ouvert' ? 'Ouvert' : 'Fermé'
+      
+      const dispoButton = match.statut_inscriptions === 'ouvert' 
+        ? `<button class="btn-dispo" onclick="setDisponible('${match.id}')">Je suis disponible</button>`
+        : ''
+      
+      return `
+        <div class="match-item">
+          <div class="match-header">
+            <div>
+              <div class="match-teams">Spacers 🏐 vs ${match.adversaire || 'Adversaire'}</div>
+              <div class="match-date">${dateStr} ${timeStr} · ${lieu}</div>
+            </div>
+            <span class="match-status ${statusClass}">${statusText}</span>
+          </div>
+          ${dispoButton}
+        </div>
+      `
+    }).join('')
+    
+  }catch(error){
+    console.error('Erreur chargement matchs:', error)
+    document.getElementById('planning-list').innerHTML = '<div style="text-align:center;color:#993556;padding:40px;">Erreur de chargement</div>'
+  }
+}
+
 async function showPlanning(){
   document.getElementById('planning-modal').style.display = 'flex'
   await loadMatches()
@@ -289,7 +374,106 @@ async function setDisponible(matchId){
   }
 }
 
+// Fonctions Points
+async function showPointsView(){
+  if(!currentProfile){
+    alert('Profil non trouvé')
+    return
+  }
+  
+  const points = currentProfile.points_total || 0
+  const matchs = currentProfile.matchs_joues || 0
+  const niveau = getNiveauInfo(points)
+  
+  const mainContent = document.getElementById('main-content')
+  mainContent.innerHTML = `
+    <button class="back-btn" onclick="showDashboard()">← Retour au dashboard</button>
+    <div class="points-section">
+      <div class="points-header">
+        <h2 class="points-title">🏆 Mes Points et Badges</h2>
+        <p class="points-subtitle">Votre progression chez les Spacers Bénévoles</p>
+      </div>
+      
+      <div class="points-display">
+        <div class="points-circle">
+          <div class="points-value">${points}</div>
+          <div class="points-label">Points totaux</div>
+        </div>
+        <div class="level-info">
+          <div class="level-name level-${niveau.class}">${niveau.icon} Niveau ${niveau.name}</div>
+          <div class="matchs-info">${matchs} match${matchs > 1 ? 's' : ''} joué${matchs > 1 ? 's' : ''}</div>
+        </div>
+      </div>
+      
+      ${niveau.next ? `
+        <div class="progress-section">
+          <div class="progress-label">
+            <span>Progression vers ${niveau.next.icon} ${niveau.next.name}</span>
+            <span>${points}/${niveau.next.min} pts</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${niveau.progress}%"></div>
+          </div>
+        </div>
+      ` : '<div style="text-align:center;color:#C9821A;font-weight:700;margin-bottom:24px;">🎉 Niveau maximum atteint !</div>'}
+      
+      <div class="badges-grid">
+        <div class="badge-item">
+          <div class="badge-icon ${points >= 0 ? 'earned' : ''}">🏐</div>
+          <div class="badge-name">1er Match</div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-icon ${points >= 50 ? 'earned' : ''}">⭐</div>
+          <div class="badge-name">Ponctuel</div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-icon ${points >= 150 ? 'earned' : ''}">🏅</div>
+          <div class="badge-name">5 Matchs</div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-icon ${points >= 300 ? 'earned' : ''}">🏆</div>
+          <div class="badge-name">10 Matchs</div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-icon ${points >= 600 ? 'earned' : ''}">🥈</div>
+          <div class="badge-name">Argent</div>
+        </div>
+        <div class="badge-item">
+          <div class="badge-icon ${points >= 1000 ? 'earned' : ''}">🥇</div>
+          <div class="badge-name">Or</div>
+        </div>
+      </div>
+    </div>
+  `
+}
+
+function getNiveauInfo(points){
+  if(points >= 1000) {
+    return {name: 'Or', class: 'or', icon: '🥇', min: 1000, progress: 100}
+  } else if(points >= 600) {
+    const progress = ((points - 600) / 400) * 100
+    return {name: 'Argent', class: 'argent', icon: '🥈', min: 600, max: 999, progress, next: {name: 'Or', icon: '🥇', min: 1000}}
+  } else {
+    const progress = (points / 600) * 100
+    return {name: 'Bronze', class: 'bronze', icon: '🥉', min: 0, max: 599, progress, next: {name: 'Argent', icon: '🥈', min: 600}}
+  }
+}
+
 // Fonctions utilitaires
+function showDashboard(){
+  const mainContent = document.getElementById('main-content')
+  mainContent.innerHTML = `
+    <div class="grid" id="dashboard-grid">
+      <div class="card"><h2>📅 Planning</h2><p>Consultez le calendrier des matchs et indiquez vos disponibilités.</p><button class="btn" onclick="showPlanningView()">Voir le planning</button></div>
+      <div class="card"><h2>✅ Mes disponibilités</h2><p>Gérez votre présence pour les prochains matchs.</p><button class="btn">Gérer mes dispos</button></div>
+      <div class="card"><h2>🏆 Points et badges</h2><p>Suivez votre progression et vos récompenses.</p><button class="btn" onclick="showPointsView()">Voir mes badges</button></div>
+      <div class="card"><h2>🛍️ Boutique</h2><p>Équipements et goodies exclusifs bénévoles.</p><button class="btn">Visiter la boutique</button></div>
+      <div class="card"><h2>💬 Communauté</h2><p>Échangez avec les autres bénévoles.</p><button class="btn">Accéder au forum</button></div>
+      <div class="card"><h2>👤 Mon profil</h2><p>Mettez à jour vos informations personnelles.</p><button class="btn" onclick="showProfileForm()">Modifier mon profil</button></div>
+    </div>
+  `
+}
+
 function closeModal(modalId){
   document.getElementById(modalId).style.display = 'none'
 }
