@@ -44,8 +44,14 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;padding:2
 .status-open{background:#EAF3DE;color:#3B6D11;}
 .status-closed{background:#FBEAF0;color:#993556;}
 .btn-dispo{background:#3B6D11;color:white;border:none;border-radius:50px;padding:8px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
-.btn-dispo:hover{background:#2d540d;}
-.btn-dispo:disabled{background:#D3D1C7;color:#5F5E5A;cursor:not-allowed;}
+.btn-dispo-oui{background:#3B6D11;color:white;border:none;border-radius:50px;padding:8px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-right:8px;}
+.btn-dispo-oui:hover{background:#2d540d;}
+.btn-dispo-non{background:#993556;color:white;border:none;border-radius:50px;padding:8px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-dispo-non:hover{background:#7a2844;}
+.dispo-status{font-size:11px;padding:4px 8px;border-radius:50px;font-weight:600;margin-bottom:8px;}
+.status-disponible{background:#EAF3DE;color:#3B6D11;}
+.status-indisponible{background:#FBEAF0;color:#993556;}
+.status-en-attente{background:#FEF3DC;color:#C9821A;}
 .main-content{transition:all 0.3s ease;}
 .back-btn{background:#5F5E5A;color:white;border:none;border-radius:50px;padding:8px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:20px;}
 .back-btn:hover{background:#3d3c38;}
@@ -135,8 +141,10 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;padding:2
           <option value="XXL">XXL</option>
         </select>
       </div>
-      <button type="submit" class="btn-save">💾 Sauvegarder</button>
-      <button type="button" class="btn-logout" style="margin-top:10px;background:#5F5E5A;" onclick="closeModal('profile-modal')">Fermer</button>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button type="submit" class="btn-save">💾 Sauvegarder</button>
+        <button type="button" class="btn-logout" style="background:#5F5E5A;" onclick="closeModal('profile-modal')">Annuler</button>
+      </div>
     </form>
   </div>
 </div>
@@ -374,6 +382,156 @@ async function setDisponible(matchId){
   }
 }
 
+// Fonctions Disponibilités
+async function showDisposView(){
+  if(!currentProfile){
+    alert('Profil non trouvé')
+    return
+  }
+  
+  const mainContent = document.getElementById('main-content')
+  mainContent.innerHTML = `
+    <button class="back-btn" onclick="showDashboard()">← Retour au dashboard</button>
+    <div class="match-list" id="dispos-list">
+      <div style="text-align:center;color:#5F5E5A;padding:40px;">Chargement...</div>
+    </div>
+  `
+  await loadDispos()
+}
+
+async function loadDispos(){
+  try{
+    // Récupérer les matchs ouverts
+    const{data:matches,error}=await sb.from('matchs')
+      .select('*')
+      .eq('statut_inscriptions', 'ouvert')
+      .order('date_match', {ascending: true})
+    
+    if(error) throw error
+    
+    // Récupérer les inscriptions de l'utilisateur
+    const{data:inscriptions,error:inscError}=await sb.from('inscriptions')
+      .select('*')
+      .eq('benevole_id', currentProfile.id)
+    
+    if(inscError) throw inscError
+    
+    const disposList = document.getElementById('dispos-list')
+    
+    if(!matches || matches.length === 0){
+      disposList.innerHTML = '<div style="text-align:center;color:#5F5E5A;padding:40px;">Aucun match ouvert aux inscriptions</div>'
+      return
+    }
+    
+    disposList.innerHTML = matches.map(match => {
+      const date = new Date(match.date_match)
+      const dateStr = date.toLocaleDateString('fr-FR', {day: 'numeric', month: 'long', year: 'numeric'})
+      const timeStr = match.heure ? match.heure.substring(0,5) : ''
+      const lieu = match.lieu || 'Palais des Sports'
+      
+      // Vérifier si l'utilisateur est déjà inscrit à ce match
+      const inscription = inscriptions?.find(inc => inc.match_id === match.id)
+      let statusDisplay = ''
+      let actionButtons = ''
+      
+      if(inscription){
+        const statusClass = inscription.statut === 'disponible' ? 'status-disponible' : 
+                          inscription.statut === 'indisponible' ? 'status-indisponible' : 'status-en-attente'
+        const statusText = inscription.statut === 'disponible' ? '✅ Disponible' : 
+                          inscription.statut === 'indisponible' ? '❌ Indisponible' : '⏳ En attente'
+        
+        statusDisplay = `<div class="dispo-status ${statusClass}">${statusText}</div>`
+        
+        // Boutons pour changer de statut
+        if(inscription.statut !== 'disponible'){
+          actionButtons += `<button class="btn-dispo-oui" onclick="updateDisponibilite('${match.id}', 'disponible')">OUI</button>`
+        }
+        if(inscription.statut !== 'indisponible'){
+          actionButtons += `<button class="btn-dispo-non" onclick="updateDisponibilite('${match.id}', 'indisponible')">NON</button>`
+        }
+      } else {
+        // Pas encore inscrit
+        actionButtons = `
+          <button class="btn-dispo-oui" onclick="updateDisponibilite('${match.id}', 'disponible')">OUI - Disponible</button>
+          <button class="btn-dispo-non" onclick="updateDisponibilite('${match.id}', 'indisponible')">NON - Indisponible</button>
+        `
+      }
+      
+      return `
+        <div class="match-item">
+          <div class="match-header">
+            <div>
+              <div class="match-teams">Spacers 🏐 vs ${match.adversaire || 'Adversaire'}</div>
+              <div class="match-date">${dateStr} ${timeStr} · ${lieu}</div>
+            </div>
+            <span class="match-status status-open">Ouvert</span>
+          </div>
+          ${statusDisplay}
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            ${actionButtons}
+          </div>
+        </div>
+      `
+    }).join('')
+    
+  }catch(error){
+    console.error('Erreur chargement disponibilités:', error)
+    document.getElementById('dispos-list').innerHTML = '<div style="text-align:center;color:#993556;padding:40px;">Erreur de chargement</div>'
+  }
+}
+
+async function updateDisponibilite(matchId, statut){
+  if(!currentUser || !currentProfile){
+    alert('Utilisateur non connecté')
+    return
+  }
+  
+  try{
+    // Vérifier si une inscription existe déjà
+    const{data:existing}=await sb.from('inscriptions')
+      .select('*')
+      .eq('benevole_id', currentProfile.id)
+      .eq('match_id', matchId)
+      .single()
+    
+    if(existing){
+      // Mettre à jour l'inscription existante
+      const{error}=await sb.from('inscriptions')
+        .update({
+          statut: statut,
+          date_mise_a_jour: new Date().toISOString()
+        })
+        .eq('id', existing.id)
+      
+      if(error) throw error
+      
+      const actionText = statut === 'disponible' ? 'Disponible' : 'Indisponible'
+      alert(`Votre disponibilité a été mise à jour : ${actionText}`)
+    } else {
+      // Créer une nouvelle inscription
+      const{error}=await sb.from('inscriptions').insert({
+        benevole_id: currentProfile.id,
+        match_id: matchId,
+        statut: statut,
+        date_inscription: new Date().toISOString(),
+        date_mise_a_jour: new Date().toISOString()
+      })
+      
+      if(error) throw error
+      
+      const actionText = statut === 'disponible' ? 'Disponible' : 'Indisponible'
+      alert(`Votre disponibilité a été enregistrée : ${actionText}`)
+    }
+    
+    // Recharger la liste pour mettre à jour l'affichage
+    await loadDispos()
+    
+  }catch(error){
+    console.error('Erreur mise à jour disponibilité:', error)
+    alert('Erreur lors de la mise à jour de votre disponibilité')
+  }
+}
+
 // Fonctions Points
 async function showPointsView(){
   if(!currentProfile){
@@ -465,7 +623,7 @@ function showDashboard(){
   mainContent.innerHTML = `
     <div class="grid" id="dashboard-grid">
       <div class="card"><h2>📅 Planning</h2><p>Consultez le calendrier des matchs et indiquez vos disponibilités.</p><button class="btn" onclick="showPlanningView()">Voir le planning</button></div>
-      <div class="card"><h2>✅ Mes disponibilités</h2><p>Gérez votre présence pour les prochains matchs.</p><button class="btn">Gérer mes dispos</button></div>
+      <div class="card"><h2>✅ Mes disponibilités</h2><p>Gérez votre présence pour les prochains matchs.</p><button class="btn" onclick="showDisposView()">Gérer mes dispos</button></div>
       <div class="card"><h2>🏆 Points et badges</h2><p>Suivez votre progression et vos récompenses.</p><button class="btn" onclick="showPointsView()">Voir mes badges</button></div>
       <div class="card"><h2>🛍️ Boutique</h2><p>Équipements et goodies exclusifs bénévoles.</p><button class="btn">Visiter la boutique</button></div>
       <div class="card"><h2>💬 Communauté</h2><p>Échangez avec les autres bénévoles.</p><button class="btn">Accéder au forum</button></div>
