@@ -12,31 +12,33 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .header{background:linear-gradient(135deg,#0C447C,#185FA5);padding:20px 24px;text-align:center;}
 .header h1{font-size:20px;font-weight:800;color:white;}
 .header p{font-size:12px;color:rgba(181,212,244,0.8);margin-top:3px;}
-.topbar{background:white;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;}
-.user-info{display:flex;align-items:center;gap:12px;}
-.user-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #B5D4F4;}
-.user-avatar-placeholder{width:40px;height:40px;border-radius:50%;background:#E6F1FB;border:2px solid #B5D4F4;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#185FA5;}
-.user-name{font-size:15px;font-weight:700;color:#0C447C;}
-.user-level{font-size:11px;color:#5F5E5A;margin-top:1px;}
-.btn-logout{background:#993556;color:white;border:none;border-radius:50px;padding:8px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
-.screen{display:none;padding:20px;}
+.topbar{background:white;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.user-info{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+.user-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid #B5D4F4;flex-shrink:0;}
+.user-avatar-placeholder{width:38px;height:38px;border-radius:50%;background:#E6F1FB;border:2px solid #B5D4F4;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#185FA5;flex-shrink:0;}
+.user-name{font-size:14px;font-weight:700;color:#0C447C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-level{font-size:10px;color:#5F5E5A;margin-top:1px;}
+.topbar-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.btn-pilote{display:none;background:#C9821A;color:white;border:none;border-radius:50px;padding:7px 12px;font-family:'Sora',sans-serif;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-logout{background:#993556;color:white;border:none;border-radius:50px;padding:7px 12px;font-family:'Sora',sans-serif;font-size:11px;font-weight:700;cursor:pointer;}
+.screen{display:none;padding:16px;}
 .screen.active{display:block;}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
-.card{background:white;border-radius:16px;padding:18px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;}
+.card{background:white;border-radius:16px;padding:16px;}
 .card h2{font-size:14px;font-weight:700;color:#0C447C;margin-bottom:6px;}
 .card p{font-size:12px;color:#5F5E5A;line-height:1.6;margin-bottom:12px;}
 .btn{background:#185FA5;color:white;border:none;border-radius:50px;padding:9px 18px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
 .btn:hover{background:#0C447C;}
 .btn-green{background:#3B6D11;}
 .btn-back{background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);border-radius:50px;padding:6px 14px;font-family:'Sora',sans-serif;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:14px;display:inline-block;}
-.pts-bar{background:white;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.pts-bar{background:white;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
 .pts-val{font-size:28px;font-weight:800;color:#185FA5;font-family:monospace;}
 .prog-track{height:8px;background:#E6F1FB;border-radius:4px;overflow:hidden;margin-top:6px;}
 .prog-fill{height:100%;background:linear-gradient(90deg,#0C447C,#185FA5);border-radius:4px;transition:width 1s ease;}
 .match-item{background:white;border-radius:12px;padding:14px;margin-bottom:10px;}
 .match-title{font-size:14px;font-weight:700;color:#0C447C;}
 .match-date{font-size:11px;color:#5F5E5A;margin-top:3px;}
-.match-actions{margin-top:10px;display:flex;gap:8px;}
+.match-actions{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;}
 .badge-open{background:#EAF3DE;color:#3B6D11;font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;display:inline-block;margin-top:4px;}
 .badge-closed{background:#F1EFE8;color:#5F5E5A;font-size:10px;padding:3px 10px;border-radius:50px;display:inline-block;margin-top:4px;}
 .badge-inscrit{background:#E6F1FB;color:#0C447C;font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;display:inline-block;margin-top:4px;}
@@ -56,23 +58,15 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .badge-icon{width:52px;height:52px;border-radius:50%;background:#EAF3DE;border:2px solid #C0DD97;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 4px;}
 .badge-icon.locked{background:#F1EFE8;border-color:#D3D1C7;opacity:0.4;}
 .badge-name{font-size:9px;color:#5F5E5A;line-height:1.2;}
-.sec-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.7);margin-bottom:12px;}
+.sec-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.7);margin-bottom:10px;}
 .post-item{background:white;border-radius:12px;padding:14px;margin-bottom:10px;}
 .post-author{font-size:12px;font-weight:700;color:#0C447C;}
 .post-content{font-size:12px;color:#5F5E5A;margin-top:4px;line-height:1.6;}
 textarea{width:100%;padding:11px 14px;border:1.5px solid #D3D1C7;border-radius:10px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:none;height:80px;}
-
-/* PHOTO UPLOAD */
-.photo-upload-zone{
-  border:2px dashed #B5D4F4;border-radius:16px;padding:24px;
-  text-align:center;cursor:pointer;transition:all .2s;background:#E6F1FB;
-  margin-bottom:14px;
-}
+.photo-upload-zone{border:2px dashed #B5D4F4;border-radius:16px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:#E6F1FB;margin-bottom:14px;}
 .photo-upload-zone:hover{border-color:#185FA5;background:#d4e8f8;}
 .photo-upload-zone input{display:none;}
 .photo-preview{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #185FA5;margin:0 auto 10px;display:block;}
-
-/* ACCREDITATION STATUS */
 .accred-status{border-radius:14px;padding:16px;margin-bottom:14px;}
 .accred-sans-photo{background:#F1EFE8;border:1.5px solid #D3D1C7;}
 .accred-en-attente{background:#FEF3DC;border:1.5px solid #FAC775;}
@@ -91,22 +85,25 @@ textarea{width:100%;padding:11px 14px;border:1.5px solid #D3D1C7;border-radius:1
 <div class="topbar">
   <div class="user-info">
     <div id="avatar-wrap"></div>
-    <div>
+    <div style="min-width:0;">
       <div class="user-name" id="user-name">Chargement...</div>
       <div class="user-level" id="user-level">...</div>
     </div>
   </div>
-  <button class="btn-logout" onclick="handleLogout()">Se déconnecter</button>
+  <div class="topbar-actions">
+    <button class="btn-pilote" id="btn-pilote" onclick="window.location.href='pilote.html'">🎯 Pilote</button>
+    <button class="btn-logout" onclick="handleLogout()">Déconnexion</button>
+  </div>
 </div>
 
 <!-- ══ HOME ══ -->
 <div class="screen active" id="screen-home">
-  <div style="padding:4px 0 4px;"><div class="sec-title">Vos points</div></div>
+  <div style="padding:4px 0;"><div class="sec-title">Vos points</div></div>
   <div class="pts-bar" id="pts-bar" style="display:none;">
     <div>
       <div style="font-size:11px;color:#5F5E5A;margin-bottom:2px;">Points cette saison</div>
       <div class="pts-val" id="pts-val">0</div>
-      <div class="prog-track" style="width:200px;"><div class="prog-fill" id="prog-fill" style="width:0%;"></div></div>
+      <div class="prog-track" style="width:180px;"><div class="prog-fill" id="prog-fill" style="width:0%;"></div></div>
       <div style="font-size:10px;color:#5F5E5A;margin-top:3px;" id="pts-next"></div>
     </div>
     <div style="text-align:right;font-size:12px;color:#5F5E5A;" id="pts-info"></div>
@@ -124,7 +121,7 @@ textarea{width:100%;padding:11px 14px;border:1.5px solid #D3D1C7;border-radius:1
 
 <!-- ══ PLANNING ══ -->
 <div class="screen" id="screen-planning">
-  <div style="background:linear-gradient(135deg,#0C447C,#185FA5);padding:16px 20px;margin:-20px -20px 16px;">
+  <div style="background:linear-gradient(135deg,#0C447C,#185FA5);padding:16px;margin:-16px -16px 16px;">
     <button class="btn-back" onclick="showScreen('home')">← Retour</button>
     <div style="font-size:18px;font-weight:800;color:white;">Planning matchs</div>
   </div>
@@ -133,7 +130,7 @@ textarea{width:100%;padding:11px 14px;border:1.5px solid #D3D1C7;border-radius:1
 
 <!-- ══ DISPONIBILITÉS ══ -->
 <div class="screen" id="screen-dispos">
-  <div style="background:linear-gradient(135deg,#27500A,#3B6D11);padding:16px 20px;margin:-20px -20px 16px;">
+  <div style="background:linear-gradient(135deg,#27500A,#3B6D11);padding:16px;margin:-16px -16px 16px;">
     <button class="btn-back" onclick="showScreen('home')">← Retour</button>
     <div style="font-size:18px;font-weight:800;color:white;">Mes disponibilités</div>
   </div>
@@ -142,7 +139,7 @@ textarea{width:100%;padding:11px 14px;border:1.5px solid #D3D1C7;border-radius:1
 
 <!-- ══ POINTS ══ -->
 <div class="screen" id="screen-points">
-  <div style="background:linear-gradient(135deg,#1a1a18,#0C447C);padding:16px 20px;margin:-20px -20px 16px;">
+  <div style="background:linear-gradient(135deg,#1a1a18,#0C447C);padding:16px;margin:-16px -16px 16px;">
     <button class="btn-back" onclick="showScreen('home')">← Retour</button>
     <div style="font-size:18px;font-weight:800;color:white;">Points et badges</div>
   </div>
@@ -151,7 +148,7 @@ textarea{width:100%;padding:11px 14px;border:1.5px solid #D3D1C7;border-radius:1
 
 <!-- ══ COMMUNAUTÉ ══ -->
 <div class="screen" id="screen-communaute">
-  <div style="background:linear-gradient(135deg,#533BB7,#185FA5);padding:16px 20px;margin:-20px -20px 16px;">
+  <div style="background:linear-gradient(135deg,#533BB7,#185FA5);padding:16px;margin:-16px -16px 16px;">
     <button class="btn-back" onclick="showScreen('home')">← Retour</button>
     <div style="font-size:18px;font-weight:800;color:white;">Communauté</div>
   </div>
@@ -167,10 +164,10 @@ textarea{width:100%;padding:11px 14px;border:1.5px solid #D3D1C7;border-radius:1
 
 <!-- ══ BOUTIQUE ══ -->
 <div class="screen" id="screen-boutique">
-  <div style="background:linear-gradient(135deg,#27500A,#3B6D11);padding:16px 20px;margin:-20px -20px 16px;">
+  <div style="background:linear-gradient(135deg,#27500A,#3B6D11);padding:16px;margin:-16px -16px 16px;">
     <button class="btn-back" onclick="showScreen('home')">← Retour</button>
     <div style="font-size:18px;font-weight:800;color:white;">Boutique</div>
-    <div style="font-size:11px;color:rgba(192,221,151,0.8);margin-top:2px;" id="boutique-remise">Remise bénévole active</div>
+    <div style="font-size:11px;color:rgba(192,221,151,0.8);margin-top:2px;" id="boutique-remise"></div>
   </div>
   <div style="margin-top:16px;" id="boutique-content"></div>
 </div>
@@ -180,8 +177,6 @@ textarea{width:100%;padding:11px 14px;border:1.5px solid #D3D1C7;border-radius:1
   <div class="modal">
     <h2>👤 Mon profil</h2>
     <div id="profil-alert"></div>
-
-    <!-- Photo section -->
     <div style="margin-bottom:20px;">
       <div class="form-label">📸 Ma photo (obligatoire pour l'accréditation)</div>
       <div class="photo-upload-zone" onclick="document.getElementById('photo-input').click()">
@@ -189,15 +184,11 @@ textarea{width:100%;padding:11px 14px;border:1.5px solid #D3D1C7;border-radius:1
         <div id="photo-preview-wrap">
           <div style="font-size:36px;margin-bottom:8px;">📷</div>
           <div style="font-size:13px;font-weight:700;color:#185FA5;">Cliquez pour ajouter votre photo</div>
-          <div style="font-size:11px;color:#5F5E5A;margin-top:4px;">Format JPG ou PNG · Max 5MB<br>Photo de visage, fond neutre recommandé</div>
+          <div style="font-size:11px;color:#5F5E5A;margin-top:4px;">JPG ou PNG · Max 5MB · Fond neutre recommandé</div>
         </div>
       </div>
-
-      <!-- Statut accréditation -->
       <div id="accred-status-block"></div>
     </div>
-
-    <!-- Infos perso -->
     <div class="form-group"><label class="form-label">Prénom</label><input class="form-input" id="f-prenom" type="text"></div>
     <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="f-nom" type="text"></div>
     <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-tel" type="tel"></div>
@@ -205,7 +196,6 @@ textarea{width:100%;padding:11px 14px;border:1.5px solid #D3D1C7;border-radius:1
       <label class="form-label">Taille t-shirt</label>
       <select class="form-input" id="f-tshirt"><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select>
     </div>
-
     <div class="modal-actions">
       <button class="btn" style="flex:1;" onclick="saveProfile()">Sauvegarder</button>
       <button class="btn" style="background:#F1EFE8;color:#5F5E5A;flex:1;" onclick="closeModal()">Fermer</button>
@@ -235,46 +225,52 @@ async function loadProfile() {
   if (p) {
     const name = ((p.prenom||'')+' '+(p.nom||'')).trim() || currentUser.email
     document.getElementById('user-name').textContent = name
-    document.getElementById('user-level').textContent = '🥉 Niveau '+(p.niveau||'Bronze')+' · '+(p.points_total||0)+' pts'
+    document.getElementById('user-level').textContent = (p.niveau==='Or'?'🥇':p.niveau==='Argent'?'🥈':'🥉') + ' ' + (p.niveau||'Bronze') + ' · ' + (p.points_total||0) + ' pts'
+
     // Avatar
     const wrap = document.getElementById('avatar-wrap')
     if (p.photo_url) {
-      wrap.innerHTML = `<img src="${p.photo_url}" class="user-avatar" alt="Photo">`
+      wrap.innerHTML = `<img src="${p.photo_url}" class="user-avatar" alt="">`
     } else {
-      const initials = ((p.prenom||'?')[0]+(p.nom||'?')[0]).toUpperCase()
-      wrap.innerHTML = `<div class="user-avatar-placeholder">${initials}</div>`
+      const ini = ((p.prenom||'?')[0]+(p.nom||'?')[0]).toUpperCase()
+      wrap.innerHTML = `<div class="user-avatar-placeholder">${ini}</div>`
     }
+
+    // Bouton pilote — visible seulement pour admin et pilote
+    if (p.role === 'admin' || p.role === 'pilote') {
+      document.getElementById('btn-pilote').style.display = 'block'
+    }
+
     // Points bar
     const pts = p.points_total||0
     const pct = p.niveau==='Or'?100:p.niveau==='Argent'?Math.min(((pts-600)/400)*100,100):Math.min((pts/600)*100,100)
-    document.getElementById('pts-bar').style.display='flex'
-    document.getElementById('pts-val').textContent=pts
-    document.getElementById('prog-fill').style.width=pct+'%'
-    document.getElementById('pts-next').textContent=p.niveau==='Or'?'Niveau maximum !':p.niveau==='Argent'?(1000-pts)+' pts avant Or':(600-pts)+' pts avant Argent'
-    document.getElementById('pts-info').innerHTML=(p.niveau||'Bronze')+'<br>'+(p.matchs_joues||0)+' matchs'
+    document.getElementById('pts-bar').style.display = 'flex'
+    document.getElementById('pts-val').textContent = pts
+    document.getElementById('prog-fill').style.width = pct+'%'
+    document.getElementById('pts-next').textContent = p.niveau==='Or'?'Niveau maximum !':p.niveau==='Argent'?(1000-pts)+' pts avant Or':(600-pts)+' pts avant Argent'
+    document.getElementById('pts-info').innerHTML = (p.niveau||'Bronze')+'<br>'+(p.matchs_joues||0)+' matchs'
   } else {
-    document.getElementById('user-name').textContent=currentUser.email
-    document.getElementById('user-level').textContent='Profil à compléter'
-    document.getElementById('avatar-wrap').innerHTML='<div class="user-avatar-placeholder">?</div>'
+    document.getElementById('user-name').textContent = currentUser.email
+    document.getElementById('user-level').textContent = 'Profil à compléter'
+    document.getElementById('avatar-wrap').innerHTML = '<div class="user-avatar-placeholder">?</div>'
   }
 }
 
 function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'))
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
   document.getElementById('screen-'+name).classList.add('active')
-  if(name==='planning') loadPlanning()
-  if(name==='dispos') loadDispos()
-  if(name==='points') loadPoints()
-  if(name==='communaute') loadPosts()
-  if(name==='boutique') loadBoutique()
+  if (name==='planning') loadPlanning()
+  if (name==='dispos') loadDispos()
+  if (name==='points') loadPoints()
+  if (name==='communaute') loadPosts()
+  if (name==='boutique') loadBoutique()
 }
 
-// ── PLANNING ──────────────────────────────────────────────────
 async function loadPlanning() {
-  const el=document.getElementById('planning-list')
-  const{data:matchs}=await sb.from('matchs').select('*').order('date_match',{ascending:true})
-  if(!matchs||matchs.length===0){el.innerHTML='<div style="text-align:center;color:rgba(181,212,244,0.6);padding:30px;">Aucun match programmé pour l\'instant.</div>';return}
-  el.innerHTML=matchs.map(m=>`
+  const el = document.getElementById('planning-list')
+  const { data: matchs } = await sb.from('matchs').select('*').order('date_match',{ascending:true})
+  if (!matchs||matchs.length===0) { el.innerHTML='<div style="text-align:center;color:rgba(181,212,244,0.6);padding:30px;">Aucun match programmé.</div>'; return }
+  el.innerHTML = matchs.map(m=>`
     <div class="match-item">
       <div class="match-title">Spacers vs ${m.adversaire}</div>
       <div class="match-date">📅 ${formatDate(m.date_match)} · ${m.heure||''} · ${m.lieu||'Palais des Sports'}</div>
@@ -284,43 +280,40 @@ async function loadPlanning() {
             <button class="btn btn-green" onclick="setDispo('${m.id}','disponible',this)">👍 Disponible</button>
             <button class="btn" style="background:#F1EFE8;color:#5F5E5A;" onclick="setDispo('${m.id}','indisponible',this)">👎 Indisponible</button>
           </div>`
-        :`<span class="badge-closed">Inscriptions fermées</span>`
-      }
+        :`<span class="badge-closed">Inscriptions fermées</span>`}
     </div>`).join('')
 }
 
 async function loadDispos() {
-  const el=document.getElementById('dispos-list')
-  const{data:matchs}=await sb.from('matchs').select('*').eq('statut_inscriptions','ouvert').order('date_match')
-  if(!matchs||matchs.length===0){el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.4);padding:30px;background:rgba(255,255,255,0.05);border-radius:12px;">Aucun match avec inscriptions ouvertes.</div>';return}
-  const{data:ins}=await sb.from('inscriptions').select('match_id,statut').eq('benevole_id',currentUser.id)
-  const insMap={}; if(ins) ins.forEach(i=>insMap[i.match_id]=i.statut)
-  el.innerHTML=matchs.map(m=>`
+  const el = document.getElementById('dispos-list')
+  const { data: matchs } = await sb.from('matchs').select('*').eq('statut_inscriptions','ouvert').order('date_match')
+  if (!matchs||matchs.length===0) { el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.4);padding:30px;background:rgba(255,255,255,0.05);border-radius:12px;">Aucun match ouvert.</div>'; return }
+  const { data: ins } = await sb.from('inscriptions').select('match_id,statut').eq('benevole_id',currentUser.id)
+  const insMap = {}; if(ins) ins.forEach(i=>insMap[i.match_id]=i.statut)
+  el.innerHTML = matchs.map(m=>`
     <div class="match-item">
       <div class="match-title">Spacers vs ${m.adversaire}</div>
       <div class="match-date">📅 ${formatDate(m.date_match)} · ${m.heure||''}</div>
       ${insMap[m.id]
-        ?`<span class="badge-inscrit">${insMap[m.id]==='disponible'?'✓ Vous êtes disponible':'✗ Indisponible'}</span>`
+        ?`<span class="badge-inscrit">${insMap[m.id]==='disponible'?'✓ Disponible':'✗ Indisponible'}</span>`
         :`<div class="match-actions">
-            <button class="btn btn-green" onclick="setDispo('${m.id}','disponible',this)">👍 Je suis disponible</button>
+            <button class="btn btn-green" onclick="setDispo('${m.id}','disponible',this)">👍 Disponible</button>
             <button class="btn" style="background:#F1EFE8;color:#5F5E5A;" onclick="setDispo('${m.id}','indisponible',this)">👎 Indisponible</button>
-          </div>`
-      }
+          </div>`}
     </div>`).join('')
 }
 
-async function setDispo(matchId,statut,btn) {
-  btn.textContent='...';btn.disabled=true
-  const{error}=await sb.from('inscriptions').upsert({benevole_id:currentUser.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'})
-  if(!error){btn.textContent=statut==='disponible'?'✓ Confirmé !':'✓ Enregistré';btn.style.background=statut==='disponible'?'#3B6D11':'#5F5E5A';setTimeout(()=>{loadPlanning();loadDispos()},1000)}
-  else{btn.textContent='Erreur';btn.disabled=false}
+async function setDispo(matchId, statut, btn) {
+  btn.textContent='...'; btn.disabled=true
+  const { error } = await sb.from('inscriptions').upsert({benevole_id:currentUser.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'})
+  if (!error) { btn.textContent=statut==='disponible'?'✓ Confirmé !':'✓ Enregistré'; btn.style.background=statut==='disponible'?'#3B6D11':'#5F5E5A'; setTimeout(()=>{loadPlanning();loadDispos()},1000) }
+  else { btn.textContent='Erreur'; btn.disabled=false }
 }
 
-// ── POINTS ────────────────────────────────────────────────────
 async function loadPoints() {
-  const el=document.getElementById('points-content')
-  const p=currentProfile
-  if(!p){el.innerHTML='<div style="color:white;">Profil non trouvé.</div>';return}
+  const el = document.getElementById('points-content')
+  const p = currentProfile
+  if (!p) { el.innerHTML='<div style="color:white;padding:20px;">Profil non trouvé.</div>'; return }
   const pts=p.points_total||0, niveau=p.niveau||'Bronze'
   const pct=niveau==='Or'?100:niveau==='Argent'?Math.min(((pts-600)/400)*100,100):Math.min((pts/600)*100,100)
   el.innerHTML=`
@@ -349,18 +342,16 @@ async function loadPoints() {
     </div>`
 }
 
-// ── COMMUNAUTÉ ────────────────────────────────────────────────
 async function loadPosts() {
-  const el=document.getElementById('posts-list')
-  const{data:posts}=await sb.from('posts').select('*, benevoles(prenom,nom,photo_url)').order('created_at',{ascending:false}).limit(20)
-  if(!posts||posts.length===0){el.innerHTML='<div style="text-align:center;color:#5F5E5A;padding:20px;">Aucun post — soyez le premier !</div>';return}
-  el.innerHTML=posts.map(p=>`
+  const el = document.getElementById('posts-list')
+  const { data: posts } = await sb.from('posts').select('*, benevoles(prenom,nom,photo_url)').order('created_at',{ascending:false}).limit(20)
+  if (!posts||posts.length===0) { el.innerHTML='<div style="text-align:center;color:#5F5E5A;padding:20px;">Aucun post — soyez le premier !</div>'; return }
+  el.innerHTML = posts.map(p=>`
     <div class="post-item">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
         ${p.benevoles?.photo_url
           ?`<img src="${p.benevoles.photo_url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid #B5D4F4;" alt="">`
-          :`<div style="width:28px;height:28px;border-radius:50%;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#185FA5;">${((p.benevoles?.prenom||'?')[0]+( p.benevoles?.nom||'?')[0]).toUpperCase()}</div>`
-        }
+          :`<div style="width:28px;height:28px;border-radius:50%;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#185FA5;">${((p.benevoles?.prenom||'?')[0]+(p.benevoles?.nom||'?')[0]).toUpperCase()}</div>`}
         <div>
           <div class="post-author">${p.benevoles?(p.benevoles.prenom||'')+' '+(p.benevoles.nom||''):'Bénévole'}</div>
           <div style="font-size:10px;color:#888780;">${formatDateTime(p.created_at)}</div>
@@ -371,129 +362,110 @@ async function loadPosts() {
 }
 
 async function publishPost() {
-  const contenu=document.getElementById('post-content').value.trim()
-  if(!contenu)return
-  const{data:profil}=await sb.from('benevoles').select('id').eq('email',currentUser.email).single()
-  if(!profil)return
+  const contenu = document.getElementById('post-content').value.trim()
+  if (!contenu) return
+  const { data: profil } = await sb.from('benevoles').select('id').eq('email',currentUser.email).single()
+  if (!profil) return
   await sb.from('posts').insert({auteur_id:profil.id,categorie:'forum',contenu})
-  document.getElementById('post-content').value=''
+  document.getElementById('post-content').value = ''
   loadPosts()
 }
 
-// ── BOUTIQUE ──────────────────────────────────────────────────
 function loadBoutique() {
-  const p=currentProfile
-  const remise=!p?10:p.niveau==='Or'?30:p.niveau==='Argent'?20:10
-  document.getElementById('boutique-remise').textContent=`Remise bénévole -${remise}% active`
-  const produits=[
-    {nom:'Maillot domicile 2026-27',prix:49,icon:'👕'},
-    {nom:'Veste d\'échauffement',prix:65,icon:'🧥'},
-    {nom:'Casquette Spacers',prix:22,icon:'🧢'},
-    {nom:'Ballon officiel signé',prix:55,icon:'🏐'},
-    {nom:'Sac à dos club',prix:38,icon:'🎒'},
-  ]
-  document.getElementById('boutique-content').innerHTML=produits.map(prod=>{
+  const p = currentProfile
+  const remise = !p?10:p.niveau==='Or'?30:p.niveau==='Argent'?20:10
+  document.getElementById('boutique-remise').textContent = `Remise bénévole -${remise}% active`
+  const produits = [{nom:'Maillot domicile 2026-27',prix:49,icon:'👕'},{nom:"Veste d'échauffement",prix:65,icon:'🧥'},{nom:'Casquette Spacers',prix:22,icon:'🧢'},{nom:'Ballon officiel signé',prix:55,icon:'🏐'},{nom:'Sac à dos club',prix:38,icon:'🎒'}]
+  document.getElementById('boutique-content').innerHTML = produits.map(prod=>{
     const pr=Math.round(prod.prix*(1-remise/100))
     return`<div style="background:white;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:14px;">
       <div style="width:48px;height:48px;background:#E6F1FB;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">${prod.icon}</div>
-      <div style="flex:1;">
-        <div style="font-size:13px;font-weight:700;color:#0C447C;">${prod.nom}</div>
+      <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#0C447C;">${prod.nom}</div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
           <span style="font-size:11px;color:#888780;text-decoration:line-through;">${prod.prix}€</span>
           <span style="font-size:15px;font-weight:800;color:#185FA5;">${pr}€</span>
           <span style="font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:50px;font-weight:700;">-${remise}%</span>
         </div>
-      </div>
-    </div>`
+      </div></div>`
   }).join('')+'<div style="text-align:center;font-size:11px;color:rgba(181,212,244,0.5);padding:10px 0;">Livraison gratuite au Palais des Sports</div>'
 }
 
-// ── PROFIL MODAL ──────────────────────────────────────────────
 function openProfilModal() {
-  const p=currentProfile
-  if(p) {
-    document.getElementById('f-prenom').value=p.prenom||''
-    document.getElementById('f-nom').value=p.nom||''
-    document.getElementById('f-tel').value=p.telephone||''
-    document.getElementById('f-tshirt').value=p.taille_tshirt||'M'
-    // Photo preview
-    if(p.photo_url) {
+  const p = currentProfile
+  if (p) {
+    document.getElementById('f-prenom').value = p.prenom||''
+    document.getElementById('f-nom').value = p.nom||''
+    document.getElementById('f-tel').value = p.telephone||''
+    document.getElementById('f-tshirt').value = p.taille_tshirt||'M'
+    if (p.photo_url) {
       document.getElementById('photo-preview-wrap').innerHTML=`
-        <img src="${p.photo_url}" class="photo-preview" alt="Votre photo">
+        <img src="${p.photo_url}" class="photo-preview" alt="">
         <div style="font-size:12px;color:#3B6D11;font-weight:600;margin-top:4px;">✓ Photo enregistrée</div>
         <div style="font-size:11px;color:#5F5E5A;margin-top:2px;">Cliquez pour changer</div>`
     }
-    // Statut accréditation
     renderAccredStatus(p.statut_accreditation||'sans_photo')
   }
-  document.getElementById('modal-profil').style.display='flex'
+  document.getElementById('modal-profil').style.display = 'flex'
 }
 
 function renderAccredStatus(statut) {
   const configs = {
-    'sans_photo':  { cls:'accred-sans-photo',  icon:'📷', title:'Photo manquante',              txt:'Uploadez votre photo pour déclencher la génération de votre accréditation.' },
-    'en_attente':  { cls:'accred-en-attente',  icon:'🟡', title:'En attente de validation',      txt:'Votre photo a été envoyée. Clément va la valider et générer votre accréditation.' },
-    'refusee':     { cls:'accred-refusee',     icon:'🔴', title:'Photo refusée',                 txt:'Votre photo n\'est pas conforme. Veuillez en uploader une nouvelle (fond neutre, visage visible).' },
-    'validee':     { cls:'accred-validee',     icon:'🟢', title:'Photo validée — en cours',      txt:'Votre accréditation est en cours de génération. Vous la recevrez le jour du match.' },
-    'generee':     { cls:'accred-generee',     icon:'✅', title:'Accréditation prête !',          txt:'Votre accréditation a été générée. Clément vous la remettra le jour de votre premier match.' },
+    'sans_photo': {cls:'accred-sans-photo', icon:'📷', title:'Photo manquante', txt:'Uploadez votre photo pour déclencher la génération de votre accréditation.'},
+    'en_attente': {cls:'accred-en-attente', icon:'🟡', title:'En attente de validation', txt:'Votre photo a été envoyée. Clément va la valider et générer votre accréditation.'},
+    'refusee':    {cls:'accred-refusee',    icon:'🔴', title:'Photo refusée', txt:"Votre photo n'est pas conforme. Veuillez en uploader une nouvelle (fond neutre, visage visible)."},
+    'validee':    {cls:'accred-validee',    icon:'🟢', title:'Photo validée — en cours', txt:"Votre accréditation est en cours de génération. Vous la recevrez le jour du match."},
+    'generee':    {cls:'accred-generee',    icon:'✅', title:'Accréditation prête !', txt:"Votre accréditation a été générée. Clément vous la remettra le jour de votre premier match."},
   }
-  const c=configs[statut]||configs['sans_photo']
+  const c = configs[statut]||configs['sans_photo']
   document.getElementById('accred-status-block').innerHTML=`
     <div class="accred-status ${c.cls}">
-      <div style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:4px;">${c.icon} Accréditation — ${c.title}</div>
+      <div style="font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:4px;">${c.icon} ${c.title}</div>
       <div style="font-size:11px;color:#5F5E5A;line-height:1.6;">${c.txt}</div>
     </div>`
 }
 
 function previewPhoto(e) {
-  const file=e.target.files[0]
-  if(!file)return
-  if(file.size>5*1024*1024){alert('Photo trop grande — maximum 5MB');return}
-  photoFile=file
-  const reader=new FileReader()
-  reader.onload=ev=>{
+  const file = e.target.files[0]
+  if (!file) return
+  if (file.size>5*1024*1024) { alert('Photo trop grande — max 5MB'); return }
+  photoFile = file
+  const reader = new FileReader()
+  reader.onload = ev => {
     document.getElementById('photo-preview-wrap').innerHTML=`
-      <img src="${ev.target.result}" class="photo-preview" alt="Aperçu">
+      <img src="${ev.target.result}" class="photo-preview" alt="">
       <div style="font-size:12px;color:#185FA5;font-weight:600;margin-top:4px;">Photo sélectionnée</div>
-      <div style="font-size:11px;color:#5F5E5A;margin-top:2px;">Cliquez Sauvegarder pour l'enregistrer</div>`
+      <div style="font-size:11px;color:#5F5E5A;margin-top:2px;">Cliquez Sauvegarder pour enregistrer</div>`
   }
   reader.readAsDataURL(file)
 }
 
 async function saveProfile() {
-  const btn=document.querySelector('.modal-actions .btn')
-  btn.textContent='Sauvegarde...'
-  btn.disabled=true
-
-  let photoUrl=currentProfile?.photo_url||null
-  let newStatut=currentProfile?.statut_accreditation||'sans_photo'
-
-  // Upload photo si nouvelle
-  if(photoFile) {
-    const ext=photoFile.name.split('.').pop()
-    const path=`${currentUser.id}/avatar.${ext}`
-    const{data:upData,error:upErr}=await sb.storage.from('avatars').upload(path,photoFile,{upsert:true})
-    if(!upErr) {
-      const{data:urlData}=sb.storage.from('avatars').getPublicUrl(path)
-      photoUrl=urlData.publicUrl+'?t='+Date.now()
-      newStatut='en_attente'
+  const btn = document.querySelector('.modal-actions .btn')
+  btn.textContent='Sauvegarde...'; btn.disabled=true
+  let photoUrl = currentProfile?.photo_url||null
+  let newStatut = currentProfile?.statut_accreditation||'sans_photo'
+  if (photoFile) {
+    const ext = photoFile.name.split('.').pop()
+    const path = `${currentUser.id}/avatar.${ext}`
+    const { error: upErr } = await sb.storage.from('avatars').upload(path,photoFile,{upsert:true})
+    if (!upErr) {
+      const { data: urlData } = sb.storage.from('avatars').getPublicUrl(path)
+      photoUrl = urlData.publicUrl+'?t='+Date.now()
+      newStatut = 'en_attente'
     } else {
-      document.getElementById('profil-alert').innerHTML=`<div class="alert alert-error">Erreur upload photo : ${upErr.message}</div>`
+      document.getElementById('profil-alert').innerHTML=`<div class="alert alert-error">Erreur upload : ${upErr.message}</div>`
       btn.textContent='Sauvegarder'; btn.disabled=false; return
     }
   }
-
-  const updates={
+  const { error } = await sb.from('benevoles').update({
     prenom:document.getElementById('f-prenom').value.trim(),
     nom:document.getElementById('f-nom').value.trim(),
     telephone:document.getElementById('f-tel').value.trim(),
     taille_tshirt:document.getElementById('f-tshirt').value,
     photo_url:photoUrl,
     statut_accreditation:newStatut
-  }
-
-  const{error}=await sb.from('benevoles').update(updates).eq('email',currentUser.email)
-  if(!error) {
+  }).eq('email',currentUser.email)
+  if (!error) {
     document.getElementById('profil-alert').innerHTML='<div class="alert alert-success">✓ Profil sauvegardé !</div>'
     photoFile=null
     await loadProfile()
