@@ -3,73 +3,416 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Connexion — Spacers Bénévoles</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Spacers Bénévoles — Connexion</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Sora',sans-serif;background:linear-gradient(160deg,#042C53,#185FA5);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-.card{background:white;border-radius:24px;padding:40px 32px;width:100%;max-width:400px;box-shadow:0 32px 80px rgba(0,0,0,0.4);}
-.logo{text-align:center;margin-bottom:28px;}
-.logo-icon{width:72px;height:72px;background:linear-gradient(135deg,#042C53,#185FA5);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 12px;}
-.logo h1{font-size:20px;font-weight:800;color:#0C447C;}
-.logo p{font-size:12px;color:#5F5E5A;margin-top:2px;}
-label{font-size:12px;font-weight:600;color:#1a1a18;margin-bottom:6px;display:block;}
-input{width:100%;padding:13px 16px;border:1.5px solid #D3D1C7;border-radius:12px;font-family:'Sora',sans-serif;font-size:14px;outline:none;margin-bottom:16px;}
-input:focus{border-color:#185FA5;}
-.btn{width:100%;padding:14px;background:#185FA5;color:white;border:none;border-radius:50px;font-family:'Sora',sans-serif;font-size:15px;font-weight:700;cursor:pointer;}
-.btn:hover{background:#0C447C;}
-.msg{border-radius:10px;padding:10px 14px;font-size:12px;margin-bottom:16px;display:none;}
-.err{background:#FBEAF0;color:#993556;}
-.ok{background:#EAF3DE;color:#3B6D11;}
-.forgot{text-align:center;margin-top:14px;font-size:12px;}
-.forgot a{color:#185FA5;font-weight:600;text-decoration:none;cursor:pointer;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;}
+
+/* PHONE FRAME */
+.frame{
+  width:390px;min-height:700px;background:#F7F5F0;
+  border-radius:44px;overflow:hidden;position:relative;
+  box-shadow:0 40px 100px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.1);
+  display:flex;flex-direction:column;
+}
+.notch{height:14px;background:#042C53;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.notch-bar{width:80px;height:4px;background:rgba(0,0,0,0.4);border-radius:2px;}
+.sbar{height:28px;background:#042C53;display:flex;align-items:center;justify-content:space-between;padding:0 18px;flex-shrink:0;}
+.sbar-l{font-size:11px;font-weight:700;color:white;font-family:monospace;}
+.sbar-r{font-size:10px;color:rgba(255,255,255,0.7);}
+
+/* LOGIN SCREEN */
+#screen-login{
+  flex:1;background:linear-gradient(160deg,#042C53 0%,#0C447C 60%,#185FA5 100%);
+  display:flex;flex-direction:column;
+}
+.login-body{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:28px 28px 16px;
+}
+.logo-wrap{
+  width:80px;height:80px;border-radius:24px;
+  background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);
+  font-size:38px;display:flex;align-items:center;justify-content:center;
+  margin-bottom:20px;
+}
+.login-title{font-size:26px;font-weight:800;color:white;text-align:center;line-height:1.2;margin-bottom:6px;}
+.login-sub{font-size:12px;color:rgba(181,212,244,0.8);text-align:center;margin-bottom:28px;line-height:1.5;}
+.input-wrap{width:100%;margin-bottom:12px;}
+.input-label{font-size:11px;font-weight:600;color:rgba(255,255,255,0.7);margin-bottom:5px;display:block;}
+.inp{
+  width:100%;padding:13px 16px;border-radius:12px;
+  border:1.5px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.1);color:white;
+  font-family:'Sora',sans-serif;font-size:13px;outline:none;
+}
+.inp::placeholder{color:rgba(255,255,255,0.35);}
+.inp:focus{border-color:rgba(181,212,244,0.6);background:rgba(255,255,255,0.15);}
+.btn-login{
+  width:100%;padding:15px;background:white;color:#0C447C;
+  border:none;border-radius:50px;font-family:'Sora',sans-serif;
+  font-size:14px;font-weight:800;cursor:pointer;margin-top:8px;
+  transition:all .2s;
+}
+.btn-login:hover{background:#E6F1FB;}
+.btn-login:disabled{background:rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);cursor:not-allowed;}
+.login-forgot{font-size:11px;color:rgba(181,212,244,0.5);text-align:center;margin-top:12px;cursor:pointer;background:none;border:none;font-family:'Sora',sans-serif;width:100%;}
+.login-forgot:hover{color:rgba(181,212,244,0.8);}
+.msg-box{
+  border-radius:10px;padding:10px 14px;font-size:12px;
+  margin-bottom:14px;display:none;width:100%;
+}
+.msg-err{background:rgba(153,53,86,0.25);color:#F4B8CE;border:1px solid rgba(153,53,86,0.3);}
+.msg-ok{background:rgba(59,109,17,0.25);color:#C0DD97;border:1px solid rgba(59,109,17,0.3);}
+
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:10px;width:100%;margin:16px 0;}
+.divider-line{flex:1;height:1px;background:rgba(255,255,255,0.1);}
+.divider-text{font-size:11px;color:rgba(255,255,255,0.35);}
+
+/* SECONDARY BTN */
+.btn-secondary{
+  width:100%;padding:12px;background:transparent;
+  border:1.5px solid rgba(255,255,255,0.2);border-radius:50px;
+  color:rgba(255,255,255,0.7);font-family:'Sora',sans-serif;
+  font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.btn-secondary:hover{border-color:rgba(255,255,255,0.4);color:white;}
+
+/* FOOTER */
+.login-footer{
+  padding:16px;text-align:center;
+  background:rgba(0,0,0,0.15);
+}
+.login-footer p{font-size:10px;color:rgba(181,212,244,0.4);line-height:1.6;}
+
+/* ── ONBOARDING SCREENS ── */
+.ob-screen{
+  flex:1;display:none;flex-direction:column;
+  background:linear-gradient(160deg,#042C53,#0C447C,#185FA5);
+}
+.ob-screen.active{display:flex;}
+
+.ob-header{padding:24px 24px 20px;}
+.ob-title{font-size:22px;font-weight:800;color:white;line-height:1.2;margin-bottom:6px;}
+.ob-sub{font-size:12px;color:rgba(181,212,244,0.75);line-height:1.5;}
+
+.ob-body{flex:1;padding:0 20px;overflow-y:auto;}
+.ob-body::-webkit-scrollbar{display:none;}
+
+.ob-card{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px;margin-bottom:10px;}
+.ob-card-title{font-size:13px;font-weight:700;color:white;margin-bottom:4px;}
+.ob-card-text{font-size:11px;color:rgba(181,212,244,0.75);line-height:1.6;}
+
+.dots{display:flex;justify-content:center;gap:6px;padding:12px 0;flex-shrink:0;}
+.dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.3);}
+.dot.active{width:20px;border-radius:3px;background:white;}
+
+.ob-footer{padding:0 20px 28px;flex-shrink:0;}
+.ob-btn{
+  width:100%;padding:14px;border:none;border-radius:50px;
+  font-family:'Sora',sans-serif;font-size:14px;font-weight:800;cursor:pointer;
+  transition:all .2s;margin-bottom:8px;
+}
+.ob-btn-primary{background:white;color:#042C53;}
+.ob-btn-skip{background:none;border:none;color:rgba(255,255,255,0.4);font-family:'Sora',sans-serif;font-size:11px;cursor:pointer;width:100%;padding:4px;}
+
+/* Step icons */
+.step-row{display:flex;gap:12px;align-items:start;margin-bottom:12px;}
+.step-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+
+/* Gamif simulator */
+.pts-display{font-size:36px;font-weight:800;color:#F5C842;font-family:monospace;text-align:center;margin:8px 0;}
+.pts-prog{height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;margin:8px 0;}
+.pts-prog-fill{height:100%;background:linear-gradient(90deg,#9B6B3A,#F5C842);border-radius:4px;transition:width .6s ease;}
+.pts-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer;}
+.pts-row:last-child{border:none;}
+.pts-val-badge{font-size:13px;font-weight:800;color:#F5C842;font-family:monospace;}
+
+/* ALL SET */
+.allset-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;}
+.confetti{font-size:56px;margin-bottom:16px;animation:bounce .8s ease infinite alternate;}
+@keyframes bounce{from{transform:scale(1);}to{transform:scale(1.1);}}
+.allset-stats{display:flex;gap:10px;justify-content:center;margin:20px 0;width:100%;}
+.stat-box{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;flex:1;text-align:center;}
+.stat-val{font-size:24px;font-weight:800;color:white;font-family:monospace;}
+.stat-lbl{font-size:9px;color:rgba(181,212,244,0.6);margin-top:2px;}
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="logo">
-    <div class="logo-icon">🏐</div>
-    <h1>Spacers Bénévoles</h1>
-    <p>Saison 2026–2027</p>
+
+<div class="frame">
+<div class="notch"><div class="notch-bar"></div></div>
+<div class="sbar"><span class="sbar-l">9:41</span><span class="sbar-r">●●● WiFi 🔋</span></div>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════════ -->
+<div id="screen-login">
+  <div class="login-body">
+    <div class="logo-wrap">🏐</div>
+    <h1 class="login-title">Spacers<br>Bénévoles</h1>
+    <p class="login-sub">Votre espace bénévole<br>Saison 2026–2027</p>
+
+    <div class="msg-box msg-err" id="msg-err"></div>
+    <div class="msg-box msg-ok"  id="msg-ok"></div>
+
+    <div class="input-wrap">
+      <label class="input-label">Adresse email</label>
+      <input class="inp" type="email" id="email" placeholder="votre@email.com" autocomplete="email">
+    </div>
+    <div class="input-wrap">
+      <label class="input-label">Mot de passe</label>
+      <input class="inp" type="password" id="pwd" placeholder="••••••••" autocomplete="current-password">
+    </div>
+
+    <button class="btn-login" id="btn-login" onclick="login()">Se connecter →</button>
+    <button class="login-forgot" onclick="resetPwd()">Mot de passe oublié ?</button>
   </div>
-  <div class="msg" id="msg"></div>
-  <label>Email</label>
-  <input type="email" id="email" placeholder="votre@email.com">
-  <label>Mot de passe</label>
-  <input type="password" id="pwd" placeholder="••••••••">
-  <button class="btn" id="btn" onclick="login()">Se connecter →</button>
-  <div class="forgot"><a onclick="reset()">Mot de passe oublié ?</a></div>
+
+  <div class="login-footer">
+    <p>TOAC-TUC Volley-Ball · Palais des Sports · Toulouse<br>Application réservée aux bénévoles inscrits</p>
+  </div>
 </div>
+
+<!-- ══ ONBOARDING 1 — BIENVENUE ═══════════════════════════════ -->
+<div class="ob-screen" id="ob1">
+  <div class="ob-header" style="text-align:center;padding-top:40px;">
+    <div style="font-size:56px;margin-bottom:16px;">🏐</div>
+    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(181,212,244,0.7);margin-bottom:10px;">SPACERS TOULOUSE VOLLEY</div>
+    <div class="ob-title" style="font-size:28px;">Bienvenue<br><span style="color:rgba(181,212,244,0.9);" id="ob-prenom">!</span></div>
+    <div class="ob-sub" style="margin-top:8px;">Votre espace bénévole est prêt.<br>2 minutes pour tout découvrir.</div>
+  </div>
+  <div class="ob-body" style="display:flex;align-items:center;justify-content:center;">
+    <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:50px;padding:8px 20px;font-size:13px;font-weight:600;color:white;">Saison 2026–2027 · Bénévole</div>
+  </div>
+  <div class="dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <div class="ob-footer">
+    <button class="ob-btn ob-btn-primary" onclick="goOb(2)">Commencer la visite →</button>
+    <button class="ob-btn-skip" onclick="finishOb()">Passer le tutoriel</button>
+  </div>
+</div>
+
+<!-- ══ ONBOARDING 2 — DASHBOARD ═══════════════════════════════ -->
+<div class="ob-screen" id="ob2">
+  <div class="ob-header">
+    <div style="font-size:9px;letter-spacing:2px;color:rgba(181,212,244,0.6);text-transform:uppercase;margin-bottom:6px;">ÉTAPE 1 / 3</div>
+    <div class="ob-title">Votre tableau de bord</div>
+    <div class="ob-sub">Tout ce qu'il vous faut en un coup d'œil</div>
+  </div>
+  <div class="ob-body">
+    <div style="background:white;border-radius:14px;overflow:hidden;margin-bottom:12px;">
+      <div style="background:#0C447C;padding:10px 14px;display:flex;justify-content:space-between;font-size:10px;color:white;"><span>🏠 Accueil</span><span style="color:rgba(181,212,244,0.7);">Bronze · 50 pts</span></div>
+      <div style="padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div style="background:#F1EFE8;border-radius:8px;padding:8px;"><div style="font-size:16px;margin-bottom:2px;">📅</div><div style="font-size:10px;font-weight:700;color:#0C447C;">Planning</div></div>
+        <div style="background:#F1EFE8;border-radius:8px;padding:8px;"><div style="font-size:16px;margin-bottom:2px;">🏆</div><div style="font-size:10px;font-weight:700;color:#0C447C;">Points</div></div>
+        <div style="background:#F1EFE8;border-radius:8px;padding:8px;"><div style="font-size:16px;margin-bottom:2px;">🛍️</div><div style="font-size:10px;font-weight:700;color:#3B6D11;">Boutique</div></div>
+        <div style="background:#F1EFE8;border-radius:8px;padding:8px;"><div style="font-size:16px;margin-bottom:2px;">💬</div><div style="font-size:10px;font-weight:700;color:#0C447C;">Forum</div></div>
+      </div>
+    </div>
+    <div class="ob-card">
+      <div class="ob-card-title">👆 Navigation simple</div>
+      <div class="ob-card-text">Tapez sur n'importe quelle carte pour y accéder. Toutes vos informations sont là, accessibles en 1 tap.</div>
+    </div>
+    <div style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);border-radius:12px;padding:12px 14px;margin-bottom:10px;display:flex;gap:10px;align-items:center;">
+      <div style="font-size:22px;">💬</div>
+      <div><div style="font-size:12px;font-weight:700;color:#C0DD97;">Groupe WhatsApp dès maintenant</div><div style="font-size:11px;color:rgba(192,221,151,0.7);margin-top:2px;">Le bouton vert sur l'accueil vous connecte au groupe des bénévoles. Rejoignez-le en premier !</div></div>
+    </div>
+  </div>
+  <div class="dots"><div class="dot"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+  <div class="ob-footer">
+    <button class="ob-btn ob-btn-primary" onclick="goOb(3)">Comment s'inscrire →</button>
+    <button class="ob-btn-skip" onclick="finishOb()">Passer</button>
+  </div>
+</div>
+
+<!-- ══ ONBOARDING 3 — INSCRIPTION ═════════════════════════════ -->
+<div class="ob-screen" id="ob3">
+  <div class="ob-header">
+    <div style="font-size:9px;letter-spacing:2px;color:rgba(181,212,244,0.6);text-transform:uppercase;margin-bottom:6px;">ÉTAPE 2 / 3</div>
+    <div class="ob-title">S'inscrire à un match</div>
+    <div class="ob-sub">Juste 2 taps — essayez ici !</div>
+  </div>
+  <div class="ob-body">
+    <div class="step-row">
+      <div class="step-icon" style="background:rgba(59,109,17,0.3);">📬</div>
+      <div class="ob-card" style="flex:1;margin-bottom:0;">
+        <div class="ob-card-title">Notification automatique à J-15</div>
+        <div class="ob-card-text">Email + notification : les inscriptions sont ouvertes pour le prochain match !</div>
+      </div>
+    </div>
+    <div style="height:10px;"></div>
+    <div class="step-row">
+      <div class="step-icon" style="background:rgba(59,109,17,0.3);">✅</div>
+      <div style="flex:1;">
+        <div class="ob-card" style="margin-bottom:8px;">
+          <div class="ob-card-title">Dites si vous êtes disponible</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+            <div style="background:rgba(59,109,17,0.3);border:1.5px solid rgba(59,109,17,0.5);border-radius:10px;padding:10px;text-align:center;cursor:pointer;" onclick="this.style.background='rgba(59,109,17,0.5)'"><div style="font-size:20px;margin-bottom:3px;">👍</div><div style="font-size:11px;color:white;font-weight:700;">Disponible</div></div>
+            <div style="background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:10px;text-align:center;cursor:pointer;" onclick="this.style.background='rgba(255,255,255,0.15)'"><div style="font-size:20px;margin-bottom:3px;">👎</div><div style="font-size:11px;color:rgba(255,255,255,0.7);font-weight:700;">Indispo</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="step-row">
+      <div class="step-icon" style="background:rgba(24,95,165,0.3);">🎯</div>
+      <div class="ob-card" style="flex:1;margin-bottom:0;">
+        <div class="ob-card-title">Clément attribue votre poste</div>
+        <div class="ob-card-text">Selon votre expérience et les besoins. Notification envoyée dès que c'est fait.</div>
+      </div>
+    </div>
+  </div>
+  <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot active"></div><div class="dot"></div></div>
+  <div class="ob-footer">
+    <button class="ob-btn ob-btn-primary" onclick="goOb(4)">Les points et avantages →</button>
+    <button class="ob-btn-skip" onclick="finishOb()">Passer</button>
+  </div>
+</div>
+
+<!-- ══ ONBOARDING 4 — GAMIFICATION ════════════════════════════ -->
+<div class="ob-screen" id="ob4" style="background:#0C1B2E;">
+  <div class="ob-header" style="background:linear-gradient(135deg,#1a1a18,#0C447C);">
+    <div style="font-size:9px;letter-spacing:2px;color:rgba(245,200,66,0.7);text-transform:uppercase;margin-bottom:6px;font-family:monospace;">ÉTAPE 3 / 3</div>
+    <div class="ob-title">Gagnez des points !</div>
+    <div class="ob-sub">Tapez sur chaque ligne pour simuler</div>
+  </div>
+  <div class="ob-body" style="padding-top:14px;">
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px;">
+        <div><div style="font-size:9px;color:rgba(181,212,244,0.5);margin-bottom:3px;font-family:monospace;">VOS POINTS</div><div class="pts-display" id="ob-pts">50</div></div>
+        <div style="text-align:right;"><div style="font-size:13px;font-weight:700;color:white;" id="ob-lvl">🥉 Bronze</div><div style="font-size:10px;color:rgba(181,212,244,0.5);margin-top:2px;" id="ob-next">550 pts avant Argent</div></div>
+      </div>
+      <div class="pts-prog"><div class="pts-prog-fill" id="ob-prog" style="width:8%;"></div></div>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;margin-bottom:12px;">
+      <div style="background:rgba(255,255,255,0.04);padding:7px 14px;font-size:9px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,0.4);font-family:monospace;">TAPEZ POUR SIMULER</div>
+      <div style="padding:0 14px;">
+        <div class="pts-row" onclick="obAdd(50)"><div style="display:flex;align-items:center;gap:8px;"><div style="width:28px;height:28px;background:rgba(255,255,255,0.06);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">📅</div><div style="font-size:11px;color:rgba(255,255,255,0.8);">Présence confirmée</div></div><div class="pts-val-badge">+50</div></div>
+        <div class="pts-row" onclick="obAdd(20)"><div style="display:flex;align-items:center;gap:8px;"><div style="width:28px;height:28px;background:rgba(255,255,255,0.06);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">⏱️</div><div style="font-size:11px;color:rgba(255,255,255,0.8);">Ponctualité validée</div></div><div class="pts-val-badge">+20</div></div>
+        <div class="pts-row" onclick="obAdd(100)"><div style="display:flex;align-items:center;gap:8px;"><div style="width:28px;height:28px;background:rgba(255,255,255,0.06);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">🏅</div><div style="font-size:11px;color:rgba(255,255,255,0.8);">Badge 5 matchs</div></div><div class="pts-val-badge">+100</div></div>
+        <div class="pts-row" onclick="obAdd(30)"><div style="display:flex;align-items:center;gap:8px;"><div style="width:28px;height:28px;background:rgba(255,255,255,0.06);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;">🎂</div><div style="font-size:11px;color:rgba(255,255,255,0.8);">Anniversaire</div></div><div class="pts-val-badge">+30</div></div>
+      </div>
+    </div>
+    <div style="background:rgba(153,53,86,0.15);border:1px solid rgba(153,53,86,0.3);border-radius:12px;padding:11px 14px;font-size:11px;color:rgba(251,234,240,0.8);line-height:1.6;">
+      ⚠️ <strong>Minimum requis :</strong> 150 pts · 3 matchs en 12 mois pour maintenir votre compte actif.
+    </div>
+  </div>
+  <div class="dots"><div class="dot" style="background:rgba(255,255,255,0.3);"></div><div class="dot" style="background:rgba(255,255,255,0.3);"></div><div class="dot" style="background:rgba(255,255,255,0.3);"></div><div class="dot active" style="background:#F5C842;width:20px;border-radius:3px;"></div></div>
+  <div class="ob-footer" style="background:#0C1B2E;">
+    <button class="ob-btn" style="background:linear-gradient(135deg,#C9821A,#854F0B);color:white;" onclick="showAllSet()">Accéder à mon espace →</button>
+  </div>
+</div>
+
+<!-- ══ ALL SET ═════════════════════════════════════════════════ -->
+<div class="ob-screen" id="ob5" style="background:linear-gradient(160deg,#042C53,#185FA5);">
+  <div class="allset-body">
+    <div class="confetti">🎉</div>
+    <h1 style="font-size:30px;font-weight:800;color:white;line-height:1.2;margin-bottom:10px;">Vous êtes<br>prêt.e !</h1>
+    <p style="font-size:14px;color:rgba(181,212,244,0.8);margin-bottom:20px;line-height:1.6;">Bienvenue dans la communauté<br>bénévoles Spacers !</p>
+    <div class="allset-stats">
+      <div class="stat-box"><div class="stat-val">+50</div><div class="stat-lbl">pts offerts</div></div>
+      <div class="stat-box"><div class="stat-val">13</div><div class="stat-lbl">matchs</div></div>
+      <div class="stat-box"><div class="stat-val">7</div><div class="stat-lbl">postes</div></div>
+    </div>
+    <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:14px 18px;text-align:left;width:100%;">
+      <div style="font-size:10px;color:rgba(181,212,244,0.6);font-weight:700;margin-bottom:6px;letter-spacing:1px;">🎁 CADEAU DE BIENVENUE</div>
+      <div style="font-size:13px;color:white;font-weight:600;margin-bottom:3px;">50 pts crédités sur votre compte !</div>
+      <div style="font-size:11px;color:rgba(181,212,244,0.7);line-height:1.5;">3 matchs minimum pour garder votre compte actif. Bonne saison !</div>
+    </div>
+  </div>
+  <div style="padding:0 24px 32px;flex-shrink:0;">
+    <button class="ob-btn ob-btn-primary" onclick="finishOb()">Accéder à mon dashboard →</button>
+  </div>
+</div>
+
+</div><!-- /frame -->
+
 <script>
-const sb = window.supabase.createClient(
-  'https://xphuolvbamdkizydveij.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwaHVvbHZiYW1ka2l6eWR2ZWlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDQ2MDksImV4cCI6MjA5MjYyMDYwOX0.vpxV6ApwAkhlTx-LMCBZwee7LCdQGYP_5sbPMXEFFUQ'
-)
-async function login(){
-  const email=document.getElementById('email').value.trim()
-  const pwd=document.getElementById('pwd').value
-  if(!email||!pwd){show('Remplissez tous les champs.','err');return}
-  document.getElementById('btn').textContent='Connexion...'
-  document.getElementById('btn').disabled=true
-  const{error}=await sb.auth.signInWithPassword({email,password:pwd})
-  if(error){show(getErr(error.message),'err');document.getElementById('btn').textContent='Se connecter →';document.getElementById('btn').disabled=false;return}
-  window.location.href='dashboard.html'
+const SUPABASE_URL = 'https://xphuolvbamdkizydveij.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwaHVvbHZiYW1ka2l6eWR2ZWlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDQ2MDksImV4cCI6MjA5MjYyMDYwOX0.vpxV6ApwAkhlTx-LMCBZwee7LCdQGYP_5sbPMXEFFUQ'
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+// Check already logged in
+sb.auth.getSession().then(({data}) => {
+  if (data.session) window.location.href = 'dashboard.html'
+})
+
+// Login
+async function login() {
+  const email = document.getElementById('email').value.trim()
+  const pwd   = document.getElementById('pwd').value
+  const btn   = document.getElementById('btn-login')
+  hideMsg()
+  if (!email || !pwd) { showErr('Remplissez tous les champs.'); return }
+  btn.disabled = true; btn.textContent = 'Connexion...'
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd })
+  if (error) {
+    showErr(getErrMsg(error.message))
+    btn.disabled = false; btn.textContent = 'Se connecter →'
+    return
+  }
+  // Check onboarding
+  const { data: profil } = await sb.from('benevoles').select('onboarding_done, prenom').eq('email', email).single()
+  if (profil && !profil.onboarding_done) {
+    const prenom = profil.prenom || ''
+    document.getElementById('ob-prenom').textContent = prenom ? 'Bienvenue ' + prenom + ' !' : '!'
+    showOb(1)
+  } else {
+    window.location.href = 'dashboard.html'
+  }
 }
-async function reset(){
-  const email=document.getElementById('email').value.trim()
-  if(!email){show('Entrez votre email puis cliquez ici.','err');return}
+
+// Password reset
+async function resetPwd() {
+  const email = document.getElementById('email').value.trim()
+  if (!email) { showErr('Entrez votre email puis cliquez ici.'); return }
   await sb.auth.resetPasswordForEmail(email)
-  show('Email envoyé ! Vérifiez votre boîte.','ok')
+  showOk('Email envoyé ! Vérifiez votre boîte.')
 }
-function show(m,c){const e=document.getElementById('msg');e.textContent=m;e.className='msg '+c;e.style.display='block'}
-function getErr(m){
-  if(m.includes('Invalid login'))return'Email ou mot de passe incorrect.'
-  if(m.includes('not confirmed'))return'Email non confirmé. Vérifiez votre boîte.'
-  return'Erreur : '+m
+
+// Onboarding navigation
+function showOb(n) {
+  document.getElementById('screen-login').style.display = 'none'
+  document.querySelectorAll('.ob-screen').forEach(s => s.classList.remove('active'))
+  document.getElementById('ob' + n).classList.add('active')
 }
-document.addEventListener('keydown',e=>{if(e.key==='Enter')login()})
-sb.auth.getSession().then(({data})=>{if(data.session)window.location.href='dashboard.html'})
+function goOb(n) { showOb(n) }
+
+async function finishOb() {
+  const { data: { session } } = await sb.auth.getSession()
+  if (session) {
+    await sb.from('benevoles').update({ onboarding_done: true }).eq('email', session.user.email)
+  }
+  window.location.href = 'dashboard.html'
+}
+
+function showAllSet() { showOb(5) }
+
+// Gamification simulator
+let obPts = 50
+function obAdd(v) {
+  obPts += v
+  document.getElementById('ob-pts').textContent = obPts
+  const pct = Math.min((obPts / 600) * 100, 100)
+  document.getElementById('ob-prog').style.width = pct + '%'
+  const lvl = document.getElementById('ob-lvl')
+  const nxt = document.getElementById('ob-next')
+  if (obPts >= 1000) { lvl.textContent = '🥇 Or'; nxt.textContent = 'Niveau maximum !'; document.getElementById('ob-prog').style.background = 'linear-gradient(90deg,#C9821A,#F5C842)' }
+  else if (obPts >= 600) { lvl.textContent = '🥈 Argent'; nxt.textContent = (1000-obPts) + ' pts avant Or'; document.getElementById('ob-prog').style.background = 'linear-gradient(90deg,#6B7280,#A8B4C0)' }
+  else { lvl.textContent = '🥉 Bronze'; nxt.textContent = (600-obPts) + ' pts avant Argent' }
+}
+
+// Helpers
+function showErr(m) { const e = document.getElementById('msg-err'); e.textContent = m; e.style.display = 'block' }
+function showOk(m)  { const e = document.getElementById('msg-ok');  e.textContent = m; e.style.display = 'block' }
+function hideMsg()  { document.getElementById('msg-err').style.display = 'none'; document.getElementById('msg-ok').style.display = 'none' }
+function getErrMsg(m) {
+  if (m.includes('Invalid login'))   return 'Email ou mot de passe incorrect.'
+  if (m.includes('not confirmed'))   return 'Email non confirmé. Vérifiez votre boîte.'
+  if (m.includes('Too many'))        return 'Trop de tentatives. Attendez quelques minutes.'
+  return 'Erreur : ' + m
+}
+document.addEventListener('keydown', e => { if (e.key === 'Enter') login() })
 </script>
 </body>
 </html>
