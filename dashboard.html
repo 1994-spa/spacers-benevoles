@@ -23,6 +23,29 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;padding:2
 .btn{background:#185FA5;color:white;border:none;border-radius:50px;padding:9px 18px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
 .pts-bar{background:white;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:none;justify-content:space-between;align-items:center;}
 .pts-val{font-size:28px;font-weight:800;color:#185FA5;font-family:monospace;}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;}
+.modal-content{background:white;border-radius:16px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow-y:auto;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.modal-title{font-size:18px;font-weight:700;color:#0C447C;}
+.close-btn{background:none;border:none;font-size:24px;color:#5F5E5A;cursor:pointer;}
+.form-group{margin-bottom:16px;}
+.form-label{display:block;font-size:12px;font-weight:600;color:#0C447C;margin-bottom:6px;}
+.form-input{width:100%;padding:10px 12px;border:1px solid #D3D1C7;border-radius:8px;font-family:'Sora',sans-serif;font-size:14px;outline:none;}
+.form-input:focus{border-color:#185FA5;}
+.form-select{width:100%;padding:10px 12px;border:1px solid #D3D1C7;border-radius:8px;font-family:'Sora',sans-serif;font-size:14px;outline:none;background:white;}
+.btn-save{background:#3B6D11;color:white;border:none;border-radius:50px;padding:10px 20px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;width:100%;}
+.btn-save:hover{background:#2d540d;}
+.match-list{max-height:400px;overflow-y:auto;}
+.match-item{background:#F7F5F0;border-radius:12px;padding:16px;margin-bottom:12px;}
+.match-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;}
+.match-teams{font-size:16px;font-weight:700;color:#0C447C;}
+.match-date{font-size:12px;color:#5F5E5A;}
+.match-status{font-size:11px;padding:4px 8px;border-radius:50px;font-weight:600;}
+.status-open{background:#EAF3DE;color:#3B6D11;}
+.status-closed{background:#FBEAF0;color:#993556;}
+.btn-dispo{background:#3B6D11;color:white;border:none;border-radius:50px;padding:8px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-dispo:hover{background:#2d540d;}
+.btn-dispo:disabled{background:#D3D1C7;color:#5F5E5A;cursor:not-allowed;}
 </style>
 </head>
 <body>
@@ -45,13 +68,63 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;padding:2
   <div style="text-align:right;font-size:12px;color:#5F5E5A;" id="pts-info"></div>
 </div>
 <div class="grid">
-  <div class="card"><h2>📅 Planning</h2><p>Consultez le calendrier des matchs et indiquez vos disponibilités.</p><button class="btn">Voir le planning</button></div>
+  <div class="card"><h2>📅 Planning</h2><p>Consultez le calendrier des matchs et indiquez vos disponibilités.</p><button class="btn" onclick="showPlanning()">Voir le planning</button></div>
   <div class="card"><h2>✅ Mes disponibilités</h2><p>Gérez votre présence pour les prochains matchs.</p><button class="btn">Gérer mes dispos</button></div>
   <div class="card"><h2>🏆 Points et badges</h2><p>Suivez votre progression et vos récompenses.</p><button class="btn">Voir mes badges</button></div>
   <div class="card"><h2>🛍️ Boutique</h2><p>Équipements et goodies exclusifs bénévoles.</p><button class="btn">Visiter la boutique</button></div>
   <div class="card"><h2>💬 Communauté</h2><p>Échangez avec les autres bénévoles.</p><button class="btn">Accéder au forum</button></div>
-  <div class="card"><h2>👤 Mon profil</h2><p>Mettez à jour vos informations personnelles.</p><button class="btn">Modifier mon profil</button></div>
+  <div class="card"><h2>👤 Mon profil</h2><p>Mettez à jour vos informations personnelles.</p><button class="btn" onclick="showProfileForm()">Modifier mon profil</button></div>
 </div>
+
+<!-- Modal Profil -->
+<div class="modal" id="profile-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">👤 Modifier mon profil</h2>
+      <button class="close-btn" onclick="closeModal('profile-modal')">&times;</button>
+    </div>
+    <form id="profile-form" onsubmit="saveProfile(event)">
+      <div class="form-group">
+        <label class="form-label">Prénom</label>
+        <input type="text" class="form-input" id="profile-prenom" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nom</label>
+        <input type="text" class="form-input" id="profile-nom" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Téléphone</label>
+        <input type="tel" class="form-input" id="profile-telephone" placeholder="06 12 34 56 78">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Taille t-shirt</label>
+        <select class="form-select" id="profile-taille-tshirt">
+          <option value="XS">XS</option>
+          <option value="S">S</option>
+          <option value="M">M</option>
+          <option value="L">L</option>
+          <option value="XL">XL</option>
+          <option value="XXL">XXL</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-save">💾 Sauvegarder</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Planning -->
+<div class="modal" id="planning-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">📅 Planning des matchs</h2>
+      <button class="close-btn" onclick="closeModal('planning-modal')">&times;</button>
+    </div>
+    <div class="match-list" id="match-list">
+      <div style="text-align:center;color:#5F5E5A;padding:40px;">Chargement...</div>
+    </div>
+  </div>
+</div>
+
 <script>
 const sb = window.supabase.createClient(
   'https://xphuolvbamdkizydveij.supabase.co',
@@ -61,15 +134,19 @@ async function handleLogout(){
   await sb.auth.signOut()
   window.location.href='index.html'
 }
+let currentUser = null
+let currentProfile = null
+
 async function init(){
   const{data:{session}}=await sb.auth.getSession()
   if(!session){window.location.href='index.html';return}
-  const user=session.user
-  document.getElementById('user-name').textContent=user.email
+  currentUser = session.user
+  document.getElementById('user-name').textContent=currentUser.email
   document.getElementById('user-level').textContent='Connecté'
-  const{data:p}=await sb.from('benevoles').select('*').eq('email',user.email).single()
+  const{data:p}=await sb.from('benevoles').select('*').eq('email',currentUser.email).single()
   if(p){
-    const name=((p.prenom||'')+' '+(p.nom||'')).trim()||user.email
+    currentProfile = p
+    const name=((p.prenom||'')+' '+(p.nom||'')).trim()||currentUser.email
     document.getElementById('user-name').textContent=name
     document.getElementById('user-level').textContent='🥉 Niveau '+(p.niveau||'Bronze')
     const bar=document.getElementById('pts-bar')
@@ -78,6 +155,145 @@ async function init(){
     document.getElementById('pts-info').innerHTML=(p.niveau||'Bronze')+'<br>'+(p.matchs_joues||0)+' matchs'
   }
 }
+
+// Fonctions Profil
+function showProfileForm(){
+  if(!currentProfile){
+    alert('Profil non trouvé')
+    return
+  }
+  
+  // Pré-remplir le formulaire
+  document.getElementById('profile-prenom').value = currentProfile.prenom || ''
+  document.getElementById('profile-nom').value = currentProfile.nom || ''
+  document.getElementById('profile-telephone').value = currentProfile.telephone || ''
+  document.getElementById('profile-taille-tshirt').value = currentProfile.taille_tshirt || 'M'
+  
+  document.getElementById('profile-modal').style.display = 'flex'
+}
+
+async function saveProfile(event){
+  event.preventDefault()
+  
+  const updatedData = {
+    prenom: document.getElementById('profile-prenom').value,
+    nom: document.getElementById('profile-nom').value,
+    telephone: document.getElementById('profile-telephone').value,
+    taille_tshirt: document.getElementById('profile-taille-tshirt').value
+  }
+  
+  try{
+    const{error}=await sb.from('benevoles').update(updatedData).eq('id',currentProfile.id)
+    if(error) throw error
+    
+    // Mettre à jour le profil local
+    currentProfile = {...currentProfile, ...updatedData}
+    
+    // Mettre à jour l'affichage
+    const name = (updatedData.prenom + ' ' + updatedData.nom).trim()
+    document.getElementById('user-name').textContent = name
+    
+    closeModal('profile-modal')
+    alert('Profil mis à jour avec succès !')
+  }catch(error){
+    console.error('Erreur sauvegarde profil:', error)
+    alert('Erreur lors de la sauvegarde du profil')
+  }
+}
+
+// Fonctions Planning
+async function showPlanning(){
+  document.getElementById('planning-modal').style.display = 'flex'
+  await loadMatches()
+}
+
+async function loadMatches(){
+  try{
+    const{data:matches,error}=await sb.from('matchs').select('*').order('date_match', {ascending: true})
+    if(error) throw error
+    
+    const matchList = document.getElementById('match-list')
+    
+    if(!matches || matches.length === 0){
+      matchList.innerHTML = '<div style="text-align:center;color:#5F5E5A;padding:40px;">Aucun match prévu</div>'
+      return
+    }
+    
+    matchList.innerHTML = matches.map(match => {
+      const date = new Date(match.date_match)
+      const dateStr = date.toLocaleDateString('fr-FR', {day: 'numeric', month: 'long', year: 'numeric'})
+      const timeStr = match.heure ? match.heure.substring(0,5) : ''
+      
+      const statusClass = match.statut_inscriptions === 'ouvert' ? 'status-open' : 'status-closed'
+      const statusText = match.statut_inscriptions === 'ouvert' ? 'Ouvert' : 'Fermé'
+      
+      const dispoButton = match.statut_inscriptions === 'ouvert' 
+        ? `<button class="btn-dispo" onclick="setDisponible('${match.id}')">Je suis disponible</button>`
+        : ''
+      
+      return `
+        <div class="match-item">
+          <div class="match-header">
+            <div>
+              <div class="match-teams">Spacers 🏐 vs ${match.adversaire || 'Adversaire'}</div>
+              <div class="match-date">${dateStr} ${timeStr}</div>
+            </div>
+            <span class="match-status ${statusClass}">${statusText}</span>
+          </div>
+          ${dispoButton}
+        </div>
+      `
+    }).join('')
+    
+  }catch(error){
+    console.error('Erreur chargement matchs:', error)
+    document.getElementById('match-list').innerHTML = '<div style="text-align:center;color:#993556;padding:40px;">Erreur de chargement</div>'
+  }
+}
+
+async function setDisponible(matchId){
+  if(!currentUser || !currentProfile){
+    alert('Utilisateur non connecté')
+    return
+  }
+  
+  try{
+    // Vérifier si déjà inscrit
+    const{data:existing}=await sb.from('inscriptions')
+      .select('*')
+      .eq('benevole_id', currentProfile.id)
+      .eq('match_id', matchId)
+      .single()
+    
+    if(existing){
+      alert('Vous êtes déjà inscrit à ce match')
+      return
+    }
+    
+    // Inscrire le bénévole
+    const{error}=await sb.from('inscriptions').insert({
+      benevole_id: currentProfile.id,
+      match_id: matchId,
+      statut: 'disponible',
+      date_inscription: new Date().toISOString()
+    })
+    
+    if(error) throw error
+    
+    alert('Disponibilité enregistrée avec succès !')
+    await loadMatches() // Recharger pour mettre à jour l'affichage
+    
+  }catch(error){
+    console.error('Erreur inscription:', error)
+    alert('Erreur lors de l\'enregistrement de votre disponibilité')
+  }
+}
+
+// Fonctions utilitaires
+function closeModal(modalId){
+  document.getElementById(modalId).style.display = 'none'
+}
+
 init()
 </script>
 </body>
