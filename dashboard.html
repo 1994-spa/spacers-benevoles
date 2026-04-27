@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spacers Bénévoles - Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Sora', sans-serif;
+  background: #042C53;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  color: #185FA5;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #185FA5;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.user-details h3 {
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.user-details p {
+  color: #666;
+  font-size: 14px;
+}
+
+.logout-btn {
+  background: #993556;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: #7a2844;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.card h2 {
+  color: #185FA5;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.card p {
+  color: #666;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.card-btn {
+  background: #185FA5;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.card-btn:hover {
+  background: #144a8a;
+}
+
+.welcome-message {
+  background: linear-gradient(135deg, #185FA5, #042C53);
+  color: white;
+  border-radius: 20px;
+  padding: 40px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.welcome-message h2 {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.welcome-message p {
+  font-size: 18px;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.loading {
+  text-align: center;
+  color: white;
+  font-size: 18px;
+  padding: 50px;
+}
+</style>
+</head>
+<body>
+
+<div class="dashboard-container">
+  <div class="welcome-message">
+    <h2>Bienvenue chez les Spacers Bénévoles ! 🏐</h2>
+    <p>Merci pour votre engagement. Votre espace personnel est maintenant accessible.</p>
+  </div>
+
+  <div class="header">
+    <h1>Tableau de bord</h1>
+    <div class="user-info">
+      <div class="user-avatar" id="user-avatar">?</div>
+      <div class="user-details">
+        <h3 id="user-name">Chargement...</h3>
+        <p id="user-email">Chargement...</p>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()">Se déconnecter</button>
+    </div>
+  </div>
+
+  <div class="cards-grid">
+    <div class="card">
+      <h2>📅 Planning</h2>
+      <p>Consultez le calendrier des matchs et indiquez vos disponibilités.</p>
+      <a href="#" class="card-btn">Voir le planning</a>
+    </div>
+
+    <div class="card">
+      <h2>📋 Mes disponibilités</h2>
+      <p>Gérez votre présence pour les prochains matchs et événements.</p>
+      <a href="#" class="card-btn">Gérer mes dispos</a>
+    </div>
+
+    <div class="card">
+      <h2>🏆 Mes points et badges</h2>
+      <p>Suivez votre progression et découvrez vos récompenses.</p>
+      <a href="#" class="card-btn">Voir mes achievements</a>
+    </div>
+
+    <div class="card">
+      <h2>🛍️ Boutique</h2>
+      <p>Accédez aux équipements et goodies exclusifs pour les bénévoles.</p>
+      <a href="#" class="card-btn">Visiter la boutique</a>
+    </div>
+
+    <div class="card">
+      <h2>💬 Communauté</h2>
+      <p>Échangez avec les autres bénévoles et restez informés.</p>
+      <a href="#" class="card-btn">Accéder au forum</a>
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Mon profil</h2>
+      <p>Mettez à jour vos informations personnelles et préférences.</p>
+      <a href="#" class="card-btn">Modifier mon profil</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// Initialisation Supabase
+const supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
+// Éléments DOM
+const userAvatar = document.getElementById('user-avatar');
+const userName = document.getElementById('user-name');
+const userEmail = document.getElementById('user-email');
+
+// Fonctions utilitaires
+function getInitials(email) {
+  if (!email) return '?';
+  const parts = email.split('@')[0].split('.');
+  return parts.map(part => part.charAt(0).toUpperCase()).join('').substring(0, 2).toUpperCase();
+}
+
+// Récupérer les informations utilisateur
+async function getUserInfo() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    const user = session.user;
+    
+    // Mettre à jour l'interface
+    userEmail.textContent = user.email;
+    userName.textContent = user.email.split('@')[0];
+    userAvatar.textContent = getInitials(user.email);
+
+  } catch (error) {
+    console.error('Erreur de récupération utilisateur:', error);
+    window.location.href = 'index.html';
+  }
+}
+
+// Déconnexion
+async function handleLogout() {
+  try {
+    await supabase.auth.signOut();
+    window.location.href = 'index.html';
+  } catch (error) {
+    console.error('Erreur de déconnexion:', error);
+  }
+}
+
+// Écouter les changements d'état d'authentification
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT' || !session) {
+    window.location.href = 'index.html';
+  }
+});
+
+// Initialisation au chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+  getUserInfo();
+});
+</script>
+
+</body>
+</html>
