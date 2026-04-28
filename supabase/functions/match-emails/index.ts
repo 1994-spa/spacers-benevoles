@@ -186,9 +186,13 @@ async function sendBulkEmail(
     chunks.push(messages.slice(i, i + 50))
   }
 
-  for (const chunk of chunks) {
-    const creds = btoa(`${MAILJET_KEY}:${MAILJET_SECRET}`)
-    await fetch('https://api.mailjet.com/v3.1/send', {
+for (const chunk of chunks) {
+  const creds = btoa(`${MAILJET_KEY}:${MAILJET_SECRET}`)
+  console.log(`Calling Mailjet with ${chunk.length} message(s)...`)
+  console.log(`MAILJET_KEY defined: ${!!MAILJET_KEY}, MAILJET_SECRET defined: ${!!MAILJET_SECRET}`)
+  
+  try {
+    const res = await fetch('https://api.mailjet.com/v3.1/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -196,6 +200,15 @@ async function sendBulkEmail(
       },
       body: JSON.stringify({ Messages: chunk })
     })
+    const responseText = await res.text()
+    console.log(`Mailjet response status: ${res.status}`)
+    console.log(`Mailjet response body: ${responseText}`)
+    if (!res.ok) {
+      throw new Error(`Mailjet error ${res.status}: ${responseText}`)
+    }
+  } catch (err) {
+    console.error('Mailjet fetch failed:', err.message)
+    throw err
   }
 }
 
