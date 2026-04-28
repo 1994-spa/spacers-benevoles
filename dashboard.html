@@ -80,6 +80,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .profil-badge{font-size:9px;padding:1px 7px;border-radius:50px;font-weight:700;display:inline-block;}
 .t-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .btn-logout{background:#FBEAF0;color:#993556;border:none;border-radius:50px;padding:6px 10px;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;cursor:pointer;}
+.btn-pilote{background:#E6F1FB;color:#0C447C;border:none;border-radius:50px;padding:6px 10px;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;cursor:pointer;}
 
 /* ── BOTTOM NAV ── */
 .bnav{background:white;position:fixed;bottom:0;left:0;right:0;display:flex;border-top:1px solid #F1EFE8;z-index:99;}
@@ -175,6 +176,10 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .alert{padding:9px 12px;border-radius:9px;font-size:11px;margin-bottom:10px;}
 .alert-s{background:#EAF3DE;color:#3B6D11;}
 .alert-e{background:#FBEAF0;color:#993556;}
+
+/* TEXTAREA FORUM */
+.post-textarea{width:100%;border:1.5px solid #D3D1C7;border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;outline:none;resize:none;height:70px;}
+.post-textarea:focus{border-color:#185FA5;}
 </style>
 </head>
 <body>
@@ -283,6 +288,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       </div>
     </div>
     <div class="t-right">
+      <button id="btn-pilote-view" class="btn-pilote" onclick="window.location.href='pilote.html'" style="display:none;">🎯 Vue pilote</button>
       <button class="btn-logout" onclick="handleLogout()">✕</button>
     </div>
   </div>
@@ -316,8 +322,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   <div class="bscreen" id="bs-forum">
     <div class="sec">Forum bénévoles</div>
     <div style="background:white;border-radius:12px;padding:13px;margin-bottom:10px;">
-      <textarea id="post-txt" placeholder="Partagez un message avec la communauté..." style="width:100%;border:1.5px solid #D3D1C7;border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;outline:none;resize:none;height:70px;"></textarea>
-      <textarea:focus{border-color:#185FA5;}
+      <textarea id="post-txt" class="post-textarea" placeholder="Partagez un message avec la communauté..."></textarea>
       <button class="btn btn-blue" style="width:100%;padding:10px;margin-top:8px;font-size:12px;" onclick="publishPost()">Publier</button>
     </div>
     <div id="posts-list"></div>
@@ -503,6 +508,12 @@ function renderTopbar(p) {
     b.classList.remove('hugo','virginie','joel')
     b.classList.add(p.profil_type||'hugo')
   })
+
+  // Bouton "Vue pilote" si admin ou pilote
+  const btnPilote = document.getElementById('btn-pilote-view')
+  if (btnPilote) {
+    btnPilote.style.display = (p.role === 'admin' || p.role === 'pilote') ? 'inline-block' : 'none'
+  }
 }
 
 // ── HOME ADAPTATIF ────────────────────────────────────────────

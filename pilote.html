@@ -381,33 +381,97 @@ body{margin:0;display:flex;justify-content:center;align-items:center;min-height:
   w.document.close()
 }
 
+let curMatch = null     // le match ouvert courant (pour les affectations)
+let curPostes = []      // les postes (chargés une fois)
+
 async function loadMatch() {
-  const { data: matchs } = await sb.from('matchs').select('*').eq('statut_inscriptions','ouvert').order('date_match').limit(1)
+  // 1. Match ouvert le plus proche
+  const { data: matchs } = await sb.from('matchs')
+    .select('*')
+    .eq('statut_inscriptions','ouvert')
+    .order('date_match')
+    .limit(1)
   const el = document.getElementById('match-info')
-  if (!matchs||matchs.length===0) return
+  if (!matchs || matchs.length === 0) {
+    el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:12px;">Aucun match ouvert.</div>'
+    document.getElementById('aff-table').innerHTML = ''
+    document.getElementById('dispos-match').innerHTML = ''
+    return
+  }
   const m = matchs[0]
-  el.innerHTML=`
+  curMatch = m
+  el.innerHTML = `
     <div style="font-size:16px;font-weight:800;color:white;">${m.adversaire}</div>
     <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;">📅 ${formatDate(m.date_match)} · ${m.heure||''} · ${m.lieu||'Palais des Sports'}</div>`
 
-  const postes=[{n:'🎟 Scan Entrée',b:4},{n:'🪑 Placement',b:3},{n:'🍺 Buvettes',b:4},{n:'🎭 Animation',b:2},{n:'👕 Boutique',b:2},{n:'🧳 Consigne',b:2},{n:'🔒 Sécu VIP',b:1}]
-  document.getElementById('aff-table').innerHTML=`<tr><th>Poste</th><th>Besoin</th><th>Dispo</th><th>Statut</th></tr>`+postes.map(p=>{
-    const ok=Math.floor(Math.random()*(p.b+1))
-    const s=ok>=p.b?`<span class="s-badge s-val">Complet</span>`:ok===0?`<span class="s-badge s-ref">URGENT</span>`:`<span class="s-badge s-att">${p.b-ok} manquant${p.b-ok>1?'s':''}</span>`
-    return`<tr><td>${p.n}</td><td>${p.b}</td><td style="font-weight:700;color:${ok>=p.b?'#C0DD97':ok===0?'#F09595':'#FAC775'}">${ok}</td><td>${s}</td></tr>`
-  }).join('')
+  // 2. Postes depuis la DB
+  const { data: postes } = await sb.from('postes').select('*').order('nom')
+  curPostes = postes || []
 
-  document.getElementById('dispos-match').innerHTML=allBenv.filter(b=>b.statut_compte==='actif').slice(0,8).map(b=>`
-    <div class="benv-row">
-      ${b.photo_url?`<img src="${b.photo_url}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
-      <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);">${b.matchs_joues||0} matchs</div></div>
-      <select class="poste-sel" onchange="this.className='poste-sel ok';showAlert('alert-match','Poste attribué ✓','s')">
-        <option>-- Poste --</option>
-        <option>🎟 Scan</option><option>🪑 Placement</option><option>🍺 Buvettes</option>
-        <option>🎭 Animation</option><option>👕 Boutique</option><option>🧳 Consigne</option><option>🔒 Sécu VIP</option>
-      </select>
-    </div>`).join('')
+  // 3. Inscriptions "disponible" pour ce match
+  const { data: insc } = await sb.from('inscriptions')
+    .select('id, benevole_id, poste_id, statut, benevoles(prenom, nom, photo_url, matchs_joues)')
+    .eq('match_id', m.id)
+    .eq('statut', 'disponible')
+
+  const dispos = insc || []
+
+  // 4. Tableau Postes : compter les bénévoles affectés à chaque poste
+  document.getElementById('aff-table').innerHTML =
+    `<tr><th>Poste</th><th>Besoin</th><th>Affectés</th><th>Statut</th></tr>` +
+    curPostes.map(p => {
+      const ok = dispos.filter(i => i.poste_id === p.id).length
+      const besoin = p.benevoles_max_match || 0
+      const s = ok >= besoin
+        ? `<span class="s-badge s-val">Complet</span>`
+        : ok === 0
+          ? `<span class="s-badge s-ref">URGENT</span>`
+          : `<span class="s-badge s-att">${besoin-ok} manquant${besoin-ok>1?'s':''}</span>`
+      const couleur = ok >= besoin ? '#C0DD97' : ok === 0 ? '#F09595' : '#FAC775'
+      return `<tr><td>${p.nom}</td><td>${besoin}</td><td style="font-weight:700;color:${couleur}">${ok}</td><td>${s}</td></tr>`
+    }).join('')
+
+  // 5. Liste des bénévoles disponibles avec sélecteur de poste
+  if (dispos.length === 0) {
+    document.getElementById('dispos-match').innerHTML =
+      '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:8px 0;">Aucun bénévole inscrit pour ce match.</div>'
+  } else {
+    document.getElementById('dispos-match').innerHTML = dispos.map(i => {
+      const b = i.benevoles || {}
+      const optionsHtml = curPostes.map(p =>
+        `<option value="${p.id}" ${i.poste_id === p.id ? 'selected' : ''}>${p.nom}</option>`
+      ).join('')
+      const selClass = i.poste_id ? 'poste-sel ok' : 'poste-sel'
+      return `
+        <div class="benv-row">
+          ${b.photo_url?`<img src="${b.photo_url}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);">${b.matchs_joues||0} matchs</div>
+          </div>
+          <select class="${selClass}" onchange="affecterPoste('${i.id}', this.value, this)">
+            <option value="">-- Poste --</option>
+            ${optionsHtml}
+          </select>
+        </div>`
+    }).join('')
+  }
+}
+
+// Met à jour le poste_id d'une inscription
+async function affecterPoste(inscriptionId, posteId, selectEl) {
+  selectEl.disabled = true
+  const updates = { poste_id: posteId || null }
+  const { error } = await sb.from('inscriptions').update(updates).eq('id', inscriptionId)
+  selectEl.disabled = false
+  if (error) {
+    showAlert('alert-match', '❌ Erreur lors de l\'affectation', 'e')
+    return
+  }
+  selectEl.className = posteId ? 'poste-sel ok' : 'poste-sel'
+  showAlert('alert-match', posteId ? 'Poste attribué ✓' : 'Poste retiré', 's')
+  // Recharger pour mettre à jour le tableau de comptage
+  loadMatch()
 }
 
 function notifAll(){showAlert('alert-match','📲 Notifications envoyées à tous les bénévoles ✓','s')}
