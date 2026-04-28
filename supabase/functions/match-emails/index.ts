@@ -10,7 +10,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
 Deno.serve(async () => {
   try {
     const today = new Date()
-    today.setHours(0,0,0,0)
+    today.setHours(0, 0, 0, 0)
 
     // Récupérer tous les matchs ouverts
     const { data: matchs } = await sb
@@ -22,11 +22,11 @@ Deno.serve(async () => {
       return new Response('Aucun match ouvert', { status: 200 })
     }
 
-    const results = []
+    const results: string[] = []
 
     for (const match of matchs) {
       const matchDate = new Date(match.date_match)
-      matchDate.setHours(0,0,0,0)
+      matchDate.setHours(0, 0, 0, 0)
       const joursAvant = Math.round((matchDate.getTime() - today.getTime()) / 86400000)
 
       console.log(`Match vs ${match.adversaire} : J${joursAvant > 0 ? '-' : '+'}${Math.abs(joursAvant)}`)
@@ -83,7 +83,7 @@ Deno.serve(async () => {
           .eq('statut', 'disponible')
 
         const destinataires = confirmes
-          ?.map(i => i.benevoles)
+          ?.map((i: any) => i.benevoles)
           .filter(Boolean) || []
 
         if (destinataires.length) {
@@ -105,7 +105,7 @@ Deno.serve(async () => {
           .eq('statut', 'disponible')
 
         const destinataires = participants
-          ?.map(i => i.benevoles)
+          ?.map((i: any) => i.benevoles)
           .filter(Boolean) || []
 
         if (destinataires.length) {
@@ -145,7 +145,7 @@ Deno.serve(async () => {
 
   } catch (error) {
     console.error(error)
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+    return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500 })
   }
 })
 
@@ -163,9 +163,9 @@ async function getNonRepondants(matchId: string) {
     .select('benevole_id')
     .eq('match_id', matchId)
 
-  const repondantsIds = new Set(repondants?.map(r => r.benevole_id) || [])
+  const repondantsIds = new Set(repondants?.map((r: any) => r.benevole_id) || [])
 
-  return (tous || []).filter(b => !repondantsIds.has(b.id))
+  return (tous || []).filter((b: any) => !repondantsIds.has(b.id))
 }
 
 // ── Envoi bulk Mailjet ───────────────────────────────────────
@@ -186,29 +186,30 @@ async function sendBulkEmail(
     chunks.push(messages.slice(i, i + 50))
   }
 
-for (const chunk of chunks) {
-  const creds = btoa(`${MAILJET_KEY}:${MAILJET_SECRET}`)
-  console.log(`Calling Mailjet with ${chunk.length} message(s)...`)
-  console.log(`MAILJET_KEY defined: ${!!MAILJET_KEY}, MAILJET_SECRET defined: ${!!MAILJET_SECRET}`)
-  
-  try {
-    const res = await fetch('https://api.mailjet.com/v3.1/send', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${creds}`
-      },
-      body: JSON.stringify({ Messages: chunk })
-    })
-    const responseText = await res.text()
-    console.log(`Mailjet response status: ${res.status}`)
-    console.log(`Mailjet response body: ${responseText}`)
-    if (!res.ok) {
-      throw new Error(`Mailjet error ${res.status}: ${responseText}`)
+  for (const chunk of chunks) {
+    const creds = btoa(`${MAILJET_KEY}:${MAILJET_SECRET}`)
+    console.log(`Calling Mailjet with ${chunk.length} message(s)...`)
+    console.log(`MAILJET_KEY defined: ${!!MAILJET_KEY}, MAILJET_SECRET defined: ${!!MAILJET_SECRET}`)
+
+    try {
+      const res = await fetch('https://api.mailjet.com/v3.1/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${creds}`
+        },
+        body: JSON.stringify({ Messages: chunk })
+      })
+      const responseText = await res.text()
+      console.log(`Mailjet response status: ${res.status}`)
+      console.log(`Mailjet response body: ${responseText}`)
+      if (!res.ok) {
+        throw new Error(`Mailjet error ${res.status}: ${responseText}`)
+      }
+    } catch (err) {
+      console.error('Mailjet fetch failed:', (err as Error).message)
+      throw err
     }
-  } catch (err) {
-    console.error('Mailjet fetch failed:', err.message)
-    throw err
   }
 }
 
