@@ -257,6 +257,16 @@ select.form-input{cursor:pointer;}
 .palert-s{background:rgba(59,109,17,0.2);color:#C0DD97;border:1px solid rgba(59,109,17,0.3);}
 .palert-e{background:rgba(153,53,86,0.2);color:#F4B8CE;border:1px solid rgba(153,53,86,0.3);}
 
+
+/* INSTAGRAM GRID */
+.ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;border-radius:12px;overflow:hidden;margin-bottom:10px;}
+.ig-post{aspect-ratio:1;background:#2a2a28;position:relative;overflow:hidden;cursor:pointer;}
+.ig-post img{width:100%;height:100%;object-fit:cover;transition:transform .3s;}
+.ig-post:hover img{transform:scale(1.05);}
+.ig-post-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;}
+.ig-post:hover .ig-post-overlay{opacity:1;}
+.ig-placeholder{aspect-ratio:1;background:linear-gradient(135deg,#3a1a2e,#4a1a4a);display:flex;align-items:center;justify-content:center;font-size:24px;}
+
 /* ACCÈS REFUSÉ */
 #no-access{display:none;position:fixed;inset:0;background:var(--bdd);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
 #no-access.show{display:flex;}
@@ -301,6 +311,7 @@ select.form-input{cursor:pointer;}
     <button class="bn"    id="bn-planning"  onclick="bSwitch('planning')"> <span class="bn-icon">📅</span><span class="bn-label">Planning</span></button>
     <button class="bn"    id="bn-points"    onclick="bSwitch('points')">   <span class="bn-icon">🏆</span><span class="bn-label">Points</span></button>
     <button class="bn"    id="bn-communaute" onclick="bSwitch('communaute')"><span class="bn-icon">💬</span><span class="bn-label">Forum</span></button>
+    <button class="bn"    id="bn-partenaires" onclick="bSwitch('partenaires')"><span class="bn-icon">🤝</span><span class="bn-label">Club</span></button>
     <button class="bn"    id="bn-profil"    onclick="bSwitch('profil')">   <span class="bn-icon">👤</span><span class="bn-label">Profil</span></button>
   </nav>
 
@@ -479,6 +490,107 @@ select.form-input{cursor:pointer;}
       <button class="btn btn-blue btn-full" onclick="saveProfile()">Sauvegarder</button>
     </div>
   </div>
+
+  <!-- PARTENAIRES -->
+  <div class="bscreen" id="bs-partenaires">
+    <div class="b-header" style="background:linear-gradient(135deg,#042C53,#185FA5,#1a6e3c);">
+      <div><div class="b-header-title">Club & Partenaires</div><div class="b-header-sub">Avantages exclusifs bénévoles</div></div>
+      <div style="font-size:28px;">🤝</div>
+    </div>
+
+    <!-- WHATSAPP -->
+    <div class="card" style="background:linear-gradient(135deg,#1a3d2e,#25D366);border:none;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:44px;height:44px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">💬</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:800;color:white;">Groupe WhatsApp Bénévoles</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;">Rejoignez la communauté · Infos matchs en temps réel</div>
+        </div>
+      </div>
+      <a href="https://chat.whatsapp.com/JZBB5746965BqiHlgFBPJS?mode=gi_t" target="_blank" style="display:block;margin-top:12px;background:white;color:#1a3d2e;border-radius:50px;padding:11px;text-align:center;font-weight:800;font-size:13px;text-decoration:none;">
+        Rejoindre le groupe →
+      </a>
+    </div>
+
+    <!-- GROUPAMA -->
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:12px 0 8px;">🌾 GROUPAMA — PARTENAIRE OFFICIEL</div>
+
+    <!-- Offres emploi -->
+    <div class="card" style="border:1.5px solid #E6F1FB;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="width:40px;height:40px;background:#E6F1FB;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">💼</div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--bd);">Offres d'emploi & stages</div><div style="font-size:10px;color:var(--md);margin-top:1px;">Opportunités exclusives pour les bénévoles</div></div>
+      </div>
+      <div id="groupama-offres">
+        <!-- Offres injectées dynamiquement -->
+        <div style="background:var(--lt);border-radius:10px;padding:11px;margin-bottom:7px;">
+          <div style="display:flex;justify-content:space-between;align-items:start;">
+            <div><div style="font-size:12px;font-weight:700;color:var(--bd);">Chargé(e) de clientèle</div>
+            <div style="font-size:10px;color:var(--md);margin-top:2px;">Toulouse · CDI</div></div>
+            <span style="font-size:9px;background:var(--gl);color:var(--g);padding:2px 7px;border-radius:50px;font-weight:700;flex-shrink:0;">Ouvert</span>
+          </div>
+          <div style="font-size:10px;color:var(--md);margin-top:6px;line-height:1.6;">Rejoignez l'agence Groupama Toulouse. Profil commercial, sens du service client requis.</div>
+          <a href="mailto:recrutement@groupama.fr?subject=Candidature bénévole Spacers — Chargé clientèle" style="display:inline-block;margin-top:8px;background:var(--blue);color:white;border-radius:50px;padding:6px 14px;font-size:10px;font-weight:700;text-decoration:none;">Postuler →</a>
+        </div>
+        <div style="background:var(--lt);border-radius:10px;padding:11px;margin-bottom:7px;">
+          <div style="display:flex;justify-content:space-between;align-items:start;">
+            <div><div style="font-size:12px;font-weight:700;color:var(--bd);">Alternant(e) Marketing Digital</div>
+            <div style="font-size:10px;color:var(--md);margin-top:2px;">Toulouse · Alternance</div></div>
+            <span style="font-size:9px;background:var(--goldl);color:var(--gold);padding:2px 7px;border-radius:50px;font-weight:700;flex-shrink:0;">Nouveau</span>
+          </div>
+          <div style="font-size:10px;color:var(--md);margin-top:6px;line-height:1.6;">Mission de 12 mois. Gestion réseaux sociaux, création de contenu, analytics.</div>
+          <a href="mailto:recrutement@groupama.fr?subject=Candidature bénévole Spacers — Alternance Marketing" style="display:inline-block;margin-top:8px;background:var(--blue);color:white;border-radius:50px;padding:6px 14px;font-size:10px;font-weight:700;text-decoration:none;">Postuler →</a>
+        </div>
+        <div style="background:var(--lt);border-radius:10px;padding:11px;">
+          <div style="display:flex;justify-content:space-between;align-items:start;">
+            <div><div style="font-size:12px;font-weight:700;color:var(--bd);">Stage Gestion de projet</div>
+            <div style="font-size:10px;color:var(--md);margin-top:2px;">Toulouse · Stage 6 mois</div></div>
+            <span style="font-size:9px;background:var(--gl);color:var(--g);padding:2px 7px;border-radius:50px;font-weight:700;flex-shrink:0;">Ouvert</span>
+          </div>
+          <div style="font-size:10px;color:var(--md);margin-top:6px;line-height:1.6;">Support au chef de projet, suivi des plannings, coordination équipes.</div>
+          <a href="mailto:recrutement@groupama.fr?subject=Candidature bénévole Spacers — Stage GP" style="display:inline-block;margin-top:8px;background:var(--blue);color:white;border-radius:50px;padding:6px 14px;font-size:10px;font-weight:700;text-decoration:none;">Postuler →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Avantages assurances -->
+    <div class="card" style="border:1.5px solid #E6F1FB;margin-top:4px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="width:40px;height:40px;background:#EAF3DE;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🛡️</div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--bd);">Avantages assurances</div><div style="font-size:10px;color:var(--md);margin-top:1px;">Tarifs préférentiels bénévoles Spacers</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px;" id="groupama-avantages">
+        <div style="background:var(--lt);border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-size:11px;font-weight:700;color:var(--bd);">🚗 Auto & Moto</div><div style="font-size:9px;color:var(--md);margin-top:1px;">Assurance véhicule préférentielle</div></div>
+          <div style="text-align:right;"><div style="font-size:12px;font-weight:800;color:var(--g);">-10%</div><div style="font-size:8px;color:var(--md);">vs tarif public</div></div>
+        </div>
+        <div style="background:var(--lt);border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-size:11px;font-weight:700;color:var(--bd);">🏠 Habitation</div><div style="font-size:9px;color:var(--md);margin-top:1px;">Multirisque habitation</div></div>
+          <div style="text-align:right;"><div style="font-size:12px;font-weight:800;color:var(--g);">-15%</div><div style="font-size:8px;color:var(--md);">vs tarif public</div></div>
+        </div>
+        <div style="background:var(--lt);border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-size:11px;font-weight:700;color:var(--bd);">❤️ Santé & Prévoyance</div><div style="font-size:9px;color:var(--md);margin-top:1px;">Mutuelle individuelle ou famille</div></div>
+          <div style="text-align:right;"><div style="font-size:12px;font-weight:800;color:var(--g);">-12%</div><div style="font-size:8px;color:var(--md);">vs tarif public</div></div>
+        </div>
+      </div>
+      <a href="tel:+33561000000" style="display:block;margin-top:10px;background:var(--gl);color:var(--g);border-radius:50px;padding:10px;text-align:center;font-weight:700;font-size:12px;text-decoration:none;">
+        📞 Contacter l'agence Groupama Toulouse
+      </a>
+    </div>
+
+    <!-- INSTAGRAM -->
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:14px 0 8px;">📸 @SPACERSTOULOUSE</div>
+    <div id="instagram-feed">
+      <!-- Feed Instagram -->
+      <div style="text-align:center;padding:20px;" id="ig-loading">
+        <div style="font-size:11px;color:rgba(181,212,244,0.4);">Chargement du feed...</div>
+      </div>
+    </div>
+    <a href="https://www.instagram.com/spacerstoulouse/" target="_blank" style="display:block;background:linear-gradient(135deg,#E1306C,#F77737,#FCAF45);color:white;border-radius:50px;padding:11px;text-align:center;font-weight:800;font-size:13px;text-decoration:none;margin-bottom:20px;">
+      Voir tout sur Instagram →
+    </a>
+  </div>
+
 </div>
 <!-- /app-benv -->
 
@@ -959,6 +1071,7 @@ function bSwitch(name) {
   if (btn) btn.classList.add('on')
   if (name==='planning') loadPlanning()
   if (name==='communaute') loadPosts()
+  if (name==='partenaires') loadInstagram()
 }
 
 // ── PILOTE DATA ──────────────────────────────────────────────
