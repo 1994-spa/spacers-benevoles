@@ -8,14 +8,62 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-:root{
-  --blue:#185FA5;--bd:#0C447C;--bdd:#042C53;
-  --g:#3B6D11;--gl:#EAF3DE;--a:#854F0B;--al:#FAEEDA;
-  --gold:#C9821A;--goldl:#FEF3DC;--red:#993556;--redl:#FBEAF0;
-  --dk:#1a1a18;--md:#5F5E5A;--lt:#F1EFE8;--br:#D3D1C7;
-  --bg:#F7F5F0;
+body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
+
+/* ── QUIZ PROFIL ── */
+.quiz-wrap{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:24px;
 }
-body{font-family:'Sora',sans-serif;background:var(--bdd);min-height:100vh;}
+.quiz-card{
+  background:white;border-radius:24px;padding:28px 24px;
+  width:100%;max-width:400px;
+  box-shadow:0 32px 80px rgba(0,0,0,0.4);
+}
+.quiz-step{display:none;}
+.quiz-step.on{display:block;}
+.quiz-header{text-align:center;margin-bottom:24px;}
+.quiz-icon{font-size:48px;margin-bottom:12px;}
+.quiz-title{font-size:20px;font-weight:800;color:#0C447C;line-height:1.3;margin-bottom:6px;}
+.quiz-sub{font-size:13px;color:#5F5E5A;line-height:1.6;}
+.quiz-dots{display:flex;justify-content:center;gap:6px;margin-bottom:20px;}
+.quiz-dot{width:8px;height:8px;border-radius:50%;background:#E6F1FB;}
+.quiz-dot.on{background:#185FA5;width:24px;border-radius:4px;}
+.quiz-options{display:flex;flex-direction:column;gap:10px;}
+.quiz-opt{
+  padding:14px 16px;border:2px solid #E6F1FB;border-radius:14px;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;
+}
+.quiz-opt:hover,.quiz-opt:active{border-color:#185FA5;background:#f0f7ff;}
+.quiz-opt.selected{border-color:#185FA5;background:#E6F1FB;}
+.quiz-opt-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.quiz-opt-text{font-size:13px;font-weight:600;color:#1a1a18;line-height:1.4;}
+.quiz-opt-sub{font-size:10px;color:#5F5E5A;margin-top:2px;}
+.quiz-progress{height:4px;background:#E6F1FB;border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,#0C447C,#185FA5);border-radius:2px;transition:width .4s ease;}
+
+/* RÉSULTAT PROFIL */
+.profil-reveal{text-align:center;padding:10px 0;}
+.profil-avatar{
+  width:80px;height:80px;border-radius:24px;
+  margin:0 auto 16px;display:flex;align-items:center;
+  justify-content:center;font-size:36px;
+}
+.profil-tag{
+  display:inline-block;font-size:10px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding:3px 12px;border-radius:50px;margin-bottom:8px;
+}
+.profil-name{font-size:26px;font-weight:800;color:#0C447C;margin-bottom:6px;}
+.profil-desc{font-size:13px;color:#5F5E5A;line-height:1.7;margin-bottom:20px;}
+.profil-traits{display:flex;flex-direction:column;gap:6px;margin-bottom:20px;text-align:left;}
+.trait{display:flex;align-items:center;gap:8px;font-size:12px;color:#5F5E5A;}
+
+/* BOUTONS */
+.btn{border:none;border-radius:50px;padding:13px 20px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;width:100%;transition:all .15s;}
+.btn:active{transform:scale(0.97);}
+.btn-blue{background:#185FA5;color:white;}
+.btn-ghost{background:#F1EFE8;color:#5F5E5A;margin-top:8px;}
 
 /* ── TOPBAR ── */
 .topbar{
@@ -26,910 +74,583 @@ body{font-family:'Sora',sans-serif;background:var(--bdd);min-height:100vh;}
 }
 .t-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
 .av{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #B5D4F4;flex-shrink:0;}
-.av-ph{width:36px;height:36px;border-radius:50%;background:#E6F1FB;border:2px solid #B5D4F4;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue);flex-shrink:0;}
-.t-name{font-size:13px;font-weight:700;color:var(--bd);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.t-sub{font-size:10px;color:var(--md);margin-top:1px;display:flex;align-items:center;gap:4px;}
-.admin-badge{background:var(--gold);color:white;font-size:8px;font-weight:800;padding:1px 6px;border-radius:50px;letter-spacing:1px;display:none;}
+.av-ph{width:36px;height:36px;border-radius:50%;background:#E6F1FB;border:2px solid #B5D4F4;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#185FA5;flex-shrink:0;}
+.t-name{font-size:13px;font-weight:700;color:#0C447C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.t-sub{font-size:10px;color:#5F5E5A;margin-top:1px;}
+.profil-badge{font-size:9px;padding:1px 7px;border-radius:50px;font-weight:700;display:inline-block;}
 .t-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.btn-switch{
-  background:linear-gradient(135deg,var(--bdd),var(--bd));
-  color:white;border:none;border-radius:50px;
-  padding:7px 12px;font-family:'Sora',sans-serif;
-  font-size:10px;font-weight:700;cursor:pointer;
-  display:none;white-space:nowrap;transition:all .2s;
-}
-.btn-switch:active{transform:scale(0.96);}
-.btn-switch.pilote-mode{background:linear-gradient(135deg,#1a1a18,#0C447C);}
-.btn-logout{background:var(--redl);color:var(--red);border:none;border-radius:50px;padding:7px 10px;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;cursor:pointer;}
+.btn-logout{background:#FBEAF0;color:#993556;border:none;border-radius:50px;padding:6px 10px;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;cursor:pointer;}
+
+/* ── BOTTOM NAV ── */
+.bnav{background:white;position:fixed;bottom:0;left:0;right:0;display:flex;border-top:1px solid #F1EFE8;z-index:99;}
+.bn{flex:1;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:none;cursor:pointer;font-family:'Sora',sans-serif;}
+.bn-icon{font-size:18px;line-height:1;}
+.bn-label{font-size:8px;color:#5F5E5A;font-weight:500;}
+.bn.on .bn-label{font-weight:700;}
+.bn.on.hugo .bn-label{color:#185FA5;}
+.bn.on.virginie .bn-label{color:#533BB7;}
+.bn.on.joel .bn-label{color:#3B6D11;}
 
 /* ── SCREENS ── */
-.app{display:none;}
-.app.on{display:block;}
-
-/* ── BÉNÉVOLE VIEW ── */
-.bnav{
-  background:white;position:fixed;bottom:0;left:0;right:0;
-  display:flex;border-top:1px solid var(--lt);z-index:99;
-  padding-bottom:env(safe-area-inset-bottom);
-}
-.bn{flex:1;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;cursor:pointer;font-family:'Sora',sans-serif;}
-.bn-icon{font-size:18px;line-height:1;}
-.bn-label{font-size:9px;color:var(--md);font-weight:500;}
-.bn.on .bn-label{color:var(--blue);font-weight:700;}
-.bn.on .bn-icon{filter:drop-shadow(0 0 4px rgba(24,95,165,0.4));}
-
 .bscreen{display:none;padding:14px 14px 80px;}
 .bscreen.on{display:block;}
 
-/* HEADER GRADIENT */
-.b-header{
-  background:linear-gradient(135deg,var(--bdd),var(--bd),var(--blue));
-  margin:-14px -14px 14px;padding:16px 14px 14px;
-  display:flex;justify-content:space-between;align-items:flex-start;
-}
-.b-header-title{font-size:18px;font-weight:800;color:white;}
-.b-header-sub{font-size:11px;color:rgba(181,212,244,0.8);margin-top:2px;}
-
-/* CARDS */
-.card{background:white;border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
-.card h2{font-size:13px;font-weight:700;color:var(--bd);margin-bottom:5px;}
-.card p{font-size:11px;color:var(--md);line-height:1.6;margin-bottom:10px;}
-.btn{border:none;border-radius:50px;padding:9px 18px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;}
-.btn:active{transform:scale(0.97);}
-.btn-blue{background:var(--blue);color:white;}
-.btn-blue:hover{background:var(--bd);}
-.btn-green{background:var(--g);color:white;}
-.btn-red{background:var(--red);color:white;}
-.btn-ghost{background:var(--lt);color:var(--md);}
-.btn-full{width:100%;padding:12px;}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-
-/* POINTS & GAMIFICATION */
-.pts-hero{
-  background:linear-gradient(135deg,var(--dk),var(--bd));
-  border-radius:20px;padding:20px;margin-bottom:14px;color:white;
+/* HUGO — GAMIFICATION */
+.hugo-hero{
+  background:linear-gradient(135deg,#1a1a18,#042C53,#0C447C);
+  border-radius:20px;padding:18px;margin-bottom:12px;
   position:relative;overflow:hidden;
 }
-.pts-hero::before{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;background:rgba(255,255,255,0.05);border-radius:50%;}
-.pts-hero::after{content:'';position:absolute;right:20px;bottom:-40px;width:80px;height:80px;background:rgba(255,255,255,0.03);border-radius:50%;}
-.pts-num{font-size:48px;font-weight:800;color:#F5C842;font-family:monospace;line-height:1;}
-.pts-prog-wrap{margin:10px 0 6px;}
-.pts-prog-track{height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;}
-.pts-prog-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);}
-.bronze-fill{background:linear-gradient(90deg,#9B6B3A,#F5C842);}
-.argent-fill{background:linear-gradient(90deg,#6B7280,#D1D5DB);}
-.or-fill{background:linear-gradient(90deg,#C9821A,#F5C842);}
+.hugo-hero::before{content:'';position:absolute;right:-20px;top:-20px;width:100px;height:100px;background:rgba(245,200,66,0.08);border-radius:50%;}
+.hugo-pts{font-size:44px;font-weight:800;color:#F5C842;font-family:monospace;line-height:1;}
+.hugo-level{font-size:13px;font-weight:700;color:white;margin-top:3px;}
+.hugo-prog{height:7px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;margin:10px 0 4px;}
+.hugo-fill{height:100%;background:linear-gradient(90deg,#9B6B3A,#F5C842);border-radius:4px;transition:width 1s ease;}
+.defi-card{background:linear-gradient(135deg,#0C447C,#185FA5);border-radius:14px;padding:13px;margin-bottom:8px;}
+.defi-title{font-size:11px;font-weight:700;color:white;margin-bottom:6px;}
+.defi-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.08);}
+.defi-item:last-child{border:none;}
+.defi-prog{flex:1;height:5px;background:rgba(255,255,255,0.15);border-radius:3px;overflow:hidden;}
+.defi-prog-fill{height:100%;background:#F5C842;border-radius:3px;}
+.rank-mini{background:white;border-radius:12px;padding:11px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.rank-pos{font-size:16px;min-width:24px;}
 
-/* BADGES */
-.badge-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px;}
-.badge-box{text-align:center;}
-.badge-ico{
-  width:46px;height:46px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;margin:0 auto 4px;transition:all .3s;
+/* VIRGINIE — ACCOMPAGNEMENT */
+.referent-card{
+  background:linear-gradient(135deg,#3a1a5e,#533BB7,#7C3FC4);
+  border-radius:20px;padding:16px;margin-bottom:12px;
+  display:flex;align-items:center;gap:14px;
 }
-.badge-ico.earned{background:var(--gl);border:2px solid #C0DD97;box-shadow:0 4px 12px rgba(59,109,17,0.2);}
-.badge-ico.locked{background:var(--lt);border:2px solid var(--br);opacity:0.4;filter:grayscale(1);}
-.badge-name{font-size:9px;color:var(--md);line-height:1.3;}
-.badge-name.earned{color:var(--g);font-weight:600;}
+.ref-av{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.bienvenue-card{background:linear-gradient(135deg,#EDE9FE,#DDD6FE);border-radius:16px;padding:14px;margin-bottom:10px;}
+.etape-item{display:flex;gap:10px;align-items:start;padding:9px 0;border-bottom:1px solid rgba(83,59,183,0.08);}
+.etape-item:last-child{border:none;}
+.etape-num{width:24px;height:24px;border-radius:50%;background:#533BB7;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.etape-done{background:#EAF3DE;color:#3B6D11;}
+.faq-item{background:white;border-radius:10px;padding:11px;margin-bottom:7px;cursor:pointer;}
+.faq-q{font-size:12px;font-weight:600;color:#533BB7;display:flex;justify-content:space-between;align-items:center;}
+.faq-a{font-size:11px;color:#5F5E5A;line-height:1.7;margin-top:6px;display:none;}
+.faq-a.on{display:block;}
 
-/* CLASSEMENT */
-.rank-item{
-  background:white;border-radius:12px;padding:12px 14px;
-  margin-bottom:8px;display:flex;align-items:center;gap:12px;
-  border:1.5px solid transparent;
+/* JOËL — EFFICACITÉ */
+.joel-hero{background:linear-gradient(135deg,#1a3d2e,#3B6D11);border-radius:20px;padding:18px;margin-bottom:12px;}
+.joel-btn{
+  background:white;border-radius:16px;padding:18px;
+  display:flex;align-items:center;gap:14px;
+  cursor:pointer;margin-bottom:10px;border:2px solid transparent;
+  transition:all .15s;
 }
-.rank-item.me{border-color:var(--blue);background:#f0f7ff;}
-.rank-medal{font-size:18px;min-width:24px;text-align:center;}
-.rank-pts{font-size:16px;font-weight:800;color:var(--blue);font-family:monospace;}
+.joel-btn:active{transform:scale(0.98);border-color:#3B6D11;}
+.joel-btn-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.joel-btn-title{font-size:15px;font-weight:700;color:#0C447C;}
+.joel-btn-sub{font-size:11px;color:#5F5E5A;margin-top:2px;}
+.transmettre-card{background:linear-gradient(135deg,#1a3d2e,#3B6D11);border-radius:16px;padding:15px;margin-bottom:10px;}
+.note-area{width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;color:white;resize:none;height:80px;outline:none;}
+.note-area::placeholder{color:rgba(255,255,255,0.4);}
 
-/* SIMULATEUR */
-.sim-card{
-  background:linear-gradient(135deg,#1a1a18,#0C447C);
-  border-radius:20px;padding:16px;margin-bottom:14px;
-}
-.sim-pts{font-size:42px;font-weight:800;color:#F5C842;font-family:monospace;text-align:center;margin:8px 0;}
-.sim-row{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:10px 12px;background:rgba(255,255,255,0.06);
-  border-radius:10px;margin-bottom:6px;cursor:pointer;transition:all .2s;
-}
-.sim-row:active{background:rgba(255,255,255,0.12);transform:scale(0.98);}
-.sim-row-l{display:flex;align-items:center;gap:10px;}
-.sim-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
-.sim-pts-badge{font-size:14px;font-weight:800;color:#F5C842;font-family:monospace;}
-.sim-anim{
-  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:36px;font-weight:800;color:#F5C842;
-  pointer-events:none;z-index:9999;opacity:0;
-  transition:all .5s ease-out;
-  text-shadow:0 0 20px rgba(245,200,66,0.8);
-}
+/* MODAL CHANGEMENT PROFIL */
+.modal-ov{position:fixed;inset:0;background:rgba(4,44,83,0.6);display:flex;align-items:flex-end;justify-content:center;z-index:200;}
+.modal{background:white;border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:440px;}
+.modal h2{font-size:16px;font-weight:800;color:#0C447C;margin-bottom:16px;}
+.profil-choice{border:2px solid #E6F1FB;border-radius:14px;padding:13px;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:all .15s;}
+.profil-choice:hover,.profil-choice.selected{border-color:#185FA5;background:#f0f7ff;}
+.profil-choice-icon{font-size:28px;}
 
-/* NIVEAUX */
-.niveau-cards{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
-.niveau-card{border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;}
-.n-bronze{background:#FEF3DC;border:1.5px solid #FAC775;}
-.n-argent{background:#F3F4F6;border:1.5px solid #D1D5DB;}
-.n-or{background:#FAEEDA;border:1.5px solid #F5C842;}
-.n-badge{font-size:20px;margin-right:8px;}
-.n-name{font-size:13px;font-weight:700;}
-.n-pts{font-size:11px;color:var(--md);margin-top:2px;}
-.n-avantage{font-size:11px;font-weight:600;text-align:right;}
+/* MATCH ITEMS */
+.match-item{background:white;border-radius:12px;padding:12px;margin-bottom:8px;}
+.match-vs{font-size:13px;font-weight:700;color:#0C447C;}
+.match-info{font-size:10px;color:#5F5E5A;margin-top:2px;}
+.s-open{background:#EAF3DE;color:#3B6D11;font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;display:inline-block;margin-top:4px;}
+.s-closed{background:#F1EFE8;color:#5F5E5A;font-size:9px;padding:2px 8px;border-radius:50px;display:inline-block;margin-top:4px;}
+.s-dispo{background:#E6F1FB;color:#0C447C;font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;display:inline-block;margin-top:4px;}
+.match-actions{margin-top:8px;display:flex;gap:6px;}
+.btn-sm{border:none;border-radius:50px;padding:7px 13px;font-family:'Sora',sans-serif;font-size:11px;font-weight:700;cursor:pointer;}
+.btn-sm-green{background:#3B6D11;color:white;}
+.btn-sm-ghost{background:#F1EFE8;color:#5F5E5A;}
 
-/* MATCH ITEM */
-.match-item{background:white;border-radius:12px;padding:13px;margin-bottom:8px;box-shadow:0 2px 6px rgba(0,0,0,0.04);}
-.match-vs{font-size:14px;font-weight:700;color:var(--bd);}
-.match-info{font-size:11px;color:var(--md);margin-top:3px;}
-.match-actions{margin-top:10px;display:flex;gap:7px;flex-wrap:wrap;}
-.s-open{background:var(--gl);color:var(--g);font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;display:inline-block;margin-top:4px;}
-.s-closed{background:var(--lt);color:var(--md);font-size:10px;padding:3px 10px;border-radius:50px;display:inline-block;margin-top:4px;}
-.s-dispo{background:#E6F1FB;color:var(--bd);font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;display:inline-block;margin-top:4px;}
+/* SECTION TITLE */
+.sec{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:12px 0 7px;}
 
-/* POST */
-.post-item{background:white;border-radius:12px;padding:13px;margin-bottom:8px;}
-.post-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.post-av{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid #B5D4F4;}
-.post-av-ph{width:28px;height:28px;border-radius:50%;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--blue);}
-.post-author{font-size:12px;font-weight:700;color:var(--bd);}
-.post-time{font-size:10px;color:var(--md);}
-.post-body{font-size:12px;color:var(--md);line-height:1.7;}
-textarea{width:100%;padding:11px;border:1.5px solid var(--br);border-radius:10px;font-family:'Sora',sans-serif;font-size:12px;outline:none;resize:none;height:70px;}
-textarea:focus{border-color:var(--blue);}
-
-/* BOUTIQUE */
-.prod-item{background:white;border-radius:14px;padding:13px;margin-bottom:9px;display:flex;align-items:center;gap:12px;}
-.prod-icon{width:46px;height:46px;background:#E6F1FB;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
-.prod-remise{font-size:10px;background:var(--gl);color:var(--g);padding:2px 8px;border-radius:50px;font-weight:700;}
-
-/* MODAL */
-.modal-ov{position:fixed;inset:0;background:rgba(4,44,83,0.5);display:flex;align-items:flex-end;justify-content:center;z-index:200;padding:0;}
-.modal-ov.center{align-items:center;padding:16px;}
-.modal{background:white;border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;}
-.modal.rounded{border-radius:20px;}
-.modal h2{font-size:15px;font-weight:800;color:var(--bd);margin-bottom:14px;}
-.modal-actions{display:flex;gap:8px;margin-top:14px;}
-.form-group{margin-bottom:12px;}
-.form-label{font-size:11px;font-weight:600;color:var(--dk);margin-bottom:4px;display:block;}
-.form-input{width:100%;padding:10px 12px;border:1.5px solid var(--br);border-radius:10px;font-family:'Sora',sans-serif;font-size:13px;outline:none;}
-.form-input:focus{border-color:var(--blue);}
-select.form-input{cursor:pointer;}
-.alert{padding:9px 12px;border-radius:9px;font-size:11px;margin-bottom:12px;}
-.alert-s{background:var(--gl);color:var(--g);}
-.alert-e{background:var(--redl);color:var(--red);}
-
-/* PHOTO */
-.photo-zone{border:2px dashed #B5D4F4;border-radius:14px;padding:20px;text-align:center;cursor:pointer;background:#E6F1FB;margin-bottom:12px;}
-.photo-zone:hover{border-color:var(--blue);}
-.photo-zone input{display:none;}
-.ph-preview{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--blue);margin:0 auto 8px;display:block;}
-.accred-block{border-radius:12px;padding:12px;margin-bottom:12px;}
-.acc-sans{background:var(--lt);border:1.5px solid var(--br);}
-.acc-att{background:var(--goldl);border:1.5px solid var(--gold);}
-.acc-ref{background:var(--redl);border:1.5px solid #F0A0BD;}
-.acc-val{background:var(--gl);border:1.5px solid #C0DD97;}
-.acc-gen{background:#E6F1FB;border:1.5px solid #B5D4F4;}
-
-/* ── PILOTE VIEW ── */
-.ptabs{display:flex;background:#111110;border-bottom:1px solid #2a2a28;overflow-x:auto;}
-.ptabs::-webkit-scrollbar{display:none;}
-.ptab{flex:1;padding:11px 6px;font-size:9px;font-weight:600;color:rgba(255,255,255,0.35);border:none;background:none;cursor:pointer;font-family:'Sora',sans-serif;white-space:nowrap;min-width:60px;position:relative;}
-.ptab.on{color:white;border-bottom:2px solid var(--blue);}
-.ptab .bdg{position:absolute;top:5px;right:5px;width:6px;height:6px;background:#E24B4A;border-radius:50%;}
-.pscreen{display:none;padding:14px;padding-bottom:30px;}
-.pscreen.on{display:block;}
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
-.kpi{background:#2a2a28;border-radius:12px;padding:12px;text-align:center;}
-.kpi-v{font-size:26px;font-weight:800;color:white;font-family:monospace;}
-.kpi-v.g{color:#C0DD97;}.kpi-v.a{color:#FAC775;}.kpi-v.r{color:#F09595;}
-.kpi-l{font-size:9px;color:rgba(255,255,255,0.35);margin-top:2px;}
-.pcard{background:#2a2a28;border-radius:12px;padding:13px;margin-bottom:8px;}
-.ps{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin:12px 0 7px;}
-.pbtn{border:none;border-radius:50px;padding:8px 14px;font-family:'Sora',sans-serif;font-size:11px;font-weight:700;cursor:pointer;}
-.pbtn-b{background:var(--blue);color:white;}
-.pbtn-g{background:var(--g);color:white;}
-.pbtn-r{background:var(--red);color:white;}
-.pbtn-gh{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.15);}
-.pbtn-f{width:100%;padding:11px;margin-bottom:6px;}
-.ph-card{background:#2a2a28;border-radius:12px;padding:12px;margin-bottom:8px;display:flex;gap:10px;align-items:center;}
-.pth{width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid #444441;flex-shrink:0;}
-.pth-ph{width:46px;height:46px;border-radius:50%;background:#444441;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;flex-shrink:0;}
-.pbr{background:#2a2a28;border-radius:10px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;gap:9px;}
-.pbav{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid #444441;flex-shrink:0;}
-.pbav-ph{width:32px;height:32px;border-radius:50%;background:#444441;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;}
-.sb{display:inline-block;font-size:8px;padding:2px 7px;border-radius:50px;font-weight:700;}
-.sb-a{background:rgba(201,130,26,0.2);color:#FAC775;}
-.sb-v{background:rgba(59,109,17,0.2);color:#C0DD97;}
-.sb-r{background:rgba(153,53,86,0.2);color:#F4B8CE;}
-.sb-g{background:rgba(24,95,165,0.2);color:#B5D4F4;}
-.sb-n{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.25);}
-.aff-table{width:100%;border-collapse:collapse;}
-.aff-table th{background:#0C447C;color:rgba(255,255,255,0.6);padding:7px 9px;text-align:left;font-size:8px;font-weight:700;letter-spacing:1px;}
-.aff-table td{padding:8px 9px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:10px;color:rgba(255,255,255,0.75);vertical-align:middle;}
-.aff-table tr:last-child td{border:none;}
-.pmodal-ov{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px;}
-.pmodal{background:#2a2a28;border-radius:18px;padding:18px;width:100%;max-width:380px;}
-.pmodal h2{font-size:14px;font-weight:800;color:white;margin-bottom:12px;}
-.pmodal-img{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--blue);display:block;margin:0 auto 12px;}
-.pmodal-actions{display:flex;gap:7px;margin-top:12px;}
-.note-area{width:100%;background:#1a1a18;border:1px solid #444441;border-radius:8px;padding:10px;font-family:'Sora',sans-serif;font-size:11px;color:white;resize:none;height:70px;outline:none;}
-.palert{padding:9px 12px;border-radius:9px;font-size:11px;margin-bottom:10px;}
-.palert-s{background:rgba(59,109,17,0.2);color:#C0DD97;border:1px solid rgba(59,109,17,0.3);}
-.palert-e{background:rgba(153,53,86,0.2);color:#F4B8CE;border:1px solid rgba(153,53,86,0.3);}
-
-
-/* INSTAGRAM GRID */
-.ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;border-radius:12px;overflow:hidden;margin-bottom:10px;}
-.ig-post{aspect-ratio:1;background:#2a2a28;position:relative;overflow:hidden;cursor:pointer;}
-.ig-post img{width:100%;height:100%;object-fit:cover;transition:transform .3s;}
-.ig-post:hover img{transform:scale(1.05);}
-.ig-post-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;}
-.ig-post:hover .ig-post-overlay{opacity:1;}
-.ig-placeholder{aspect-ratio:1;background:linear-gradient(135deg,#3a1a2e,#4a1a4a);display:flex;align-items:center;justify-content:center;font-size:24px;}
-
-/* ACCÈS REFUSÉ */
-#no-access{display:none;position:fixed;inset:0;background:var(--bdd);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
-#no-access.show{display:flex;}
+/* ALERT */
+.alert{padding:9px 12px;border-radius:9px;font-size:11px;margin-bottom:10px;}
+.alert-s{background:#EAF3DE;color:#3B6D11;}
+.alert-e{background:#FBEAF0;color:#993556;}
 </style>
 </head>
 <body>
 
-<!-- ACCÈS REFUSÉ -->
-<div id="no-access">
-  <div style="font-size:52px;margin-bottom:16px;">🔒</div>
-  <h1 style="font-size:22px;font-weight:800;color:white;margin-bottom:10px;">Accès réservé aux pilotes</h1>
-  <p style="font-size:13px;color:rgba(181,212,244,0.6);line-height:1.7;margin-bottom:24px;">Cette section nécessite<br>des droits admin ou pilote.</p>
-  <button class="btn btn-blue" onclick="window.location.href='index.html'" style="padding:12px 28px;">← Retour</button>
-</div>
+<!-- ══ QUIZ DÉTECTION PROFIL ══ -->
+<div id="quiz-wrap" class="quiz-wrap" style="display:none;">
+  <div class="quiz-card">
+    <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-prog" style="width:33%;"></div></div>
+    <div class="quiz-dots">
+      <div class="quiz-dot on" id="qd1"></div>
+      <div class="quiz-dot" id="qd2"></div>
+      <div class="quiz-dot" id="qd3"></div>
+    </div>
 
-<!-- TOPBAR -->
-<div class="topbar" id="topbar" style="display:none;">
-  <div class="t-left">
-    <div id="av-wrap"></div>
-    <div style="min-width:0;">
-      <div class="t-name" id="t-name">Chargement...</div>
-      <div class="t-sub" id="t-sub">
-        <span id="mode-badge" class="admin-badge">ADMIN</span>
-        <span id="t-level">...</span>
+    <!-- Q1 -->
+    <div class="quiz-step on" id="qs1">
+      <div class="quiz-header">
+        <div class="quiz-icon">🏐</div>
+        <div class="quiz-title">Votre expérience bénévole ?</div>
+        <div class="quiz-sub">Pour personnaliser votre expérience</div>
+      </div>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="quizSelect(1,'v')">
+          <div class="quiz-opt-icon" style="background:#EDE9FE;">🌱</div>
+          <div><div class="quiz-opt-text">Première fois</div><div class="quiz-opt-sub">Je découvre le bénévolat sportif</div></div>
+        </div>
+        <div class="quiz-opt" onclick="quizSelect(1,'h')">
+          <div class="quiz-opt-icon" style="background:#E6F1FB;">⚡</div>
+          <div><div class="quiz-opt-text">Quelques expériences</div><div class="quiz-opt-sub">J'ai déjà participé à des événements</div></div>
+        </div>
+        <div class="quiz-opt" onclick="quizSelect(1,'j')">
+          <div class="quiz-opt-icon" style="background:#EAF3DE;">🎯</div>
+          <div><div class="quiz-opt-text">Plusieurs saisons</div><div class="quiz-opt-sub">Je suis un(e) bénévole expérimenté(e)</div></div>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="t-right">
-    <button class="btn-switch" id="btn-switch" onclick="toggleMode()">🎯 Pilote</button>
-    <button class="btn-logout" onclick="handleLogout()">✕</button>
+
+    <!-- Q2 -->
+    <div class="quiz-step" id="qs2">
+      <div class="quiz-header">
+        <div class="quiz-icon">💡</div>
+        <div class="quiz-title">Ce qui vous motive le plus ?</div>
+        <div class="quiz-sub">Votre style de bénévolat</div>
+      </div>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="quizSelect(2,'v')">
+          <div class="quiz-opt-icon" style="background:#EDE9FE;">🤝</div>
+          <div><div class="quiz-opt-text">Découvrir et rencontrer</div><div class="quiz-opt-sub">Les nouvelles personnes et expériences</div></div>
+        </div>
+        <div class="quiz-opt" onclick="quizSelect(2,'h')">
+          <div class="quiz-opt-icon" style="background:#E6F1FB;">🏆</div>
+          <div><div class="quiz-opt-text">Progresser et gagner</div><div class="quiz-opt-sub">Les défis, la compétition, les récompenses</div></div>
+        </div>
+        <div class="quiz-opt" onclick="quizSelect(2,'j')">
+          <div class="quiz-opt-icon" style="background:#EAF3DE;">💪</div>
+          <div><div class="quiz-opt-text">Être utile et transmettre</div><div class="quiz-opt-sub">Mon expérience au service de l'équipe</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz-step" id="qs3">
+      <div class="quiz-header">
+        <div class="quiz-icon">🎯</div>
+        <div class="quiz-title">Votre façon de travailler ?</div>
+        <div class="quiz-sub">Comment vous préférez opérer</div>
+      </div>
+      <div class="quiz-options">
+        <div class="quiz-opt" onclick="quizSelect(3,'v')">
+          <div class="quiz-opt-icon" style="background:#EDE9FE;">🗺️</div>
+          <div><div class="quiz-opt-text">J'ai besoin d'être guidé(e)</div><div class="quiz-opt-sub">Des instructions claires m'aident à être au top</div></div>
+        </div>
+        <div class="quiz-opt" onclick="quizSelect(3,'h')">
+          <div class="quiz-opt-icon" style="background:#E6F1FB;">📊</div>
+          <div><div class="quiz-opt-text">Je veux tout voir</div><div class="quiz-opt-sub">Stats, points, classement — je gère tout</div></div>
+        </div>
+        <div class="quiz-opt" onclick="quizSelect(3,'j')">
+          <div class="quiz-opt-icon" style="background:#EAF3DE;">⚡</div>
+          <div><div class="quiz-opt-text">Je vais droit au but</div><div class="quiz-opt-sub">L'essentiel, sans fioritures</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RÉSULTAT -->
+    <div class="quiz-step" id="qs-result">
+      <div class="profil-reveal" id="profil-reveal"></div>
+      <button class="btn btn-blue" onclick="saveProfilAndContinue()">Commencer mon expérience →</button>
+      <button class="btn btn-ghost" onclick="showQuizAgain()">← Recommencer</button>
+    </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════ -->
-<!-- ── APP BÉNÉVOLE ── -->
-<!-- ══════════════════════════════════════════════ -->
-<div class="app" id="app-benv">
+<!-- ══ APP PRINCIPALE ══ -->
+<div id="app" style="display:none;">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="t-left">
+      <div id="av-wrap"></div>
+      <div style="min-width:0;">
+        <div class="t-name" id="t-name">...</div>
+        <div class="t-sub">
+          <span class="profil-badge" id="profil-badge"></span>
+          <span id="t-pts" style="margin-left:4px;"></span>
+        </div>
+      </div>
+    </div>
+    <div class="t-right">
+      <button class="btn-logout" onclick="handleLogout()">✕</button>
+    </div>
+  </div>
 
   <!-- BOTTOM NAV -->
-  <nav class="bnav">
-    <button class="bn on" id="bn-home"      onclick="bSwitch('home')">     <span class="bn-icon">🏠</span><span class="bn-label">Accueil</span></button>
-    <button class="bn"    id="bn-planning"  onclick="bSwitch('planning')"> <span class="bn-icon">📅</span><span class="bn-label">Planning</span></button>
-    <button class="bn"    id="bn-points"    onclick="bSwitch('points')">   <span class="bn-icon">🏆</span><span class="bn-label">Points</span></button>
-    <button class="bn"    id="bn-communaute" onclick="bSwitch('communaute')"><span class="bn-icon">💬</span><span class="bn-label">Forum</span></button>
-    <button class="bn"    id="bn-partenaires" onclick="bSwitch('partenaires')"><span class="bn-icon">🤝</span><span class="bn-label">Club</span></button>
-    <button class="bn"    id="bn-profil"    onclick="bSwitch('profil')">   <span class="bn-icon">👤</span><span class="bn-label">Profil</span></button>
+  <nav class="bnav" id="bnav">
+    <button class="bn on" id="bn-home"     onclick="bSwitch('home')"    ><span class="bn-icon">🏠</span><span class="bn-label">Accueil</span></button>
+    <button class="bn"   id="bn-planning" onclick="bSwitch('planning')"><span class="bn-icon">📅</span><span class="bn-label">Planning</span></button>
+    <button class="bn"   id="bn-points"   onclick="bSwitch('points')"  ><span class="bn-icon">🏆</span><span class="bn-label">Points</span></button>
+    <button class="bn"   id="bn-forum"    onclick="bSwitch('forum')"   ><span class="bn-icon">💬</span><span class="bn-label">Forum</span></button>
+    <button class="bn"   id="bn-profil"   onclick="bSwitch('profil')"  ><span class="bn-icon">👤</span><span class="bn-label">Profil</span></button>
   </nav>
 
-  <!-- HOME -->
-  <div class="bscreen on" id="bs-home">
-    <div class="b-header">
-      <div>
-        <div class="b-header-title" id="welcome-msg">Bonjour !</div>
-        <div class="b-header-sub">Spacers Bénévoles · Saison 2026–2027</div>
-      </div>
-      <div style="font-size:28px;">🏐</div>
-    </div>
+  <!-- ── HOME (adaptatif) ── -->
+  <div class="bscreen on" id="bs-home"></div>
 
-    <!-- Mini pts bar -->
-    <div class="card" style="background:linear-gradient(135deg,var(--dk),var(--bd));color:white;cursor:pointer;" onclick="bSwitch('points')">
-      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px;">
-        <div>
-          <div style="font-size:9px;color:rgba(181,212,244,0.6);letter-spacing:2px;margin-bottom:3px;">VOS POINTS</div>
-          <div class="pts-num" id="home-pts">0</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:13px;font-weight:700;color:white;" id="home-lvl">🥉 Bronze</div>
-          <div style="font-size:10px;color:rgba(181,212,244,0.5);margin-top:2px;" id="home-matchs">0 matchs</div>
-        </div>
-      </div>
-      <div class="pts-prog-track"><div class="pts-prog-fill bronze-fill" id="home-prog" style="width:0%;"></div></div>
-      <div style="font-size:9px;color:rgba(181,212,244,0.5);margin-top:4px;" id="home-next"></div>
-    </div>
-
-    <div class="grid2">
-      <div class="card" onclick="bSwitch('planning')" style="cursor:pointer;">
-        <div style="font-size:24px;margin-bottom:6px;">📅</div>
-        <div style="font-size:12px;font-weight:700;color:var(--bd);">Planning</div>
-        <div style="font-size:10px;color:var(--md);margin-top:2px;">Matchs & dispos</div>
-      </div>
-      <div class="card" onclick="bSwitch('points')" style="cursor:pointer;">
-        <div style="font-size:24px;margin-bottom:6px;">🏆</div>
-        <div style="font-size:12px;font-weight:700;color:var(--bd);">Badges</div>
-        <div style="font-size:10px;color:var(--md);margin-top:2px;">Progressez !</div>
-      </div>
-      <div class="card" onclick="bSwitch('boutique')" style="cursor:pointer;">
-        <div style="font-size:24px;margin-bottom:6px;">🛍️</div>
-        <div style="font-size:12px;font-weight:700;color:var(--bd);">Boutique</div>
-        <div style="font-size:10px;color:var(--g);margin-top:2px;font-weight:600;" id="home-remise">-10% Bronze</div>
-      </div>
-      <div class="card" onclick="bSwitch('communaute')" style="cursor:pointer;">
-        <div style="font-size:24px;margin-bottom:6px;">💬</div>
-        <div style="font-size:12px;font-weight:700;color:var(--bd);">Forum</div>
-        <div style="font-size:10px;color:var(--md);margin-top:2px;">Communauté</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PLANNING -->
+  <!-- ── PLANNING ── -->
   <div class="bscreen" id="bs-planning">
-    <div class="b-header">
-      <div><div class="b-header-title">Planning</div><div class="b-header-sub">Saison 2026–2027</div></div>
-    </div>
-    <div id="planning-list"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;">Chargement...</div></div>
+    <div id="planning-alert"></div>
+    <div class="sec">Matchs saison 2026–2027</div>
+    <div id="planning-list"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
   </div>
 
-  <!-- POINTS & GAMIFICATION -->
+  <!-- ── POINTS ── -->
   <div class="bscreen" id="bs-points">
-    <div class="b-header">
-      <div><div class="b-header-title">Points & Badges</div><div class="b-header-sub">Votre progression</div></div>
-    </div>
-
-    <div class="pts-hero">
-      <div style="font-size:9px;color:rgba(181,212,244,0.5);letter-spacing:2px;margin-bottom:4px;">VOS POINTS SAISON</div>
-      <div class="pts-num" id="pts-num">0</div>
-      <div style="font-size:14px;font-weight:700;color:white;margin-top:4px;" id="pts-niveau">🥉 Bronze</div>
-      <div class="pts-prog-wrap">
-        <div class="pts-prog-track"><div class="pts-prog-fill bronze-fill" id="pts-fill" style="width:0%;"></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(181,212,244,0.4);">
-        <span id="pts-matchs">0 matchs</span>
-        <span id="pts-next">600 pts avant Argent</span>
-      </div>
-    </div>
-
-    <!-- SIMULATEUR INTERACTIF -->
-    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.5);margin-bottom:8px;">⚡ SIMULATEUR — Tapez pour ajouter</div>
-    <div class="sim-card">
-      <div style="font-size:9px;color:rgba(245,200,66,0.6);text-align:center;letter-spacing:2px;">SIMULATION</div>
-      <div class="sim-pts" id="sim-pts">0</div>
-      <div style="font-size:8px;color:rgba(255,255,255,0.3);text-align:center;margin-bottom:10px;" id="sim-lvl">🥉 Bronze</div>
-      <div class="pts-prog-track" style="margin-bottom:12px;"><div class="pts-prog-fill bronze-fill" id="sim-fill" style="width:0%;"></div></div>
-
-      <div class="sim-row" onclick="simAdd(50,'📅','Présence confirmée')">
-        <div class="sim-row-l"><div class="sim-icon" style="background:rgba(24,95,165,0.3);">📅</div><div><div style="font-size:11px;color:white;font-weight:600;">Présence confirmée</div><div style="font-size:9px;color:rgba(255,255,255,0.4);">Par match joué</div></div></div>
-        <div class="sim-pts-badge">+50</div>
-      </div>
-      <div class="sim-row" onclick="simAdd(20,'⏱️','Ponctualité')">
-        <div class="sim-row-l"><div class="sim-icon" style="background:rgba(59,109,17,0.3);">⏱️</div><div><div style="font-size:11px;color:white;font-weight:600;">Ponctualité validée</div><div style="font-size:9px;color:rgba(255,255,255,0.4);">Validé par le pilote</div></div></div>
-        <div class="sim-pts-badge">+20</div>
-      </div>
-      <div class="sim-row" onclick="simAdd(100,'🏅','Badge 5 matchs')">
-        <div class="sim-row-l"><div class="sim-icon" style="background:rgba(201,130,26,0.3);">🏅</div><div><div style="font-size:11px;color:white;font-weight:600;">Badge 5 matchs</div><div style="font-size:9px;color:rgba(255,255,255,0.4);">Automatique</div></div></div>
-        <div class="sim-pts-badge">+100</div>
-      </div>
-      <div class="sim-row" onclick="simAdd(200,'🏆','Badge 10 matchs')">
-        <div class="sim-row-l"><div class="sim-icon" style="background:rgba(201,130,26,0.3);">🏆</div><div><div style="font-size:11px;color:white;font-weight:600;">Badge 10 matchs</div><div style="font-size:9px;color:rgba(255,255,255,0.4);">Automatique</div></div></div>
-        <div class="sim-pts-badge">+200</div>
-      </div>
-      <div class="sim-row" onclick="simAdd(30,'🎂','Anniversaire')">
-        <div class="sim-row-l"><div class="sim-icon" style="background:rgba(83,59,183,0.3);">🎂</div><div><div style="font-size:11px;color:white;font-weight:600;">Anniversaire</div><div style="font-size:9px;color:rgba(255,255,255,0.4);">Automatique le jour J</div></div></div>
-        <div class="sim-pts-badge">+30</div>
-      </div>
-      <div class="sim-row" onclick="simAdd(50,'👥','Parrainage')">
-        <div class="sim-row-l"><div class="sim-icon" style="background:rgba(83,59,183,0.3);">👥</div><div><div style="font-size:11px;color:white;font-weight:600;">Parrainage</div><div style="font-size:9px;color:rgba(255,255,255,0.4);">Par bénévole parrainé</div></div></div>
-        <div class="sim-pts-badge">+50</div>
-      </div>
-      <button class="pbtn pbtn-gh" style="width:100%;margin-top:10px;padding:8px;font-size:10px;" onclick="simReset()">↺ Réinitialiser</button>
-    </div>
-
-    <!-- BADGES -->
-    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.5);margin-bottom:8px;">BADGES</div>
-    <div class="card" id="badges-container"></div>
-
-    <!-- NIVEAUX -->
-    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.5);margin:12px 0 8px;">NIVEAUX & AVANTAGES</div>
-    <div class="niveau-cards">
-      <div class="niveau-card n-bronze"><div style="display:flex;align-items:center;"><span class="n-badge">🥉</span><div><div class="n-name" style="color:#9B6B3A;">Bronze</div><div class="n-pts">0 — 599 pts</div></div></div><div class="n-avantage" style="color:#9B6B3A;">-10%<br>boutique</div></div>
-      <div class="niveau-card n-argent"><div style="display:flex;align-items:center;"><span class="n-badge">🥈</span><div><div class="n-name" style="color:#6B7280;">Argent</div><div class="n-pts">600 — 999 pts</div></div></div><div class="n-avantage" style="color:#6B7280;">-20%<br>boutique</div></div>
-      <div class="niveau-card n-or"><div style="display:flex;align-items:center;"><span class="n-badge">🥇</span><div><div class="n-name" style="color:var(--gold);">Or</div><div class="n-pts">1000+ pts</div></div></div><div class="n-avantage" style="color:var(--gold);">-30%<br>boutique + VIP</div></div>
-    </div>
-
-    <!-- CLASSEMENT -->
-    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.5);margin:14px 0 8px;">🏆 CLASSEMENT SAISON</div>
-    <div id="classement-list"></div>
+    <div class="sec">Vos points</div>
+    <div id="points-content"></div>
   </div>
 
-  <!-- COMMUNAUTÉ -->
-  <div class="bscreen" id="bs-communaute">
-    <div class="b-header"><div><div class="b-header-title">Forum</div><div class="b-header-sub">Communauté bénévoles</div></div></div>
-    <div class="card" style="margin-bottom:10px;">
-      <div style="font-size:12px;font-weight:700;color:var(--bd);margin-bottom:7px;">Partager un message</div>
-      <textarea id="post-content" placeholder="Votre message..."></textarea>
-      <button class="btn btn-blue" style="margin-top:8px;width:100%;" onclick="publishPost()">Publier</button>
+  <!-- ── FORUM ── -->
+  <div class="bscreen" id="bs-forum">
+    <div class="sec">Forum bénévoles</div>
+    <div style="background:white;border-radius:12px;padding:13px;margin-bottom:10px;">
+      <textarea id="post-txt" placeholder="Partagez un message avec la communauté..." style="width:100%;border:1.5px solid #D3D1C7;border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;outline:none;resize:none;height:70px;"></textarea>
+      <textarea:focus{border-color:#185FA5;}
+      <button class="btn btn-blue" style="width:100%;padding:10px;margin-top:8px;font-size:12px;" onclick="publishPost()">Publier</button>
     </div>
     <div id="posts-list"></div>
   </div>
 
-  <!-- BOUTIQUE -->
-  <div class="bscreen" id="bs-boutique">
-    <div class="b-header"><div><div class="b-header-title">Boutique</div><div class="b-header-sub" id="bout-remise">Remise active</div></div></div>
-    <div id="boutique-content"></div>
-  </div>
-
-  <!-- PROFIL -->
+  <!-- ── PROFIL ── -->
   <div class="bscreen" id="bs-profil">
-    <div class="b-header"><div><div class="b-header-title">Mon profil</div><div class="b-header-sub">Infos & accréditation</div></div></div>
+    <div class="sec">Mon profil</div>
     <div id="profil-alert"></div>
-
-    <div class="card">
-      <div class="form-label" style="margin-bottom:8px;">📸 Ma photo</div>
-      <div class="photo-zone" onclick="document.getElementById('ph-input').click()">
-        <input type="file" id="ph-input" accept="image/*" onchange="previewPhoto(event)">
-        <div id="ph-preview-wrap">
-          <div style="font-size:32px;margin-bottom:6px;">📷</div>
-          <div style="font-size:12px;font-weight:700;color:var(--blue);">Ajouter ma photo</div>
-          <div style="font-size:10px;color:var(--md);margin-top:3px;">JPG/PNG · max 5MB</div>
-        </div>
-      </div>
-      <div id="accred-status"></div>
+    <div style="background:white;border-radius:16px;padding:16px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:12px;">Informations personnelles</div>
+      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;display:block;">Prénom</label><input style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-prenom" type="text"></div>
+      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;display:block;">Nom</label><input style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-nom" type="text"></div>
+      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;display:block;">Téléphone</label><input style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-tel" type="tel"></div>
+      <button class="btn btn-blue" style="font-size:13px;" onclick="saveProfile()">Sauvegarder</button>
     </div>
 
-    <div class="card">
-      <div id="profil-fields-alert"></div>
-      <div class="form-group"><label class="form-label">Prénom</label><input class="form-input" id="f-prenom" type="text"></div>
-      <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="f-nom" type="text"></div>
-      <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="f-tel" type="tel"></div>
-      <div class="form-group"><label class="form-label">Taille t-shirt</label>
-        <select class="form-input" id="f-tshirt"><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select>
-      </div>
-      <button class="btn btn-blue btn-full" onclick="saveProfile()">Sauvegarder</button>
+    <!-- CHANGER PROFIL -->
+    <div style="background:white;border-radius:16px;padding:16px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:4px;">Mon profil bénévole</div>
+      <div style="font-size:11px;color:#5F5E5A;margin-bottom:12px;">Personnalise votre expérience dans l'app</div>
+      <div id="current-profil-display"></div>
+      <button class="btn btn-blue" style="font-size:12px;margin-top:10px;" onclick="openChangeProfil()">Changer de profil</button>
     </div>
   </div>
 
-  <!-- PARTENAIRES -->
-  <div class="bscreen" id="bs-partenaires">
-    <div class="b-header" style="background:linear-gradient(135deg,#042C53,#185FA5,#1a6e3c);">
-      <div><div class="b-header-title">Club & Partenaires</div><div class="b-header-sub">Avantages exclusifs bénévoles</div></div>
-      <div style="font-size:28px;">🤝</div>
+</div><!-- /app -->
+
+<!-- MODAL CHANGEMENT PROFIL -->
+<div class="modal-ov" id="modal-profil" style="display:none;">
+  <div class="modal">
+    <h2>🎭 Changer de profil</h2>
+    <div class="profil-choice" onclick="selectNewProfil('hugo')" id="pc-hugo">
+      <div class="profil-choice-icon">⚡</div>
+      <div><div style="font-size:13px;font-weight:700;color:#0C447C;">Hugo — Compétiteur</div><div style="font-size:10px;color:#5F5E5A;">Gamification, points, classement</div></div>
     </div>
-
-    <!-- WHATSAPP -->
-    <div class="card" style="background:linear-gradient(135deg,#1a3d2e,#25D366);border:none;margin-bottom:10px;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div style="width:44px;height:44px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">💬</div>
-        <div style="flex:1;">
-          <div style="font-size:14px;font-weight:800;color:white;">Groupe WhatsApp Bénévoles</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;">Rejoignez la communauté · Infos matchs en temps réel</div>
-        </div>
-      </div>
-      <a href="https://chat.whatsapp.com/JZBB5746965BqiHlgFBPJS?mode=gi_t" target="_blank" style="display:block;margin-top:12px;background:white;color:#1a3d2e;border-radius:50px;padding:11px;text-align:center;font-weight:800;font-size:13px;text-decoration:none;">
-        Rejoindre le groupe →
-      </a>
+    <div class="profil-choice" onclick="selectNewProfil('virginie')" id="pc-virginie">
+      <div class="profil-choice-icon">🌸</div>
+      <div><div style="font-size:13px;font-weight:700;color:#533BB7;">Virginie — Découverte</div><div style="font-size:10px;color:#5F5E5A;">Accompagnement, référent, FAQ</div></div>
     </div>
-
-    <!-- GROUPAMA -->
-    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:12px 0 8px;">🌾 GROUPAMA — PARTENAIRE OFFICIEL</div>
-
-    <!-- Offres emploi -->
-    <div class="card" style="border:1.5px solid #E6F1FB;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <div style="width:40px;height:40px;background:#E6F1FB;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">💼</div>
-        <div><div style="font-size:13px;font-weight:700;color:var(--bd);">Offres d'emploi & stages</div><div style="font-size:10px;color:var(--md);margin-top:1px;">Opportunités exclusives pour les bénévoles</div></div>
-      </div>
-      <div id="groupama-offres">
-        <!-- Offres injectées dynamiquement -->
-        <div style="background:var(--lt);border-radius:10px;padding:11px;margin-bottom:7px;">
-          <div style="display:flex;justify-content:space-between;align-items:start;">
-            <div><div style="font-size:12px;font-weight:700;color:var(--bd);">Chargé(e) de clientèle</div>
-            <div style="font-size:10px;color:var(--md);margin-top:2px;">Toulouse · CDI</div></div>
-            <span style="font-size:9px;background:var(--gl);color:var(--g);padding:2px 7px;border-radius:50px;font-weight:700;flex-shrink:0;">Ouvert</span>
-          </div>
-          <div style="font-size:10px;color:var(--md);margin-top:6px;line-height:1.6;">Rejoignez l'agence Groupama Toulouse. Profil commercial, sens du service client requis.</div>
-          <a href="mailto:recrutement@groupama.fr?subject=Candidature bénévole Spacers — Chargé clientèle" style="display:inline-block;margin-top:8px;background:var(--blue);color:white;border-radius:50px;padding:6px 14px;font-size:10px;font-weight:700;text-decoration:none;">Postuler →</a>
-        </div>
-        <div style="background:var(--lt);border-radius:10px;padding:11px;margin-bottom:7px;">
-          <div style="display:flex;justify-content:space-between;align-items:start;">
-            <div><div style="font-size:12px;font-weight:700;color:var(--bd);">Alternant(e) Marketing Digital</div>
-            <div style="font-size:10px;color:var(--md);margin-top:2px;">Toulouse · Alternance</div></div>
-            <span style="font-size:9px;background:var(--goldl);color:var(--gold);padding:2px 7px;border-radius:50px;font-weight:700;flex-shrink:0;">Nouveau</span>
-          </div>
-          <div style="font-size:10px;color:var(--md);margin-top:6px;line-height:1.6;">Mission de 12 mois. Gestion réseaux sociaux, création de contenu, analytics.</div>
-          <a href="mailto:recrutement@groupama.fr?subject=Candidature bénévole Spacers — Alternance Marketing" style="display:inline-block;margin-top:8px;background:var(--blue);color:white;border-radius:50px;padding:6px 14px;font-size:10px;font-weight:700;text-decoration:none;">Postuler →</a>
-        </div>
-        <div style="background:var(--lt);border-radius:10px;padding:11px;">
-          <div style="display:flex;justify-content:space-between;align-items:start;">
-            <div><div style="font-size:12px;font-weight:700;color:var(--bd);">Stage Gestion de projet</div>
-            <div style="font-size:10px;color:var(--md);margin-top:2px;">Toulouse · Stage 6 mois</div></div>
-            <span style="font-size:9px;background:var(--gl);color:var(--g);padding:2px 7px;border-radius:50px;font-weight:700;flex-shrink:0;">Ouvert</span>
-          </div>
-          <div style="font-size:10px;color:var(--md);margin-top:6px;line-height:1.6;">Support au chef de projet, suivi des plannings, coordination équipes.</div>
-          <a href="mailto:recrutement@groupama.fr?subject=Candidature bénévole Spacers — Stage GP" style="display:inline-block;margin-top:8px;background:var(--blue);color:white;border-radius:50px;padding:6px 14px;font-size:10px;font-weight:700;text-decoration:none;">Postuler →</a>
-        </div>
-      </div>
+    <div class="profil-choice" onclick="selectNewProfil('joel')" id="pc-joel">
+      <div class="profil-choice-icon">🎯</div>
+      <div><div style="font-size:13px;font-weight:700;color:#3B6D11;">Joël — Expérimenté</div><div style="font-size:10px;color:#5F5E5A;">Interface simple, 3 boutons, référent</div></div>
     </div>
-
-    <!-- Avantages assurances -->
-    <div class="card" style="border:1.5px solid #E6F1FB;margin-top:4px;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <div style="width:40px;height:40px;background:#EAF3DE;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🛡️</div>
-        <div><div style="font-size:13px;font-weight:700;color:var(--bd);">Avantages assurances</div><div style="font-size:10px;color:var(--md);margin-top:1px;">Tarifs préférentiels bénévoles Spacers</div></div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:7px;" id="groupama-avantages">
-        <div style="background:var(--lt);border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center;">
-          <div><div style="font-size:11px;font-weight:700;color:var(--bd);">🚗 Auto & Moto</div><div style="font-size:9px;color:var(--md);margin-top:1px;">Assurance véhicule préférentielle</div></div>
-          <div style="text-align:right;"><div style="font-size:12px;font-weight:800;color:var(--g);">-10%</div><div style="font-size:8px;color:var(--md);">vs tarif public</div></div>
-        </div>
-        <div style="background:var(--lt);border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center;">
-          <div><div style="font-size:11px;font-weight:700;color:var(--bd);">🏠 Habitation</div><div style="font-size:9px;color:var(--md);margin-top:1px;">Multirisque habitation</div></div>
-          <div style="text-align:right;"><div style="font-size:12px;font-weight:800;color:var(--g);">-15%</div><div style="font-size:8px;color:var(--md);">vs tarif public</div></div>
-        </div>
-        <div style="background:var(--lt);border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center;">
-          <div><div style="font-size:11px;font-weight:700;color:var(--bd);">❤️ Santé & Prévoyance</div><div style="font-size:9px;color:var(--md);margin-top:1px;">Mutuelle individuelle ou famille</div></div>
-          <div style="text-align:right;"><div style="font-size:12px;font-weight:800;color:var(--g);">-12%</div><div style="font-size:8px;color:var(--md);">vs tarif public</div></div>
-        </div>
-      </div>
-      <a href="tel:+33561000000" style="display:block;margin-top:10px;background:var(--gl);color:var(--g);border-radius:50px;padding:10px;text-align:center;font-weight:700;font-size:12px;text-decoration:none;">
-        📞 Contacter l'agence Groupama Toulouse
-      </a>
-    </div>
-
-    <!-- INSTAGRAM -->
-    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:14px 0 8px;">📸 @SPACERSTOULOUSE</div>
-    <div id="instagram-feed">
-      <!-- Feed Instagram -->
-      <div style="text-align:center;padding:20px;" id="ig-loading">
-        <div style="font-size:11px;color:rgba(181,212,244,0.4);">Chargement du feed...</div>
-      </div>
-    </div>
-    <a href="https://www.instagram.com/spacerstoulouse/" target="_blank" style="display:block;background:linear-gradient(135deg,#E1306C,#F77737,#FCAF45);color:white;border-radius:50px;padding:11px;text-align:center;font-weight:800;font-size:13px;text-decoration:none;margin-bottom:20px;">
-      Voir tout sur Instagram →
-    </a>
-  </div>
-
-</div>
-<!-- /app-benv -->
-
-<!-- ══════════════════════════════════════════════ -->
-<!-- ── APP PILOTE ── -->
-<!-- ══════════════════════════════════════════════ -->
-<div class="app" id="app-pilote">
-  <div class="ptabs">
-    <button class="ptab on" id="pt-accueil"   onclick="pSwitch('accueil')">📊 Accueil</button>
-    <button class="ptab"    id="pt-accreds"   onclick="pSwitch('accreds')">🪪 Accréds<span class="bdg" id="p-bdg" style="display:none;"></span></button>
-    <button class="ptab"    id="pt-match"     onclick="pSwitch('match')">⚽ Match</button>
-    <button class="ptab"    id="pt-benv"      onclick="pSwitch('benv')">👥 Bénévoles</button>
-    <button class="ptab"    id="pt-notes"     onclick="pSwitch('notes')">📖 Notes</button>
-  </div>
-
-  <!-- ACCUEIL PILOTE -->
-  <div class="pscreen on" id="ps-accueil">
-    <div class="kpi-grid">
-      <div class="kpi"><div class="kpi-v g" id="p-kb">—</div><div class="kpi-l">Actifs</div></div>
-      <div class="kpi"><div class="kpi-v a" id="p-kp">—</div><div class="kpi-l">Photos en attente</div></div>
-      <div class="kpi"><div class="kpi-v" id="p-ka">—</div><div class="kpi-l">Accréditations</div></div>
-      <div class="kpi"><div class="kpi-v r" id="p-kr">—</div><div class="kpi-l">Comptes à risque</div></div>
-    </div>
-    <button class="pbtn pbtn-b pbtn-f" onclick="pSwitch('accreds')">🪪 Valider les photos</button>
-    <button class="pbtn pbtn-gh pbtn-f" onclick="pSwitch('match')">⚽ Gérer le match</button>
-    <div class="ps">Top 5 saison</div>
-    <div id="p-top5"></div>
-  </div>
-
-  <!-- ACCRÉDITATIONS -->
-  <div class="pscreen" id="ps-accreds">
-    <div id="p-alert-acc"></div>
-    <div class="ps">Photos à valider</div>
-    <div id="p-photos-att"></div>
-    <div class="ps">Accréditations générées</div>
-    <div id="p-accreds-gen"></div>
-  </div>
-
-  <!-- MATCH -->
-  <div class="pscreen" id="ps-match">
-    <div id="p-alert-match"></div>
-    <div class="ps">Prochain match</div>
-    <div class="pcard" id="p-match-info"><div style="color:rgba(255,255,255,0.3);font-size:12px;">Aucun match ouvert.</div></div>
-    <div class="ps">Postes</div>
-    <div class="pcard" style="padding:7px;overflow-x:auto;"><table class="aff-table" id="p-aff-table"><tr><th>Poste</th><th>Besoin</th><th>Dispo</th><th>Statut</th></tr></table></div>
-    <div class="ps">Affecter les postes</div>
-    <div id="p-dispos-match"></div>
-    <button class="pbtn pbtn-b pbtn-f" style="margin-top:8px;" onclick="pNotif()">📲 Notifier tous</button>
-    <button class="pbtn pbtn-gh pbtn-f" onclick="pRelance()">⚡ Relancer non-répondants</button>
-  </div>
-
-  <!-- BÉNÉVOLES -->
-  <div class="pscreen" id="ps-benv">
-    <input id="p-search" placeholder="Rechercher..." style="width:100%;background:#2a2a28;border:1px solid #444441;border-radius:50px;padding:8px 13px;font-family:'Sora',sans-serif;font-size:11px;color:white;outline:none;margin-bottom:10px;" oninput="pFilterBenv()">
-    <div id="p-benv-list"></div>
-  </div>
-
-  <!-- NOTES -->
-  <div class="pscreen" id="ps-notes">
-    <div class="ps">Nouvelle note de passation</div>
-    <div class="pcard">
-      <textarea class="note-area" id="note-txt" placeholder="Observations · Points d'attention · Bénévoles à mettre en avant..."></textarea>
-      <button class="pbtn pbtn-b" style="width:100%;margin-top:8px;padding:10px;" onclick="pSaveNote()">💾 Sauvegarder</button>
-    </div>
-    <div class="ps">Historique</div>
-    <div id="p-notes-hist">
-      <div class="pcard"><div style="font-size:10px;color:rgba(255,255,255,0.4);font-style:italic;">"Hugo top au scan. Virginie évite Buvettes. Joël encadre bien les nouveaux. Ouvrir porte Nord 30 min plus tôt."</div><div style="font-size:9px;color:rgba(255,255,255,0.2);margin-top:5px;">Pilote · 13 nov. 2026</div></div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-blue" style="flex:1;font-size:13px;" onclick="confirmChangeProfil()">Confirmer</button>
+      <button class="btn btn-ghost" style="flex:1;font-size:13px;" onclick="closeChangeProfil()">Annuler</button>
     </div>
   </div>
 </div>
-<!-- /app-pilote -->
-
-<!-- MODAL PHOTO PILOTE -->
-<div class="pmodal-ov" id="pm-photo" style="display:none;">
-  <div class="pmodal">
-    <h2>📷 Valider la photo</h2>
-    <div id="pm-photo-content"></div>
-    <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:9px;font-size:9px;color:rgba(255,255,255,0.35);line-height:1.8;margin-bottom:4px;">
-      ✓ Visage visible · ✓ Fond neutre · ✓ Qualité suffisante<br>✗ Refusez si : lunettes de soleil · filtre · flou
-    </div>
-    <div class="pmodal-actions">
-      <button class="pbtn pbtn-g" style="flex:1;" id="pm-btn-v" onclick="pmValider(true)">✓ Valider</button>
-      <button class="pbtn pbtn-r" style="flex:1;" id="pm-btn-r" onclick="pmValider(false)">✗ Refuser</button>
-      <button class="pbtn pbtn-gh" style="flex:1;" onclick="closePmPhoto()">Fermer</button>
-    </div>
-  </div>
-</div>
-
-<!-- ANIMATION POINTS -->
-<div class="sim-anim" id="pts-anim"></div>
 
 <script>
 const SUPABASE_URL = 'https://xphuolvbamdkizydveij.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwaHVvbHZiYW1ka2l6eWR2ZWlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDQ2MDksImV4cCI6MjA5MjYyMDYwOX0.vpxV6ApwAkhlTx-LMCBZwee7LCdQGYP_5sbPMXEFFUQ'
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
-let CU = null   // currentUser
-let CP = null   // currentProfile
-let allBenv = []
-let curPhBenv = null
-let photoFile = null
-let simPts = 0
-let currentMode = localStorage.getItem('spacers_mode') || 'benevole'
+let CU = null, CP = null
+let quizScores = {h:0,v:0,j:0}
+let quizCurrentStep = 1
+let detectedProfil = ''
+let newProfilSelected = ''
 
 // ── INIT ─────────────────────────────────────────────────────
 async function init() {
   const { data: { session } } = await sb.auth.getSession()
   if (!session) { window.location.href = 'index.html'; return }
   CU = session.user
-
   const { data: p } = await sb.from('benevoles').select('*').eq('email', CU.email).single()
   CP = p
-
-  if (!p) { renderNoProfile(); return }
-
-  document.getElementById('topbar').style.display = 'flex'
-  renderTopbar(p)
-
-  // Afficher ou cacher le bouton switch
-  if (p.role === 'admin' || p.role === 'pilote') {
-    document.getElementById('btn-switch').style.display = 'block'
-    document.getElementById('mode-badge').style.display = 'inline-block'
-  }
-
-  // Charger le bon mode
-  if (currentMode === 'pilote' && (p.role === 'admin' || p.role === 'pilote')) {
-    showPilote()
+  if (!p) { window.location.href = 'index.html'; return }
+  if (!p.profil_type || p.profil_type === 'hugo' && p.matchs_joues === 0 && !localStorage.getItem('quiz_done_'+CU.id)) {
+    // Montrer quiz
+    document.getElementById('quiz-wrap').style.display = 'flex'
   } else {
-    showBenevole()
+    showApp(p)
   }
 }
 
-// ── TOPBAR ───────────────────────────────────────────────────
+// ── QUIZ ─────────────────────────────────────────────────────
+function quizSelect(step, choice) {
+  quizScores[choice]++
+  // Highlight
+  document.querySelectorAll(`#qs${step} .quiz-opt`).forEach(o => o.classList.remove('selected'))
+  event.currentTarget.classList.add('selected')
+  setTimeout(() => {
+    if (step < 3) {
+      document.getElementById('qs'+step).classList.remove('on')
+      quizCurrentStep = step + 1
+      document.getElementById('qs'+quizCurrentStep).classList.add('on')
+      document.getElementById('qd'+(step)).classList.remove('on')
+      document.getElementById('qd'+(step+1)).classList.add('on')
+      document.getElementById('quiz-prog').style.width = ((step+1)/3*100) + '%'
+    } else {
+      // Calculer profil
+      const max = Math.max(quizScores.h, quizScores.v, quizScores.j)
+      detectedProfil = quizScores.h===max ? 'hugo' : quizScores.v===max ? 'virginie' : 'joel'
+      showProfilResult()
+    }
+  }, 300)
+}
+
+function showQuizAgain() {
+  quizScores = {h:0,v:0,j:0}
+  quizCurrentStep = 1
+  document.querySelectorAll('.quiz-step').forEach(s=>s.classList.remove('on'))
+  document.getElementById('qs1').classList.add('on')
+  document.getElementById('quiz-prog').style.width = '33%'
+  ;['qd1','qd2','qd3'].forEach((id,i)=>{
+    document.getElementById(id).className = 'quiz-dot' + (i===0?' on':'')
+  })
+}
+
+function showProfilResult() {
+  const configs = {
+    hugo: {
+      icon:'⚡', bg:'linear-gradient(135deg,#E6F1FB,#B5D4F4)',
+      tag:'PROFIL COMPÉTITEUR', tagBg:'#E6F1FB', tagColor:'#0C447C',
+      name:'Hugo', emoji:'🏆',
+      desc:'Vous adorez les défis et la compétition ! Votre dashboard met en avant vos points, votre classement et vos badges. Chaque match est une nouvelle opportunité de progresser.',
+      traits:['⚡ Gamification complète activée','🏆 Classement en temps réel','🎯 Défis et badges personnalisés','📊 Stats détaillées']
+    },
+    virginie: {
+      icon:'🌸', bg:'linear-gradient(135deg,#EDE9FE,#DDD6FE)',
+      tag:'PROFIL DÉCOUVERTE', tagBg:'#EDE9FE', tagColor:'#533BB7',
+      name:'Virginie', emoji:'🤝',
+      desc:'Bienvenue dans l\'aventure ! Un référent va vous être assigné pour vous guider à chaque étape. Votre dashboard est pensé pour vous accompagner en douceur.',
+      traits:['🤝 Référent assigné automatiquement','📖 Guide pas à pas intégré','💡 FAQ pratique accessible','💜 Interface douce et rassurante']
+    },
+    joel: {
+      icon:'🎯', bg:'linear-gradient(135deg,#EAF3DE,#C0DD97)',
+      tag:'PROFIL EXPÉRIMENTÉ', tagBg:'#EAF3DE', tagColor:'#3B6D11',
+      name:'Joël', emoji:'💪',
+      desc:'Vous connaissez le terrain ! Votre interface est épurée avec les 3 boutons essentiels. Vous pouvez aussi partager votre savoir-faire avec les nouveaux bénévoles.',
+      traits:['⚡ Interface 3 boutons streamlinée','📋 Planning & dispos en 1 tap','📝 Section "Transmettre" activée','🏅 Rôle référent reconnu']
+    }
+  }
+  const c = configs[detectedProfil]
+  document.getElementById('qs-result').classList.add('on')
+  document.querySelectorAll('.quiz-step:not(#qs-result)').forEach(s=>s.classList.remove('on'))
+  document.getElementById('quiz-prog').style.width = '100%'
+  document.getElementById('profil-reveal').innerHTML = `
+    <div class="profil-avatar" style="background:${c.bg};font-size:40px;">${c.icon}</div>
+    <span class="profil-tag" style="background:${c.tagBg};color:${c.tagColor};">${c.tag}</span>
+    <div class="profil-name">${c.emoji} Profil ${c.name}</div>
+    <p class="profil-desc">${c.desc}</p>
+    <div class="profil-traits">${c.traits.map(t=>`<div class="trait">✓ <span>${t.substring(2)}</span></div>`).join('')}</div>`
+}
+
+async function saveProfilAndContinue() {
+  localStorage.setItem('quiz_done_'+CU.id, '1')
+  await sb.from('benevoles').update({profil_type: detectedProfil}).eq('email', CU.email)
+  CP.profil_type = detectedProfil
+  document.getElementById('quiz-wrap').style.display = 'none'
+  showApp(CP)
+}
+
+// ── APP ───────────────────────────────────────────────────────
+function showApp(p) {
+  document.getElementById('app').style.display = 'block'
+  renderTopbar(p)
+  renderHomeForProfil(p)
+  loadProfilFields(p)
+}
+
 function renderTopbar(p) {
   const name = ((p.prenom||'')+' '+(p.nom||'')).trim() || CU.email
+  const profilCfg = {
+    hugo:    {label:'COMPÉTITEUR', bg:'#E6F1FB', color:'#0C447C'},
+    virginie:{label:'DÉCOUVERTE',  bg:'#EDE9FE', color:'#533BB7'},
+    joel:    {label:'EXPÉRIMENTÉ', bg:'#EAF3DE', color:'#3B6D11'},
+  }
+  const cfg = profilCfg[p.profil_type||'hugo']
   document.getElementById('t-name').textContent = name
-  document.getElementById('t-level').textContent = (p.niveau==='Or'?'🥇':p.niveau==='Argent'?'🥈':'🥉') + ' ' + (p.niveau||'Bronze') + ' · ' + (p.points_total||0) + ' pts'
+  document.getElementById('profil-badge').textContent = cfg.label
+  document.getElementById('profil-badge').style.background = cfg.bg
+  document.getElementById('profil-badge').style.color = cfg.color
+  document.getElementById('t-pts').textContent = (p.points_total||0) + ' pts'
   const wrap = document.getElementById('av-wrap')
-  if (p.photo_url) {
-    wrap.innerHTML = `<img src="${p.photo_url}" class="av" alt="">`
-  } else {
-    wrap.innerHTML = `<div class="av-ph">${ini(p)}</div>`
-  }
+  if (p.photo_url) wrap.innerHTML = `<img src="${p.photo_url}" class="av" alt="">`
+  else wrap.innerHTML = `<div class="av-ph">${ini(p)}</div>`
+  // Nav colors
+  document.querySelectorAll('.bn').forEach(b=>{
+    b.classList.remove('hugo','virginie','joel')
+    b.classList.add(p.profil_type||'hugo')
+  })
 }
 
-// ── SWITCH MODE ──────────────────────────────────────────────
-function toggleMode() {
-  if (currentMode === 'benevole') {
-    currentMode = 'pilote'
-    localStorage.setItem('spacers_mode', 'pilote')
-    showPilote()
-  } else {
-    currentMode = 'benevole'
-    localStorage.setItem('spacers_mode', 'benevole')
-    showBenevole()
-  }
-}
-
-function showBenevole() {
-  document.getElementById('app-benv').classList.add('on')
-  document.getElementById('app-pilote').classList.remove('on')
-  const btn = document.getElementById('btn-switch')
-  btn.textContent = '🎯 Pilote'
-  btn.classList.remove('pilote-mode')
-  loadBenevoleData()
-}
-
-function showPilote() {
-  document.getElementById('app-pilote').classList.add('on')
-  document.getElementById('app-benv').classList.remove('on')
-  const btn = document.getElementById('btn-switch')
-  btn.textContent = '👤 Bénévole'
-  btn.classList.add('pilote-mode')
-  loadPiloteData()
-}
-
-function renderNoProfile() {
-  document.getElementById('topbar').style.display = 'flex'
-  document.getElementById('t-name').textContent = CU.email
-  document.getElementById('t-level').textContent = 'Profil à créer'
-  document.getElementById('av-wrap').innerHTML = '<div class="av-ph">?</div>'
-  showBenevole()
-}
-
-// ── BÉNÉVOLE DATA ────────────────────────────────────────────
-async function loadBenevoleData() {
-  if (!CP) return
-  const p = CP
+// ── HOME ADAPTATIF ────────────────────────────────────────────
+function renderHomeForProfil(p) {
+  const home = document.getElementById('bs-home')
+  const profil = p.profil_type || 'hugo'
   const pts = p.points_total || 0
   const niveau = p.niveau || 'Bronze'
   const pct = niveau==='Or'?100:niveau==='Argent'?Math.min(((pts-600)/400)*100,100):Math.min((pts/600)*100,100)
-  const next = niveau==='Or'?'Niveau max !':niveau==='Argent'?(1000-pts)+' pts avant Or':(600-pts)+' pts avant Argent'
-  const remise = niveau==='Or'?30:niveau==='Argent'?20:10
-  const lvlIcon = niveau==='Or'?'🥇':niveau==='Argent'?'🥈':'🥉'
 
-  // Home
-  document.getElementById('welcome-msg').textContent = 'Bonjour ' + (p.prenom||'') + ' !'
-  document.getElementById('home-pts').textContent = pts
-  document.getElementById('home-lvl').textContent = lvlIcon + ' ' + niveau
-  document.getElementById('home-matchs').textContent = (p.matchs_joues||0) + ' matchs'
-  document.getElementById('home-prog').style.width = pct + '%'
-  document.getElementById('home-prog').className = 'pts-prog-fill ' + (niveau==='Or'?'or-fill':niveau==='Argent'?'argent-fill':'bronze-fill')
-  document.getElementById('home-next').textContent = next
-  document.getElementById('home-remise').textContent = '-' + remise + '% ' + niveau
-
-  // Points screen
-  document.getElementById('pts-num').textContent = pts
-  document.getElementById('pts-niveau').textContent = lvlIcon + ' ' + niveau
-  document.getElementById('pts-fill').style.width = pct + '%'
-  document.getElementById('pts-fill').className = 'pts-prog-fill ' + (niveau==='Or'?'or-fill':niveau==='Argent'?'argent-fill':'bronze-fill')
-  document.getElementById('pts-matchs').textContent = (p.matchs_joues||0) + ' matchs'
-  document.getElementById('pts-next').textContent = next
-
-  // Simulateur init
-  simPts = pts
-  updateSim()
-
-  // Badges
-  renderBadges(p)
-
-  // Classement
-  await loadClassement()
-
-  // Profil
-  loadProfilFields(p)
-
-  // Boutique
-  loadBoutique(niveau)
+  if (profil === 'hugo') renderHugoHome(home, p, pts, niveau, pct)
+  else if (profil === 'virginie') renderVirginieHome(home, p)
+  else renderJoelHome(home, p, pts)
 }
 
-function renderBadges(p) {
-  const badges = [
-    { icon:'🏐', name:'1er Match',  earned: (p.points_total||0)>=50 },
-    { icon:'🏅', name:'5 Matchs',   earned: (p.matchs_joues||0)>=5 },
-    { icon:'🏆', name:'10 Matchs',  earned: (p.matchs_joues||0)>=10 },
-    { icon:'🌟', name:'Ponctuel',   earned: (p.matchs_joues||0)>=3 },
-    { icon:'🥈', name:'Argent',     earned: p.niveau==='Argent'||p.niveau==='Or' },
-    { icon:'🥇', name:'Or',         earned: p.niveau==='Or' },
-    { icon:'🎂', name:'Anniversaire',earned:false },
-    { icon:'👥', name:'Parrain',    earned:false },
-    { icon:'🎯', name:'Référent',   earned: p.role==='referent'||p.role==='pilote'||p.role==='admin' },
-    { icon:'💎', name:'Fidèle',     earned:(p.matchs_joues||0)>=20 },
-  ]
-  document.getElementById('badges-container').innerHTML = `
-    <div class="badge-grid">${badges.map(b=>`
-      <div class="badge-box">
-        <div class="badge-ico ${b.earned?'earned':'locked'}">${b.icon}</div>
-        <div class="badge-name ${b.earned?'earned':''}">${b.name}</div>
-      </div>`).join('')}
+function renderHugoHome(el, p, pts, niveau, pct) {
+  el.innerHTML = `
+    <div class="hugo-hero">
+      <div style="font-size:9px;color:rgba(245,200,66,0.5);letter-spacing:2px;margin-bottom:3px;">VOS POINTS SAISON</div>
+      <div class="hugo-pts">${pts}</div>
+      <div class="hugo-level">${niveau==='Or'?'🥇':niveau==='Argent'?'🥈':'🥉'} Niveau ${niveau}</div>
+      <div class="hugo-prog"><div class="hugo-fill" style="width:${pct}%;"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(181,212,244,0.4);">
+        <span>${p.matchs_joues||0} matchs</span>
+        <span>${niveau==='Or'?'Max !':niveau==='Argent'?(1000-pts)+' pts avant Or':(600-pts)+' pts avant Argent'}</span>
+      </div>
+    </div>
+    <div class="defi-card">
+      <div class="defi-title">🎯 Défis en cours</div>
+      <div class="defi-item">
+        <div style="font-size:11px;color:white;flex:1;">5 matchs consécutifs</div>
+        <div class="defi-prog"><div class="defi-prog-fill" style="width:${Math.min(((p.matchs_joues||0)/5)*100,100)}%;"></div></div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-left:8px;">${p.matchs_joues||0}/5</div>
+      </div>
+      <div class="defi-item">
+        <div style="font-size:11px;color:white;flex:1;">Atteindre 600 pts</div>
+        <div class="defi-prog"><div class="defi-prog-fill" style="width:${Math.min((pts/600)*100,100)}%;"></div></div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-left:8px;">${pts}/600</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="background:white;border-radius:14px;padding:13px;cursor:pointer;" onclick="bSwitch('planning')">
+        <div style="font-size:22px;margin-bottom:5px;">📅</div>
+        <div style="font-size:12px;font-weight:700;color:#0C447C;">Planning</div>
+        <div style="font-size:10px;color:#5F5E5A;">Matchs ouverts</div>
+      </div>
+      <div style="background:white;border-radius:14px;padding:13px;cursor:pointer;" onclick="bSwitch('points')">
+        <div style="font-size:22px;margin-bottom:5px;">🏆</div>
+        <div style="font-size:12px;font-weight:700;color:#0C447C;">Classement</div>
+        <div style="font-size:10px;color:#185FA5;font-weight:600;">Voir mon rang</div>
+      </div>
     </div>`
 }
 
-async function loadClassement() {
-  const { data: benv } = await sb.from('benevoles').select('id,prenom,nom,points_total,matchs_joues,niveau,photo_url').eq('statut_compte','actif').order('points_total',{ascending:false}).limit(10)
-  if (!benv) return
-  const med = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟']
-  document.getElementById('classement-list').innerHTML = benv.map((b,i)=>`
-    <div class="rank-item ${b.id===CP?.id?'me':''}">
-      <div class="rank-medal">${med[i]||i+1}</div>
-      ${b.photo_url?`<img src="${b.photo_url}" class="av" alt="">`:`<div class="av-ph">${ini(b)}</div>`}
-      <div style="flex:1;">
-        <div style="font-size:12px;font-weight:700;color:var(--bd);">${b.prenom||''} ${b.nom||''} ${b.id===CP?.id?'<span style="font-size:9px;color:var(--blue);">(vous)</span>':''}</div>
-        <div style="font-size:10px;color:var(--md);">${b.matchs_joues||0} matchs · ${b.niveau||'Bronze'}</div>
+function renderVirginieHome(el, p) {
+  el.innerHTML = `
+    <div class="bienvenue-card">
+      <div style="font-size:20px;margin-bottom:6px;">👋</div>
+      <div style="font-size:16px;font-weight:800;color:#533BB7;">Bonjour ${p.prenom||''} !</div>
+      <div style="font-size:12px;color:#6D5DAA;margin-top:4px;line-height:1.6;">Vous faites partie des Spacers — voici comment tout se passe ici.</div>
+    </div>
+
+    <div class="referent-card">
+      <div class="ref-av">👩</div>
+      <div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:3px;">VOTRE RÉFÉRENTE</div>
+        <div style="font-size:15px;font-weight:800;color:white;">Marie D.</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">3 saisons · Spécialité : Scan Entrée</div>
+        <a href="https://chat.whatsapp.com/JZBB5746965BqiHlgFBPJS" target="_blank" style="display:inline-block;margin-top:8px;background:rgba(255,255,255,0.15);color:white;border-radius:50px;padding:5px 12px;font-size:10px;font-weight:700;text-decoration:none;">💬 Contacter sur WhatsApp →</a>
       </div>
-      <div class="rank-pts">${b.points_total||0}</div>
-    </div>`).join('')
+    </div>
+
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:10px 0 7px;">VOS PREMIÈRES ÉTAPES</div>
+    <div style="background:white;border-radius:14px;padding:13px;margin-bottom:10px;">
+      ${[
+        {done:true,  txt:'Inscription validée ✓'},
+        {done:true,  txt:'Compte créé et email reçu ✓'},
+        {done:false, txt:'Ajouter votre photo de profil'},
+        {done:false, txt:'Répondre au premier match'},
+        {done:false, txt:'Découvrir votre fiche de poste'},
+      ].map(e=>`
+        <div class="etape-item">
+          <div class="etape-num ${e.done?'etape-done':''}">${e.done?'✓':'→'}</div>
+          <div style="font-size:12px;color:${e.done?'#5F5E5A':'#1a1a18'};font-weight:${e.done?'400':'600'};${e.done?'text-decoration:line-through;':''}text-decoration-color:#C0DD97;">${e.txt}</div>
+        </div>`).join('')}
+    </div>
+
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:10px 0 7px;">❓ FAQ RAPIDE</div>
+    ${[
+      {q:'Comment m\'inscrire à un match ?', a:'Dans l\'onglet Planning → cliquez "Je suis disponible" sur le match souhaité. Le pilote confirmera votre affectation.'},
+      {q:'Que dois-je apporter le jour J ?', a:'Rien de spécial ! Arrivez 30 min avant le match. Clément vous remettra votre accréditation à l\'entrée.'},
+      {q:'Je suis disponible mais finalement non ?', a:'Revenez dans Planning → cliquez "Indisponible". Prévenez le plus tôt possible, idéalement avant J-3.'},
+      {q:'Comment gagner des points ?', a:'50 pts par match + 20 pts ponctualité. Les points permettent de débloquer des remises boutique et des avantages exclusifs.'},
+    ].map(f=>`
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">${f.q} <span>+</span></div>
+        <div class="faq-a">${f.a}</div>
+      </div>`).join('')}`
 }
 
-function loadBoutique(niveau) {
-  const remise = niveau==='Or'?30:niveau==='Argent'?20:10
-  document.getElementById('bout-remise').textContent = 'Remise bénévole -' + remise + '% · ' + niveau
-  const prods = [
-    {n:'Maillot domicile 2026-27',p:49,i:'👕'},
-    {n:"Veste d'échauffement",p:65,i:'🧥'},
-    {n:'Casquette Spacers',p:22,i:'🧢'},
-    {n:'Ballon officiel signé',p:55,i:'🏐'},
-    {n:'Sac à dos club',p:38,i:'🎒'},
-    {n:'Gourde Spacers',p:18,i:'🫗'},
-  ]
-  document.getElementById('boutique-content').innerHTML = prods.map(prod=>{
-    const pr = Math.round(prod.p*(1-remise/100))
-    return`<div class="prod-item">
-      <div class="prod-icon">${prod.i}</div>
-      <div style="flex:1;">
-        <div style="font-size:12px;font-weight:700;color:var(--bd);">${prod.n}</div>
-        <div style="display:flex;align-items:center;gap:7px;margin-top:3px;">
-          <span style="font-size:10px;color:var(--md);text-decoration:line-through;">${prod.p}€</span>
-          <span style="font-size:14px;font-weight:800;color:var(--blue);">${pr}€</span>
-          <span class="prod-remise">-${remise}%</span>
-        </div>
-      </div>
-    </div>`}).join('')+'<div style="text-align:center;font-size:10px;color:rgba(181,212,244,0.4);padding:8px 0;">Livraison gratuite au Palais des Sports</div>'
+function renderJoelHome(el, p, pts) {
+  el.innerHTML = `
+    <div class="joel-hero">
+      <div style="font-size:10px;color:rgba(192,221,151,0.6);letter-spacing:2px;margin-bottom:3px;">${p.role==='referent'||p.role==='pilote'||p.role==='admin'?'🏅 RÉFÉRENT OFFICIEL':'BÉNÉVOLE EXPÉRIMENTÉ'}</div>
+      <div style="font-size:18px;font-weight:800;color:white;margin-bottom:4px;">${p.prenom||''} ${p.nom||''}</div>
+      <div style="font-size:12px;color:rgba(192,221,151,0.7);">${p.matchs_joues||0} matchs · ${pts} pts · ${p.niveau||'Bronze'}</div>
+    </div>
+
+    <div class="joel-btn" onclick="bSwitch('planning')">
+      <div class="joel-btn-icon" style="background:#E6F1FB;">📅</div>
+      <div><div class="joel-btn-title">Planning & Disponibilités</div><div class="joel-btn-sub">Consulter et répondre aux matchs</div></div>
+      <div style="font-size:18px;color:#D3D1C7;">›</div>
+    </div>
+    <div class="joel-btn" onclick="bSwitch('points')">
+      <div class="joel-btn-icon" style="background:#EAF3DE;">🏆</div>
+      <div><div class="joel-btn-title">Points & Badges</div><div class="joel-btn-sub">${pts} pts cette saison</div></div>
+      <div style="font-size:18px;color:#D3D1C7;">›</div>
+    </div>
+    <div class="joel-btn" onclick="bSwitch('profil')">
+      <div class="joel-btn-icon" style="background:#F1EFE8;">👤</div>
+      <div><div class="joel-btn-title">Mon profil</div><div class="joel-btn-sub">Infos et accréditation</div></div>
+      <div style="font-size:18px;color:#D3D1C7;">›</div>
+    </div>
+
+    <div class="transmettre-card">
+      <div style="font-size:13px;font-weight:700;color:white;margin-bottom:6px;">📝 Transmettre mon savoir-faire</div>
+      <div style="font-size:11px;color:rgba(192,221,151,0.7);margin-bottom:10px;line-height:1.6;">Partagez vos conseils avec les nouveaux bénévoles. Ces notes sont transmises aux pilotes.</div>
+      <textarea class="note-area" id="joel-note" placeholder="Astuce, retour d'expérience, conseil pratique..."></textarea>
+      <button class="btn btn-blue" style="font-size:12px;margin-top:8px;" onclick="saveJoelNote()">Partager ce conseil</button>
+    </div>`
 }
 
-// ── SIMULATEUR ───────────────────────────────────────────────
-function simAdd(v, icon, label) {
-  simPts += v
-  updateSim()
-  showAnim('+' + v)
-}
-
-function simReset() {
-  simPts = CP?.points_total || 0
-  updateSim()
-}
-
-function updateSim() {
-  const pts = simPts
-  document.getElementById('sim-pts').textContent = pts
-  const niveau = pts>=1000?'Or':pts>=600?'Argent':'Bronze'
-  const pct = niveau==='Or'?100:niveau==='Argent'?Math.min(((pts-600)/400)*100,100):Math.min((pts/600)*100,100)
-  const icon = niveau==='Or'?'🥇':niveau==='Argent'?'🥈':'🥉'
-  document.getElementById('sim-lvl').textContent = icon + ' ' + niveau
-  const fill = document.getElementById('sim-fill')
-  fill.style.width = pct + '%'
-  fill.className = 'pts-prog-fill ' + (niveau==='Or'?'or-fill':niveau==='Argent'?'argent-fill':'bronze-fill')
-}
-
-function showAnim(text) {
-  const el = document.getElementById('pts-anim')
-  el.textContent = text
-  el.style.opacity = '1'
-  el.style.transform = 'translate(-50%, -80%)'
-  setTimeout(() => {
-    el.style.opacity = '0'
-    el.style.transform = 'translate(-50%, -120%)'
-  }, 600)
-  setTimeout(() => {
-    el.style.transform = 'translate(-50%,-50%)'
-  }, 1200)
+// ── TOGGLE FAQ ────────────────────────────────────────────────
+function toggleFaq(el) {
+  const ans = el.querySelector('.faq-a')
+  const icon = el.querySelector('.faq-q span')
+  const isOpen = ans.classList.contains('on')
+  document.querySelectorAll('.faq-a.on').forEach(a=>{a.classList.remove('on');a.closest('.faq-item').querySelector('span').textContent='+'})
+  if (!isOpen) { ans.classList.add('on'); icon.textContent = '−' }
 }
 
 // ── PLANNING ─────────────────────────────────────────────────
 async function loadPlanning() {
   const el = document.getElementById('planning-list')
   const { data: matchs } = await sb.from('matchs').select('*').order('date_match',{ascending:true})
-  if (!matchs||matchs.length===0) { el.innerHTML='<div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;">Aucun match programmé.</div>'; return }
+  if (!matchs||matchs.length===0){el.innerHTML='<div style="text-align:center;color:rgba(181,212,244,0.4);padding:30px;font-size:12px;">Aucun match programmé pour l\'instant.</div>';return}
   const { data: ins } = await sb.from('inscriptions').select('match_id,statut').eq('benevole_id',CU.id)
-  const insMap = {}; if(ins) ins.forEach(i=>insMap[i.match_id]=i.statut)
+  const insMap={}; if(ins) ins.forEach(i=>insMap[i.match_id]=i.statut)
   el.innerHTML = matchs.map(m=>`
     <div class="match-item">
       <div class="match-vs">Spacers vs ${m.adversaire}</div>
@@ -937,330 +658,163 @@ async function loadPlanning() {
       ${m.statut_inscriptions==='ouvert'
         ? insMap[m.id]
           ? `<span class="s-dispo">${insMap[m.id]==='disponible'?'✓ Disponible':'✗ Indisponible'}</span>`
-          : `<span class="s-open">✅ Inscriptions ouvertes</span>
+          : `<span class="s-open">✅ Ouvert</span>
              <div class="match-actions">
-               <button class="btn btn-green" style="font-size:11px;padding:7px 14px;" onclick="setDispo('${m.id}','disponible',this)">👍 Disponible</button>
-               <button class="btn btn-ghost" style="font-size:11px;padding:7px 14px;" onclick="setDispo('${m.id}','indisponible',this)">👎 Indisponible</button>
+               <button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Dispo</button>
+               <button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">👎 Indispo</button>
              </div>`
-        : `<span class="s-closed">Inscriptions fermées</span>`}
+        : `<span class="s-closed">Fermé</span>`}
     </div>`).join('')
 }
 
-async function setDispo(matchId, statut, btn) {
-  btn.textContent = '...'; btn.disabled = true
-  const { error } = await sb.from('inscriptions').upsert({benevole_id:CU.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'})
-  if (!error) { btn.textContent = statut==='disponible'?'✓ Confirmé !':'✓ Enregistré'; btn.style.background = statut==='disponible'?'var(--g)':'var(--md)'; setTimeout(loadPlanning,1000) }
-  else { btn.textContent='Erreur'; btn.disabled=false }
+async function setDispo(matchId,statut,btn) {
+  btn.textContent='...';btn.disabled=true
+  const{error}=await sb.from('inscriptions').upsert({benevole_id:CU.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'})
+  if(!error){btn.textContent=statut==='disponible'?'✓':'✗';btn.style.background=statut==='disponible'?'#3B6D11':'#888';setTimeout(loadPlanning,800)}
+  else{btn.textContent='Err';btn.disabled=false}
+}
+
+// ── POINTS ───────────────────────────────────────────────────
+function loadPoints() {
+  if (!CP) return
+  const p=CP, pts=p.points_total||0, niveau=p.niveau||'Bronze'
+  const pct=niveau==='Or'?100:niveau==='Argent'?Math.min(((pts-600)/400)*100,100):Math.min((pts/600)*100,100)
+  document.getElementById('points-content').innerHTML=`
+    <div style="background:linear-gradient(135deg,#1a1a18,#0C447C);border-radius:16px;padding:18px;margin-bottom:12px;">
+      <div style="font-size:36px;font-weight:800;color:#F5C842;font-family:monospace;">${pts}</div>
+      <div style="font-size:13px;font-weight:700;color:white;margin-top:3px;">${niveau==='Bronze'?'🥉':niveau==='Argent'?'🥈':'🥇'} ${niveau}</div>
+      <div style="height:7px;background:rgba(255,255,255,0.1);border-radius:4px;margin:10px 0 4px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#C9821A,#F5C842);border-radius:4px;"></div>
+      </div>
+      <div style="font-size:9px;color:rgba(181,212,244,0.4);">${niveau==='Or'?'Niveau max':niveau==='Argent'?(1000-pts)+' pts avant Or':(600-pts)+' pts avant Argent'}</div>
+    </div>
+    <div style="background:white;border-radius:12px;padding:13px;">
+      <div style="font-size:12px;font-weight:700;color:#0C447C;margin-bottom:10px;">Comment gagner des points</div>
+      ${[['📅','Présence confirmée','+50'],['⏱️','Ponctualité','+20'],['🏅','Badge 5 matchs','+100'],['🎂','Anniversaire','+30'],['👥','Parrainage','+50']].map(([i,l,v])=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #F1EFE8;font-size:12px;">
+        <div style="display:flex;gap:7px;align-items:center;"><span>${i}</span><span style="color:#5F5E5A;">${l}</span></div>
+        <strong style="color:#185FA5;">${v} pts</strong>
+      </div>`).join('')}
+    </div>`
 }
 
 // ── FORUM ────────────────────────────────────────────────────
 async function loadPosts() {
-  const el = document.getElementById('posts-list')
-  const { data: posts } = await sb.from('posts').select('*, benevoles(prenom,nom,photo_url)').order('created_at',{ascending:false}).limit(20)
-  if (!posts||posts.length===0) { el.innerHTML='<div style="text-align:center;color:var(--md);padding:20px;font-size:12px;">Aucun message — soyez le premier !</div>'; return }
-  el.innerHTML = posts.map(p=>`
-    <div class="post-item">
-      <div class="post-head">
-        ${p.benevoles?.photo_url?`<img src="${p.benevoles.photo_url}" class="post-av" alt="">`:
-         `<div class="post-av-ph">${((p.benevoles?.prenom||'?')[0]+(p.benevoles?.nom||'?')[0]).toUpperCase()}</div>`}
-        <div><div class="post-author">${p.benevoles?(p.benevoles.prenom||'')+' '+(p.benevoles.nom||''):'Bénévole'}</div>
-        <div class="post-time">${formatDateTime(p.created_at)}</div></div>
+  const el=document.getElementById('posts-list')
+  const{data:posts}=await sb.from('posts').select('*, benevoles(prenom,nom,photo_url,profil_type)').order('created_at',{ascending:false}).limit(20)
+  if(!posts||posts.length===0){el.innerHTML='<div style="text-align:center;color:#5F5E5A;padding:20px;font-size:12px;">Soyez le premier à poster !</div>';return}
+  el.innerHTML=posts.map(p=>{
+    const ptBg={hugo:'#E6F1FB',virginie:'#EDE9FE',joel:'#EAF3DE'}[p.benevoles?.profil_type||'hugo']||'#E6F1FB'
+    const ptC={hugo:'#0C447C',virginie:'#533BB7',joel:'#3B6D11'}[p.benevoles?.profil_type||'hugo']||'#0C447C'
+    return`<div style="background:white;border-radius:12px;padding:13px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+        ${p.benevoles?.photo_url
+          ?`<img src="${p.benevoles.photo_url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid #B5D4F4;">`
+          :`<div style="width:28px;height:28px;border-radius:50%;background:${ptBg};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${ptC};">${((p.benevoles?.prenom||'?')[0]+(p.benevoles?.nom||'?')[0]).toUpperCase()}</div>`}
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#0C447C;">${p.benevoles?(p.benevoles.prenom||'')+' '+(p.benevoles.nom||''):'Bénévole'}</div>
+          <div style="font-size:9px;color:#5F5E5A;">${formatDateTime(p.created_at)}</div>
+        </div>
       </div>
-      <div class="post-body">${p.contenu}</div>
-    </div>`).join('')
+      <div style="font-size:12px;color:#5F5E5A;line-height:1.7;">${p.contenu}</div>
+    </div>`
+  }).join('')
 }
 
 async function publishPost() {
-  const txt = document.getElementById('post-content').value.trim()
-  if (!txt) return
-  const { data: profil } = await sb.from('benevoles').select('id').eq('email',CU.email).single()
-  if (!profil) return
+  const txt=document.getElementById('post-txt').value.trim()
+  if(!txt)return
+  const{data:profil}=await sb.from('benevoles').select('id').eq('email',CU.email).single()
+  if(!profil)return
   await sb.from('posts').insert({auteur_id:profil.id,categorie:'forum',contenu:txt})
-  document.getElementById('post-content').value = ''
+  document.getElementById('post-txt').value=''
   loadPosts()
 }
 
-// ── PROFIL ───────────────────────────────────────────────────
+// ── PROFIL FIELDS ────────────────────────────────────────────
 function loadProfilFields(p) {
-  document.getElementById('f-prenom').value = p.prenom||''
-  document.getElementById('f-nom').value = p.nom||''
-  document.getElementById('f-tel').value = p.telephone||''
-  document.getElementById('f-tshirt').value = p.taille_tshirt||'M'
-  if (p.photo_url) {
-    document.getElementById('ph-preview-wrap').innerHTML=`
-      <img src="${p.photo_url}" class="ph-preview" alt="">
-      <div style="font-size:11px;color:var(--g);font-weight:600;margin-top:4px;">✓ Photo enregistrée</div>
-      <div style="font-size:10px;color:var(--md);margin-top:2px;">Cliquez pour changer</div>`
+  document.getElementById('f-prenom').value=p.prenom||''
+  document.getElementById('f-nom').value=p.nom||''
+  document.getElementById('f-tel').value=p.telephone||''
+  const cfgP={
+    hugo:    {icon:'⚡',name:'Compétiteur',desc:'Gamification et classement en avant-plan',bg:'#E6F1FB',color:'#0C447C'},
+    virginie:{icon:'🌸',name:'Découverte', desc:'Accompagnement et référent assigné',bg:'#EDE9FE',color:'#533BB7'},
+    joel:    {icon:'🎯',name:'Expérimenté',desc:'Interface simplifiée 3 boutons',bg:'#EAF3DE',color:'#3B6D11'},
   }
-  renderAccredStatus(p.statut_accreditation||'sans_photo')
-}
-
-function renderAccredStatus(statut) {
-  const cfg = {
-    'sans_photo': {cls:'acc-sans',icon:'📷',t:'Photo manquante',d:"Uploadez votre photo pour l'accréditation."},
-    'en_attente': {cls:'acc-att',icon:'🟡',t:'En attente de validation',d:'Votre photo a été envoyée à Clément pour validation.'},
-    'refusee':    {cls:'acc-ref',icon:'🔴',t:'Photo refusée',d:"Photo non conforme. Uploadez-en une nouvelle (fond neutre, visage visible)."},
-    'validee':    {cls:'acc-val',icon:'🟢',t:'Validée — en cours',d:"Accréditation en cours de génération."},
-    'generee':    {cls:'acc-gen',icon:'✅',t:'Accréditation prête !',d:"Clément vous la remettra le jour de votre premier match."},
-  }
-  const c = cfg[statut]||cfg['sans_photo']
-  document.getElementById('accred-status').innerHTML=`
-    <div class="accred-block ${c.cls}">
-      <div style="font-size:12px;font-weight:700;color:var(--dk);margin-bottom:3px;">${c.icon} ${c.t}</div>
-      <div style="font-size:10px;color:var(--md);line-height:1.6;">${c.d}</div>
+  const c=cfgP[p.profil_type||'hugo']
+  document.getElementById('current-profil-display').innerHTML=`
+    <div style="background:${c.bg};border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;">
+      <div style="font-size:28px;">${c.icon}</div>
+      <div><div style="font-size:13px;font-weight:700;color:${c.color};">${c.name}</div>
+        <div style="font-size:10px;color:#5F5E5A;margin-top:1px;">${c.desc}</div></div>
     </div>`
 }
 
-function previewPhoto(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  if (file.size>5*1024*1024) { alert('Max 5MB'); return }
-  photoFile = file
-  const reader = new FileReader()
-  reader.onload = ev => {
-    document.getElementById('ph-preview-wrap').innerHTML=`
-      <img src="${ev.target.result}" class="ph-preview" alt="">
-      <div style="font-size:11px;color:var(--blue);font-weight:600;margin-top:4px;">Photo sélectionnée</div>
-      <div style="font-size:10px;color:var(--md);">Cliquez Sauvegarder</div>`
-  }
-  reader.readAsDataURL(file)
-}
-
 async function saveProfile() {
-  const btn = document.querySelector('#bs-profil .btn-blue')
-  btn.textContent = 'Sauvegarde...'; btn.disabled = true
-  let photoUrl = CP?.photo_url||null
-  let newStatut = CP?.statut_accreditation||'sans_photo'
-  if (photoFile) {
-    const ext = photoFile.name.split('.').pop()
-    const { error: upErr } = await sb.storage.from('avatars').upload(`${CU.id}/avatar.${ext}`,photoFile,{upsert:true})
-    if (!upErr) {
-      const { data: ud } = sb.storage.from('avatars').getPublicUrl(`${CU.id}/avatar.${ext}`)
-      photoUrl = ud.publicUrl+'?t='+Date.now()
-      newStatut = 'en_attente'
-    }
-  }
-  const updates = {
+  const{error}=await sb.from('benevoles').update({
     prenom:document.getElementById('f-prenom').value.trim(),
     nom:document.getElementById('f-nom').value.trim(),
     telephone:document.getElementById('f-tel').value.trim(),
-    taille_tshirt:document.getElementById('f-tshirt').value,
-    photo_url:photoUrl, statut_accreditation:newStatut
-  }
-  const { error } = await sb.from('benevoles').update(updates).eq('email',CU.email)
-  if (!error) {
-    document.getElementById('profil-fields-alert').innerHTML='<div class="alert alert-s">✓ Profil sauvegardé !</div>'
-    photoFile = null
-    const { data: p } = await sb.from('benevoles').select('*').eq('email',CU.email).single()
-    CP = p
-    renderTopbar(p)
-    renderAccredStatus(newStatut)
-    setTimeout(()=>document.getElementById('profil-fields-alert').innerHTML='',3000)
-  } else {
-    document.getElementById('profil-fields-alert').innerHTML=`<div class="alert alert-e">Erreur : ${error.message}</div>`
-  }
-  btn.textContent='Sauvegarder'; btn.disabled=false
+  }).eq('email',CU.email)
+  document.getElementById('profil-alert').innerHTML=error
+    ?`<div class="alert alert-e">Erreur : ${error.message}</div>`
+    :'<div class="alert alert-s">✓ Profil sauvegardé !</div>'
+  if(!error){const{data:p}=await sb.from('benevoles').select('*').eq('email',CU.email).single();CP=p;renderTopbar(p)}
+  setTimeout(()=>document.getElementById('profil-alert').innerHTML='',3000)
 }
 
-// ── NAVIGATION BÉNÉVOLE ──────────────────────────────────────
+async function saveJoelNote() {
+  const txt=document.getElementById('joel-note')?.value.trim()
+  if(!txt)return
+  const{data:profil}=await sb.from('benevoles').select('id').eq('email',CU.email).single()
+  if(profil) await sb.from('posts').insert({auteur_id:profil.id,categorie:'forum',contenu:'💡 Conseil de '+CP?.prenom+' : '+txt})
+  document.getElementById('joel-note').value=''
+  alert('Conseil partagé avec la communauté ✓')
+}
+
+// ── CHANGER PROFIL ────────────────────────────────────────────
+function openChangeProfil() {
+  document.getElementById('modal-profil').style.display='flex'
+  newProfilSelected = CP?.profil_type||'hugo'
+  ;['hugo','virginie','joel'].forEach(p=>{
+    const el=document.getElementById('pc-'+p)
+    el.classList.toggle('selected', p===newProfilSelected)
+  })
+}
+
+function selectNewProfil(p) {
+  newProfilSelected=p
+  ;['hugo','virginie','joel'].forEach(id=>{
+    document.getElementById('pc-'+id).classList.toggle('selected',id===p)
+  })
+}
+
+async function confirmChangeProfil() {
+  if(!newProfilSelected)return
+  await sb.from('benevoles').update({profil_type:newProfilSelected}).eq('email',CU.email)
+  CP.profil_type=newProfilSelected
+  closeChangeProfil()
+  renderTopbar(CP)
+  renderHomeForProfil(CP)
+  loadProfilFields(CP)
+}
+
+function closeChangeProfil(){document.getElementById('modal-profil').style.display='none'}
+
+// ── NAVIGATION ────────────────────────────────────────────────
 function bSwitch(name) {
   document.querySelectorAll('.bscreen').forEach(s=>s.classList.remove('on'))
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'))
   document.getElementById('bs-'+name).classList.add('on')
-  const btn = document.getElementById('bn-'+name)
-  if (btn) btn.classList.add('on')
-  if (name==='planning') loadPlanning()
-  if (name==='communaute') loadPosts()
-  if (name==='partenaires') loadInstagram()
+  const btn=document.getElementById('bn-'+name)
+  if(btn){btn.classList.add('on');btn.classList.add(CP?.profil_type||'hugo')}
+  if(name==='planning')loadPlanning()
+  if(name==='points')loadPoints()
+  if(name==='forum')loadPosts()
 }
 
-// ── PILOTE DATA ──────────────────────────────────────────────
-async function loadPiloteData() {
-  const { data: benv } = await sb.from('benevoles').select('*').order('nom')
-  if (!benv) return
-  allBenv = benv
+async function handleLogout(){await sb.auth.signOut();window.location.href='index.html'}
 
-  const att = benv.filter(b=>b.statut_accreditation==='en_attente')
-  document.getElementById('p-kb').textContent = benv.filter(b=>b.statut_compte==='actif').length
-  document.getElementById('p-kp').textContent = att.length
-  document.getElementById('p-ka').textContent = benv.filter(b=>b.statut_accreditation==='generee').length
-  document.getElementById('p-kr').textContent = benv.filter(b=>(b.points_total||0)<50&&b.statut_compte==='actif').length
-  if (att.length>0) document.getElementById('p-bdg').style.display='block'
-
-  const top = [...benv].sort((a,b)=>(b.points_total||0)-(a.points_total||0)).slice(0,5)
-  const med = ['🥇','🥈','🥉','4️⃣','5️⃣']
-  document.getElementById('p-top5').innerHTML = top.map((b,i)=>`
-    <div class="pbr">
-      <div style="font-size:14px;min-width:20px;">${med[i]}</div>
-      ${b.photo_url?`<img src="${b.photo_url}" class="pbav">`:`<div class="pbav-ph">${ini(b)}</div>`}
-      <div style="flex:1;"><div style="font-size:11px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);">${b.matchs_joues||0} matchs</div></div>
-      <div style="font-size:13px;font-weight:800;color:#F5C842;font-family:monospace;">${b.points_total||0}</div>
-    </div>`).join('')
-
-  pRenderPhotosAtt(att)
-  pRenderAccredsGen(benv.filter(b=>b.statut_accreditation==='generee'))
-  pRenderBenv(benv)
-  await pLoadMatch()
-}
-
-function pRenderPhotosAtt(list) {
-  document.getElementById('p-photos-att').innerHTML = list.length===0
-    ? '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:9px;padding:10px;font-size:11px;color:#C0DD97;">✓ Aucune photo en attente</div>'
-    : list.map(b=>`
-      <div class="ph-card">
-        ${b.photo_url?`<img src="${b.photo_url}" class="pth">`:`<div class="pth-ph">${ini(b)}</div>`}
-        <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:1px;">${b.email}</div>
-          <span class="sb sb-a">🟡 En attente</span>
-        </div>
-        <button class="pbtn pbtn-b" style="font-size:9px;padding:5px 10px;" onclick="openPmPhoto('${b.id}')">Voir</button>
-      </div>`).join('')
-}
-
-function pRenderAccredsGen(list) {
-  document.getElementById('p-accreds-gen').innerHTML = list.length===0
-    ? '<div style="color:rgba(255,255,255,0.25);font-size:11px;padding:6px 0;">Aucune accréditation générée.</div>'
-    : list.map((b,i)=>`
-      <div class="ph-card">
-        ${b.photo_url?`<img src="${b.photo_url}" class="pth">`:`<div class="pth-ph">${ini(b)}</div>`}
-        <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
-          <div style="font-size:9px;font-family:monospace;color:rgba(181,212,244,0.4);">ACC-2627-${String(i+1).padStart(3,'0')}</div>
-          <span class="sb sb-g">✅ Générée</span>
-        </div>
-        <button class="pbtn pbtn-b" style="font-size:9px;padding:5px 10px;" onclick="pPrintAccred('${b.id}','${b.prenom||''}','${b.nom||''}',${i+1})">⬇ PDF</button>
-      </div>`).join('')
-}
-
-function pRenderBenv(list) {
-  document.getElementById('p-benv-list').innerHTML = list.map(b=>`
-    <div class="pbr">
-      ${b.photo_url?`<img src="${b.photo_url}" class="pbav">`:`<div class="pbav-ph">${ini(b)}</div>`}
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:11px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${b.prenom||''} ${b.nom||''}</div>
-        <div style="display:flex;gap:3px;margin-top:2px;flex-wrap:wrap;">
-          <span class="sb" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">${b.niveau||'Bronze'}</span>
-          <span class="sb" style="background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.3);">${b.points_total||0} pts</span>
-          ${pGetAccBadge(b.statut_accreditation)}
-        </div>
-      </div>
-    </div>`).join('')
-}
-
-function pFilterBenv() {
-  const q = document.getElementById('p-search').value.toLowerCase()
-  pRenderBenv(allBenv.filter(b=>(b.prenom||'').toLowerCase().includes(q)||(b.nom||'').toLowerCase().includes(q)||(b.email||'').toLowerCase().includes(q)))
-}
-
-function pGetAccBadge(s) {
-  const m={'sans_photo':`<span class="sb sb-n">📷 Sans photo</span>`,'en_attente':`<span class="sb sb-a">🟡 À valider</span>`,'refusee':`<span class="sb sb-r">🔴 Refusée</span>`,'validee':`<span class="sb sb-v">🟢 Validée</span>`,'generee':`<span class="sb sb-g">✅ OK</span>`}
-  return m[s]||''
-}
-
-async function pLoadMatch() {
-  const { data: matchs } = await sb.from('matchs').select('*').eq('statut_inscriptions','ouvert').order('date_match').limit(1)
-  if (!matchs||matchs.length===0) return
-  const m = matchs[0]
-  document.getElementById('p-match-info').innerHTML=`
-    <div style="font-size:14px;font-weight:800;color:white;">Spacers vs ${m.adversaire}</div>
-    <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;">📅 ${formatDate(m.date_match)} · ${m.heure||''} · ${m.lieu||'Palais des Sports'}</div>`
-  const postes=[{n:'🎟 Scan',b:4},{n:'🪑 Placement',b:3},{n:'🍺 Buvettes',b:4},{n:'🎭 Animation',b:2},{n:'👕 Boutique',b:2},{n:'🧳 Consigne',b:2},{n:'🔒 Sécu VIP',b:1}]
-  document.getElementById('p-aff-table').innerHTML=`<tr><th>Poste</th><th>Besoin</th><th>Dispo</th><th>Statut</th></tr>`+postes.map(p=>{
-    const ok=Math.floor(Math.random()*(p.b+1))
-    const s=ok>=p.b?`<span class="sb sb-v">OK</span>`:ok===0?`<span class="sb sb-r">URGENT</span>`:`<span class="sb sb-a">${p.b-ok} manq.</span>`
-    return`<tr><td>${p.n}</td><td>${p.b}</td><td style="font-weight:700;color:${ok>=p.b?'#C0DD97':ok===0?'#F09595':'#FAC775'}">${ok}</td><td>${s}</td></tr>`
-  }).join('')
-  document.getElementById('p-dispos-match').innerHTML=allBenv.filter(b=>b.statut_compte==='actif').slice(0,8).map(b=>`
-    <div class="pbr">
-      ${b.photo_url?`<img src="${b.photo_url}" class="pbav">`:`<div class="pbav-ph">${ini(b)}</div>`}
-      <div style="flex:1;"><div style="font-size:11px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
-        <div style="font-size:9px;color:rgba(255,255,255,0.35);">${b.matchs_joues||0} matchs</div></div>
-      <select style="background:#1a1a18;border:1px solid #444;border-radius:6px;padding:4px 7px;font-family:'Sora',sans-serif;font-size:9px;color:white;min-width:100px;" onchange="this.style.borderColor='#3B6D11';pShowAlert('p-alert-match','Poste attribué ✓','s')">
-        <option>-- Poste --</option><option>🎟 Scan</option><option>🪑 Placement</option><option>🍺 Buvettes</option><option>🎭 Animation</option><option>👕 Boutique</option><option>🧳 Consigne</option><option>🔒 Sécu VIP</option>
-      </select>
-    </div>`).join('')
-}
-
-// ── PHOTO VALIDATION MODAL ───────────────────────────────────
-function openPmPhoto(id) {
-  const b = allBenv.find(x=>x.id===id); if (!b) return
-  curPhBenv = b
-  document.getElementById('pm-photo-content').innerHTML=`
-    ${b.photo_url?`<img src="${b.photo_url}" class="pmodal-img" alt="">`:`<div style="width:90px;height:90px;border-radius:50%;background:#444;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:white;margin:0 auto 12px;">${ini(b)}</div>`}
-    <div style="text-align:center;margin-bottom:10px;">
-      <div style="font-size:14px;font-weight:800;color:white;">${b.prenom||''} ${b.nom||''}</div>
-      <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;">${b.email}</div>
-    </div>`
-  document.getElementById('pm-photo').style.display='flex'
-}
-
-async function pmValider(ok) {
-  if (!curPhBenv) return
-  const btnV = document.getElementById('pm-btn-v'), btnR = document.getElementById('pm-btn-r')
-  btnV.disabled=true; btnR.disabled=true; btnV.textContent='...'; btnR.textContent='...'
-  const idx = allBenv.filter(b=>b.statut_accreditation==='generee').length+1
-  await sb.from('benevoles').update({
-    photo_validee:ok,
-    statut_accreditation:ok?'generee':'refusee',
-    accreditation_url:ok?'ACC-2627-'+String(idx).padStart(3,'0'):null
-  }).eq('id',curPhBenv.id)
-  closePmPhoto()
-  await loadPiloteData()
-  pShowAlert('p-alert-acc',ok?`✅ Accréditation générée pour ${curPhBenv.prenom} ${curPhBenv.nom} !`:`Photo de ${curPhBenv.prenom} refusée.`,ok?'s':'e')
-}
-
-function closePmPhoto() {
-  document.getElementById('pm-photo').style.display='none'
-  curPhBenv=null
-  document.getElementById('pm-btn-v').textContent='✓ Valider'; document.getElementById('pm-btn-v').disabled=false
-  document.getElementById('pm-btn-r').textContent='✗ Refuser'; document.getElementById('pm-btn-r').disabled=false
-}
-
-function pPrintAccred(id,prenom,nom,num) {
-  const b=allBenv.find(x=>x.id===id)
-  const numF='ACC-2627-'+String(num).padStart(3,'0')
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-@page{size:85.6mm 54mm;margin:0;}
-body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#E0E0E0;}
-.card{width:85.6mm;height:54mm;background:linear-gradient(135deg,#042C53,#185FA5);border-radius:8px;padding:14px;color:white;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;}
-.top{display:flex;justify-content:space-between;align-items:start;}
-.club{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:rgba(181,212,244,0.7);}
-.photo{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);}
-.ph-ph{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
-.bottom{}.type{font-size:7px;color:rgba(181,212,244,0.6);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
-.name{font-size:15px;font-weight:800;}.season{font-size:8px;color:rgba(181,212,244,0.6);margin-top:2px;}
-.num{font-size:8px;font-family:monospace;color:rgba(181,212,244,0.35);margin-top:5px;}
-</style></head><body><div class="card">
-<div class="top"><div class="club">Spacer's Toulouse Volley</div>${b?.photo_url?`<img src="${b.photo_url}" class="photo">`:`<div class="ph-ph">${(prenom[0]||'')(nom[0]||'')}</div>`}</div>
-<div class="bottom"><div class="type">Bénévole · Accréditation officielle</div><div class="name">${prenom} ${nom}</div><div class="season">Saison 2026–2027 · Palais des Sports</div><div class="num">${numF}</div></div>
-</div><script>window.onload=()=>window.print()<\/script></body></html>`
-  const w=window.open('','_blank'); w.document.write(html); w.document.close()
-}
-
-function pSwitch(n) {
-  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'))
-  document.querySelectorAll('.pscreen').forEach(s=>s.classList.remove('on'))
-  document.getElementById('pt-'+n).classList.add('on')
-  document.getElementById('ps-'+n).classList.add('on')
-}
-
-function pNotif(){pShowAlert('p-alert-match','📲 Notifications envoyées à tous ✓','s')}
-function pRelance(){pShowAlert('p-alert-match','⚡ Relance envoyée aux non-répondants ✓','s')}
-function pSaveNote(){const t=document.getElementById('note-txt').value.trim();if(!t)return;pShowAlert('p-alert-match','📖 Note sauvegardée ✓','s');document.getElementById('note-txt').value=''}
-
-function pShowAlert(id,msg,type){
-  const el=document.getElementById(id); if(!el)return
-  el.innerHTML=`<div class="palert palert-${type}">${msg}</div>`
-  setTimeout(()=>el.innerHTML='',3000)
-}
-
-// ── LOGOUT ───────────────────────────────────────────────────
-async function handleLogout() {
-  await sb.auth.signOut()
-  window.location.href='index.html'
-}
-
-// ── HELPERS ──────────────────────────────────────────────────
 function ini(b){return((b.prenom||'?')[0]+(b.nom||'?')[0]).toUpperCase()}
 function formatDate(d){if(!d)return'';return new Date(d).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long'})}
 function formatDateTime(d){if(!d)return'';return new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
