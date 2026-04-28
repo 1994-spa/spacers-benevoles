@@ -31,8 +31,11 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 .btn-blue{background:#185FA5;color:white;}
 .btn-green{background:#3B6D11;color:white;}
 .btn-red{background:#993556;color:white;}
+.btn-orange{background:#C9821A;color:white;}
 .btn-ghost{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);}
 .btn-full{width:100%;padding:12px;margin-bottom:8px;}
+.btn-sm{font-size:10px;padding:5px 10px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
 .photo-card{background:#2a2a28;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:center;}
 .thumb{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #444441;flex-shrink:0;}
 .thumb-ph{width:52px;height:52px;border-radius:50%;background:#444441;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;flex-shrink:0;}
@@ -52,11 +55,16 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 .aff-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:11px;color:rgba(255,255,255,0.8);vertical-align:middle;}
 .aff-table tr:last-child td{border:none;}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px;}
-.modal{background:#2a2a28;border-radius:20px;padding:20px;width:100%;max-width:400px;}
+.modal{background:#2a2a28;border-radius:20px;padding:20px;width:100%;max-width:440px;}
 .modal h2{font-size:15px;font-weight:800;color:white;margin-bottom:14px;}
 .modal-img{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid #185FA5;display:block;margin:0 auto 14px;}
 .modal-actions{display:flex;gap:8px;margin-top:14px;}
 .note-area{width:100%;background:#1a1a18;border:1px solid #444441;border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;color:white;resize:none;height:80px;outline:none;}
+.note-area:focus{border-color:#185FA5;}
+.input-field{width:100%;background:#1a1a18;border:1px solid #444441;border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;}
+.input-field:focus{border-color:#185FA5;}
+.input-label{display:block;font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:6px;font-weight:600;}
+.input-hint{font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;font-style:italic;}
 .alert{padding:10px 14px;border-radius:10px;font-size:12px;margin-bottom:12px;}
 .alert-s{background:rgba(59,109,17,0.2);color:#C0DD97;border:1px solid rgba(59,109,17,0.3);}
 .alert-e{background:rgba(153,53,86,0.2);color:#F4B8CE;border:1px solid rgba(153,53,86,0.3);}
@@ -124,16 +132,29 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <div id="alert-match"></div>
   <div class="sec">Prochain match ouvert</div>
   <div class="card" id="match-info"><div style="color:rgba(255,255,255,0.4);font-size:12px;">Aucun match ouvert.</div></div>
+  
   <div class="sec">Postes</div>
   <div class="card" style="padding:8px;overflow-x:auto;">
     <table class="aff-table" id="aff-table">
       <tr><th>Poste</th><th>Besoin</th><th>Dispo</th><th>Statut</th></tr>
     </table>
   </div>
+  
   <div class="sec">Bénévoles disponibles — affecter un poste</div>
   <div id="dispos-match"></div>
-  <button class="btn btn-blue btn-full" style="margin-top:8px;" onclick="notifAll()">📲 Notifier tous les bénévoles</button>
-  <button class="btn btn-ghost btn-full" onclick="relancer()">⚡ Relancer les non-répondants</button>
+  
+  <div class="sec">Bénévoles non-répondants</div>
+  <div id="non-rep-match"></div>
+  
+  <button class="btn btn-blue btn-full" style="margin-top:8px;" onclick="openModalNotif()">📲 Notifier les bénévoles affectés</button>
+  <button class="btn btn-orange btn-full" onclick="relancer()">⚡ Relancer tous les non-répondants</button>
+  
+  <div class="sec">Note pilote sur ce match</div>
+  <div class="card">
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:8px;">Visible uniquement par les pilotes / admins. Sauvegardée dans la base.</div>
+    <textarea class="note-area" id="note-match" placeholder="Points d'attention, retours d'expérience, infos logistiques..."></textarea>
+    <button class="btn btn-blue btn-full" style="margin-top:10px;" onclick="saveNote()">💾 Sauvegarder la note</button>
+  </div>
 </div>
 
 <!-- BÉNÉVOLES -->
@@ -144,15 +165,9 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 
 <!-- MÉMOIRE -->
 <div class="screen" id="screen-notes">
-  <div class="sec">Nouvelle note de passation</div>
-  <div class="card">
-    <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:8px;">Points d'attention · Bénévoles remarquables · Logistique</div>
-    <textarea class="note-area" id="note-txt" placeholder="Ex: Hugo excellent au scan. Virginie évite les Buvettes. Ouvrir porte Nord 30 min plus tôt..."></textarea>
-    <button class="btn btn-blue btn-full" style="margin-top:10px;" onclick="saveNote()">💾 Sauvegarder</button>
-  </div>
-  <div class="sec">Historique</div>
+  <div class="sec">Historique des notes pilote</div>
   <div id="notes-hist">
-    <div class="card"><div style="font-size:11px;color:rgba(255,255,255,0.4);font-style:italic;">"Animation sous-staffée. Hugo top. Virginie préfère éviter Buvettes. Joël encadre bien les nouveaux."</div><div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:6px;">Pilote · 13 nov. 2026</div></div>
+    <div class="card"><div style="color:rgba(255,255,255,0.3);font-size:12px;font-style:italic;">Les notes des matchs passés apparaîtront ici.</div></div>
   </div>
 </div>
 
@@ -175,6 +190,29 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   </div>
 </div>
 
+<!-- MODAL NOTIFICATION -->
+<div class="modal-overlay" id="modal-notif" style="display:none;">
+  <div class="modal">
+    <h2>📲 Notifier les bénévoles affectés</h2>
+    <p style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:14px;line-height:1.6;">
+      Email envoyé aux bénévoles ayant un <strong>poste affecté</strong> pour ce match.
+    </p>
+    
+    <label class="input-label">🕐 Heure de RDV</label>
+    <input id="notif-heure" class="input-field" type="text" placeholder="ex: 18h30" value="18h30">
+    <div class="input-hint">Heure d'arrivée des bénévoles avant le match</div>
+    
+    <div style="margin-top:14px;"></div>
+    <label class="input-label">⚠️ Point particulier (optionnel)</label>
+    <textarea id="notif-particulier" class="note-area" placeholder="Code parking, tenue spéciale, info logistique..."></textarea>
+    
+    <div class="modal-actions">
+      <button class="btn btn-blue" style="flex:1;" id="btn-notif-send" onclick="confirmNotifAll()">📤 Envoyer</button>
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeModalNotif()">Annuler</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://xphuolvbamdkizydveij.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwaHVvbHZiYW1ka2l6eWR2ZWlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDQ2MDksImV4cCI6MjA5MjYyMDYwOX0.vpxV6ApwAkhlTx-LMCBZwee7LCdQGYP_5sbPMXEFFUQ'
@@ -182,12 +220,13 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 let allBenv = []
 let curPh = null
+let curMatch = null
+let curPostes = []
 
 async function init() {
   const { data: { session } } = await sb.auth.getSession()
   if (!session) { window.location.href = 'index.html'; return }
 
-  // ── VÉRIFICATION DU RÔLE ─────────────────────────────────────
   const { data: profil } = await sb
     .from('benevoles')
     .select('role, prenom, nom')
@@ -195,17 +234,16 @@ async function init() {
     .single()
 
   if (!profil || (profil.role !== 'admin' && profil.role !== 'pilote')) {
-    // Accès refusé — afficher l'écran de blocage
     document.getElementById('access-denied').classList.add('show')
     return
   }
 
-  // Accès accordé
   document.getElementById('main-content').style.display = 'block'
   document.getElementById('pilote-name').textContent =
     (profil.prenom||'') + ' ' + (profil.nom||'') + ' · ' + (profil.role === 'admin' ? 'Admin' : 'Pilote')
 
   await loadAll()
+  await loadNotesHistory()
 }
 
 async function loadAll() {
@@ -213,7 +251,6 @@ async function loadAll() {
   if (!benv) return
   allBenv = benv
 
-  // KPIs
   document.getElementById('kpi-b').textContent = benv.filter(b=>b.statut_compte==='actif').length
   const att = benv.filter(b=>b.statut_accreditation==='en_attente')
   document.getElementById('kpi-p').textContent = att.length
@@ -221,7 +258,6 @@ async function loadAll() {
   document.getElementById('kpi-r').textContent = benv.filter(b=>(b.points_total||0)<50 && b.statut_compte==='actif').length
   if (att.length>0) document.getElementById('bdg-accreds').style.display='block'
 
-  // Top 5
   const top = [...benv].sort((a,b)=>(b.points_total||0)-(a.points_total||0)).slice(0,5)
   const med = ['🥇','🥈','🥉','4️⃣','5️⃣']
   document.getElementById('top5').innerHTML = top.map((b,i)=>`
@@ -381,11 +417,10 @@ body{margin:0;display:flex;justify-content:center;align-items:center;min-height:
   w.document.close()
 }
 
-let curMatch = null     // le match ouvert courant (pour les affectations)
-let curPostes = []      // les postes (chargés une fois)
-
+// ─────────────────────────────────────────────────
+// LOAD MATCH (étendu : non-répondants + note existante)
+// ─────────────────────────────────────────────────
 async function loadMatch() {
-  // 1. Match ouvert le plus proche
   const { data: matchs } = await sb.from('matchs')
     .select('*')
     .eq('statut_inscriptions','ouvert')
@@ -396,6 +431,9 @@ async function loadMatch() {
     el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:12px;">Aucun match ouvert.</div>'
     document.getElementById('aff-table').innerHTML = ''
     document.getElementById('dispos-match').innerHTML = ''
+    document.getElementById('non-rep-match').innerHTML = ''
+    document.getElementById('note-match').value = ''
+    curMatch = null
     return
   }
   const m = matchs[0]
@@ -404,11 +442,11 @@ async function loadMatch() {
     <div style="font-size:16px;font-weight:800;color:white;">${m.adversaire}</div>
     <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;">📅 ${formatDate(m.date_match)} · ${m.heure||''} · ${m.lieu||'Palais des Sports'}</div>`
 
-  // 2. Postes depuis la DB
+  // Postes
   const { data: postes } = await sb.from('postes').select('*').order('nom')
   curPostes = postes || []
 
-  // 3. Inscriptions "disponible" pour ce match
+  // Inscriptions disponibles
   const { data: insc } = await sb.from('inscriptions')
     .select('id, benevole_id, poste_id, statut, benevoles(prenom, nom, photo_url, matchs_joues)')
     .eq('match_id', m.id)
@@ -416,7 +454,7 @@ async function loadMatch() {
 
   const dispos = insc || []
 
-  // 4. Tableau Postes : compter les bénévoles affectés à chaque poste
+  // Tableau Postes
   document.getElementById('aff-table').innerHTML =
     `<tr><th>Poste</th><th>Besoin</th><th>Affectés</th><th>Statut</th></tr>` +
     curPostes.map(p => {
@@ -431,7 +469,7 @@ async function loadMatch() {
       return `<tr><td>${p.nom}</td><td>${besoin}</td><td style="font-weight:700;color:${couleur}">${ok}</td><td>${s}</td></tr>`
     }).join('')
 
-  // 5. Liste des bénévoles disponibles avec sélecteur de poste
+  // Liste dispos
   if (dispos.length === 0) {
     document.getElementById('dispos-match').innerHTML =
       '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:8px 0;">Aucun bénévole inscrit pour ce match.</div>'
@@ -456,9 +494,33 @@ async function loadMatch() {
         </div>`
     }).join('')
   }
+
+  // Bénévoles non-répondants (actifs sans inscription pour ce match)
+  const { data: allInsc } = await sb.from('inscriptions')
+    .select('benevole_id')
+    .eq('match_id', m.id)
+  const inscritsIds = new Set((allInsc || []).map(i => i.benevole_id))
+  const nonReps = allBenv.filter(b => b.statut_compte === 'actif' && !inscritsIds.has(b.id))
+
+  if (nonReps.length === 0) {
+    document.getElementById('non-rep-match').innerHTML =
+      '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:10px;font-size:12px;color:#C0DD97;">✓ Tous les bénévoles ont répondu</div>'
+  } else {
+    document.getElementById('non-rep-match').innerHTML = nonReps.map(b => `
+      <div class="benv-row">
+        ${b.photo_url?`<img src="${b.photo_url}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);">Pas encore répondu</div>
+        </div>
+        <button class="btn btn-orange btn-sm" onclick="relancerIndiv('${b.id}', this)">⚡ Relancer</button>
+      </div>`).join('')
+  }
+
+  // Note pilote existante
+  document.getElementById('note-match').value = m.notes_pilote || ''
 }
 
-// Met à jour le poste_id d'une inscription
 async function affecterPoste(inscriptionId, posteId, selectEl) {
   selectEl.disabled = true
   const updates = { poste_id: posteId || null }
@@ -470,26 +532,171 @@ async function affecterPoste(inscriptionId, posteId, selectEl) {
   }
   selectEl.className = posteId ? 'poste-sel ok' : 'poste-sel'
   showAlert('alert-match', posteId ? 'Poste attribué ✓' : 'Poste retiré', 's')
-  // Recharger pour mettre à jour le tableau de comptage
   loadMatch()
 }
 
-function notifAll(){showAlert('alert-match','📲 Notifications envoyées à tous les bénévoles ✓','s')}
-function relancer(){showAlert('alert-match','⚡ Relance envoyée aux non-répondants ✓','s')}
-function saveNote(){const t=document.getElementById('note-txt').value.trim();if(!t)return;showAlert('alert-match','📖 Note sauvegardée ✓','s');document.getElementById('note-txt').value=''}
+// ─────────────────────────────────────────────────
+// NOTIFICATION : Modal + envoi via Edge Function
+// ─────────────────────────────────────────────────
+function openModalNotif() {
+  if (!curMatch) {
+    showAlert('alert-match', '❌ Aucun match ouvert', 'e')
+    return
+  }
+  document.getElementById('modal-notif').style.display = 'flex'
+}
+
+function closeModalNotif() {
+  document.getElementById('modal-notif').style.display = 'none'
+  document.getElementById('btn-notif-send').disabled = false
+  document.getElementById('btn-notif-send').textContent = '📤 Envoyer'
+}
+
+async function confirmNotifAll() {
+  if (!curMatch) return
+  const heure = document.getElementById('notif-heure').value.trim()
+  const particulier = document.getElementById('notif-particulier').value.trim()
+  if (!heure) {
+    showAlert('alert-match', '❌ Heure de RDV obligatoire', 'e')
+    return
+  }
+  const btn = document.getElementById('btn-notif-send')
+  btn.disabled = true
+  btn.textContent = 'Envoi en cours...'
+
+  try {
+    const res = await callEdgeFunction({
+      match_id: curMatch.id,
+      mode: 'affectes',
+      heure_rdv: heure,
+      point_particulier: particulier || null
+    })
+    closeModalNotif()
+    if (res.sent === 0) {
+      showAlert('alert-match', '⚠️ Aucun bénévole avec poste affecté', 'e')
+    } else {
+      showAlert('alert-match', `✓ ${res.sent} email${res.sent>1?'s':''} envoyé${res.sent>1?'s':''}`, 's')
+    }
+  } catch (err) {
+    closeModalNotif()
+    showAlert('alert-match', '❌ Erreur : ' + err.message, 'e')
+  }
+}
+
+async function relancer() {
+  if (!curMatch) {
+    showAlert('alert-match', '❌ Aucun match ouvert', 'e')
+    return
+  }
+  if (!confirm('Envoyer une relance à tous les bénévoles qui n\'ont pas répondu ?')) return
+  
+  try {
+    const res = await callEdgeFunction({
+      match_id: curMatch.id,
+      mode: 'relance_globale'
+    })
+    if (res.sent === 0) {
+      showAlert('alert-match', '✓ Tous les bénévoles ont déjà répondu', 's')
+    } else {
+      showAlert('alert-match', `⚡ ${res.sent} relance${res.sent>1?'s':''} envoyée${res.sent>1?'s':''}`, 's')
+    }
+  } catch (err) {
+    showAlert('alert-match', '❌ Erreur : ' + err.message, 'e')
+  }
+}
+
+async function relancerIndiv(benevoleId, btn) {
+  if (!curMatch) return
+  btn.disabled = true
+  btn.textContent = '...'
+  try {
+    const res = await callEdgeFunction({
+      match_id: curMatch.id,
+      mode: 'relance_individuelle',
+      benevole_id: benevoleId
+    })
+    btn.textContent = '✓ Envoyé'
+    btn.className = 'btn btn-green btn-sm'
+    showAlert('alert-match', '⚡ Relance envoyée', 's')
+  } catch (err) {
+    btn.disabled = false
+    btn.textContent = '⚡ Relancer'
+    showAlert('alert-match', '❌ Erreur : ' + err.message, 'e')
+  }
+}
+
+async function callEdgeFunction(body) {
+  const res = await fetch(SUPABASE_URL + '/functions/v1/notify-volunteers', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + SUPABASE_KEY
+    },
+    body: JSON.stringify(body)
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Erreur inconnue')
+  return data
+}
+
+// ─────────────────────────────────────────────────
+// NOTE PILOTE : UPDATE matchs.notes_pilote
+// ─────────────────────────────────────────────────
+async function saveNote() {
+  if (!curMatch) {
+    showAlert('alert-match', '❌ Aucun match ouvert', 'e')
+    return
+  }
+  const txt = document.getElementById('note-match').value.trim()
+  const { error } = await sb.from('matchs')
+    .update({ notes_pilote: txt || null })
+    .eq('id', curMatch.id)
+  if (error) {
+    showAlert('alert-match', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+  curMatch.notes_pilote = txt
+  showAlert('alert-match', '💾 Note sauvegardée', 's')
+}
+
+// ─────────────────────────────────────────────────
+// HISTORIQUE NOTES (matchs archivés avec note_pilote)
+// ─────────────────────────────────────────────────
+async function loadNotesHistory() {
+  const { data: matchs } = await sb.from('matchs')
+    .select('id, adversaire, date_match, notes_pilote, statut_inscriptions')
+    .not('notes_pilote', 'is', null)
+    .order('date_match', { ascending: false })
+    .limit(20)
+  
+  const el = document.getElementById('notes-hist')
+  if (!matchs || matchs.length === 0) {
+    el.innerHTML = '<div class="card"><div style="color:rgba(255,255,255,0.3);font-size:12px;font-style:italic;">Aucune note pilote enregistrée pour le moment.</div></div>'
+    return
+  }
+  el.innerHTML = matchs.map(m => `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-size:12px;font-weight:700;color:white;">⚽ vs ${m.adversaire}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">${formatDate(m.date_match)}</div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.7;white-space:pre-wrap;">${m.notes_pilote}</div>
+    </div>`).join('')
+}
 
 function switchTab(n) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'))
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'))
   document.getElementById('tab-'+n).classList.add('on')
   document.getElementById('screen-'+n).classList.add('on')
+  if (n === 'notes') loadNotesHistory()
 }
 
 function showAlert(id,msg,type){
   const el=document.getElementById(id)
   if(!el)return
   el.innerHTML=`<div class="alert alert-${type}">${msg}</div>`
-  setTimeout(()=>el.innerHTML='',3000)
+  setTimeout(()=>el.innerHTML='',3500)
 }
 
 function ini(b){return((b.prenom||'?')[0]+(b.nom||'?')[0]).toUpperCase()}
