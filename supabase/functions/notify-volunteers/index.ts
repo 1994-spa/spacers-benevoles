@@ -1,239 +1,287 @@
-// supabase/functions/notify-volunteers/index.ts
-// Edge Function : envoi d'emails à la demande depuis le dashboard pilote
-// 3 modes : 'affectes' | 'relance_globale' | 'relance_individuelle'
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const MAILJET_API_KEY = Deno.env.get('MAILJET_API_KEY')!
-const MAILJET_SECRET_KEY = Deno.env.get('MAILJET_SECRET_KEY')!
-const FROM_EMAIL = 'marketing@spacerstoulouse.fr'
-const FROM_NAME = "Spacer's Toulouse Volley"
+const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const MAILJET_KEY  = Deno.env.get('MAILJET_API_KEY')!
+const MAILJET_SECRET = Deno.env.get('MAILJET_SECRET_KEY')!
 
-const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
-
-function fmtDate(d: string): string {
-  return new Date(d).toLocaleDateString('fr-FR', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-  })
-}
-
-async function sendEmail(to: { Email: string; Name: string }[], subject: string, html: string) {
-  const auth = btoa(`${MAILJET_API_KEY}:${MAILJET_SECRET_KEY}`)
-  const messages = to.map(t => ({
-    From: { Email: FROM_EMAIL, Name: FROM_NAME },
-    To: [t],
-    Subject: subject,
-    HTMLPart: html,
-  }))
-  const res = await fetch('https://api.mailjet.com/v3.1/send', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${auth}` },
-    body: JSON.stringify({ Messages: messages }),
-  })
-  const body = await res.text()
-  console.log('Mailjet status:', res.status, 'body:', body.substring(0, 500))
-  if (!res.ok) throw new Error(`Mailjet error ${res.status}: ${body}`)
-  return res.status
-}
-
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
-  }
-
+Deno.serve(async () => {
   try {
-    const body = await req.json()
-    const { match_id, mode, benevole_id, heure_rdv, point_particulier } = body
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
 
-    if (!match_id || !mode) {
-      return new Response(JSON.stringify({ error: 'match_id et mode requis' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
+    // Récupérer tous les matchs ouverts
+    const { data: matchs } = await sb
+      .from('matchs')
+      .select('*')
+      .eq('statut_inscriptions', 'ouvert')
+
+    if (!matchs || matchs.length === 0) {
+      return new Response('Aucun match ouvert', { status: 200 })
     }
 
-    // Charger le match
-    const { data: match, error: mErr } = await sb
-      .from('matchs').select('*').eq('id', match_id).single()
-    if (mErr || !match) {
-      return new Response(JSON.stringify({ error: 'Match introuvable' }), {
-        status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
+    const results: string[] = []
 
-    let recipients: { email: string; prenom: string; nom: string; poste_nom?: string }[] = []
-    let subject = ''
-    let buildHtml: (r: typeof recipients[0]) => string
+    for (const match of matchs) {
+      const matchDate = new Date(match.date_match)
+      matchDate.setHours(0, 0, 0, 0)
+      const joursAvant = Math.round((matchDate.getTime() - today.getTime()) / 86400000)
 
-    // ─────────────────────────────────────────────────
-    // MODE 1 : AFFECTÉS (notifAll)
-    // ─────────────────────────────────────────────────
-    if (mode === 'affectes') {
-      const { data: insc } = await sb.from('inscriptions')
-        .select('benevole_id, poste_id, benevoles(email, prenom, nom), postes(nom)')
-        .eq('match_id', match_id)
-        .eq('statut', 'disponible')
-        .not('poste_id', 'is', null)
+      console.log(`Match vs ${match.adversaire} : J${joursAvant > 0 ? '-' : '+'}${Math.abs(joursAvant)}`)
 
-      recipients = (insc || []).map((i: any) => ({
-        email: i.benevoles?.email,
-        prenom: i.benevoles?.prenom || '',
-        nom: i.benevoles?.nom || '',
-        poste_nom: i.postes?.nom || 'Poste à confirmer',
-      })).filter(r => r.email)
+      // ── J-15 : Ouverture inscriptions → TOUS les bénévoles actifs
+      if (joursAvant === 15) {
+        const { data: benevoles } = await sb
+          .from('benevoles')
+          .select('email, prenom, nom')
+          .eq('statut_compte', 'actif')
 
-      subject = `📢 Infos pratiques — Match vs ${match.adversaire} ${fmtDate(match.date_match)}`
-
-      buildHtml = (r) => `
-        <div style="font-family:Sora,Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f7f7f5;">
-          <h2 style="color:#0C447C;">Bonjour ${r.prenom},</h2>
-          <p style="color:#1a1a18;font-size:14px;line-height:1.7;">
-            Petit rappel pour le match à venir, voici les infos pratiques :
-          </p>
-          <div style="background:white;border-radius:12px;padding:20px;margin:18px 0;">
-            <p style="margin:6px 0;"><strong>📅 Match :</strong> Spacers vs ${match.adversaire}</p>
-            <p style="margin:6px 0;"><strong>📍 Lieu :</strong> ${match.lieu || 'Palais des Sports'}</p>
-            <p style="margin:6px 0;"><strong>🕐 Heure de RDV :</strong> ${heure_rdv || (match.heure || '')}</p>
-            <p style="margin:6px 0;"><strong>🎯 Ton poste :</strong> ${r.poste_nom}</p>
-          </div>
-          ${point_particulier ? `
-          <div style="background:#FAC775;border-radius:12px;padding:16px;margin:18px 0;">
-            <p style="margin:0;color:#1a1a18;font-size:13px;line-height:1.7;">
-              <strong>⚠️ Point particulier :</strong><br>${point_particulier}
-            </p>
-          </div>` : ''}
-          <p style="color:#1a1a18;font-size:14px;">À très vite !</p>
-          <p style="color:#5F5E5A;font-size:12px;margin-top:24px;">L'équipe Spacers Toulouse Volley</p>
-        </div>`
-    }
-
-    // ─────────────────────────────────────────────────
-    // MODE 2 : RELANCE GLOBALE (relancer())
-    // ─────────────────────────────────────────────────
-    else if (mode === 'relance_globale') {
-      // Bénévoles actifs qui n'ont AUCUNE inscription pour ce match
-      const { data: actifs } = await sb.from('benevoles')
-        .select('id, email, prenom, nom').eq('statut_compte', 'actif')
-
-      const { data: inscritsList } = await sb.from('inscriptions')
-        .select('benevole_id').eq('match_id', match_id)
-      const inscritsSet = new Set((inscritsList || []).map((i: any) => i.benevole_id))
-
-      recipients = (actifs || []).filter((b: any) => !inscritsSet.has(b.id) && b.email)
-        .map((b: any) => ({ email: b.email, prenom: b.prenom || '', nom: b.nom || '' }))
-
-      subject = `⚡ Tu n'as pas encore répondu — Match vs ${match.adversaire}`
-
-      buildHtml = (r) => `
-        <div style="font-family:Sora,Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f7f7f5;">
-          <h2 style="color:#993556;">Hey ${r.prenom} !</h2>
-          <p style="color:#1a1a18;font-size:14px;line-height:1.7;">
-            On manque encore de bénévoles pour le prochain match :
-          </p>
-          <div style="background:white;border-radius:12px;padding:20px;margin:18px 0;">
-            <p style="margin:6px 0;"><strong>📅 ${fmtDate(match.date_match)}</strong></p>
-            <p style="margin:6px 0;"><strong>⚽ Spacers vs ${match.adversaire}</strong></p>
-            <p style="margin:6px 0;"><strong>📍 ${match.lieu || 'Palais des Sports'}</strong></p>
-          </div>
-          <p style="color:#1a1a18;font-size:14px;line-height:1.7;">
-            Connecte-toi pour indiquer ta disponibilité, ça nous aiderait beaucoup ! 🙏
-          </p>
-          <a href="https://spacers-benevoles.spacersytb.workers.dev/dashboard" 
-             style="display:inline-block;background:#185FA5;color:white;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;margin-top:12px;">
-            👉 Répondre au match
-          </a>
-          <p style="color:#5F5E5A;font-size:12px;margin-top:30px;">L'équipe Spacers Toulouse Volley</p>
-        </div>`
-    }
-
-    // ─────────────────────────────────────────────────
-    // MODE 3 : RELANCE INDIVIDUELLE
-    // ─────────────────────────────────────────────────
-    else if (mode === 'relance_individuelle') {
-      if (!benevole_id) {
-        return new Response(JSON.stringify({ error: 'benevole_id requis pour relance_individuelle' }), {
-          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
+        if (benevoles?.length) {
+          await sendBulkEmail(benevoles, {
+            subject: `🏐 Inscriptions ouvertes — Spacers vs ${match.adversaire}`,
+            type: 'ouverture',
+            match
+          })
+          results.push(`J-15 → ${benevoles.length} emails envoyés`)
+        }
       }
-      const { data: b } = await sb.from('benevoles')
-        .select('email, prenom, nom').eq('id', benevole_id).single()
-      if (!b || !b.email) {
-        return new Response(JSON.stringify({ error: 'Bénévole introuvable ou sans email' }), {
-          status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        })
+
+      // ── J-10 : Relance → bénévoles qui N'ONT PAS répondu
+      if (joursAvant === 10) {
+        const nonRepondants = await getNonRepondants(match.id)
+        if (nonRepondants.length) {
+          await sendBulkEmail(nonRepondants, {
+            subject: `⏰ On a besoin de toi — Spacers vs ${match.adversaire} — J-10`,
+            type: 'relance_j10',
+            match
+          })
+          results.push(`J-10 → ${nonRepondants.length} relances envoyées`)
+        }
       }
-      recipients = [{ email: b.email, prenom: b.prenom || '', nom: b.nom || '' }]
 
-      subject = `⚡ Petit rappel personnel — Match vs ${match.adversaire}`
+      // ── J-5 : Urgence → bénévoles qui N'ONT PAS répondu
+      if (joursAvant === 5) {
+        const nonRepondants = await getNonRepondants(match.id)
+        if (nonRepondants.length) {
+          await sendBulkEmail(nonRepondants, {
+            subject: `🚨 URGENT — Dernière chance Spacers vs ${match.adversaire}`,
+            type: 'urgence_j5',
+            match
+          })
+          results.push(`J-5 → ${nonRepondants.length} urgences envoyées`)
+        }
+      }
 
-      buildHtml = (r) => `
-        <div style="font-family:Sora,Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f7f7f5;">
-          <h2 style="color:#0C447C;">Salut ${r.prenom} !</h2>
-          <p style="color:#1a1a18;font-size:14px;line-height:1.7;">
-            On apprécierait vraiment ton aide pour le match du <strong>${fmtDate(match.date_match)}</strong> 
-            (Spacers vs ${match.adversaire}). Tu peux te positionner en 1 clic :
-          </p>
-          <a href="https://spacers-benevoles.spacersytb.workers.dev/dashboard" 
-             style="display:inline-block;background:#185FA5;color:white;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;margin-top:12px;">
-            👉 Répondre au match
-          </a>
-          <p style="color:#5F5E5A;font-size:12px;margin-top:30px;">L'équipe Spacers Toulouse Volley</p>
-        </div>`
+      // ── J-1 : Convocation → bénévoles qui ont répondu OUI
+      if (joursAvant === 1) {
+        const { data: confirmes } = await sb
+          .from('inscriptions')
+          .select('*, benevoles(email, prenom, nom)')
+          .eq('match_id', match.id)
+          .eq('statut', 'disponible')
+
+        const destinataires = confirmes
+          ?.map((i: any) => i.benevoles)
+          .filter(Boolean) || []
+
+        if (destinataires.length) {
+          await sendBulkEmail(destinataires, {
+            subject: `✅ Convocation — Spacers vs ${match.adversaire} demain`,
+            type: 'convocation_j1',
+            match
+          })
+          results.push(`J-1 → ${destinataires.length} convocations envoyées`)
+        }
+      }
+
+      // ── J+1 : Post-match → bénévoles qui avaient dit OUI
+      if (joursAvant === -1) {
+        const { data: participants } = await sb
+          .from('inscriptions')
+          .select('*, benevoles(email, prenom, nom)')
+          .eq('match_id', match.id)
+          .eq('statut', 'disponible')
+
+        const destinataires = participants
+          ?.map((i: any) => i.benevoles)
+          .filter(Boolean) || []
+
+        if (destinataires.length) {
+          await sendBulkEmail(destinataires, {
+            subject: `🎉 Merci — Spacers vs ${match.adversaire} — Tes points ont été crédités`,
+            type: 'post_match',
+            match
+          })
+          // Créditer les points (+50 par participant)
+          for (const p of participants || []) {
+            await sb.from('points_log').insert({
+              benevole_id: p.benevole_id,
+              match_id: match.id,
+              action: 'match_complete',
+              points: 50,
+              description: `Match vs ${match.adversaire}`
+            })
+            await sb.rpc('increment_points', {
+              benv_id: p.benevole_id,
+              pts: 50
+            })
+          }
+          results.push(`J+1 → ${destinataires.length} post-match + points crédités`)
+
+          // Fermer les inscriptions
+          await sb.from('matchs')
+            .update({ statut_inscriptions: 'archive' })
+            .eq('id', match.id)
+        }
+      }
     }
-    else {
-      return new Response(JSON.stringify({ error: 'mode invalide' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
 
-    // Aucun destinataire ?
-    if (recipients.length === 0) {
-      return new Response(JSON.stringify({ ok: true, sent: 0, message: 'Aucun destinataire' }), {
-        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
+    return new Response(
+      JSON.stringify({ success: true, results }),
+      { headers: { 'Content-Type': 'application/json' } }
+    )
 
-    // Envoi par batchs de 50 (limite Mailjet par requête)
-    const BATCH = 50
-    let totalSent = 0
-    for (let i = 0; i < recipients.length; i += BATCH) {
-      const batch = recipients.slice(i, i + BATCH)
-      const to = batch.map(r => ({ Email: r.email, Name: `${r.prenom} ${r.nom}`.trim() }))
-      // Mailjet : on envoie un message par destinataire pour personnaliser le HTML
-      const auth = btoa(`${MAILJET_API_KEY}:${MAILJET_SECRET_KEY}`)
-      const messages = batch.map(r => ({
-        From: { Email: FROM_EMAIL, Name: FROM_NAME },
-        To: [{ Email: r.email, Name: `${r.prenom} ${r.nom}`.trim() }],
-        Subject: subject,
-        HTMLPart: buildHtml(r),
-      }))
-      const res = await fetch('https://api.mailjet.com/v3.1/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${auth}` },
-        body: JSON.stringify({ Messages: messages }),
-      })
-      const respBody = await res.text()
-      console.log('Mailjet batch', i / BATCH, 'status:', res.status, 'body:', respBody.substring(0, 300))
-      if (res.ok) totalSent += batch.length
-    }
-
-    return new Response(JSON.stringify({ ok: true, sent: totalSent, mode }), {
-      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
-  } catch (err) {
-    console.error('Erreur:', err)
-    return new Response(JSON.stringify({ error: String(err) }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
+  } catch (error) {
+    console.error(error)
+    return new Response(JSON.stringify({ error: (error as Error).message }), { status: 500 })
   }
 })
+
+// ── Bénévoles sans réponse ───────────────────────────────────
+async function getNonRepondants(matchId: string) {
+  // Tous les actifs
+  const { data: tous } = await sb
+    .from('benevoles')
+    .select('id, email, prenom, nom')
+    .eq('statut_compte', 'actif')
+
+  // Ceux qui ont déjà répondu (oui ou non)
+  const { data: repondants } = await sb
+    .from('inscriptions')
+    .select('benevole_id')
+    .eq('match_id', matchId)
+
+  const repondantsIds = new Set(repondants?.map((r: any) => r.benevole_id) || [])
+
+  return (tous || []).filter((b: any) => !repondantsIds.has(b.id))
+}
+
+// ── Envoi bulk Mailjet ───────────────────────────────────────
+async function sendBulkEmail(
+  destinataires: any[],
+  { subject, type, match }: { subject: string, type: string, match: any }
+) {
+  const messages = destinataires.map(b => ({
+    From: { Email: 'marketing@spacerstoulouse.fr', Name: "Spacer's Toulouse Volley" },
+    To: [{ Email: b.email, Name: `${b.prenom || ''} ${b.nom || ''}`.trim() }],
+    Subject: subject,
+    HTMLPart: getEmailHTML(type, b, match),
+  }))
+
+  // Mailjet accepte max 50 messages par appel → on découpe
+  const chunks = []
+  for (let i = 0; i < messages.length; i += 50) {
+    chunks.push(messages.slice(i, i + 50))
+  }
+
+  for (const chunk of chunks) {
+    const creds = btoa(`${MAILJET_KEY}:${MAILJET_SECRET}`)
+    console.log(`Calling Mailjet with ${chunk.length} message(s)...`)
+    console.log(`MAILJET_KEY defined: ${!!MAILJET_KEY}, MAILJET_SECRET defined: ${!!MAILJET_SECRET}`)
+
+    try {
+      const res = await fetch('https://api.mailjet.com/v3.1/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${creds}`
+        },
+        body: JSON.stringify({ Messages: chunk })
+      })
+      const responseText = await res.text()
+      console.log(`Mailjet response status: ${res.status}`)
+      console.log(`Mailjet response body: ${responseText}`)
+      if (!res.ok) {
+        throw new Error(`Mailjet error ${res.status}: ${responseText}`)
+      }
+    } catch (err) {
+      console.error('Mailjet fetch failed:', (err as Error).message)
+      throw err
+    }
+  }
+}
+
+// ── Templates HTML ───────────────────────────────────────────
+function getEmailHTML(type: string, b: any, match: any): string {
+  const prenom = b.prenom || 'Bénévole'
+  const date = new Date(match.date_match).toLocaleDateString('fr-FR', {
+    weekday: 'long', day: 'numeric', month: 'long'
+  })
+  const adversaire = match.adversaire
+  const heure = match.heure || '17h00'
+  const lieu = match.lieu || 'Palais des Sports'
+
+  const base = `
+    <div style="font-family:'Arial',sans-serif;max-width:560px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#042C53,#185FA5);padding:28px 32px;text-align:center;">
+        <div style="font-size:36px;margin-bottom:10px;">🏐</div>
+        <div style="font-size:18px;font-weight:800;color:white;">Spacers vs ${adversaire}</div>
+        <div style="font-size:12px;color:rgba(181,212,244,0.8);margin-top:4px;">${date} · ${heure} · ${lieu}</div>
+      </div>
+      <div style="padding:24px 32px;">
+        <p style="font-size:15px;color:#1a1a18;">Bonjour <strong style="color:#185FA5;">${prenom}</strong>,</p>
+        CONTENT
+      </div>
+      <div style="background:#042C53;padding:16px;text-align:center;">
+        <p style="font-size:11px;color:rgba(181,212,244,0.5);margin:0;">Spacer's Toulouse Volley · Palais des Sports · Toulouse</p>
+      </div>
+    </div>`
+
+  const contents: Record<string, string> = {
+    ouverture: `
+        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Les inscriptions pour le prochain match sont ouvertes. Indique ta disponibilité avant J-10 pour qu'on puisse construire l'équipe bénévole sereinement.</p>
+        <div style="background:#E6F1FB;border-radius:12px;padding:14px;margin:16px 0;">
+          <div style="font-size:12px;color:#0C447C;">📅 <strong>${date}</strong> · ${heure}<br>📍 ${lieu}</div>
+        </div>
+        <a href="https://spacers-benevoles.spacersytb.workers.dev" style="display:block;background:#185FA5;color:white;border-radius:50px;padding:13px;text-align:center;font-weight:700;font-size:14px;text-decoration:none;margin-top:16px;">Indiquer ma disponibilité →</a>`,
+
+    relance_j10: `
+        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">On n'a pas encore reçu ta réponse pour ce match. Il reste des places — on compte sur toi pour te positionner rapidement.</p>
+        <div style="background:#FEF3DC;border-radius:12px;padding:14px;margin:16px 0;border:1.5px solid #FAC775;">
+          <div style="font-size:12px;color:#854F0B;">⏰ <strong>J-10</strong> — Réponds avant J-5 pour être convoqué</div>
+        </div>
+        <a href="https://spacers-benevoles.spacersytb.workers.dev" style="display:block;background:#185FA5;color:white;border-radius:50px;padding:13px;text-align:center;font-weight:700;font-size:14px;text-decoration:none;margin-top:16px;">Je réponds maintenant →</a>`,
+
+    urgence_j5: `
+        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Plus que 5 jours. On a encore besoin de toi pour ce match — c'est ta dernière chance de t'inscrire.</p>
+        <div style="background:#FBEAF0;border-radius:12px;padding:14px;margin:16px 0;border:1.5px solid #F0A0BD;">
+          <div style="font-size:12px;color:#993556;">🚨 <strong>J-5</strong> — Dernier appel</div>
+        </div>
+        <a href="https://spacers-benevoles.spacersytb.workers.dev" style="display:block;background:#993556;color:white;border-radius:50px;padding:13px;text-align:center;font-weight:700;font-size:14px;text-decoration:none;margin-top:16px;">Je me porte volontaire →</a>`,
+
+    convocation_j1: `
+        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Tu es <strong style="color:#3B6D11;">convoqué(e) pour demain</strong>. Merci pour ton engagement — voici les infos pratiques :</p>
+        <div style="background:#EAF3DE;border-radius:12px;padding:14px;margin:16px 0;border:1.5px solid #C0DD97;">
+          <div style="font-size:13px;color:#3B6D11;line-height:1.8;">
+            📅 <strong>Demain</strong> · ${heure}<br>
+            📍 ${lieu}<br>
+            ⏰ Arrivée demandée <strong>30 min avant</strong><br>
+            🪪 Ton accréditation te sera remise sur place
+          </div>
+        </div>
+        <p style="font-size:12px;color:#5F5E5A;">En cas d'empêchement de dernière minute, préviens Clément directement.</p>`,
+
+    post_match: `
+        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Un grand merci pour ta présence hier soir. Grâce à toi, ce match a été une réussite côté coulisses.</p>
+        <div style="background:#E6F1FB;border-radius:12px;padding:14px;margin:16px 0;text-align:center;">
+          <div style="font-size:9px;color:#5F5E5A;letter-spacing:2px;margin-bottom:4px;">POINTS CRÉDITÉS</div>
+          <div style="font-size:36px;font-weight:800;color:#F5C842;font-family:monospace;">+50</div>
+          <div style="font-size:11px;color:#0C447C;margin-top:2px;">Présence confirmée</div>
+        </div>
+        <a href="https://spacers-benevoles.spacersytb.workers.dev" style="display:block;background:#185FA5;color:white;border-radius:50px;padding:13px;text-align:center;font-weight:700;font-size:14px;text-decoration:none;margin-top:16px;">Voir mes points →</a>`
+  }
+
+  return base.replace('CONTENT', contents[type] || '')
+}

@@ -53,7 +53,7 @@ Deno.serve(async () => {
         const nonRepondants = await getNonRepondants(match.id)
         if (nonRepondants.length) {
           await sendBulkEmail(nonRepondants, {
-            subject: `⏰ On a besoin de toi ! Spacers vs ${match.adversaire} — J-10`,
+            subject: `⏰ On a besoin de toi — Spacers vs ${match.adversaire} — J-10`,
             type: 'relance_j10',
             match
           })
@@ -110,7 +110,7 @@ Deno.serve(async () => {
 
         if (destinataires.length) {
           await sendBulkEmail(destinataires, {
-            subject: `🎉 Merci ! Spacers vs ${match.adversaire} — Vos points ont été crédités`,
+            subject: `🎉 Merci — Spacers vs ${match.adversaire} — Tes points ont été crédités`,
             type: 'post_match',
             match
           })
@@ -174,7 +174,7 @@ async function sendBulkEmail(
   { subject, type, match }: { subject: string, type: string, match: any }
 ) {
   const messages = destinataires.map(b => ({
-    From: { Email: 'marketing@spacerstoulouse.fr', Name: 'Spacers Toulouse Volley' },
+    From: { Email: 'marketing@spacerstoulouse.fr', Name: "Spacer's Toulouse Volley" },
     To: [{ Email: b.email, Name: `${b.prenom || ''} ${b.nom || ''}`.trim() }],
     Subject: subject,
     HTMLPart: getEmailHTML(type, b, match),
@@ -235,46 +235,46 @@ function getEmailHTML(type: string, b: any, match: any): string {
         CONTENT
       </div>
       <div style="background:#042C53;padding:16px;text-align:center;">
-        <p style="font-size:11px;color:rgba(181,212,244,0.5);margin:0;">TOAC-TUC Volley-Ball · Palais des Sports · Toulouse</p>
+        <p style="font-size:11px;color:rgba(181,212,244,0.5);margin:0;">Spacer's Toulouse Volley · Palais des Sports · Toulouse</p>
       </div>
     </div>`
 
   const contents: Record<string, string> = {
     ouverture: `
-        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Les inscriptions pour le prochain match sont ouvertes ! Indiquez votre disponibilité avant J-10.</p>
+        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Les inscriptions pour le prochain match sont ouvertes. Indique ta disponibilité avant J-10 pour qu'on puisse construire l'équipe bénévole sereinement.</p>
         <div style="background:#E6F1FB;border-radius:12px;padding:14px;margin:16px 0;">
           <div style="font-size:12px;color:#0C447C;">📅 <strong>${date}</strong> · ${heure}<br>📍 ${lieu}</div>
         </div>
         <a href="https://spacers-benevoles.spacersytb.workers.dev" style="display:block;background:#185FA5;color:white;border-radius:50px;padding:13px;text-align:center;font-weight:700;font-size:14px;text-decoration:none;margin-top:16px;">Indiquer ma disponibilité →</a>`,
 
     relance_j10: `
-        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Nous n'avons pas encore reçu votre réponse pour ce match. Il reste encore des places — répondez dès maintenant !</p>
+        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">On n'a pas encore reçu ta réponse pour ce match. Il reste des places — on compte sur toi pour te positionner rapidement.</p>
         <div style="background:#FEF3DC;border-radius:12px;padding:14px;margin:16px 0;border:1.5px solid #FAC775;">
-          <div style="font-size:12px;color:#854F0B;">⏰ <strong>J-10</strong> — Répondez avant J-5 pour être convoqué</div>
+          <div style="font-size:12px;color:#854F0B;">⏰ <strong>J-10</strong> — Réponds avant J-5 pour être convoqué</div>
         </div>
         <a href="https://spacers-benevoles.spacersytb.workers.dev" style="display:block;background:#185FA5;color:white;border-radius:50px;padding:13px;text-align:center;font-weight:700;font-size:14px;text-decoration:none;margin-top:16px;">Je réponds maintenant →</a>`,
 
     urgence_j5: `
-        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Il ne reste que 5 jours ! Nous avons encore besoin de bénévoles pour ce match. <strong>C'est votre dernière chance</strong> de vous inscrire.</p>
+        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Plus que 5 jours. On a encore besoin de toi pour ce match — c'est ta dernière chance de t'inscrire.</p>
         <div style="background:#FBEAF0;border-radius:12px;padding:14px;margin:16px 0;border:1.5px solid #F0A0BD;">
           <div style="font-size:12px;color:#993556;">🚨 <strong>J-5</strong> — Dernier appel</div>
         </div>
         <a href="https://spacers-benevoles.spacersytb.workers.dev" style="display:block;background:#993556;color:white;border-radius:50px;padding:13px;text-align:center;font-weight:700;font-size:14px;text-decoration:none;margin-top:16px;">Je me porte volontaire →</a>`,
 
     convocation_j1: `
-        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Vous êtes <strong style="color:#3B6D11;">convoqué(e) pour demain</strong> ! Merci pour votre engagement. Voici les infos pratiques :</p>
+        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Tu es <strong style="color:#3B6D11;">convoqué(e) pour demain</strong>. Merci pour ton engagement — voici les infos pratiques :</p>
         <div style="background:#EAF3DE;border-radius:12px;padding:14px;margin:16px 0;border:1.5px solid #C0DD97;">
           <div style="font-size:13px;color:#3B6D11;line-height:1.8;">
             📅 <strong>Demain</strong> · ${heure}<br>
             📍 ${lieu}<br>
             ⏰ Arrivée demandée <strong>30 min avant</strong><br>
-            🪪 Votre accréditation vous sera remise sur place
+            🪪 Ton accréditation te sera remise sur place
           </div>
         </div>
-        <p style="font-size:12px;color:#5F5E5A;">Si vous avez un empêchement de dernière minute, prévenez Clément directement.</p>`,
+        <p style="font-size:12px;color:#5F5E5A;">En cas d'empêchement de dernière minute, préviens Clément directement.</p>`,
 
     post_match: `
-        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Un immense merci pour votre présence hier soir ! Grâce à vous, ce match a été une réussite.</p>
+        <p style="color:#5F5E5A;font-size:14px;line-height:1.7;">Un grand merci pour ta présence hier soir. Grâce à toi, ce match a été une réussite côté coulisses.</p>
         <div style="background:#E6F1FB;border-radius:12px;padding:14px;margin:16px 0;text-align:center;">
           <div style="font-size:9px;color:#5F5E5A;letter-spacing:2px;margin-bottom:4px;">POINTS CRÉDITÉS</div>
           <div style="font-size:36px;font-weight:800;color:#F5C842;font-family:monospace;">+50</div>
