@@ -68,6 +68,10 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 .alert{padding:10px 14px;border-radius:10px;font-size:12px;margin-bottom:12px;}
 .alert-s{background:rgba(59,109,17,0.2);color:#C0DD97;border:1px solid rgba(59,109,17,0.3);}
 .alert-e{background:rgba(153,53,86,0.2);color:#F4B8CE;border:1px solid rgba(153,53,86,0.3);}
+.toast-flot{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120px);background:#2a2a28;color:white;padding:13px 22px;border-radius:50px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.5);opacity:0;transition:all .3s ease;pointer-events:none;max-width:90%;text-align:center;border:1px solid rgba(255,255,255,0.1);}
+.toast-flot.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast-flot.s{background:#3B6D11;border-color:#5C9C1C;}
+.toast-flot.e{background:#993556;border-color:#C04D72;}
 
 /* ACCÈS REFUSÉ */
 #access-denied{display:none;position:fixed;inset:0;background:#1a1a18;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
@@ -171,6 +175,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   </div>
 </div>
 
+<div id="toast-flot" class="toast-flot"></div>
 </div><!-- /main-content -->
 
 <!-- MODAL PHOTO -->
@@ -693,6 +698,15 @@ function switchTab(n) {
 }
 
 function showAlert(id,msg,type){
+  // Toast flottant (visible partout)
+  const toast=document.getElementById('toast-flot')
+  if(toast){
+    toast.textContent=msg
+    toast.className='toast-flot '+type+' show'
+    clearTimeout(toast._t)
+    toast._t=setTimeout(()=>toast.classList.remove('show'),3500)
+  }
+  // Alerte inline (rétrocompat)
   const el=document.getElementById(id)
   if(!el)return
   el.innerHTML=`<div class="alert alert-${type}">${msg}</div>`
