@@ -352,6 +352,22 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 <div id="toast-flot" class="toast-flot"></div>
 </div><!-- /main-content -->
 
+<!-- MODAL CONFIRMATION UNIFIÉE -->
+<div class="modal-overlay" id="modal-confirm" style="display:none;">
+  <div class="modal">
+    <div id="modal-confirm-icon" style="text-align:center;font-size:42px;margin-bottom:6px;line-height:1;"></div>
+    <h2 id="modal-confirm-title" style="text-align:center;">Confirmer ?</h2>
+    <div id="modal-confirm-msg" style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:14px;white-space:pre-line;text-align:center;"></div>
+    <div id="modal-confirm-input-wrap" style="display:none;margin-bottom:14px;">
+      <textarea id="modal-confirm-input" class="note-area" placeholder=""></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-blue" style="flex:1;" id="modal-confirm-ok">Confirmer</button>
+      <button class="btn btn-ghost" style="flex:1;" id="modal-confirm-cancel">Annuler</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PHOTO -->
 <div class="modal-overlay" id="modal-ph" style="display:none;">
   <div class="modal">
@@ -410,6 +426,80 @@ let sugSearchDeb = null
 
 // VALIDATION state
 let curInscriptionsAffectes = []
+
+// ─────────────────────────────────────────────────
+// MODAL CONFIRMATION UNIFIÉE (remplace confirm/prompt natifs)
+// ─────────────────────────────────────────────────
+function confirmModal(opts) {
+  return new Promise((resolve) => {
+    const m = document.getElementById('modal-confirm')
+    document.getElementById('modal-confirm-title').textContent = opts.title || 'Confirmer ?'
+    document.getElementById('modal-confirm-msg').textContent = opts.message || ''
+    const iconEl = document.getElementById('modal-confirm-icon')
+    iconEl.textContent = opts.icon || ''
+    iconEl.style.display = opts.icon ? 'block' : 'none'
+    document.getElementById('modal-confirm-input-wrap').style.display = 'none'
+
+    const okBtn = document.getElementById('modal-confirm-ok')
+    okBtn.textContent = opts.confirmText || 'Confirmer'
+    okBtn.className = 'btn ' + (opts.confirmStyle === 'red' ? 'btn-red' : opts.confirmStyle === 'green' ? 'btn-green' : 'btn-blue')
+
+    const cancelBtn = document.getElementById('modal-confirm-cancel')
+    cancelBtn.textContent = opts.cancelText || 'Annuler'
+
+    const close = (result) => {
+      m.style.display = 'none'
+      okBtn.onclick = null
+      cancelBtn.onclick = null
+      m.onclick = null
+      resolve(result)
+    }
+    okBtn.onclick = () => close(true)
+    cancelBtn.onclick = () => close(false)
+    m.onclick = (e) => { if (e.target.id === 'modal-confirm') close(false) }
+
+    m.style.display = 'flex'
+  })
+}
+
+function promptModal(opts) {
+  return new Promise((resolve) => {
+    const m = document.getElementById('modal-confirm')
+    document.getElementById('modal-confirm-title').textContent = opts.title || 'Saisir...'
+    document.getElementById('modal-confirm-msg').textContent = opts.message || ''
+    const iconEl = document.getElementById('modal-confirm-icon')
+    iconEl.textContent = opts.icon || ''
+    iconEl.style.display = opts.icon ? 'block' : 'none'
+
+    const inputWrap = document.getElementById('modal-confirm-input-wrap')
+    inputWrap.style.display = 'block'
+    const inp = document.getElementById('modal-confirm-input')
+    inp.value = opts.defaultValue || ''
+    inp.placeholder = opts.placeholder || ''
+
+    const okBtn = document.getElementById('modal-confirm-ok')
+    okBtn.textContent = opts.confirmText || 'OK'
+    okBtn.className = 'btn ' + (opts.confirmStyle === 'red' ? 'btn-red' : opts.confirmStyle === 'green' ? 'btn-green' : 'btn-blue')
+
+    const cancelBtn = document.getElementById('modal-confirm-cancel')
+    cancelBtn.textContent = opts.cancelText || 'Annuler'
+
+    const close = (result) => {
+      m.style.display = 'none'
+      okBtn.onclick = null
+      cancelBtn.onclick = null
+      m.onclick = null
+      inputWrap.style.display = 'none'
+      resolve(result)
+    }
+    okBtn.onclick = () => close(inp.value)
+    cancelBtn.onclick = () => close(null)
+    m.onclick = (e) => { if (e.target.id === 'modal-confirm') close(null) }
+
+    m.style.display = 'flex'
+    setTimeout(() => inp.focus(), 50)
+  })
+}
 
 async function init() {
   const { data: { session } } = await sb.auth.getSession()
@@ -882,7 +972,14 @@ async function relancer() {
     showAlert('alert-match', '❌ Aucun match ouvert', 'e')
     return
   }
-  if (!confirm('Envoyer une relance à tous les bénévoles qui n\'ont pas répondu ?')) return
+  const ok = await confirmModal({
+    icon: '⚡',
+    title: 'Relancer les non-répondants ?',
+    message: 'Un email de relance sera envoyé à tous les bénévoles qui n\'ont pas encore répondu pour ce match.',
+    confirmText: 'Envoyer la relance',
+    confirmStyle: 'blue',
+  })
+  if (!ok) return
 
   try {
     const res = await callEdgeFunction({

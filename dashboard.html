@@ -474,6 +474,22 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 <!-- TOAST FLOTTANT -->
 <div class="toast-flot" id="toast-flot"></div>
 
+<!-- MODAL CONFIRMATION UNIFIÉE -->
+<div class="modal-ov" id="modal-confirm" style="display:none;">
+  <div class="modal">
+    <div id="modal-confirm-icon" style="text-align:center;font-size:42px;margin-bottom:6px;line-height:1;"></div>
+    <h2 id="modal-confirm-title" style="text-align:center;">Confirmer ?</h2>
+    <div id="modal-confirm-msg" style="font-size:13px;color:#5F5E5A;line-height:1.6;margin-bottom:14px;white-space:pre-line;text-align:center;"></div>
+    <div id="modal-confirm-input-wrap" style="display:none;margin-bottom:14px;">
+      <textarea id="modal-confirm-input" class="post-textarea" placeholder=""></textarea>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-blue" style="flex:1;font-size:13px;" id="modal-confirm-ok">Confirmer</button>
+      <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" id="modal-confirm-cancel">Annuler</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CHANGEMENT PROFIL -->
 <div class="modal-ov" id="modal-profil" style="display:none;">
   <div class="modal">
@@ -510,6 +526,80 @@ let newProfilSelected = ''
 
 // PHOTO state
 let pendingPhotoFile = null
+
+// ─────────────────────────────────────────────────
+// MODAL CONFIRMATION UNIFIÉE (remplace confirm/prompt natifs)
+// ─────────────────────────────────────────────────
+function confirmModal(opts) {
+  return new Promise((resolve) => {
+    const m = document.getElementById('modal-confirm')
+    document.getElementById('modal-confirm-title').textContent = opts.title || 'Confirmer ?'
+    document.getElementById('modal-confirm-msg').textContent = opts.message || ''
+    const iconEl = document.getElementById('modal-confirm-icon')
+    iconEl.textContent = opts.icon || ''
+    iconEl.style.display = opts.icon ? 'block' : 'none'
+    document.getElementById('modal-confirm-input-wrap').style.display = 'none'
+
+    const okBtn = document.getElementById('modal-confirm-ok')
+    okBtn.textContent = opts.confirmText || 'Confirmer'
+    okBtn.className = 'btn ' + (opts.confirmStyle === 'red' ? 'btn-red' : opts.confirmStyle === 'green' ? 'btn-green' : 'btn-blue')
+
+    const cancelBtn = document.getElementById('modal-confirm-cancel')
+    cancelBtn.textContent = opts.cancelText || 'Annuler'
+
+    const close = (result) => {
+      m.style.display = 'none'
+      okBtn.onclick = null
+      cancelBtn.onclick = null
+      m.onclick = null
+      resolve(result)
+    }
+    okBtn.onclick = () => close(true)
+    cancelBtn.onclick = () => close(false)
+    m.onclick = (e) => { if (e.target.id === 'modal-confirm') close(false) }
+
+    m.style.display = 'flex'
+  })
+}
+
+function promptModal(opts) {
+  return new Promise((resolve) => {
+    const m = document.getElementById('modal-confirm')
+    document.getElementById('modal-confirm-title').textContent = opts.title || 'Saisir...'
+    document.getElementById('modal-confirm-msg').textContent = opts.message || ''
+    const iconEl = document.getElementById('modal-confirm-icon')
+    iconEl.textContent = opts.icon || ''
+    iconEl.style.display = opts.icon ? 'block' : 'none'
+
+    const inputWrap = document.getElementById('modal-confirm-input-wrap')
+    inputWrap.style.display = 'block'
+    const inp = document.getElementById('modal-confirm-input')
+    inp.value = opts.defaultValue || ''
+    inp.placeholder = opts.placeholder || ''
+
+    const okBtn = document.getElementById('modal-confirm-ok')
+    okBtn.textContent = opts.confirmText || 'OK'
+    okBtn.className = 'btn ' + (opts.confirmStyle === 'red' ? 'btn-red' : opts.confirmStyle === 'green' ? 'btn-green' : 'btn-blue')
+
+    const cancelBtn = document.getElementById('modal-confirm-cancel')
+    cancelBtn.textContent = opts.cancelText || 'Annuler'
+
+    const close = (result) => {
+      m.style.display = 'none'
+      okBtn.onclick = null
+      cancelBtn.onclick = null
+      m.onclick = null
+      inputWrap.style.display = 'none'
+      resolve(result)
+    }
+    okBtn.onclick = () => close(inp.value)
+    cancelBtn.onclick = () => close(null)
+    m.onclick = (e) => { if (e.target.id === 'modal-confirm') close(null) }
+
+    m.style.display = 'flex'
+    setTimeout(() => inp.focus(), 50)
+  })
+}
 
 // ── INIT ─────────────────────────────────────────────────────
 async function init() {
@@ -1305,7 +1395,14 @@ async function requestReward(palierPts) {
     showToast('Pas assez de points', 'error')
     return
   }
-  if (!confirm(`Demander un cadeau au palier ${palierPts} pts ?\n\nLe pilote va te transmettre ton code dès que possible. Tes points ne seront débités qu'à la réception du code.`)) return
+  const ok = await confirmModal({
+    icon: '🎁',
+    title: `Demander ce cadeau ?`,
+    message: `Palier ${palierPts} pts · -10€ sur 50€\n\nLe pilote va te transmettre ton code dès que possible.\nTes points ne seront débités qu'à la réception du code.`,
+    confirmText: 'Demander',
+    confirmStyle: 'blue',
+  })
+  if (!ok) return
 
   const { error } = await sb.from('recompenses_demandes').insert({
     benevole_id: CP.id,
@@ -1320,7 +1417,15 @@ async function requestReward(palierPts) {
 }
 
 async function cancelRequest(demandeId) {
-  if (!confirm('Annuler cette demande ?')) return
+  const ok = await confirmModal({
+    icon: '↺',
+    title: 'Annuler ma demande ?',
+    message: 'Tu pourras refaire une demande à tout moment.',
+    confirmText: 'Annuler la demande',
+    cancelText: 'Garder',
+    confirmStyle: 'red',
+  })
+  if (!ok) return
   const { error } = await sb.from('recompenses_demandes')
     .update({ statut: 'annulee', traite_le: new Date().toISOString() })
     .eq('id', demandeId)
