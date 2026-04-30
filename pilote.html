@@ -166,6 +166,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <button class="tab"    id="tab-benevoles"   onclick="switchTab('benevoles')">👥 Bénévoles</button>
   <button class="tab"    id="tab-suggestions" onclick="switchTab('suggestions')">💡 Suggestions<span class="bdg-num" id="bdg-suggestions" style="display:none;"></span></button>
   <button class="tab"    id="tab-reward"      onclick="switchTab('reward')">🎁 Cadeaux<span class="bdg-num" id="bdg-reward" style="display:none;"></span></button>
+  <button class="tab"    id="tab-emploi"      onclick="switchTab('emploi')">💼 Emploi</button>
   <button class="tab"    id="tab-notes"       onclick="switchTab('notes')">📖 Mémoire</button>
 </div>
 
@@ -339,6 +340,101 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
     </div>
   </div>
   <div id="rew-codes-list"></div>
+</div>
+
+<!-- EMPLOI (chantier 8) -->
+<div class="screen" id="screen-emploi">
+  <div id="alert-emploi"></div>
+
+  <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="kpi"><div class="kpi-val g" id="emp-kpi-actives">—</div><div class="kpi-lbl">Actives</div></div>
+    <div class="kpi"><div class="kpi-val a" id="emp-kpi-exp">—</div><div class="kpi-lbl">Expirées</div></div>
+    <div class="kpi"><div class="kpi-val" id="emp-kpi-tot">—</div><div class="kpi-lbl">Total</div></div>
+  </div>
+
+  <div class="sec">➕ Nouvelle annonce</div>
+  <div class="card">
+    <label class="input-label">Type d'annonce</label>
+    <div class="seg-group" id="emp-type-group" style="margin-bottom:12px;">
+      <button class="seg on" data-emp-type="partenaire" onclick="setEmpType('partenaire',this)">🤝 Partenaire</button>
+      <button class="seg" data-emp-type="benevole" onclick="setEmpType('benevole',this)">🏐 Bénévole</button>
+    </div>
+
+    <div id="emp-form-partenaire">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div>
+          <label class="input-label">Nom du partenaire</label>
+          <input id="emp-partenaire-nom" class="input-field" placeholder="Decathlon Labège">
+        </div>
+        <div>
+          <label class="input-label">Logo URL (optionnel)</label>
+          <input id="emp-partenaire-logo" class="input-field" placeholder="https://...">
+        </div>
+      </div>
+    </div>
+
+    <label class="input-label">Titre du poste</label>
+    <input id="emp-titre" class="input-field" placeholder="Conseiller(e) commercial(e) sport">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;">
+      <div>
+        <label class="input-label">Type de contrat</label>
+        <select id="emp-contrat" class="input-field">
+          <option value="">--</option>
+          <option>CDI</option>
+          <option>CDD</option>
+          <option>Stage</option>
+          <option>Alternance</option>
+          <option>Freelance</option>
+          <option>Saisonnier</option>
+          <option>Bénévolat</option>
+        </select>
+      </div>
+      <div>
+        <label class="input-label">Lieu</label>
+        <input id="emp-lieu" class="input-field" placeholder="Toulouse">
+      </div>
+    </div>
+
+    <label class="input-label">Description</label>
+    <textarea id="emp-desc" class="bulk-code-area" placeholder="Description du poste, missions, profil recherché..."></textarea>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 8px;">
+      <div>
+        <label class="input-label">Contact - Nom</label>
+        <input id="emp-contact-nom" class="input-field" placeholder="Sophie Durand">
+      </div>
+      <div>
+        <label class="input-label">Contact - Email</label>
+        <input id="emp-contact-email" class="input-field" type="email" placeholder="recrut@partenaire.fr">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div>
+        <label class="input-label">Contact - Téléphone</label>
+        <input id="emp-contact-tel" class="input-field" type="tel" placeholder="06 12 34 56 78">
+      </div>
+      <div>
+        <label class="input-label">Lien (LinkedIn, formulaire...)</label>
+        <input id="emp-contact-lien" class="input-field" placeholder="https://...">
+      </div>
+    </div>
+
+    <label class="input-label">Date d'expiration (optionnel)</label>
+    <input id="emp-expire" class="input-field" type="date" style="margin-bottom:10px;">
+
+    <button class="btn btn-blue btn-full" onclick="ajouterAnnonce()">📤 Publier l'annonce</button>
+  </div>
+
+  <div class="sec">📋 Annonces publiées</div>
+  <div style="margin-bottom:8px;">
+    <div class="seg-group" id="emp-list-filter">
+      <button class="seg on" data-emp-list-filter="actives" onclick="setEmpListFilter('actives',this)">Actives</button>
+      <button class="seg" data-emp-list-filter="exp" onclick="setEmpListFilter('exp',this)">Expirées</button>
+      <button class="seg" data-emp-list-filter="tous" onclick="setEmpListFilter('tous',this)">Toutes</button>
+    </div>
+  </div>
+  <div id="emp-list"></div>
 </div>
 
 <!-- MÉMOIRE -->
@@ -1600,6 +1696,177 @@ async function refuserDemande(demandeId) {
 }
 
 // ─────────────────────────────────────────────────
+// EMPLOI / MINUTE EMPLOI (chantier 8)
+// ─────────────────────────────────────────────────
+let empAnnonces = []
+let empType = 'partenaire'
+let empListFilter = 'actives'
+
+async function loadEmploi() {
+  const { data, error } = await sb.from('annonces_emploi')
+    .select('*')
+    .order('publiee_le', { ascending: false })
+
+  if (error) {
+    showAlert('alert-emploi', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+  empAnnonces = data || []
+  updateEmploiKPIs()
+  renderEmploiList()
+}
+
+function updateEmploiKPIs() {
+  const now = new Date()
+  const actives = empAnnonces.filter(a => a.active && (!a.expire_le || new Date(a.expire_le) > now))
+  const exp = empAnnonces.filter(a => a.expire_le && new Date(a.expire_le) <= now)
+
+  document.getElementById('emp-kpi-actives').textContent = actives.length
+  document.getElementById('emp-kpi-exp').textContent = exp.length
+  document.getElementById('emp-kpi-tot').textContent = empAnnonces.length
+}
+
+function setEmpType(t, btn) {
+  empType = t
+  document.querySelectorAll('#emp-type-group .seg').forEach(s => s.classList.remove('on'))
+  btn.classList.add('on')
+  // Hide partenaire-specific fields if type=benevole
+  document.getElementById('emp-form-partenaire').style.display = t === 'partenaire' ? 'block' : 'none'
+}
+
+function setEmpListFilter(f, btn) {
+  empListFilter = f
+  document.querySelectorAll('#emp-list-filter .seg').forEach(s => s.classList.remove('on'))
+  btn.classList.add('on')
+  renderEmploiList()
+}
+
+function renderEmploiList() {
+  const now = new Date()
+  let list = empAnnonces
+  if (empListFilter === 'actives') list = list.filter(a => a.active && (!a.expire_le || new Date(a.expire_le) > now))
+  else if (empListFilter === 'exp') list = list.filter(a => a.expire_le && new Date(a.expire_le) <= now)
+
+  const el = document.getElementById('emp-list')
+  if (list.length === 0) {
+    el.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:10px 0;font-style:italic;">Aucune annonce dans cette catégorie.</div>'
+    return
+  }
+
+  el.innerHTML = list.map(a => {
+    const isPart = a.type === 'partenaire'
+    const isExp = a.expire_le && new Date(a.expire_le) <= now
+    const opacity = (a.active && !isExp) ? '1' : '0.5'
+    const statut = !a.active ? '<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);">⏸ Désactivée</span>'
+      : isExp ? '<span class="s-badge" style="background:rgba(201,130,26,0.15);color:#FAC775;">⏰ Expirée</span>'
+      : '<span class="s-badge" style="background:rgba(59,109,17,0.15);color:#C0DD97;">● Active</span>'
+
+    return `
+      <div class="card" style="opacity:${opacity};">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <span class="s-badge" style="background:${isPart?'rgba(201,130,26,0.15);color:#FAC775':'rgba(24,95,165,0.2);color:#B5D4F4'};">
+            ${isPart ? '🤝 Partenaire' : '🏐 Bénévole'}
+          </span>
+          ${a.type_contrat ? `<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);">${escapeHtmlPilote(a.type_contrat)}</span>` : ''}
+          ${statut}
+        </div>
+        <div style="font-size:13px;font-weight:700;color:white;margin-bottom:3px;">${escapeHtmlPilote(a.titre)}</div>
+        ${a.partenaire_nom ? `<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px;">📌 ${escapeHtmlPilote(a.partenaire_nom)}</div>` : ''}
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5;margin-bottom:8px;white-space:pre-line;">${escapeHtmlPilote(a.description)}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:10px;">
+          ${a.lieu ? `📍 ${escapeHtmlPilote(a.lieu)} · ` : ''}
+          🕐 ${formatDate(a.publiee_le)}
+          ${a.expire_le ? ` · ⏰ Expire ${formatDate(a.expire_le)}` : ''}
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="toggleAnnonce('${a.id}', ${!a.active})">${a.active ? '⏸ Désactiver' : '▶ Réactiver'}</button>
+          <button class="btn btn-red btn-sm" onclick="supprimerAnnonce('${a.id}')">🗑 Supprimer</button>
+        </div>
+      </div>`
+  }).join('')
+}
+
+async function ajouterAnnonce() {
+  const titre = document.getElementById('emp-titre').value.trim()
+  const desc = document.getElementById('emp-desc').value.trim()
+  if (!titre || !desc) {
+    showAlert('alert-emploi', '❌ Titre et description obligatoires', 'e')
+    return
+  }
+
+  const partenaireNom = empType === 'partenaire' ? document.getElementById('emp-partenaire-nom').value.trim() : null
+  const partenaireLogo = empType === 'partenaire' ? document.getElementById('emp-partenaire-logo').value.trim() : null
+  const expireRaw = document.getElementById('emp-expire').value
+  const expire = expireRaw ? new Date(expireRaw + 'T23:59:59').toISOString() : null
+
+  const row = {
+    type: empType,
+    titre,
+    description: desc,
+    partenaire_nom: partenaireNom || null,
+    partenaire_logo_url: partenaireLogo || null,
+    type_contrat: document.getElementById('emp-contrat').value || null,
+    lieu: document.getElementById('emp-lieu').value.trim() || null,
+    contact_nom: document.getElementById('emp-contact-nom').value.trim() || null,
+    contact_email: document.getElementById('emp-contact-email').value.trim() || null,
+    contact_tel: document.getElementById('emp-contact-tel').value.trim() || null,
+    contact_lien: document.getElementById('emp-contact-lien').value.trim() || null,
+    pilote_id: curPiloteId,
+    expire_le: expire,
+    active: true,
+  }
+
+  const { error } = await sb.from('annonces_emploi').insert(row)
+  if (error) {
+    showAlert('alert-emploi', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+
+  // Reset form
+  ;['emp-titre','emp-desc','emp-partenaire-nom','emp-partenaire-logo','emp-lieu',
+    'emp-contact-nom','emp-contact-email','emp-contact-tel','emp-contact-lien','emp-expire']
+    .forEach(id => { document.getElementById(id).value = '' })
+  document.getElementById('emp-contrat').value = ''
+
+  showAlert('alert-emploi', '✓ Annonce publiée', 's')
+  loadEmploi()
+}
+
+async function toggleAnnonce(id, newActive) {
+  const { error } = await sb.from('annonces_emploi')
+    .update({ active: newActive })
+    .eq('id', id)
+  if (error) return showAlert('alert-emploi', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-emploi', newActive ? '▶ Annonce réactivée' : '⏸ Annonce désactivée', 's')
+  loadEmploi()
+}
+
+async function supprimerAnnonce(id) {
+  const ok = await confirmModal({
+    icon: '🗑',
+    title: 'Supprimer cette annonce ?',
+    message: 'Action irréversible. Si tu veux juste la cacher, utilise "Désactiver".',
+    confirmText: 'Supprimer',
+    confirmStyle: 'red',
+  })
+  if (!ok) return
+  const { error } = await sb.from('annonces_emploi').delete().eq('id', id)
+  if (error) return showAlert('alert-emploi', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-emploi', '🗑 Annonce supprimée', 's')
+  loadEmploi()
+}
+
+function escapeHtmlPilote(str) {
+  if (str === null || str === undefined) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+// ─────────────────────────────────────────────────
 // TABS + UTILS
 // ─────────────────────────────────────────────────
 function switchTab(n) {
@@ -1610,6 +1877,7 @@ function switchTab(n) {
   if (n === 'notes') loadNotesHistory()
   if (n === 'suggestions') loadSuggestions()
   if (n === 'reward') loadReward()
+  if (n === 'emploi') loadEmploi()
 }
 
 function showAlert(id,msg,type){

@@ -284,6 +284,43 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .histo-attr{background:#EAF3DE;color:#3B6D11;}
 .histo-ann{background:#F1EFE8;color:#5F5E5A;}
 .histo-ref{background:#FBEAF0;color:#993556;}
+
+/* ── EMPLOI (chantier 8) ── */
+.seg-b{
+  flex:1;padding:7px 8px;border:1px solid rgba(181,212,244,0.15);background:rgba(255,255,255,0.04);
+  color:rgba(181,212,244,0.6);font-size:11px;font-weight:600;border-radius:50px;cursor:pointer;
+  font-family:'Sora',sans-serif;
+}
+.seg-b.on{background:#185FA5;color:white;border-color:#185FA5;}
+.annonce-card{
+  background:white;border-radius:14px;padding:14px;margin-bottom:10px;
+}
+.annonce-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.annonce-logo{
+  width:40px;height:40px;border-radius:10px;object-fit:cover;
+  background:#E6F1FB;flex-shrink:0;
+}
+.annonce-logo-ph{
+  width:40px;height:40px;border-radius:10px;background:#E6F1FB;
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.annonce-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.annonce-tag{
+  font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;
+}
+.annonce-tag.partenaire{background:#FEF3C7;color:#C9821A;}
+.annonce-tag.benevole{background:#E6F1FB;color:#185FA5;}
+.annonce-tag.contrat{background:#F1EFE8;color:#5F5E5A;}
+.annonce-titre{font-size:14px;font-weight:800;color:#0C447C;margin-bottom:3px;line-height:1.3;}
+.annonce-partenaire{font-size:11px;color:#5F5E5A;margin-bottom:6px;}
+.annonce-desc{
+  font-size:12px;color:#1a1a18;line-height:1.55;margin-bottom:10px;
+  white-space:pre-line;
+}
+.annonce-meta-bas{
+  display:flex;gap:10px;font-size:10px;color:#5F5E5A;margin-bottom:10px;
+  flex-wrap:wrap;
+}
 </style>
 </head>
 <body>
@@ -404,6 +441,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <button class="bn"   id="bn-points"   onclick="bSwitch('points')"  ><span class="bn-icon">🏆</span><span class="bn-label">Points</span></button>
     <button class="bn"   id="bn-forum"    onclick="bSwitch('forum')"   ><span class="bn-icon">💬</span><span class="bn-label">Forum</span></button>
     <button class="bn"   id="bn-reward"   onclick="bSwitch('reward')"  ><span class="bn-icon">🎁</span><span class="bn-label">Cadeaux</span></button>
+    <button class="bn"   id="bn-emploi"   onclick="bSwitch('emploi')"  ><span class="bn-icon">💼</span><span class="bn-label">Emploi</span></button>
     <button class="bn"   id="bn-profil"   onclick="bSwitch('profil')"  ><span class="bn-icon">👤</span><span class="bn-label">Profil</span></button>
   </nav>
 
@@ -437,6 +475,17 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   <div class="bscreen" id="bs-reward">
     <div class="sec">🎁 Cadeaux & récompenses</div>
     <div id="reward-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
+  </div>
+
+  <!-- ── EMPLOI (chantier 8) ── -->
+  <div class="bscreen" id="bs-emploi">
+    <div class="sec">💼 Minute emploi</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;">
+      <button class="seg-b on" data-emp-filter="tous" onclick="setEmpFilter('tous',this)">Tous</button>
+      <button class="seg-b" data-emp-filter="partenaire" onclick="setEmpFilter('partenaire',this)">🤝 Partenaires</button>
+      <button class="seg-b" data-emp-filter="benevole" onclick="setEmpFilter('benevole',this)">🏐 Bénévoles</button>
+    </div>
+    <div id="emploi-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
   </div>
 
   <!-- ── PROFIL ── -->
@@ -526,6 +575,111 @@ let newProfilSelected = ''
 
 // PHOTO state
 let pendingPhotoFile = null
+
+// ─────────────────────────────────────────────────
+// EMPLOI / MINUTE EMPLOI (chantier 8)
+// ─────────────────────────────────────────────────
+let empAnnonces = []
+let empFilter = 'tous'
+
+async function loadEmploi() {
+  const el = document.getElementById('emploi-content')
+  if (!el) return
+
+  const { data, error } = await sb.from('annonces_emploi')
+    .select('*')
+    .eq('active', true)
+    .or('expire_le.is.null,expire_le.gt.' + new Date().toISOString())
+    .order('publiee_le', { ascending: false })
+
+  if (error) {
+    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : ' + error.message + '</div>'
+    return
+  }
+
+  empAnnonces = data || []
+  renderEmploi()
+}
+
+function setEmpFilter(f, btn) {
+  empFilter = f
+  document.querySelectorAll('[data-emp-filter]').forEach(b => b.classList.remove('on'))
+  btn.classList.add('on')
+  renderEmploi()
+}
+
+function renderEmploi() {
+  const el = document.getElementById('emploi-content')
+  let list = empAnnonces
+  if (empFilter !== 'tous') list = list.filter(a => a.type === empFilter)
+
+  if (list.length === 0) {
+    el.innerHTML = `<div style="text-align:center;color:rgba(181,212,244,0.5);padding:40px 20px;font-size:12px;">
+      ${empFilter === 'tous'
+        ? 'Pas encore d\'annonces en ligne.<br>Reviens plus tard !'
+        : 'Pas d\'annonce dans cette catégorie.'}
+    </div>`
+    return
+  }
+
+  el.innerHTML = list.map(a => {
+    const isPart = a.type === 'partenaire'
+    const logo = isPart && a.partenaire_logo_url
+      ? `<img src="${escapeHtml(a.partenaire_logo_url)}" class="annonce-logo" onerror="this.outerHTML='<div class=\\'annonce-logo-ph\\'>🤝</div>'">`
+      : `<div class="annonce-logo-ph">${isPart ? '🤝' : '🏐'}</div>`
+
+    const contactBtns = []
+    if (a.contact_lien) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;" href="${escapeHtml(a.contact_lien)}" target="_blank" rel="noopener">🔗 Postuler</a>`)
+    if (a.contact_email) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;${contactBtns.length?'background:#3B6D11;':''}" href="mailto:${encodeURIComponent(a.contact_email)}">📧 Email</a>`)
+    if (a.contact_tel) {
+      const cleaned = (a.contact_tel || '').replace(/[^\d+]/g, '')
+      contactBtns.push(`<a class="btn btn-ghost" style="font-size:12px;text-decoration:none;display:inline-block;" href="tel:${cleaned}">📞 ${escapeHtml(a.contact_tel)}</a>`)
+    }
+
+    return `
+      <div class="annonce-card">
+        <div class="annonce-meta">
+          ${logo}
+          <div class="annonce-tags">
+            <span class="annonce-tag ${isPart ? 'partenaire' : 'benevole'}">${isPart ? '🤝 PARTENAIRE' : '🏐 BÉNÉVOLE'}</span>
+            ${a.type_contrat ? `<span class="annonce-tag contrat">${escapeHtml(a.type_contrat)}</span>` : ''}
+          </div>
+        </div>
+        <div class="annonce-titre">${escapeHtml(a.titre)}</div>
+        ${a.partenaire_nom ? `<div class="annonce-partenaire">📌 ${escapeHtml(a.partenaire_nom)}</div>` : ''}
+        <div class="annonce-desc">${escapeHtml(a.description)}</div>
+        <div class="annonce-meta-bas">
+          ${a.lieu ? `<span>📍 ${escapeHtml(a.lieu)}</span>` : ''}
+          <span>🕐 ${formatRelativeDate(a.publiee_le)}</span>
+          ${a.contact_nom ? `<span>👤 ${escapeHtml(a.contact_nom)}</span>` : ''}
+        </div>
+        ${contactBtns.length > 0 ? `<div style="display:flex;gap:6px;flex-wrap:wrap;">${contactBtns.join('')}</div>` : ''}
+      </div>`
+  }).join('')
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+function formatRelativeDate(d) {
+  if (!d) return ''
+  const date = new Date(d)
+  const now = new Date()
+  const diffMs = now - date
+  const diffH = Math.floor(diffMs / 3600000)
+  if (diffH < 1) return 'À l\'instant'
+  if (diffH < 24) return `Il y a ${diffH}h`
+  const diffJ = Math.floor(diffH / 24)
+  if (diffJ < 7) return `Il y a ${diffJ}j`
+  return date.toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'})
+}
 
 // ─────────────────────────────────────────────────
 // MODAL CONFIRMATION UNIFIÉE (remplace confirm/prompt natifs)
@@ -1493,6 +1647,7 @@ function bSwitch(name) {
   if(name==='points')loadPoints()
   if(name==='forum')loadPosts()
   if(name==='reward')loadReward()
+  if(name==='emploi')loadEmploi()
   if(name==='profil')renderPhotoCard() // refresh la carte photo en arrivant sur l'onglet
 }
 
