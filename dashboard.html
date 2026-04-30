@@ -565,7 +565,8 @@ function renderHugoHome(el, p, pts, niveau, pct) {
         <div style="font-size:12px;font-weight:700;color:#0C447C;">Classement</div>
         <div style="font-size:10px;color:#185FA5;font-weight:600;">Voir mon rang</div>
       </div>
-    </div>`
+    </div>
+    ${renderSuggestionSection('hugo')}`
 }
 
 function renderVirginieHome(el, p) {
@@ -611,7 +612,8 @@ function renderVirginieHome(el, p) {
       <div class="faq-item" onclick="toggleFaq(this)">
         <div class="faq-q">${f.q} <span>+</span></div>
         <div class="faq-a">${f.a}</div>
-      </div>`).join('')}`
+      </div>`).join('')}
+    ${renderSuggestionSection('virginie')}`
 }
 
 function renderJoelHome(el, p, pts) {
@@ -638,11 +640,40 @@ function renderJoelHome(el, p, pts) {
       <div style="font-size:18px;color:#D3D1C7;">›</div>
     </div>
 
-    <div class="transmettre-card">
-      <div style="font-size:13px;font-weight:700;color:white;margin-bottom:6px;">📝 Transmettre mon savoir-faire</div>
-      <div style="font-size:11px;color:rgba(192,221,151,0.7);margin-bottom:10px;line-height:1.6;">Partagez vos conseils avec les nouveaux bénévoles. Ces notes sont transmises aux pilotes.</div>
-      <textarea class="note-area" id="joel-note" placeholder="Astuce, retour d'expérience, conseil pratique..."></textarea>
-      <button class="btn btn-blue" style="font-size:12px;margin-top:8px;" onclick="saveJoelNote()">Partager ce conseil</button>
+    ${renderSuggestionSection('joel')}`
+}
+
+// ── SECTION AMÉLIORER L'EXPÉRIENCE (commune aux 3 profils) ──
+function renderSuggestionSection(profilType) {
+  const cfg = {
+    hugo:    {bg:'linear-gradient(135deg,#0C447C,#185FA5)', sub:'rgba(181,212,244,0.75)'},
+    virginie:{bg:'linear-gradient(135deg,#3a1a5e,#533BB7)', sub:'rgba(221,214,254,0.75)'},
+    joel:    {bg:'linear-gradient(135deg,#1a3d2e,#3B6D11)', sub:'rgba(192,221,151,0.75)'},
+  }[profilType] || {bg:'linear-gradient(135deg,#0C447C,#185FA5)', sub:'rgba(181,212,244,0.75)'}
+
+  return `
+    <div class="transmettre-card" style="background:${cfg.bg};">
+      <div style="font-size:13px;font-weight:700;color:white;margin-bottom:6px;">💡 Améliorer l'expérience bénévole</div>
+      <div style="font-size:11px;color:${cfg.sub};margin-bottom:10px;line-height:1.6;">Partage tes suggestions, retours, idées pour améliorer le club.</div>
+      <select id="sugg-tag" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:9px 10px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:8px;cursor:pointer;">
+        <option value="jour_match" style="color:#1a1a18;">📅 Jour de match</option>
+        <option value="hors_match" style="color:#1a1a18;">🏠 Hors-match</option>
+        <option value="accueil" style="color:#1a1a18;">👋 Accueil bénévoles</option>
+        <option value="application" style="color:#1a1a18;">📱 Application</option>
+        <option value="autre" style="color:#1a1a18;">💭 Autre</option>
+      </select>
+      <textarea class="note-area" id="sugg-txt" placeholder="Suggestion, retour, idée d'amélioration..."></textarea>
+      <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:6px;color:white;font-size:11px;cursor:pointer;">
+          <input type="checkbox" id="cb-forum" checked style="cursor:pointer;width:15px;height:15px;accent-color:#185FA5;">
+          💬 Visible par tous
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;color:white;font-size:11px;cursor:pointer;">
+          <input type="checkbox" id="cb-pilotes" style="cursor:pointer;width:15px;height:15px;accent-color:#185FA5;">
+          🎯 Privé pilotes
+        </label>
+      </div>
+      <button class="btn btn-blue" style="font-size:12px;margin-top:10px;" onclick="saveSuggestion()">Partager</button>
     </div>`
 }
 
@@ -774,13 +805,53 @@ async function saveProfile() {
   setTimeout(()=>document.getElementById('profil-alert').innerHTML='',3000)
 }
 
-async function saveJoelNote() {
-  const txt=document.getElementById('joel-note')?.value.trim()
-  if(!txt)return
-  const{data:profil}=await sb.from('benevoles').select('id').eq('email',CU.email).single()
-  if(profil) await sb.from('posts').insert({auteur_id:profil.id,categorie:'forum',titre:'Conseil de '+(CP?.prenom||'un bénévole'),contenu:'💡 Conseil de '+CP?.prenom+' : '+txt})
-  document.getElementById('joel-note').value=''
-  alert('Conseil partagé avec la communauté ✓')
+async function saveSuggestion() {
+  const txt = document.getElementById('sugg-txt')?.value.trim()
+  if (!txt) return alert('Tape une suggestion avant de partager')
+
+  const tag = document.getElementById('sugg-tag')?.value || 'autre'
+  const cbForum = document.getElementById('cb-forum')?.checked
+  const cbPilotes = document.getElementById('cb-pilotes')?.checked
+
+  if (!cbForum && !cbPilotes) {
+    return alert('Choisis au moins une audience (Forum ou Pilotes)')
+  }
+
+  const { data: profil } = await sb.from('benevoles').select('id').eq('email', CU.email).single()
+  if (!profil) return
+
+  const tagLabels = {
+    jour_match:'📅 Jour de match',
+    hors_match:'🏠 Hors-match',
+    accueil:'👋 Accueil',
+    application:'📱 Application',
+    autre:'💭 Autre'
+  }
+  const tagLbl = tagLabels[tag] || '💭 Autre'
+
+  const { error } = await sb.from('posts').insert({
+    auteur_id: profil.id,
+    categorie: 'suggestion',
+    tag: tag,
+    titre: tagLbl + ' — ' + (CP?.prenom || 'Bénévole'),
+    contenu: '💡 ' + txt,
+    visible_forum: cbForum,
+    visible_pilotes: cbPilotes,
+  })
+
+  if (error) return alert('Erreur : ' + error.message)
+
+  document.getElementById('sugg-txt').value = ''
+  document.getElementById('cb-forum').checked = true
+  document.getElementById('cb-pilotes').checked = false
+  document.getElementById('sugg-tag').value = 'jour_match'
+
+  let msg = 'Suggestion partagée '
+  if (cbForum && cbPilotes) msg += 'avec la communauté et les pilotes ✓'
+  else if (cbForum) msg += 'avec la communauté ✓'
+  else msg += 'aux pilotes (privé) ✓'
+  alert(msg)
+  if (cbForum) loadPosts()
 }
 
 // ── CHANGER PROFIL ────────────────────────────────────────────
