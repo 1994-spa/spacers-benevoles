@@ -101,6 +101,18 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 .sug-empty{background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.1);border-radius:10px;padding:18px 14px;font-size:12px;color:rgba(255,255,255,0.5);text-align:center;}
 .sug-empty.s{background:rgba(59,109,17,0.1);border-color:rgba(59,109,17,0.3);color:#C0DD97;border-style:solid;}
 
+/* ── VALIDATION PRÉSENCE (chantier 5) ── */
+.btn-val{
+  flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  color:rgba(255,255,255,0.6);padding:7px 5px;border-radius:50px;
+  font-family:'Sora',sans-serif;font-size:10px;font-weight:600;cursor:pointer;
+  transition:all .15s;text-align:center;white-space:nowrap;
+}
+.btn-val:active{transform:scale(0.97);}
+.btn-val.on.g{background:#3B6D11;border-color:#5C9C1C;color:white;}
+.btn-val.on.a{background:#C9821A;border-color:#FAC775;color:white;}
+.btn-val.on.r{background:#993556;border-color:#C04D72;color:white;}
+
 /* ACCÈS REFUSÉ */
 #access-denied{display:none;position:fixed;inset:0;background:#1a1a18;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
 #access-denied.show{display:flex;}
@@ -182,6 +194,13 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 
   <button class="btn btn-blue btn-full" style="margin-top:8px;" onclick="openModalNotif()">📲 Notifier les bénévoles affectés</button>
   <button class="btn btn-orange btn-full" onclick="relancer()">⚡ Relancer tous les non-répondants</button>
+
+  <!-- VALIDATION PRÉSENCE (chantier 5) -->
+  <div class="sec">✅ Validation présence (jour J)</div>
+  <div id="validation-section">
+    <div id="validation-kpis"></div>
+    <div id="validation-list"></div>
+  </div>
 
   <div class="sec">Note pilote sur ce match</div>
   <div class="card">
@@ -306,11 +325,15 @@ let allBenv = []
 let curPh = null
 let curMatch = null
 let curPostes = []
+let curPiloteId = null
 
 // SUGGESTIONS state
 let allSuggestions = []
 let sugFilters = { search: '', tag: 'all', statut: 'tous', vis: 'tous', sort: 'non_lu_first' }
 let sugSearchDeb = null
+
+// VALIDATION state
+let curInscriptionsAffectes = []
 
 async function init() {
   const { data: { session } } = await sb.auth.getSession()
@@ -318,7 +341,7 @@ async function init() {
 
   const { data: profil } = await sb
     .from('benevoles')
-    .select('role, prenom, nom')
+    .select('id, role, prenom, nom')
     .eq('email', session.user.email)
     .single()
 
@@ -327,6 +350,7 @@ async function init() {
     return
   }
 
+  curPiloteId = profil.id
   document.getElementById('main-content').style.display = 'block'
   document.getElementById('pilote-name').textContent =
     (profil.prenom||'') + ' ' + (profil.nom||'') + ' · ' + (profil.role === 'admin' ? 'Admin' : 'Pilote')
@@ -508,7 +532,7 @@ body{margin:0;display:flex;justify-content:center;align-items:center;min-height:
 }
 
 // ─────────────────────────────────────────────────
-// LOAD MATCH (étendu : non-répondants + note existante)
+// LOAD MATCH (étendu : non-répondants + note + validation)
 // ─────────────────────────────────────────────────
 async function loadMatch() {
   const { data: matchs } = await sb.from('matchs')
@@ -524,6 +548,8 @@ async function loadMatch() {
     document.getElementById('non-rep-match').innerHTML = ''
     document.getElementById('note-match').value = ''
     curMatch = null
+    curInscriptionsAffectes = []
+    renderValidation([])
     return
   }
   const m = matchs[0]
@@ -536,9 +562,9 @@ async function loadMatch() {
   const { data: postes } = await sb.from('postes').select('*').order('nom')
   curPostes = postes || []
 
-  // Inscriptions disponibles
+  // Inscriptions disponibles (incluant statut_jour_match pour la validation)
   const { data: insc } = await sb.from('inscriptions')
-    .select('id, benevole_id, poste_id, statut, benevoles(prenom, nom, photo_url, matchs_joues)')
+    .select('id, benevole_id, poste_id, statut, statut_jour_match, benevoles(prenom, nom, photo_url, matchs_joues)')
     .eq('match_id', m.id)
     .eq('statut', 'disponible')
 
@@ -609,6 +635,10 @@ async function loadMatch() {
 
   // Note pilote existante
   document.getElementById('note-match').value = m.notes_pilote || ''
+
+  // VALIDATION : extrait les bénévoles affectés à un poste
+  curInscriptionsAffectes = dispos.filter(i => i.poste_id)
+  renderValidation(curInscriptionsAffectes)
 }
 
 async function affecterPoste(inscriptionId, posteId, selectEl) {
@@ -623,6 +653,103 @@ async function affecterPoste(inscriptionId, posteId, selectEl) {
   selectEl.className = posteId ? 'poste-sel ok' : 'poste-sel'
   showAlert('alert-match', posteId ? 'Poste attribué ✓' : 'Poste retiré', 's')
   loadMatch()
+}
+
+// ─────────────────────────────────────────────────
+// VALIDATION PRÉSENCE (chantier 5)
+// ─────────────────────────────────────────────────
+function renderValidation(list) {
+  const kpisEl = document.getElementById('validation-kpis')
+  const listEl = document.getElementById('validation-list')
+  if (!kpisEl || !listEl) return
+
+  if (!curMatch) {
+    kpisEl.innerHTML = ''
+    listEl.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:10px 0;font-style:italic;">Aucun match ouvert.</div>'
+    return
+  }
+
+  if (!list || list.length === 0) {
+    kpisEl.innerHTML = ''
+    listEl.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:10px 0;font-style:italic;">Aucun bénévole affecté à un poste pour ce match. Affecte les postes ci-dessus pour pouvoir valider la présence.</div>'
+    return
+  }
+
+  const total = list.length
+  const ponctuels = list.filter(i => i.statut_jour_match === 'present_ponctuel').length
+  const retards = list.filter(i => i.statut_jour_match === 'present_retard').length
+  const absents = list.filter(i => i.statut_jour_match === 'absent').length
+  const presents = ponctuels + retards
+  const reste = total - presents - absents
+
+  kpisEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div class="kpi"><div class="kpi-val g">${presents}</div><div class="kpi-lbl">Présents</div></div>
+      <div class="kpi"><div class="kpi-val a">${ponctuels}</div><div class="kpi-lbl">À l'heure</div></div>
+      <div class="kpi"><div class="kpi-val r">${absents}</div><div class="kpi-lbl">Absents</div></div>
+    </div>
+    ${reste > 0
+      ? `<div class="alert" style="background:rgba(201,130,26,0.15);color:#FAC775;border:1px solid rgba(201,130,26,0.3);">⏳ ${reste} bénévole${reste>1?'s':''} reste${reste>1?'nt':''} à valider</div>`
+      : `<div class="alert alert-s">✓ Tous les bénévoles affectés ont été validés</div>`}
+  `
+
+  listEl.innerHTML = list.map(i => {
+    const b = i.benevoles || {}
+    const posteName = curPostes.find(p => p.id === i.poste_id)?.nom || '?'
+    const s = i.statut_jour_match
+    return `
+      <div class="benv-row" style="display:block;padding:11px 13px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+          ${b.photo_url ? `<img src="${b.photo_url}" class="bav">` : `<div class="bav-ph">${ini(b)}</div>`}
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);">📍 ${posteName}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:5px;">
+          <button class="btn-val ${s==='present_ponctuel'?'on g':''}" onclick="setValidation('${i.id}','present_ponctuel')">✓ À l'heure</button>
+          <button class="btn-val ${s==='present_retard'?'on a':''}" onclick="setValidation('${i.id}','present_retard')">⚠️ Retard</button>
+          <button class="btn-val ${s==='absent'?'on r':''}" onclick="setValidation('${i.id}','absent')">✗ Absent</button>
+        </div>
+      </div>`
+  }).join('')
+}
+
+async function setValidation(inscId, newStatus) {
+  const insc = curInscriptionsAffectes.find(i => i.id === inscId)
+  if (!insc) return
+
+  // Toggle : si on click sur l'état déjà actif, on dé-active
+  const finalStatus = (insc.statut_jour_match === newStatus) ? null : newStatus
+  const oldStatus = insc.statut_jour_match
+
+  // Optimistic local update
+  insc.statut_jour_match = finalStatus
+  renderValidation(curInscriptionsAffectes)
+
+  // DB update
+  const updates = {
+    statut_jour_match: finalStatus,
+    validee_par: finalStatus ? curPiloteId : null,
+    validee_le: finalStatus ? new Date().toISOString() : null,
+  }
+  const { error } = await sb.from('inscriptions').update(updates).eq('id', inscId)
+
+  if (error) {
+    // Revert
+    insc.statut_jour_match = oldStatus
+    renderValidation(curInscriptionsAffectes)
+    showAlert('alert-match', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+
+  const labels = {
+    'present_ponctuel': '✓ Présent à l\'heure (+70 pts)',
+    'present_retard': '⚠️ Présent en retard (+50 pts)',
+    'absent': '✗ Marqué absent',
+  }
+  const lbl = finalStatus ? labels[finalStatus] : '↺ Validation retirée'
+  showAlert('alert-match', lbl, finalStatus === 'absent' ? 'e' : 's')
 }
 
 // ─────────────────────────────────────────────────
@@ -938,7 +1065,6 @@ function sugCardHTML(s) {
 function toggleSugExpand(card, id) {
   const wasExpanded = card.classList.contains('expanded')
   card.classList.toggle('expanded')
-  // Auto-mark read on first expand if currently unread
   if (!wasExpanded) {
     const sug = allSuggestions.find(s => s.id === id)
     if (sug && !sug.lu_par_pilote) {
@@ -957,7 +1083,6 @@ async function markSugRead(id, lu, silent) {
   if (sug) sug.lu_par_pilote = lu
   updateSugStats()
 
-  // Update visuel sur la card sans tout re-render
   const card = document.querySelector(`.sug-card[data-sug-id="${id}"]`)
   if (card && sug) {
     const wasExpanded = card.classList.contains('expanded')
