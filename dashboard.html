@@ -737,7 +737,7 @@ async function publishPost() {
   if(!txt)return
   const{data:profil}=await sb.from('benevoles').select('id').eq('email',CU.email).single()
   if(!profil)return
-  await sb.from('posts').insert({auteur_id:profil.id,categorie:'forum',contenu:txt})
+  await sb.from('posts').insert({auteur_id:profil.id,categorie:'forum',titre:txt.slice(0,80),contenu:txt})
   document.getElementById('post-txt').value=''
   loadPosts()
 }
@@ -778,7 +778,7 @@ async function saveJoelNote() {
   const txt=document.getElementById('joel-note')?.value.trim()
   if(!txt)return
   const{data:profil}=await sb.from('benevoles').select('id').eq('email',CU.email).single()
-  if(profil) await sb.from('posts').insert({auteur_id:profil.id,categorie:'forum',contenu:'💡 Conseil de '+CP?.prenom+' : '+txt})
+  if(profil) await sb.from('posts').insert({auteur_id:profil.id,categorie:'forum',titre:'Conseil de '+(CP?.prenom||'un bénévole'),contenu:'💡 Conseil de '+CP?.prenom+' : '+txt})
   document.getElementById('joel-note').value=''
   alert('Conseil partagé avec la communauté ✓')
 }
