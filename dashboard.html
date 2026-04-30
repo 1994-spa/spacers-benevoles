@@ -224,6 +224,66 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   font-size:10px;color:#5F5E5A;line-height:1.7;margin-bottom:12px;
 }
 .photo-tips strong{color:#0C447C;}
+
+/* ── RÉCOMPENSES (chantier 6) ── */
+.rew-hero{
+  background:linear-gradient(135deg,#1a1a18,#042C53,#0C447C);
+  border-radius:20px;padding:18px;margin-bottom:12px;
+  position:relative;overflow:hidden;
+}
+.rew-hero::before{content:'';position:absolute;right:-30px;top:-30px;width:140px;height:140px;background:rgba(245,200,66,0.06);border-radius:50%;}
+.rew-pts-big{font-size:38px;font-weight:800;color:#F5C842;font-family:monospace;line-height:1;}
+.rew-pts-sub{font-size:11px;color:rgba(181,212,244,0.6);margin-top:4px;}
+.rew-prog{height:7px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;margin:12px 0 4px;}
+.rew-prog-fill{height:100%;background:linear-gradient(90deg,#9B6B3A,#F5C842);border-radius:4px;transition:width 1s ease;}
+.rew-prog-lbl{font-size:10px;color:rgba(181,212,244,0.5);}
+.palier-card{
+  background:white;border-radius:16px;padding:16px;margin-bottom:10px;
+  border:2px solid transparent;transition:all .2s;
+}
+.palier-card.unlocked{border-color:#3B6D11;box-shadow:0 4px 16px rgba(59,109,17,0.15);}
+.palier-card.locked{opacity:0.85;}
+.palier-icon{font-size:32px;line-height:1;}
+.palier-title{font-size:15px;font-weight:800;color:#0C447C;}
+.palier-desc{font-size:11px;color:#5F5E5A;margin-top:3px;line-height:1.5;}
+.palier-cost{
+  display:inline-block;font-size:11px;font-weight:700;color:#185FA5;
+  background:#E6F1FB;border-radius:50px;padding:3px 10px;margin-top:8px;
+}
+.palier-progress-mini{
+  height:4px;background:#E6F1FB;border-radius:2px;margin:10px 0 4px;overflow:hidden;
+}
+.palier-progress-mini-fill{height:100%;background:#3B6D11;border-radius:2px;}
+.code-card{
+  background:linear-gradient(135deg,#3B6D11,#5C9C1C);
+  border-radius:16px;padding:16px;margin-bottom:10px;color:white;
+}
+.code-display{
+  background:rgba(255,255,255,0.15);border:1px dashed rgba(255,255,255,0.4);
+  border-radius:10px;padding:14px;text-align:center;margin:10px 0;
+  font-family:monospace;font-size:18px;font-weight:800;letter-spacing:2px;
+}
+.pending-card{
+  background:#FEF3C7;border-radius:14px;padding:14px;margin-bottom:10px;
+  border-left:3px solid #C9821A;
+}
+.pending-title{font-size:13px;font-weight:700;color:#C9821A;}
+.pending-sub{font-size:11px;color:#5F5E5A;margin-top:4px;line-height:1.5;}
+.boutique-link{
+  background:linear-gradient(135deg,#0F0F0F,#2a2a28);
+  border-radius:14px;padding:14px;margin-bottom:10px;display:flex;
+  align-items:center;gap:12px;cursor:pointer;text-decoration:none;
+}
+.boutique-link:active{transform:scale(0.98);}
+.histo-item{
+  background:white;border-radius:10px;padding:10px 12px;margin-bottom:6px;
+  display:flex;justify-content:space-between;align-items:center;font-size:11px;
+}
+.histo-statut{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;}
+.histo-att{background:#FEF3C7;color:#C9821A;}
+.histo-attr{background:#EAF3DE;color:#3B6D11;}
+.histo-ann{background:#F1EFE8;color:#5F5E5A;}
+.histo-ref{background:#FBEAF0;color:#993556;}
 </style>
 </head>
 <body>
@@ -343,6 +403,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <button class="bn"   id="bn-planning" onclick="bSwitch('planning')"><span class="bn-icon">📅</span><span class="bn-label">Planning</span></button>
     <button class="bn"   id="bn-points"   onclick="bSwitch('points')"  ><span class="bn-icon">🏆</span><span class="bn-label">Points</span></button>
     <button class="bn"   id="bn-forum"    onclick="bSwitch('forum')"   ><span class="bn-icon">💬</span><span class="bn-label">Forum</span></button>
+    <button class="bn"   id="bn-reward"   onclick="bSwitch('reward')"  ><span class="bn-icon">🎁</span><span class="bn-label">Cadeaux</span></button>
     <button class="bn"   id="bn-profil"   onclick="bSwitch('profil')"  ><span class="bn-icon">👤</span><span class="bn-label">Profil</span></button>
   </nav>
 
@@ -370,6 +431,12 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       <button class="btn btn-blue" style="width:100%;padding:10px;margin-top:8px;font-size:12px;" onclick="publishPost()">Publier</button>
     </div>
     <div id="posts-list"></div>
+  </div>
+
+  <!-- ── CADEAUX (chantier 6) ── -->
+  <div class="bscreen" id="bs-reward">
+    <div class="sec">🎁 Cadeaux & récompenses</div>
+    <div id="reward-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
   </div>
 
   <!-- ── PROFIL ── -->
@@ -1077,6 +1144,210 @@ function formatFileSize(bytes) {
   return (bytes/(1024*1024)).toFixed(1) + ' Mo'
 }
 
+// ─────────────────────────────────────────────────
+// CADEAUX / RÉCOMPENSES (chantier 6)
+// ─────────────────────────────────────────────────
+
+// Configuration des paliers (alignés sur la SQL)
+const PALIERS = [
+  { pts: 200, valeur: 10, min: 50, label: '-10€ sur 50€', desc: 'Code de réduction Intersport · panier ≥ 50€' }
+]
+const BOUTIQUE_URL = 'https://b19.intersport-boutique-club.fr/685-SPACERSVOLLEYTOULOUSE'
+
+async function loadReward() {
+  if (!CP) return
+  const el = document.getElementById('reward-content')
+  if (!el) return
+
+  // Refresh CP pour avoir les bons points_total / points_depenses
+  const { data: profil } = await sb.from('benevoles')
+    .select('points_total, points_depenses')
+    .eq('id', CP.id).single()
+  if (profil) {
+    CP.points_total = profil.points_total
+    CP.points_depenses = profil.points_depenses
+  }
+
+  // Load mes demandes
+  const { data: demandes, error } = await sb.from('recompenses_demandes')
+    .select('id, palier_pts, statut, code_id, cree_le, traite_le, pilote_message, recompenses_codes(code, valeur_eur, min_panier_eur, expire_le)')
+    .eq('benevole_id', CP.id)
+    .order('cree_le', { ascending: false })
+
+  if (error) {
+    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : '+error.message+'</div>'
+    return
+  }
+
+  const ptsTotal = CP.points_total || 0
+  const ptsDep = CP.points_depenses || 0
+  const ptsDispo = Math.max(0, ptsTotal - ptsDep)
+
+  // Demande en cours pour chaque palier
+  const demandeEnCours = (demandes || []).find(d => d.statut === 'en_attente')
+  const codesAttribues = (demandes || []).filter(d => d.statut === 'attribuee' && d.recompenses_codes)
+
+  let html = `
+    <div class="rew-hero">
+      <div style="font-size:9px;color:rgba(245,200,66,0.5);letter-spacing:2px;margin-bottom:3px;">POINTS DISPONIBLES</div>
+      <div class="rew-pts-big">${ptsDispo}</div>
+      <div class="rew-pts-sub">${ptsTotal} pts gagnés · ${ptsDep} pts dépensés</div>
+      ${ptsTotal > 0 ? `
+        <div class="rew-prog"><div class="rew-prog-fill" style="width:${Math.min((ptsDispo/200)*100,100)}%;"></div></div>
+        <div class="rew-prog-lbl">${ptsDispo >= 200 ? '✓ Premier palier débloqué !' : (200 - ptsDispo) + ' pts pour débloquer le premier cadeau'}</div>
+      ` : ''}
+    </div>
+  `
+
+  // Codes attribués (à utiliser maintenant)
+  if (codesAttribues.length > 0) {
+    html += `<div class="sec">✨ Mes codes disponibles</div>`
+    codesAttribues.forEach(d => {
+      const c = d.recompenses_codes
+      const expirat = c.expire_le ? `Expire le ${formatDate(c.expire_le)}` : 'Sans date d\'expiration'
+      html += `
+        <div class="code-card">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="font-size:18px;">🎟️</span>
+            <strong style="font-size:14px;">-${c.valeur_eur}€ sur ${c.min_panier_eur}€ d'achat</strong>
+          </div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.7);">${expirat}</div>
+          <div class="code-display">${c.code}</div>
+          <button class="btn btn-blue" style="font-size:12px;width:100%;background:white;color:#3B6D11;" onclick="copyCode('${c.code}')">📋 Copier le code</button>
+        </div>`
+    })
+  }
+
+  // Paliers disponibles
+  html += `<div class="sec">🎁 Catalogue des cadeaux</div>`
+  PALIERS.forEach(p => {
+    const dejaEnCours = demandeEnCours && demandeEnCours.palier_pts === p.pts
+    const peutDemander = ptsDispo >= p.pts && !dejaEnCours
+    const progressPct = Math.min((ptsDispo / p.pts) * 100, 100)
+
+    html += `
+      <div class="palier-card ${ptsDispo >= p.pts ? 'unlocked' : 'locked'}">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div class="palier-icon">🎟️</div>
+          <div style="flex:1;">
+            <div class="palier-title">${p.label}</div>
+            <div class="palier-desc">${p.desc}</div>
+            <span class="palier-cost">${p.pts} pts</span>
+          </div>
+        </div>
+        ${ptsDispo < p.pts ? `
+          <div class="palier-progress-mini"><div class="palier-progress-mini-fill" style="width:${progressPct}%;"></div></div>
+          <div style="font-size:10px;color:#5F5E5A;margin-top:4px;">Encore ${p.pts - ptsDispo} pts pour débloquer</div>
+        ` : ''}
+        <button class="btn btn-blue"
+          style="font-size:12px;margin-top:10px;${peutDemander ? '' : 'opacity:0.5;cursor:not-allowed;'}"
+          ${peutDemander ? '' : 'disabled'}
+          onclick="${peutDemander ? `requestReward(${p.pts})` : ''}">
+          ${dejaEnCours ? '⏳ Demande déjà en cours' : ptsDispo < p.pts ? `🔒 Encore ${p.pts - ptsDispo} pts` : '🎁 Demander mon cadeau'}
+        </button>
+      </div>`
+  })
+
+  // Demande en attente
+  if (demandeEnCours) {
+    html += `
+      <div class="pending-card">
+        <div class="pending-title">⏳ Ta demande est en cours</div>
+        <div class="pending-sub">
+          Demandée le ${formatDateTime(demandeEnCours.cree_le)}.<br>
+          Un pilote va te transmettre ton code dès que possible.
+        </div>
+        <button class="btn btn-ghost" style="font-size:11px;margin-top:10px;width:100%;" onclick="cancelRequest('${demandeEnCours.id}')">Annuler ma demande</button>
+      </div>`
+  }
+
+  // Lien boutique
+  html += `
+    <div class="sec">🛍️ La boutique</div>
+    <a class="boutique-link" href="${BOUTIQUE_URL}" target="_blank" rel="noopener">
+      <div style="font-size:24px;">🛒</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;color:white;">Boutique Spacers Intersport</div>
+        <div style="font-size:10px;color:rgba(181,212,244,0.6);margin-top:2px;">Maillots, sacs, survêtements officiels</div>
+      </div>
+      <div style="font-size:18px;color:rgba(181,212,244,0.5);">↗</div>
+    </a>
+  `
+
+  // Historique
+  const histo = (demandes || []).filter(d => d.statut !== 'en_attente')
+  if (histo.length > 0) {
+    html += `<div class="sec">📋 Historique de mes demandes</div>`
+    histo.forEach(d => {
+      const lbl = {
+        'attribuee': '<span class="histo-statut histo-attr">✓ Code reçu</span>',
+        'annulee':   '<span class="histo-statut histo-ann">↺ Annulée</span>',
+        'refusee':   '<span class="histo-statut histo-ref">✗ Refusée</span>',
+      }[d.statut] || ''
+      html += `
+        <div class="histo-item">
+          <div>
+            <div style="font-weight:600;color:#0C447C;">${d.palier_pts} pts</div>
+            <div style="font-size:9px;color:#5F5E5A;">${formatDateTime(d.cree_le)}</div>
+          </div>
+          ${lbl}
+        </div>`
+    })
+  }
+
+  el.innerHTML = html
+}
+
+async function requestReward(palierPts) {
+  if (!CP) return
+  const ptsDispo = (CP.points_total || 0) - (CP.points_depenses || 0)
+  if (ptsDispo < palierPts) {
+    showToast('Pas assez de points', 'error')
+    return
+  }
+  if (!confirm(`Demander un cadeau au palier ${palierPts} pts ?\n\nLe pilote va te transmettre ton code dès que possible. Tes points ne seront débités qu'à la réception du code.`)) return
+
+  const { error } = await sb.from('recompenses_demandes').insert({
+    benevole_id: CP.id,
+    palier_pts: palierPts,
+  })
+  if (error) {
+    showToast('Erreur : ' + error.message, 'error')
+    return
+  }
+  showToast('🎁 Demande envoyée au pilote !', 'success')
+  loadReward()
+}
+
+async function cancelRequest(demandeId) {
+  if (!confirm('Annuler cette demande ?')) return
+  const { error } = await sb.from('recompenses_demandes')
+    .update({ statut: 'annulee', traite_le: new Date().toISOString() })
+    .eq('id', demandeId)
+  if (error) {
+    showToast('Erreur : ' + error.message, 'error')
+    return
+  }
+  showToast('Demande annulée', 'info')
+  loadReward()
+}
+
+function copyCode(code) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code)
+    showToast('📋 Code copié !', 'success')
+  } else {
+    // Fallback
+    const ta = document.createElement('textarea')
+    ta.value = code
+    document.body.appendChild(ta)
+    ta.select()
+    try { document.execCommand('copy'); showToast('📋 Code copié !', 'success') }
+    catch (e) { showToast('Impossible de copier', 'error') }
+    document.body.removeChild(ta)
+  }
+}
+
 // ── CHANGER PROFIL ────────────────────────────────────────────
 function openChangeProfil() {
   document.getElementById('modal-profil').style.display='flex'
@@ -1116,6 +1387,7 @@ function bSwitch(name) {
   if(name==='planning')loadPlanning()
   if(name==='points')loadPoints()
   if(name==='forum')loadPosts()
+  if(name==='reward')loadReward()
   if(name==='profil')renderPhotoCard() // refresh la carte photo en arrivant sur l'onglet
 }
 

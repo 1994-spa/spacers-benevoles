@@ -113,6 +113,27 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 .btn-val.on.a{background:#C9821A;border-color:#FAC775;color:white;}
 .btn-val.on.r{background:#993556;border-color:#C04D72;color:white;}
 
+/* ── RÉCOMPENSES (chantier 6) ── */
+.code-stock-row{
+  background:#2a2a28;border-radius:10px;padding:11px 13px;margin-bottom:7px;
+  display:flex;align-items:center;gap:10px;
+}
+.code-tag{
+  font-family:monospace;font-size:11px;font-weight:700;color:#C0DD97;
+  background:rgba(59,109,17,0.15);padding:3px 8px;border-radius:6px;
+}
+.code-tag.utilise{color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.05);text-decoration:line-through;}
+.bulk-code-area{
+  width:100%;background:#1a1a18;border:1px solid #444441;border-radius:10px;
+  padding:10px;font-family:monospace;font-size:12px;color:white;
+  resize:vertical;min-height:80px;outline:none;
+}
+.bulk-code-area:focus{border-color:#185FA5;}
+.demande-card{
+  background:#2a2a28;border-radius:14px;padding:14px;margin-bottom:8px;
+  border-left:3px solid #C9821A;
+}
+
 /* ACCÈS REFUSÉ */
 #access-denied{display:none;position:fixed;inset:0;background:#1a1a18;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
 #access-denied.show{display:flex;}
@@ -144,6 +165,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <button class="tab"    id="tab-match"       onclick="switchTab('match')">⚽ Match</button>
   <button class="tab"    id="tab-benevoles"   onclick="switchTab('benevoles')">👥 Bénévoles</button>
   <button class="tab"    id="tab-suggestions" onclick="switchTab('suggestions')">💡 Suggestions<span class="bdg-num" id="bdg-suggestions" style="display:none;"></span></button>
+  <button class="tab"    id="tab-reward"      onclick="switchTab('reward')">🎁 Cadeaux<span class="bdg-num" id="bdg-reward" style="display:none;"></span></button>
   <button class="tab"    id="tab-notes"       onclick="switchTab('notes')">📖 Mémoire</button>
 </div>
 
@@ -263,6 +285,60 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   </div>
 
   <div id="sug-list"></div>
+</div>
+
+<!-- RÉCOMPENSES (chantier 6) -->
+<div class="screen" id="screen-reward">
+  <div id="alert-reward"></div>
+
+  <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="kpi"><div class="kpi-val g" id="rew-kpi-stock">—</div><div class="kpi-lbl">Codes en stock</div></div>
+    <div class="kpi"><div class="kpi-val a" id="rew-kpi-att">—</div><div class="kpi-lbl">Demandes en attente</div></div>
+    <div class="kpi"><div class="kpi-val" id="rew-kpi-attr">—</div><div class="kpi-lbl">Codes attribués</div></div>
+  </div>
+
+  <div class="sec">📨 Demandes en attente</div>
+  <div id="rew-demandes"></div>
+
+  <div class="sec">📦 Stock de codes</div>
+  <div class="card">
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:10px;line-height:1.5;">
+      Ajoute des codes par lot (un par ligne). Ils seront utilisables à l'attribution d'une demande.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div>
+        <label class="input-label">Palier (pts)</label>
+        <input id="rew-add-palier" class="input-field" type="number" value="200" min="1">
+      </div>
+      <div>
+        <label class="input-label">Valeur (€)</label>
+        <input id="rew-add-valeur" class="input-field" type="number" value="10" min="1">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div>
+        <label class="input-label">Min. panier (€)</label>
+        <input id="rew-add-min" class="input-field" type="number" value="50" min="0">
+      </div>
+      <div>
+        <label class="input-label">Date d'expiration (optionnel)</label>
+        <input id="rew-add-expire" class="input-field" type="date">
+      </div>
+    </div>
+    <label class="input-label">Codes (un par ligne)</label>
+    <textarea id="rew-add-codes" class="bulk-code-area" placeholder="ABCD1234&#10;EFGH5678&#10;IJKL9012"></textarea>
+    <button class="btn btn-blue btn-full" style="margin-top:10px;" onclick="ajouterCodes()">📥 Ajouter au stock</button>
+  </div>
+
+  <div class="sec">📋 Liste des codes</div>
+  <div style="margin-bottom:8px;">
+    <div class="seg-group" id="rew-filter-group">
+      <button class="seg on" data-rew-filter="dispo" onclick="setRewFilter('dispo', this)">Disponibles</button>
+      <button class="seg" data-rew-filter="utilises" onclick="setRewFilter('utilises', this)">Utilisés</button>
+      <button class="seg" data-rew-filter="tous" onclick="setRewFilter('tous', this)">Tous</button>
+    </div>
+  </div>
+  <div id="rew-codes-list"></div>
 </div>
 
 <!-- MÉMOIRE -->
@@ -387,6 +463,7 @@ async function loadAll() {
   renderBenv(benv)
   await loadMatch()
   await loadSuggestions()
+  await loadReward()
 }
 
 function renderPhotosAtt(list) {
@@ -1176,6 +1253,223 @@ function escapeHtml(s) {
 }
 
 // ─────────────────────────────────────────────────
+// RÉCOMPENSES (chantier 6)
+// ─────────────────────────────────────────────────
+let rewFilter = 'dispo'
+let rewDemandes = []
+let rewCodes = []
+
+async function loadReward() {
+  // Charge demandes (avec info bénévole)
+  const { data: demandes, error: e1 } = await sb.from('recompenses_demandes')
+    .select(`
+      id, palier_pts, statut, code_id, cree_le, traite_le,
+      benevoles!recompenses_demandes_benevole_id_fkey(id, prenom, nom, photo_url, points_total, points_depenses),
+      recompenses_codes(code, valeur_eur, min_panier_eur)
+    `)
+    .order('cree_le', { ascending: false })
+
+  if (e1) {
+    showAlert('alert-reward', '❌ Erreur demandes : ' + e1.message, 'e')
+    return
+  }
+
+  // Charge codes
+  const { data: codes, error: e2 } = await sb.from('recompenses_codes')
+    .select(`
+      *,
+      benevoles!recompenses_codes_utilise_par_fkey(prenom, nom)
+    `)
+    .order('cree_le', { ascending: false })
+
+  if (e2) {
+    showAlert('alert-reward', '❌ Erreur codes : ' + e2.message, 'e')
+    return
+  }
+
+  rewDemandes = demandes || []
+  rewCodes = codes || []
+
+  updateRewKPIs()
+  renderRewDemandes()
+  renderRewCodes()
+}
+
+function updateRewKPIs() {
+  const stock = rewCodes.filter(c => !c.utilise_par).length
+  const att = rewDemandes.filter(d => d.statut === 'en_attente').length
+  const attr = rewDemandes.filter(d => d.statut === 'attribuee').length
+
+  document.getElementById('rew-kpi-stock').textContent = stock
+  document.getElementById('rew-kpi-att').textContent = att
+  document.getElementById('rew-kpi-attr').textContent = attr
+
+  // Badge sur l'onglet
+  const bdg = document.getElementById('bdg-reward')
+  if (bdg) {
+    if (att > 0) {
+      bdg.textContent = att > 99 ? '99+' : String(att)
+      bdg.style.display = 'flex'
+    } else {
+      bdg.style.display = 'none'
+    }
+  }
+}
+
+function renderRewDemandes() {
+  const att = rewDemandes.filter(d => d.statut === 'en_attente')
+  const el = document.getElementById('rew-demandes')
+
+  if (att.length === 0) {
+    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucune demande en attente</div>'
+    return
+  }
+
+  el.innerHTML = att.map(d => {
+    const b = d.benevoles || {}
+    const ptsDispo = (b.points_total || 0) - (b.points_depenses || 0)
+    const stockMatching = rewCodes.filter(c => !c.utilise_par && c.palier_pts === d.palier_pts).length
+
+    return `
+      <div class="demande-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          ${b.photo_url ? `<img src="${b.photo_url}" class="bav">` : `<div class="bav-ph">${ini(b)}</div>`}
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.5);">
+              Palier ${d.palier_pts} pts · ${ptsDispo} pts dispos · demandé ${formatRelativeDate(d.cree_le)}
+            </div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:${stockMatching > 0 ? '#C0DD97' : '#F09595'};margin-bottom:8px;">
+          ${stockMatching > 0 ? `✓ ${stockMatching} code${stockMatching>1?'s':''} dispo${stockMatching>1?'s':''} pour ce palier` : '✗ Aucun code dispo pour ce palier (ajoute du stock)'}
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-green btn-sm" style="flex:1;${stockMatching === 0 ? 'opacity:0.5;cursor:not-allowed;' : ''}"
+            ${stockMatching === 0 ? 'disabled' : ''}
+            onclick="attribuerCode('${d.id}', ${d.palier_pts})">🎁 Attribuer un code</button>
+          <button class="btn btn-red btn-sm" onclick="refuserDemande('${d.id}')">✗ Refuser</button>
+        </div>
+      </div>`
+  }).join('')
+}
+
+function renderRewCodes() {
+  let list = rewCodes
+  if (rewFilter === 'dispo') list = list.filter(c => !c.utilise_par)
+  else if (rewFilter === 'utilises') list = list.filter(c => c.utilise_par)
+
+  const el = document.getElementById('rew-codes-list')
+  if (list.length === 0) {
+    el.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:10px 0;font-style:italic;">Aucun code dans cette catégorie.</div>'
+    return
+  }
+
+  el.innerHTML = list.map(c => {
+    const utilise = !!c.utilise_par
+    const utilLbl = utilise && c.benevoles
+      ? `Utilisé par ${c.benevoles.prenom||''} ${c.benevoles.nom||''} le ${formatDate(c.utilise_le)}`
+      : ''
+    const expire = c.expire_le ? `Expire ${formatDate(c.expire_le)}` : 'Sans expiration'
+    return `
+      <div class="code-stock-row">
+        <div class="code-tag ${utilise ? 'utilise' : ''}">${c.code}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;color:white;">-${c.valeur_eur}€ sur ${c.min_panier_eur}€ · ${c.palier_pts} pts</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.4);">${utilise ? utilLbl : expire}</div>
+        </div>
+        ${!utilise ? `<button class="btn btn-ghost btn-sm" onclick="supprimerCode('${c.id}')">🗑</button>` : ''}
+      </div>`
+  }).join('')
+}
+
+function setRewFilter(f, btn) {
+  rewFilter = f
+  document.querySelectorAll('#rew-filter-group .seg').forEach(s => s.classList.remove('on'))
+  btn.classList.add('on')
+  renderRewCodes()
+}
+
+async function ajouterCodes() {
+  const palier = parseInt(document.getElementById('rew-add-palier').value, 10)
+  const valeur = parseInt(document.getElementById('rew-add-valeur').value, 10)
+  const minP = parseInt(document.getElementById('rew-add-min').value, 10)
+  const expireRaw = document.getElementById('rew-add-expire').value
+  const codesText = document.getElementById('rew-add-codes').value.trim()
+
+  if (!palier || !valeur) return showAlert('alert-reward', '❌ Palier et valeur obligatoires', 'e')
+  if (!codesText) return showAlert('alert-reward', '❌ Aucun code à ajouter', 'e')
+
+  const codes = codesText.split('\n').map(c => c.trim()).filter(c => c.length > 0)
+  if (codes.length === 0) return showAlert('alert-reward', '❌ Aucun code valide', 'e')
+
+  const expire = expireRaw ? new Date(expireRaw + 'T23:59:59').toISOString() : null
+
+  const rows = codes.map(code => ({
+    code,
+    palier_pts: palier,
+    valeur_eur: valeur,
+    min_panier_eur: minP || 0,
+    expire_le: expire,
+    description: `-${valeur}€ sur ${minP || 0}€ d'achat`,
+  }))
+
+  const { error } = await sb.from('recompenses_codes').insert(rows)
+  if (error) return showAlert('alert-reward', '❌ Erreur : ' + error.message, 'e')
+
+  document.getElementById('rew-add-codes').value = ''
+  showAlert('alert-reward', `✓ ${codes.length} code${codes.length>1?'s':''} ajouté${codes.length>1?'s':''} au stock`, 's')
+  loadReward()
+}
+
+async function supprimerCode(codeId) {
+  if (!confirm('Supprimer ce code du stock ?')) return
+  const { error } = await sb.from('recompenses_codes').delete().eq('id', codeId)
+  if (error) return showAlert('alert-reward', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-reward', '🗑 Code supprimé', 's')
+  loadReward()
+}
+
+async function attribuerCode(demandeId, palierPts) {
+  // Trouver un code dispo pour ce palier (premier du stock)
+  const codeDispo = rewCodes.find(c => !c.utilise_par && c.palier_pts === palierPts)
+  if (!codeDispo) {
+    showAlert('alert-reward', '❌ Aucun code dispo pour ce palier', 'e')
+    return
+  }
+
+  if (!confirm(`Attribuer le code "${codeDispo.code}" à cette demande ?\n\n• ${palierPts} pts seront débités du compte du bénévole\n• Le bénévole verra son code dans son espace`)) return
+
+  const { data, error } = await sb.rpc('attribuer_code_recompense', {
+    p_demande_id: demandeId,
+    p_code_id: codeDispo.id,
+  })
+
+  if (error) {
+    showAlert('alert-reward', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+  showAlert('alert-reward', `🎁 Code "${codeDispo.code}" attribué !`, 's')
+  loadReward()
+}
+
+async function refuserDemande(demandeId) {
+  const msg = prompt('Raison du refus (visible par le bénévole, optionnel) :')
+  if (msg === null) return // Annulé
+
+  const { error } = await sb.from('recompenses_demandes').update({
+    statut: 'refusee',
+    pilote_id: curPiloteId,
+    pilote_message: msg || null,
+    traite_le: new Date().toISOString(),
+  }).eq('id', demandeId)
+
+  if (error) return showAlert('alert-reward', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-reward', '✗ Demande refusée', 's')
+  loadReward()
+}
+
+// ─────────────────────────────────────────────────
 // TABS + UTILS
 // ─────────────────────────────────────────────────
 function switchTab(n) {
@@ -1185,6 +1479,7 @@ function switchTab(n) {
   document.getElementById('screen-'+n).classList.add('on')
   if (n === 'notes') loadNotesHistory()
   if (n === 'suggestions') loadSuggestions()
+  if (n === 'reward') loadReward()
 }
 
 function showAlert(id,msg,type){
