@@ -18,6 +18,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 .tab{flex:1;padding:12px 8px;font-size:10px;font-weight:600;color:rgba(255,255,255,0.4);border:none;background:none;cursor:pointer;font-family:'Sora',sans-serif;white-space:nowrap;min-width:70px;position:relative;}
 .tab.on{color:white;border-bottom:2px solid #185FA5;}
 .tab .bdg{position:absolute;top:6px;right:6px;width:7px;height:7px;background:#E24B4A;border-radius:50%;}
+.tab .bdg-num{position:absolute;top:4px;right:2px;min-width:16px;height:14px;background:#E24B4A;border-radius:7px;font-size:9px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1;}
 .screen{display:none;padding:16px;}
 .screen.on{display:block;}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
@@ -73,6 +74,33 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 .toast-flot.s{background:#3B6D11;border-color:#5C9C1C;}
 .toast-flot.e{background:#993556;border-color:#C04D72;}
 
+/* ── SUGGESTIONS (chantier 3) ── */
+.sug-search{width:100%;background:#2a2a28;border:1px solid #444441;border-radius:50px;padding:9px 14px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:10px;}
+.sug-search:focus{border-color:#185FA5;}
+.chips-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.chip{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);padding:5px 11px;border-radius:50px;font-family:'Sora',sans-serif;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;}
+.chip.on{background:rgba(24,95,165,0.3);border-color:#185FA5;color:#B5D4F4;}
+.seg-row{margin-bottom:8px;display:flex;}
+.seg-group{display:inline-flex;background:#2a2a28;border-radius:50px;padding:3px;}
+.seg{background:none;border:none;color:rgba(255,255,255,0.5);padding:5px 12px;border-radius:50px;font-family:'Sora',sans-serif;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;}
+.seg.on{background:#185FA5;color:white;}
+.sug-toolbar{display:flex;gap:8px;margin:10px 0 12px;align-items:center;}
+.sug-sort{background:#1a1a18;border:1px solid #444441;border-radius:50px;padding:6px 12px;font-family:'Sora',sans-serif;font-size:10px;color:white;outline:none;flex:1;cursor:pointer;}
+.sug-card{background:#2a2a28;border-radius:14px;padding:14px;margin-bottom:8px;cursor:pointer;border-left:3px solid transparent;transition:background .15s, border-color .15s;}
+.sug-card.unread{border-left-color:#E24B4A;background:rgba(226,75,74,0.04);}
+.sug-card-head{display:flex;align-items:flex-start;gap:10px;}
+.sug-tag-emoji{font-size:20px;flex-shrink:0;line-height:1;margin-top:1px;}
+.sug-card-meta{flex:1;min-width:0;}
+.sug-title{font-size:13px;font-weight:700;color:white;margin-bottom:4px;word-break:break-word;}
+.sug-info{font-size:10px;color:rgba(255,255,255,0.4);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.sug-dot{width:8px;height:8px;background:#E24B4A;border-radius:50%;flex-shrink:0;margin-top:6px;}
+.sug-extract{font-size:11.5px;color:rgba(255,255,255,0.6);line-height:1.55;margin-top:8px;white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.sug-card.expanded .sug-extract{-webkit-line-clamp:unset;display:block;overflow:visible;}
+.sug-actions{display:none;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.sug-card.expanded .sug-actions{display:flex;}
+.sug-empty{background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.1);border-radius:10px;padding:18px 14px;font-size:12px;color:rgba(255,255,255,0.5);text-align:center;}
+.sug-empty.s{background:rgba(59,109,17,0.1);border-color:rgba(59,109,17,0.3);color:#C0DD97;border-style:solid;}
+
 /* ACCÈS REFUSÉ */
 #access-denied{display:none;position:fixed;inset:0;background:#1a1a18;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
 #access-denied.show{display:flex;}
@@ -99,11 +127,12 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 </div>
 
 <div class="tabs">
-  <button class="tab on" id="tab-accueil"   onclick="switchTab('accueil')">📊 Accueil</button>
-  <button class="tab"    id="tab-accreds"   onclick="switchTab('accreds')">🪪 Accréds<span class="bdg" id="bdg-accreds" style="display:none;"></span></button>
-  <button class="tab"    id="tab-match"     onclick="switchTab('match')">⚽ Match</button>
-  <button class="tab"    id="tab-benevoles" onclick="switchTab('benevoles')">👥 Bénévoles</button>
-  <button class="tab"    id="tab-notes"     onclick="switchTab('notes')">📖 Mémoire</button>
+  <button class="tab on" id="tab-accueil"     onclick="switchTab('accueil')">📊 Accueil</button>
+  <button class="tab"    id="tab-accreds"     onclick="switchTab('accreds')">🪪 Accréds<span class="bdg" id="bdg-accreds" style="display:none;"></span></button>
+  <button class="tab"    id="tab-match"       onclick="switchTab('match')">⚽ Match</button>
+  <button class="tab"    id="tab-benevoles"   onclick="switchTab('benevoles')">👥 Bénévoles</button>
+  <button class="tab"    id="tab-suggestions" onclick="switchTab('suggestions')">💡 Suggestions<span class="bdg-num" id="bdg-suggestions" style="display:none;"></span></button>
+  <button class="tab"    id="tab-notes"       onclick="switchTab('notes')">📖 Mémoire</button>
 </div>
 
 <!-- ACCUEIL -->
@@ -115,6 +144,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
     <div class="kpi"><div class="kpi-val r" id="kpi-r">—</div><div class="kpi-lbl">Comptes à risque</div></div>
   </div>
   <div class="sec">Actions rapides</div>
+  <button class="btn btn-orange btn-full" id="btn-acc-sug" onclick="switchTab('suggestions')" style="display:none;">💡 <span id="acc-sug-msg"></span></button>
   <button class="btn btn-blue btn-full" onclick="switchTab('accreds')">🪪 Valider les photos</button>
   <button class="btn btn-ghost btn-full" onclick="switchTab('match')">⚽ Gérer le match</button>
   <button class="btn btn-ghost btn-full" onclick="switchTab('benevoles')">👥 Tous les bénévoles</button>
@@ -136,23 +166,23 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <div id="alert-match"></div>
   <div class="sec">Prochain match ouvert</div>
   <div class="card" id="match-info"><div style="color:rgba(255,255,255,0.4);font-size:12px;">Aucun match ouvert.</div></div>
-  
+
   <div class="sec">Postes</div>
   <div class="card" style="padding:8px;overflow-x:auto;">
     <table class="aff-table" id="aff-table">
       <tr><th>Poste</th><th>Besoin</th><th>Dispo</th><th>Statut</th></tr>
     </table>
   </div>
-  
+
   <div class="sec">Bénévoles disponibles — affecter un poste</div>
   <div id="dispos-match"></div>
-  
+
   <div class="sec">Bénévoles non-répondants</div>
   <div id="non-rep-match"></div>
-  
+
   <button class="btn btn-blue btn-full" style="margin-top:8px;" onclick="openModalNotif()">📲 Notifier les bénévoles affectés</button>
   <button class="btn btn-orange btn-full" onclick="relancer()">⚡ Relancer tous les non-répondants</button>
-  
+
   <div class="sec">Note pilote sur ce match</div>
   <div class="card">
     <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:8px;">Visible uniquement par les pilotes / admins. Sauvegardée dans la base.</div>
@@ -165,6 +195,55 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 <div class="screen" id="screen-benevoles">
   <input id="search" placeholder="Rechercher un bénévole..." style="width:100%;background:#2a2a28;border:1px solid #444441;border-radius:50px;padding:9px 14px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:12px;" oninput="filterBenv()">
   <div id="benv-list"></div>
+</div>
+
+<!-- SUGGESTIONS (chantier 3) -->
+<div class="screen" id="screen-suggestions">
+  <div id="alert-suggestions"></div>
+
+  <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="kpi"><div class="kpi-val" id="sug-kpi-tot">—</div><div class="kpi-lbl">Total</div></div>
+    <div class="kpi"><div class="kpi-val r" id="sug-kpi-unread">—</div><div class="kpi-lbl">Non-lues</div></div>
+    <div class="kpi"><div class="kpi-val a" id="sug-kpi-priv">—</div><div class="kpi-lbl">🎯 Privées</div></div>
+  </div>
+
+  <input id="sug-search" class="sug-search" placeholder="🔍 Rechercher dans les suggestions..." oninput="onSugSearch()">
+
+  <div class="chips-row" id="sug-tag-chips">
+    <button class="chip on" data-tag="all" onclick="setSugTag('all', this)">Tous</button>
+    <button class="chip" data-tag="📅" onclick="setSugTag('📅', this)">📅 Match</button>
+    <button class="chip" data-tag="🏠" onclick="setSugTag('🏠', this)">🏠 Hors-match</button>
+    <button class="chip" data-tag="👋" onclick="setSugTag('👋', this)">👋 Accueil</button>
+    <button class="chip" data-tag="📱" onclick="setSugTag('📱', this)">📱 App</button>
+    <button class="chip" data-tag="💭" onclick="setSugTag('💭', this)">💭 Autre</button>
+  </div>
+
+  <div class="seg-row">
+    <div class="seg-group" id="sug-statut-group">
+      <button class="seg on" data-statut="tous" onclick="setSugStatut('tous', this)">Toutes</button>
+      <button class="seg" data-statut="non_lu" onclick="setSugStatut('non_lu', this)">Non-lues</button>
+      <button class="seg" data-statut="lu" onclick="setSugStatut('lu', this)">Lues</button>
+    </div>
+  </div>
+
+  <div class="seg-row">
+    <div class="seg-group" id="sug-vis-group">
+      <button class="seg on" data-vis="tous" onclick="setSugVis('tous', this)">Toutes</button>
+      <button class="seg" data-vis="prive" onclick="setSugVis('prive', this)">🎯 Privées</button>
+      <button class="seg" data-vis="public" onclick="setSugVis('public', this)">💬 Publiques</button>
+    </div>
+  </div>
+
+  <div class="sug-toolbar">
+    <select id="sug-sort" class="sug-sort" onchange="onSugSortChange()">
+      <option value="non_lu_first">Non-lues d'abord</option>
+      <option value="recent">Plus récentes</option>
+      <option value="ancien">Plus anciennes</option>
+    </select>
+    <button class="btn btn-ghost btn-sm" onclick="markAllSugRead()">✓ Tout lu</button>
+  </div>
+
+  <div id="sug-list"></div>
 </div>
 
 <!-- MÉMOIRE -->
@@ -202,15 +281,15 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
     <p style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:14px;line-height:1.6;">
       Email envoyé aux bénévoles ayant un <strong>poste affecté</strong> pour ce match.
     </p>
-    
+
     <label class="input-label">🕐 Heure de RDV</label>
     <input id="notif-heure" class="input-field" type="text" placeholder="ex: 18h30" value="18h30">
     <div class="input-hint">Heure d'arrivée des bénévoles avant le match</div>
-    
+
     <div style="margin-top:14px;"></div>
     <label class="input-label">⚠️ Point particulier (optionnel)</label>
     <textarea id="notif-particulier" class="note-area" placeholder="Code parking, tenue spéciale, info logistique..."></textarea>
-    
+
     <div class="modal-actions">
       <button class="btn btn-blue" style="flex:1;" id="btn-notif-send" onclick="confirmNotifAll()">📤 Envoyer</button>
       <button class="btn btn-ghost" style="flex:1;" onclick="closeModalNotif()">Annuler</button>
@@ -227,6 +306,11 @@ let allBenv = []
 let curPh = null
 let curMatch = null
 let curPostes = []
+
+// SUGGESTIONS state
+let allSuggestions = []
+let sugFilters = { search: '', tag: 'all', statut: 'tous', vis: 'tous', sort: 'non_lu_first' }
+let sugSearchDeb = null
 
 async function init() {
   const { data: { session } } = await sb.auth.getSession()
@@ -278,6 +362,7 @@ async function loadAll() {
   renderAccredsGen(benv.filter(b=>b.statut_accreditation==='generee'))
   renderBenv(benv)
   await loadMatch()
+  await loadSuggestions()
 }
 
 function renderPhotosAtt(list) {
@@ -594,7 +679,7 @@ async function relancer() {
     return
   }
   if (!confirm('Envoyer une relance à tous les bénévoles qui n\'ont pas répondu ?')) return
-  
+
   try {
     const res = await callEdgeFunction({
       match_id: curMatch.id,
@@ -673,7 +758,7 @@ async function loadNotesHistory() {
     .not('notes_pilote', 'is', null)
     .order('date_match', { ascending: false })
     .limit(20)
-  
+
   const el = document.getElementById('notes-hist')
   if (!matchs || matchs.length === 0) {
     el.innerHTML = '<div class="card"><div style="color:rgba(255,255,255,0.3);font-size:12px;font-style:italic;">Aucune note pilote enregistrée pour le moment.</div></div>'
@@ -689,12 +774,289 @@ async function loadNotesHistory() {
     </div>`).join('')
 }
 
+// ─────────────────────────────────────────────────
+// SUGGESTIONS (chantier 3)
+// ─────────────────────────────────────────────────
+async function loadSuggestions() {
+  const { data, error } = await sb.from('posts')
+    .select('*, benevoles!auteur_id(prenom, nom)')
+    .eq('categorie', 'suggestion')
+    .order('created_at', { ascending: false })
+  if (error) {
+    console.error('loadSuggestions error', error)
+    showAlert('alert-suggestions', '❌ Erreur de chargement : ' + error.message, 'e')
+    return
+  }
+  allSuggestions = data || []
+  updateSugStats()
+  renderSuggestions()
+}
+
+function updateSugStats() {
+  const visibles = allSuggestions.filter(s => s.visible_pilotes || s.visible_forum)
+  const total = visibles.length
+  const unread = visibles.filter(s => !s.lu_par_pilote).length
+  const priv = visibles.filter(s => s.visible_pilotes && !s.visible_forum).length
+
+  const elTot = document.getElementById('sug-kpi-tot')
+  const elUnr = document.getElementById('sug-kpi-unread')
+  const elPrv = document.getElementById('sug-kpi-priv')
+  if (elTot) elTot.textContent = total
+  if (elUnr) elUnr.textContent = unread
+  if (elPrv) elPrv.textContent = priv
+
+  // Badge sur l'onglet
+  const bdg = document.getElementById('bdg-suggestions')
+  if (bdg) {
+    if (unread > 0) {
+      bdg.textContent = unread > 99 ? '99+' : String(unread)
+      bdg.style.display = 'flex'
+    } else {
+      bdg.style.display = 'none'
+    }
+  }
+
+  // Quick action en accueil
+  const btnAcc = document.getElementById('btn-acc-sug')
+  const msgAcc = document.getElementById('acc-sug-msg')
+  if (btnAcc && msgAcc) {
+    if (unread > 0) {
+      msgAcc.textContent = unread + ' nouvelle' + (unread>1?'s':'') + ' suggestion' + (unread>1?'s':'') + ' à lire'
+      btnAcc.style.display = 'block'
+    } else {
+      btnAcc.style.display = 'none'
+    }
+  }
+}
+
+function getFilteredSugs() {
+  let list = allSuggestions.filter(s => s.visible_pilotes || s.visible_forum)
+
+  if (sugFilters.tag !== 'all') {
+    list = list.filter(s => (s.tag || '').includes(sugFilters.tag))
+  }
+  if (sugFilters.statut === 'non_lu') {
+    list = list.filter(s => !s.lu_par_pilote)
+  } else if (sugFilters.statut === 'lu') {
+    list = list.filter(s => s.lu_par_pilote)
+  }
+  if (sugFilters.vis === 'prive') {
+    list = list.filter(s => s.visible_pilotes)
+  } else if (sugFilters.vis === 'public') {
+    list = list.filter(s => s.visible_forum)
+  }
+  if (sugFilters.search) {
+    const q = sugFilters.search.toLowerCase()
+    list = list.filter(s =>
+      (s.titre || '').toLowerCase().includes(q) ||
+      (s.contenu || '').toLowerCase().includes(q)
+    )
+  }
+
+  if (sugFilters.sort === 'non_lu_first') {
+    list.sort((a, b) => {
+      const ar = a.lu_par_pilote ? 1 : 0
+      const br = b.lu_par_pilote ? 1 : 0
+      if (ar !== br) return ar - br
+      return new Date(b.created_at) - new Date(a.created_at)
+    })
+  } else if (sugFilters.sort === 'recent') {
+    list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+  } else if (sugFilters.sort === 'ancien') {
+    list.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+  }
+
+  return list
+}
+
+function renderSuggestions() {
+  const list = getFilteredSugs()
+  const el = document.getElementById('sug-list')
+  if (!el) return
+
+  const allEmpty = allSuggestions.filter(s => s.visible_pilotes || s.visible_forum).length === 0
+  if (list.length === 0) {
+    if (allEmpty) {
+      el.innerHTML = '<div class="sug-empty s">✓ Aucune suggestion pour le moment.<br>Les bénévoles peuvent en envoyer depuis leur espace.</div>'
+    } else {
+      el.innerHTML = '<div class="sug-empty">Aucune suggestion ne correspond aux filtres actuels.</div>'
+    }
+    return
+  }
+  el.innerHTML = list.map(s => sugCardHTML(s)).join('')
+}
+
+function sugCardHTML(s) {
+  const emoji = getTagEmoji(s.tag)
+  const author = s.anonyme
+    ? '🕶️ Anonyme'
+    : `${(s.benevoles && s.benevoles.prenom) || ''} ${(s.benevoles && s.benevoles.nom) || ''}`.trim() || 'Bénévole'
+  const date = formatRelativeDate(s.created_at)
+  const isPrivate = s.visible_pilotes && !s.visible_forum
+  const isPublic = s.visible_forum
+  const isBoth = s.visible_pilotes && s.visible_forum
+  const unread = !s.lu_par_pilote
+
+  let visBadges = ''
+  if (isBoth) {
+    visBadges = '<span class="s-badge" style="background:rgba(201,130,26,0.2);color:#FAC775;">🎯 Privé</span><span class="s-badge" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">💬 Public</span>'
+  } else if (isPrivate) {
+    visBadges = '<span class="s-badge" style="background:rgba(201,130,26,0.2);color:#FAC775;">🎯 Privé pilotes</span>'
+  } else if (isPublic) {
+    visBadges = '<span class="s-badge" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">💬 Public</span>'
+  }
+
+  const actionBtn = unread
+    ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();markSugRead('${s.id}',true)">✓ Marquer lu</button>`
+    : `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();markSugRead('${s.id}',false)">↺ Marquer non-lu</button>`
+
+  return `
+    <div class="sug-card ${unread ? 'unread' : ''}" data-sug-id="${s.id}" onclick="toggleSugExpand(this, '${s.id}')">
+      <div class="sug-card-head">
+        <div class="sug-tag-emoji">${emoji}</div>
+        <div class="sug-card-meta">
+          <div class="sug-title">${escapeHtml(s.titre || '(sans titre)')}</div>
+          <div class="sug-info">
+            <span>${escapeHtml(author)}</span>
+            <span>·</span>
+            <span>${date}</span>
+            ${visBadges}
+          </div>
+        </div>
+        ${unread ? '<div class="sug-dot" title="Non-lu"></div>' : ''}
+      </div>
+      <div class="sug-extract">${escapeHtml(s.contenu || '')}</div>
+      <div class="sug-actions">
+        ${actionBtn}
+      </div>
+    </div>`
+}
+
+function toggleSugExpand(card, id) {
+  const wasExpanded = card.classList.contains('expanded')
+  card.classList.toggle('expanded')
+  // Auto-mark read on first expand if currently unread
+  if (!wasExpanded) {
+    const sug = allSuggestions.find(s => s.id === id)
+    if (sug && !sug.lu_par_pilote) {
+      markSugRead(id, true, true)
+    }
+  }
+}
+
+async function markSugRead(id, lu, silent) {
+  const { error } = await sb.from('posts').update({ lu_par_pilote: lu }).eq('id', id)
+  if (error) {
+    showAlert('alert-suggestions', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+  const sug = allSuggestions.find(s => s.id === id)
+  if (sug) sug.lu_par_pilote = lu
+  updateSugStats()
+
+  // Update visuel sur la card sans tout re-render
+  const card = document.querySelector(`.sug-card[data-sug-id="${id}"]`)
+  if (card && sug) {
+    const wasExpanded = card.classList.contains('expanded')
+    const newHtml = sugCardHTML(sug)
+    const tmp = document.createElement('div')
+    tmp.innerHTML = newHtml.trim()
+    const newCard = tmp.firstChild
+    if (wasExpanded) newCard.classList.add('expanded')
+    card.replaceWith(newCard)
+  }
+
+  if (!silent) {
+    showAlert('alert-suggestions', lu ? '✓ Marqué comme lu' : '↺ Marqué non-lu', 's')
+  }
+}
+
+async function markAllSugRead() {
+  const list = getFilteredSugs().filter(s => !s.lu_par_pilote)
+  if (list.length === 0) {
+    showAlert('alert-suggestions', '✓ Aucune suggestion non-lue dans la sélection', 's')
+    return
+  }
+  if (!confirm(`Marquer ${list.length} suggestion${list.length>1?'s':''} comme lue${list.length>1?'s':''} ?`)) return
+
+  const ids = list.map(s => s.id)
+  const { error } = await sb.from('posts').update({ lu_par_pilote: true }).in('id', ids)
+  if (error) {
+    showAlert('alert-suggestions', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+  list.forEach(s => { s.lu_par_pilote = true })
+  updateSugStats()
+  renderSuggestions()
+  showAlert('alert-suggestions', `✓ ${list.length} suggestion${list.length>1?'s':''} marquée${list.length>1?'s':''} lue${list.length>1?'s':''}`, 's')
+}
+
+function setSugTag(tag, btn) {
+  sugFilters.tag = tag
+  document.querySelectorAll('#sug-tag-chips .chip').forEach(c => c.classList.remove('on'))
+  btn.classList.add('on')
+  renderSuggestions()
+}
+function setSugStatut(statut, btn) {
+  sugFilters.statut = statut
+  document.querySelectorAll('#sug-statut-group .seg').forEach(c => c.classList.remove('on'))
+  btn.classList.add('on')
+  renderSuggestions()
+}
+function setSugVis(vis, btn) {
+  sugFilters.vis = vis
+  document.querySelectorAll('#sug-vis-group .seg').forEach(c => c.classList.remove('on'))
+  btn.classList.add('on')
+  renderSuggestions()
+}
+function onSugSearch() {
+  clearTimeout(sugSearchDeb)
+  sugSearchDeb = setTimeout(() => {
+    sugFilters.search = document.getElementById('sug-search').value.trim()
+    renderSuggestions()
+  }, 200)
+}
+function onSugSortChange() {
+  sugFilters.sort = document.getElementById('sug-sort').value
+  renderSuggestions()
+}
+
+function getTagEmoji(tag) {
+  if (!tag) return '💭'
+  const t = String(tag)
+  if (t.includes('📅')) return '📅'
+  if (t.includes('🏠')) return '🏠'
+  if (t.includes('👋')) return '👋'
+  if (t.includes('📱')) return '📱'
+  if (t.includes('💭')) return '💭'
+  return '💭'
+}
+
+function formatRelativeDate(d) {
+  if (!d) return ''
+  const diff = (Date.now() - new Date(d).getTime()) / 1000
+  if (diff < 60) return 'à l\'instant'
+  if (diff < 3600) return 'il y a ' + Math.floor(diff/60) + ' min'
+  if (diff < 86400) return 'il y a ' + Math.floor(diff/3600) + 'h'
+  if (diff < 604800) return 'il y a ' + Math.floor(diff/86400) + 'j'
+  return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+}
+
+function escapeHtml(s) {
+  if (s == null) return ''
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+}
+
+// ─────────────────────────────────────────────────
+// TABS + UTILS
+// ─────────────────────────────────────────────────
 function switchTab(n) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'))
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'))
   document.getElementById('tab-'+n).classList.add('on')
   document.getElementById('screen-'+n).classList.add('on')
   if (n === 'notes') loadNotesHistory()
+  if (n === 'suggestions') loadSuggestions()
 }
 
 function showAlert(id,msg,type){
