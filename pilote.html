@@ -94,8 +94,8 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 .sug-title{font-size:13px;font-weight:700;color:white;margin-bottom:4px;word-break:break-word;}
 .sug-info{font-size:10px;color:rgba(255,255,255,0.4);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .sug-dot{width:8px;height:8px;background:#E24B4A;border-radius:50%;flex-shrink:0;margin-top:6px;}
-.sug-extract{font-size:11.5px;color:rgba(255,255,255,0.6);line-height:1.55;margin-top:8px;white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.sug-card.expanded .sug-extract{-webkit-line-clamp:unset;display:block;overflow:visible;}
+.sug-extract{font-size:11.5px;color:rgba(255,255,255,0.6);line-height:1.55;margin-top:8px;white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.sug-card.expanded .sug-extract{-webkit-line-clamp:unset;line-clamp:unset;display:block;overflow:visible;}
 .sug-actions{display:none;gap:6px;margin-top:10px;flex-wrap:wrap;}
 .sug-card.expanded .sug-actions{display:flex;}
 .sug-empty{background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.1);border-radius:10px;padding:18px 14px;font-size:12px;color:rgba(255,255,255,0.5);text-align:center;}
@@ -1279,7 +1279,14 @@ async function markAllSugRead() {
     showAlert('alert-suggestions', '✓ Aucune suggestion non-lue dans la sélection', 's')
     return
   }
-  if (!confirm(`Marquer ${list.length} suggestion${list.length>1?'s':''} comme lue${list.length>1?'s':''} ?`)) return
+  const ok = await confirmModal({
+    icon: '✓',
+    title: `Marquer ${list.length} suggestion${list.length>1?'s':''} comme lue${list.length>1?'s':''} ?`,
+    message: 'Tu pourras toujours les retrouver dans le filtre "Lues".',
+    confirmText: 'Tout marquer lu',
+    confirmStyle: 'blue',
+  })
+  if (!ok) return
 
   const ids = list.map(s => s.id)
   const { error } = await sb.from('posts').update({ lu_par_pilote: true }).in('id', ids)
@@ -1520,7 +1527,14 @@ async function ajouterCodes() {
 }
 
 async function supprimerCode(codeId) {
-  if (!confirm('Supprimer ce code du stock ?')) return
+  const ok = await confirmModal({
+    icon: '🗑',
+    title: 'Supprimer ce code ?',
+    message: 'Le code sera retiré du stock définitivement.',
+    confirmText: 'Supprimer',
+    confirmStyle: 'red',
+  })
+  if (!ok) return
   const { error } = await sb.from('recompenses_codes').delete().eq('id', codeId)
   if (error) return showAlert('alert-reward', '❌ Erreur : ' + error.message, 'e')
   showAlert('alert-reward', '🗑 Code supprimé', 's')
@@ -1535,7 +1549,14 @@ async function attribuerCode(demandeId, palierPts) {
     return
   }
 
-  if (!confirm(`Attribuer le code "${codeDispo.code}" à cette demande ?\n\n• ${palierPts} pts seront débités du compte du bénévole\n• Le bénévole verra son code dans son espace`)) return
+  const ok = await confirmModal({
+    icon: '🎁',
+    title: 'Attribuer ce code ?',
+    message: `Code : ${codeDispo.code}\n\n• ${palierPts} pts seront débités du compte du bénévole\n• Le bénévole verra son code dans son espace`,
+    confirmText: 'Attribuer',
+    confirmStyle: 'green',
+  })
+  if (!ok) return
 
   const { data, error } = await sb.rpc('attribuer_code_recompense', {
     p_demande_id: demandeId,
@@ -1551,7 +1572,14 @@ async function attribuerCode(demandeId, palierPts) {
 }
 
 async function refuserDemande(demandeId) {
-  const msg = prompt('Raison du refus (visible par le bénévole, optionnel) :')
+  const msg = await promptModal({
+    icon: '✗',
+    title: 'Refuser cette demande',
+    message: 'Indique une raison (optionnel, visible par le bénévole).',
+    placeholder: 'Plus de codes en stock cette semaine...',
+    confirmText: 'Refuser la demande',
+    confirmStyle: 'red',
+  })
   if (msg === null) return // Annulé
 
   const { error } = await sb.from('recompenses_demandes').update({
