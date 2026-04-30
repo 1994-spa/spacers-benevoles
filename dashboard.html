@@ -180,6 +180,19 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 /* TEXTAREA FORUM */
 .post-textarea{width:100%;border:1.5px solid #D3D1C7;border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;outline:none;resize:none;height:70px;}
 .post-textarea:focus{border-color:#185FA5;}
+
+/* TOAST FLOTTANT */
+.toast-flot{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(120px);
+  background:#0C447C;color:white;padding:12px 18px;border-radius:50px;
+  font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.25);
+  transition:transform 0.3s ease;z-index:300;max-width:90%;text-align:center;
+  pointer-events:none;
+}
+.toast-flot.show{transform:translateX(-50%) translateY(0);}
+.toast-flot.success{background:#3B6D11;}
+.toast-flot.error{background:#993556;}
+.toast-flot.info{background:#185FA5;}
 </style>
 </head>
 <body>
@@ -350,6 +363,9 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   </div>
 
 </div><!-- /app -->
+
+<!-- TOAST FLOTTANT -->
+<div class="toast-flot" id="toast-flot"></div>
 
 <!-- MODAL CHANGEMENT PROFIL -->
 <div class="modal-ov" id="modal-profil" style="display:none;">
@@ -798,23 +814,21 @@ async function saveProfile() {
     nom:document.getElementById('f-nom').value.trim(),
     telephone:document.getElementById('f-tel').value.trim(),
   }).eq('email',CU.email)
-  document.getElementById('profil-alert').innerHTML=error
-    ?`<div class="alert alert-e">Erreur : ${error.message}</div>`
-    :'<div class="alert alert-s">✓ Profil sauvegardé !</div>'
-  if(!error){const{data:p}=await sb.from('benevoles').select('*').eq('email',CU.email).single();CP=p;renderTopbar(p)}
-  setTimeout(()=>document.getElementById('profil-alert').innerHTML='',3000)
+  if(error){showToast('Erreur : '+error.message,'error');return}
+  showToast('Profil sauvegardé ✓','success')
+  const{data:p}=await sb.from('benevoles').select('*').eq('email',CU.email).single();CP=p;renderTopbar(p)
 }
 
 async function saveSuggestion() {
   const txt = document.getElementById('sugg-txt')?.value.trim()
-  if (!txt) return alert('Tape une suggestion avant de partager')
+  if (!txt) return showToast('Tape une suggestion avant de partager', 'error')
 
   const tag = document.getElementById('sugg-tag')?.value || 'autre'
   const cbForum = document.getElementById('cb-forum')?.checked
   const cbPilotes = document.getElementById('cb-pilotes')?.checked
 
   if (!cbForum && !cbPilotes) {
-    return alert('Choisis au moins une audience (Forum ou Pilotes)')
+    return showToast('Choisis au moins une audience', 'error')
   }
 
   const { data: profil } = await sb.from('benevoles').select('id').eq('email', CU.email).single()
@@ -839,7 +853,7 @@ async function saveSuggestion() {
     visible_pilotes: cbPilotes,
   })
 
-  if (error) return alert('Erreur : ' + error.message)
+  if (error) return showToast('Erreur : ' + error.message, 'error')
 
   document.getElementById('sugg-txt').value = ''
   document.getElementById('cb-forum').checked = true
@@ -850,7 +864,7 @@ async function saveSuggestion() {
   if (cbForum && cbPilotes) msg += 'avec la communauté et les pilotes ✓'
   else if (cbForum) msg += 'avec la communauté ✓'
   else msg += 'aux pilotes (privé) ✓'
-  alert(msg)
+  showToast(msg, 'success')
   if (cbForum) loadPosts()
 }
 
@@ -900,6 +914,19 @@ async function handleLogout(){await sb.auth.signOut();window.location.href='inde
 function ini(b){return((b.prenom||'?')[0]+(b.nom||'?')[0]).toUpperCase()}
 function formatDate(d){if(!d)return'';return new Date(d).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long'})}
 function formatDateTime(d){if(!d)return'';return new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+
+// ── TOAST FLOTTANT ────────────────────────────────────────────
+let _toastTimeout = null
+function showToast(msg, type = 'success') {
+  const el = document.getElementById('toast-flot')
+  if (!el) return
+  clearTimeout(_toastTimeout)
+  el.textContent = msg
+  el.className = 'toast-flot ' + type + ' show'
+  _toastTimeout = setTimeout(() => {
+    el.classList.remove('show')
+  }, 2800)
+}
 
 init()
 </script>
