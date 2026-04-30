@@ -321,6 +321,47 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   display:flex;gap:10px;font-size:10px;color:#5F5E5A;margin-bottom:10px;
   flex-wrap:wrap;
 }
+
+/* ── PROPOSER ANNONCE (modale PDF-like) ── */
+.prop-section-header{
+  background:linear-gradient(90deg,#E6F1FB,#D0E5F8);
+  border-left:4px solid #185FA5;
+  border-radius:6px;
+  padding:9px 12px;
+  margin:16px 0 10px;
+  font-size:11px;
+  font-weight:800;
+  color:#0C447C;
+  letter-spacing:1.2px;
+}
+.prop-section-header:first-of-type{margin-top:8px;}
+.prop-modal-header{
+  background:linear-gradient(135deg,#0C447C,#185FA5);
+  margin:-22px -22px 14px -22px;
+  padding:18px 22px 16px;
+  border-radius:14px 14px 0 0;
+  position:relative;
+  overflow:hidden;
+}
+.prop-modal-header::before{
+  content:'';position:absolute;right:-20px;top:-20px;
+  width:80px;height:80px;background:rgba(245,200,66,0.12);
+  border-radius:50%;
+}
+.prop-modal-header h2{
+  color:white;font-size:18px;font-weight:800;margin:0;letter-spacing:0.5px;
+  position:relative;text-align:left;
+}
+.prop-modal-header-sub{
+  font-size:10px;color:rgba(181,212,244,0.7);margin-top:4px;
+  position:relative;
+}
+.prop-modal-stv{
+  position:absolute;right:14px;top:18px;
+  width:38px;height:38px;background:#F5C842;color:#0C447C;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:11px;
+}
 </style>
 </head>
 <body>
@@ -481,14 +522,13 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   <div class="bscreen" id="bs-emploi">
     <div class="sec">💼 Minute emploi</div>
     
-    <!-- Cartouche : Proposer une annonce via PDF -->
-    <div style="background:linear-gradient(135deg,#185FA5,#0C447C);border-radius:14px;padding:14px;margin-bottom:14px;color:white;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:4px;">✍️ Tu as une annonce à proposer ?</div>
-      <div style="font-size:11px;color:rgba(181,212,244,0.8);line-height:1.5;margin-bottom:10px;">
-        Télécharge le formulaire, remplis-le et envoie-le à <strong>contact@spacerstoulouse.fr</strong>. Un pilote la publiera après validation.
-      </div>
-      <a class="btn btn-blue" href="/formulaire-emploi-partenaire.pdf" download style="display:inline-block;font-size:12px;background:white;color:#185FA5;text-decoration:none;padding:8px 16px;">📥 Télécharger le formulaire</a>
-    </div>
+    <!-- CTA : Proposer une annonce -->
+    <button class="btn btn-blue" style="width:100%;font-size:13px;margin-bottom:12px;background:linear-gradient(135deg,#185FA5,#0C447C);" onclick="openProposerEmploi()">
+      ✍️ Proposer une annonce
+    </button>
+    
+    <!-- Mes propositions (si y en a) -->
+    <div id="mes-propositions"></div>
     
     <div style="display:flex;gap:6px;margin-bottom:12px;">
       <button class="seg-b on" data-emp-filter="tous" onclick="setEmpFilter('tous',this)">Tous</button>
@@ -549,6 +589,79 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   </div>
 </div>
 
+<!-- MODAL PROPOSER UNE ANNONCE EMPLOI (PDF-like) -->
+<div class="modal-ov" id="modal-proposer-emp" style="display:none;">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:520px;padding:22px;">
+    <!-- Header style PDF -->
+    <div class="prop-modal-header">
+      <h2>MINUTE EMPLOI</h2>
+      <div class="prop-modal-header-sub">Formulaire de proposition d'annonce — Spacers Toulouse Volley</div>
+      <div class="prop-modal-stv">STV</div>
+    </div>
+
+    <div style="font-size:11px;color:#5F5E5A;line-height:1.5;text-align:center;margin-bottom:8px;">
+      Ta proposition sera examinée par un pilote avant publication.
+    </div>
+
+    <!-- Section 1 : LE POSTE -->
+    <div class="prop-section-header">1. LE POSTE PROPOSÉ</div>
+
+    <label class="input-label">Titre du poste *</label>
+    <input id="prop-titre" class="input-field" placeholder="Cherche graphiste freelance">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;">
+      <div>
+        <label class="input-label">Type de contrat</label>
+        <select id="prop-contrat" class="input-field">
+          <option value="">--</option>
+          <option>CDI</option>
+          <option>CDD</option>
+          <option>Stage</option>
+          <option>Alternance</option>
+          <option>Freelance</option>
+          <option>Saisonnier</option>
+          <option>Bénévolat</option>
+        </select>
+      </div>
+      <div>
+        <label class="input-label">Lieu</label>
+        <input id="prop-lieu" class="input-field" placeholder="Toulouse">
+      </div>
+    </div>
+
+    <label class="input-label">Description du poste, missions, profil recherché *</label>
+    <textarea id="prop-desc" class="post-textarea" style="height:100px;" placeholder="Décris l'opportunité, le profil recherché, les détails..."></textarea>
+
+    <!-- Section 2 : CONTACT -->
+    <div class="prop-section-header">2. CONTACT POUR LA CANDIDATURE</div>
+
+    <div style="font-size:10px;color:#5F5E5A;margin-bottom:8px;font-style:italic;">📞 Au moins un contact obligatoire</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <div>
+        <label class="input-label">Email</label>
+        <input id="prop-contact-email" class="input-field" type="email">
+      </div>
+      <div>
+        <label class="input-label">Téléphone</label>
+        <input id="prop-contact-tel" class="input-field" type="tel">
+      </div>
+    </div>
+    <label class="input-label">Lien (LinkedIn, formulaire de candidature...)</label>
+    <input id="prop-contact-lien" class="input-field" placeholder="https://...">
+
+    <!-- Boutons -->
+    <div style="display:flex;gap:8px;margin-top:18px;">
+      <button class="btn btn-blue" style="flex:1;font-size:13px;" onclick="soumettreProposition()">📤 Envoyer ma proposition</button>
+      <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="closeProposerEmp()">Annuler</button>
+    </div>
+
+    <div style="font-size:9px;color:#5F5E5A;text-align:center;margin-top:14px;font-style:italic;">
+      * Champs obligatoires
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CHANGEMENT PROFIL -->
 <div class="modal-ov" id="modal-profil" style="display:none;">
   <div class="modal">
@@ -596,6 +709,17 @@ async function loadEmploi() {
   const el = document.getElementById('emploi-content')
   if (!el) return
 
+  // 1. Mes propositions (toutes statuts)
+  if (CP) {
+    const { data: mesProps } = await sb.from('annonces_emploi')
+      .select('id, titre, statut_validation, pilote_message, publiee_le')
+      .eq('soumise_par', CP.id)
+      .order('publiee_le', { ascending: false })
+      .limit(5)
+    renderMesPropositions(mesProps || [])
+  }
+
+  // 2. Annonces publiées (validées + actives + non expirées)
   const { data, error } = await sb.from('annonces_emploi')
     .select('*')
     .eq('active', true)
@@ -610,6 +734,84 @@ async function loadEmploi() {
 
   empAnnonces = data || []
   renderEmploi()
+}
+
+function renderMesPropositions(list) {
+  const el = document.getElementById('mes-propositions')
+  if (!el) return
+  if (list.length === 0) { el.innerHTML = ''; return }
+
+  el.innerHTML = `<div style="font-size:9px;color:rgba(181,212,244,0.4);letter-spacing:1.5px;margin-bottom:6px;">MES PROPOSITIONS</div>` +
+    list.map(p => {
+      const lbl = {
+        'en_attente': '<span class="histo-statut histo-att">⏳ En attente</span>',
+        'validee': '<span class="histo-statut histo-attr">✓ Publiée</span>',
+        'refusee': '<span class="histo-statut histo-ref">✗ Refusée</span>',
+      }[p.statut_validation] || ''
+      return `
+        <div class="histo-item" style="margin-bottom:6px;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;color:#0C447C;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(p.titre)}</div>
+            ${p.pilote_message ? `<div style="font-size:9px;color:#5F5E5A;margin-top:2px;font-style:italic;">"${escapeHtml(p.pilote_message)}"</div>` : ''}
+          </div>
+          ${lbl}
+        </div>`
+    }).join('') + '<div style="margin-bottom:14px;"></div>'
+}
+
+function openProposerEmploi() {
+  // Reset form
+  ;['prop-titre','prop-desc','prop-lieu','prop-contact-email','prop-contact-tel','prop-contact-lien']
+    .forEach(id => { document.getElementById(id).value = '' })
+  document.getElementById('prop-contrat').value = ''
+  document.getElementById('modal-proposer-emp').style.display = 'flex'
+}
+
+function closeProposerEmp() {
+  document.getElementById('modal-proposer-emp').style.display = 'none'
+}
+
+async function soumettreProposition() {
+  if (!CP) return showToast('Pas connecté', 'error')
+
+  const titre = document.getElementById('prop-titre').value.trim()
+  const desc = document.getElementById('prop-desc').value.trim()
+  const email = document.getElementById('prop-contact-email').value.trim()
+  const tel = document.getElementById('prop-contact-tel').value.trim()
+  const lien = document.getElementById('prop-contact-lien').value.trim()
+
+  if (!titre || !desc) {
+    showToast('Titre et description obligatoires', 'error')
+    return
+  }
+  if (!email && !tel && !lien) {
+    showToast('Au moins un contact (email, tél ou lien) requis', 'error')
+    return
+  }
+
+  const row = {
+    type: 'benevole',
+    titre,
+    description: desc,
+    type_contrat: document.getElementById('prop-contrat').value || null,
+    lieu: document.getElementById('prop-lieu').value.trim() || null,
+    contact_nom: (CP.prenom || '') + ' ' + (CP.nom || ''),
+    contact_email: email || null,
+    contact_tel: tel || null,
+    contact_lien: lien || null,
+    soumise_par: CP.id,
+    statut_validation: 'en_attente',
+    active: true,
+  }
+
+  const { error } = await sb.from('annonces_emploi').insert(row)
+  if (error) {
+    showToast('Erreur : ' + error.message, 'error')
+    return
+  }
+  closeProposerEmp()
+  showToast('🎉 Proposition envoyée au pilote !', 'success')
+  loadEmploi()
 }
 
 function setEmpFilter(f, btn) {
