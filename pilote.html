@@ -598,6 +598,7 @@ function renderBenv(list) {
           ${getAccBadge(b.statut_accreditation)}
         </div>
       </div>
+      <button class="btn btn-green btn-sm" title="WhatsApp" style="flex-shrink:0;" onclick="whatsAppLibre('${b.id}')">📱</button>
     </div>`).join('')
 }
 
@@ -796,7 +797,10 @@ async function loadMatch() {
           <div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
           <div style="font-size:10px;color:rgba(255,255,255,0.4);">Pas encore répondu</div>
         </div>
-        <button class="btn btn-orange btn-sm" onclick="relancerIndiv('${b.id}', this)">⚡ Relancer</button>
+        <div style="display:flex;gap:5px;flex-shrink:0;">
+          <button class="btn btn-green btn-sm" title="WhatsApp" onclick="whatsAppNonRepondant('${b.id}')">📱</button>
+          <button class="btn btn-orange btn-sm" onclick="relancerIndiv('${b.id}', this)">⚡ Email</button>
+        </div>
       </div>`).join('')
   }
 
@@ -872,6 +876,7 @@ function renderValidation(list) {
             <div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.4);">📍 ${posteName}</div>
           </div>
+          <button class="btn btn-green btn-sm" title="WhatsApp rappel" onclick="whatsAppRappelAffecte('${i.benevole_id}', '${posteName.replace(/'/g, "\\'")}')">📱</button>
         </div>
         <div style="display:flex;gap:5px;">
           <button class="btn-val ${s==='present_ponctuel'?'on g':''}" onclick="setValidation('${i.id}','present_ponctuel')">✓ À l'heure</button>
@@ -1621,6 +1626,95 @@ function showAlert(id,msg,type){
   if(!el)return
   el.innerHTML=`<div class="alert alert-${type}">${msg}</div>`
   setTimeout(()=>el.innerHTML='',3500)
+}
+
+// ─────────────────────────────────────────────────
+// WHATSAPP — liens wa.me pré-remplis (option B)
+// ─────────────────────────────────────────────────
+function cleanPhoneFr(phone) {
+  if (!phone) return null
+  let p = String(phone).replace(/[^\d+]/g, '')
+  if (p.startsWith('+')) p = p.substring(1)
+  if (p.startsWith('0') && p.length === 10) p = '33' + p.substring(1)
+  if (p.startsWith('33') && p.length === 11) return p
+  return null
+}
+
+function whatsAppLink(phone, message) {
+  const clean = cleanPhoneFr(phone)
+  if (!clean) return null
+  return `https://wa.me/${clean}?text=${encodeURIComponent(message || '')}`
+}
+
+function openWhatsApp(phone, message, alertId) {
+  const url = whatsAppLink(phone, message)
+  if (!url) {
+    showAlert(alertId || 'alert-match', '📱 Numéro de téléphone manquant ou invalide pour ce bénévole', 'e')
+    return
+  }
+  window.open(url, '_blank')
+}
+
+const APP_URL = 'https://spacers-benevoles.spacersytb.workers.dev/'
+
+// Message dispo pour un non-répondant
+function whatsAppNonRepondant(benevoleId) {
+  const b = allBenv.find(x => x.id === benevoleId)
+  if (!b) return
+  if (!curMatch) {
+    showAlert('alert-match', '❌ Aucun match ouvert', 'e')
+    return
+  }
+  const date = formatDate(curMatch.date_match)
+  const heure = curMatch.heure || ''
+  const lieu = curMatch.lieu || 'Palais des Sports'
+  const msg = `Salut ${b.prenom || ''} 👋
+
+On a besoin de toi pour le match Spacers vs ${curMatch.adversaire} le ${date}${heure ? ' à ' + heure : ''} au ${lieu} !
+
+Peux-tu nous dire si tu es dispo ? Tu peux répondre directement dans ton espace bénévole : ${APP_URL}
+
+Merci 🏐`
+  openWhatsApp(b.telephone, msg, 'alert-match')
+}
+
+// Message rappel J-1 pour un affecté
+function whatsAppRappelAffecte(benevoleId, posteName) {
+  const b = allBenv.find(x => x.id === benevoleId)
+  if (!b) return
+  if (!curMatch) return
+  const date = formatDate(curMatch.date_match)
+  const lieu = curMatch.lieu || 'Palais des Sports'
+  const msg = `Salut ${b.prenom || ''} 👋
+
+Petit rappel pour le match Spacers vs ${curMatch.adversaire} (${date}) !
+
+Tu es affecté(e) au poste : ${posteName}.
+RDV au ${lieu}.
+
+À bientôt ! 🏐`
+  openWhatsApp(b.telephone, msg, 'alert-match')
+}
+
+// Message libre pour un bénévole quelconque
+async function whatsAppLibre(benevoleId, alertId) {
+  const b = allBenv.find(x => x.id === benevoleId)
+  if (!b) return
+  if (!cleanPhoneFr(b.telephone)) {
+    showAlert(alertId || 'alert-match', '📱 Numéro de téléphone manquant ou invalide pour ' + (b.prenom || '') + ' ' + (b.nom || ''), 'e')
+    return
+  }
+  const msg = await promptModal({
+    icon: '📱',
+    title: 'Envoyer un message WhatsApp',
+    message: `À : ${b.prenom || ''} ${b.nom || ''}`,
+    placeholder: 'Salut ! ...',
+    defaultValue: `Salut ${b.prenom || ''} 👋\n\n`,
+    confirmText: 'Ouvrir WhatsApp',
+    confirmStyle: 'green',
+  })
+  if (msg === null || !msg.trim()) return
+  openWhatsApp(b.telephone, msg, alertId)
 }
 
 function ini(b){return((b.prenom||'?')[0]+(b.nom||'?')[0]).toUpperCase()}
