@@ -833,7 +833,10 @@ function getFilteredSugs() {
   let list = allSuggestions.filter(s => s.visible_pilotes || s.visible_forum)
 
   if (sugFilters.tag !== 'all') {
-    list = list.filter(s => (s.tag || '').includes(sugFilters.tag))
+    list = list.filter(s => {
+      const haystack = String(s.tag || '') + ' ' + String(s.titre || '')
+      return haystack.includes(sugFilters.tag)
+    })
   }
   if (sugFilters.statut === 'non_lu') {
     list = list.filter(s => !s.lu_par_pilote)
@@ -887,7 +890,7 @@ function renderSuggestions() {
 }
 
 function sugCardHTML(s) {
-  const emoji = getTagEmoji(s.tag)
+  const emoji = getTagEmoji(s)
   const author = s.anonyme
     ? '🕶️ Anonyme'
     : `${(s.benevoles && s.benevoles.prenom) || ''} ${(s.benevoles && s.benevoles.nom) || ''}`.trim() || 'Bénévole'
@@ -1021,14 +1024,14 @@ function onSugSortChange() {
   renderSuggestions()
 }
 
-function getTagEmoji(tag) {
-  if (!tag) return '💭'
-  const t = String(tag)
-  if (t.includes('📅')) return '📅'
-  if (t.includes('🏠')) return '🏠'
-  if (t.includes('👋')) return '👋'
-  if (t.includes('📱')) return '📱'
-  if (t.includes('💭')) return '💭'
+function getTagEmoji(s) {
+  // Cherche l'emoji dans tag ET dans titre (selon ce que dashboard.html stocke)
+  const haystack = String(s.tag || '') + ' ' + String(s.titre || '')
+  if (haystack.includes('📅')) return '📅'
+  if (haystack.includes('🏠')) return '🏠'
+  if (haystack.includes('👋')) return '👋'
+  if (haystack.includes('📱')) return '📱'
+  if (haystack.includes('💭')) return '💭'
   return '💭'
 }
 
