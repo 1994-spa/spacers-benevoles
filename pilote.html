@@ -1668,13 +1668,13 @@ function whatsAppNonRepondant(benevoleId) {
   const date = formatDate(curMatch.date_match)
   const heure = curMatch.heure || ''
   const lieu = curMatch.lieu || 'Palais des Sports'
-  const msg = `Salut ${b.prenom || ''} 👋
+  const msg = `Salut ${b.prenom || ''},
 
 On a besoin de toi pour le match Spacers vs ${curMatch.adversaire} le ${date}${heure ? ' à ' + heure : ''} au ${lieu} !
 
 Peux-tu nous dire si tu es dispo ? Tu peux répondre directement dans ton espace bénévole : ${APP_URL}
 
-Merci 🏐`
+Merci !`
   openWhatsApp(b.telephone, msg, 'alert-match')
 }
 
@@ -1685,14 +1685,14 @@ function whatsAppRappelAffecte(benevoleId, posteName) {
   if (!curMatch) return
   const date = formatDate(curMatch.date_match)
   const lieu = curMatch.lieu || 'Palais des Sports'
-  const msg = `Salut ${b.prenom || ''} 👋
+  const msg = `Salut ${b.prenom || ''},
 
 Petit rappel pour le match Spacers vs ${curMatch.adversaire} (${date}) !
 
 Tu es affecté(e) au poste : ${posteName}.
 RDV au ${lieu}.
 
-À bientôt ! 🏐`
+À bientôt !`
   openWhatsApp(b.telephone, msg, 'alert-match')
 }
 
@@ -1709,7 +1709,7 @@ async function whatsAppLibre(benevoleId, alertId) {
     title: 'Envoyer un message WhatsApp',
     message: `À : ${b.prenom || ''} ${b.nom || ''}`,
     placeholder: 'Salut ! ...',
-    defaultValue: `Salut ${b.prenom || ''} 👋\n\n`,
+    defaultValue: `Salut ${b.prenom || ''},\n\n`,
     confirmText: 'Ouvrir WhatsApp',
     confirmStyle: 'green',
   })
