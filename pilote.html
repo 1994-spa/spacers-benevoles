@@ -166,7 +166,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <button class="tab"    id="tab-benevoles"   onclick="switchTab('benevoles')">👥 Bénévoles</button>
   <button class="tab"    id="tab-suggestions" onclick="switchTab('suggestions')">💡 Suggestions<span class="bdg-num" id="bdg-suggestions" style="display:none;"></span></button>
   <button class="tab"    id="tab-reward"      onclick="switchTab('reward')">🎁 Cadeaux<span class="bdg-num" id="bdg-reward" style="display:none;"></span></button>
-  <button class="tab"    id="tab-emploi"      onclick="switchTab('emploi')">💼 Emploi</button>
+  <button class="tab"    id="tab-emploi"      onclick="switchTab('emploi')">💼 Emploi<span class="bdg-num" id="bdg-emploi" style="display:none;"></span></button>
   <button class="tab"    id="tab-notes"       onclick="switchTab('notes')">📖 Mémoire</button>
 </div>
 
@@ -346,10 +346,30 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 <div class="screen" id="screen-emploi">
   <div id="alert-emploi"></div>
 
-  <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr;">
+  <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+    <div class="kpi"><div class="kpi-val a" id="emp-kpi-att">—</div><div class="kpi-lbl">En attente</div></div>
     <div class="kpi"><div class="kpi-val g" id="emp-kpi-actives">—</div><div class="kpi-lbl">Actives</div></div>
-    <div class="kpi"><div class="kpi-val a" id="emp-kpi-exp">—</div><div class="kpi-lbl">Expirées</div></div>
+    <div class="kpi"><div class="kpi-val" id="emp-kpi-exp">—</div><div class="kpi-lbl">Expirées</div></div>
     <div class="kpi"><div class="kpi-val" id="emp-kpi-tot">—</div><div class="kpi-lbl">Total</div></div>
+  </div>
+
+  <!-- Demandes en attente (bénévoles) -->
+  <div class="sec">📨 Demandes bénévoles en attente</div>
+  <div id="emp-demandes"></div>
+
+  <!-- Lien formulaire partenaire -->
+  <div class="sec">📄 Formulaire partenaire</div>
+  <div class="card" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:200px;">
+      <div style="font-size:12px;font-weight:700;color:white;margin-bottom:3px;">PDF interactif à envoyer aux partenaires</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.5);line-height:1.5;">
+        Le partenaire le remplit dans Acrobat / Aperçu Mac et te le renvoie. Tu n'as plus qu'à recopier dans le formulaire ci-dessous.
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <a class="btn btn-blue btn-sm" href="/formulaire-emploi-partenaire.pdf" download style="text-decoration:none;display:inline-block;">📥 Télécharger</a>
+      <button class="btn btn-ghost btn-sm" onclick="copyFormulaireLink()">🔗 Copier le lien public</button>
+    </div>
   </div>
 
   <div class="sec">➕ Nouvelle annonce</div>
@@ -650,6 +670,7 @@ async function loadAll() {
   await loadMatch()
   await loadSuggestions()
   await loadReward()
+  await loadEmploi()
 }
 
 function renderPhotosAtt(list) {
@@ -1704,7 +1725,10 @@ let empListFilter = 'actives'
 
 async function loadEmploi() {
   const { data, error } = await sb.from('annonces_emploi')
-    .select('*')
+    .select(`
+      *,
+      benevoles!annonces_emploi_soumise_par_fkey(prenom, nom, photo_url)
+    `)
     .order('publiee_le', { ascending: false })
 
   if (error) {
@@ -1713,17 +1737,102 @@ async function loadEmploi() {
   }
   empAnnonces = data || []
   updateEmploiKPIs()
+  renderEmpDemandes()
   renderEmploiList()
+}
+
+function renderEmpDemandes() {
+  const att = empAnnonces.filter(a => a.statut_validation === 'en_attente')
+  const el = document.getElementById('emp-demandes')
+
+  if (att.length === 0) {
+    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucune demande en attente</div>'
+    return
+  }
+
+  el.innerHTML = att.map(a => {
+    const b = a.benevoles || {}
+    return `
+      <div class="demande-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          ${b.photo_url ? `<img src="${b.photo_url}" class="bav">` : `<div class="bav-ph">${ini(b)}</div>`}
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:700;color:white;">${escapeHtmlPilote((b.prenom||'') + ' ' + (b.nom||''))}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.5);">Soumis ${formatDate(a.publiee_le)}</div>
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;margin-bottom:10px;">
+          <div style="font-size:13px;font-weight:700;color:white;margin-bottom:4px;">${escapeHtmlPilote(a.titre)}</div>
+          ${a.type_contrat ? `<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:4px;">${escapeHtmlPilote(a.type_contrat)}${a.lieu ? ' · 📍 ' + escapeHtmlPilote(a.lieu) : ''}</div>` : ''}
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.5;white-space:pre-line;margin-bottom:6px;">${escapeHtmlPilote(a.description)}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.5);">📞 ${[a.contact_email, a.contact_tel, a.contact_lien].filter(x=>x).map(escapeHtmlPilote).join(' · ')}</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-green btn-sm" style="flex:1;" onclick="validerProposition('${a.id}')">✓ Valider et publier</button>
+          <button class="btn btn-red btn-sm" onclick="refuserProposition('${a.id}')">✗ Refuser</button>
+        </div>
+      </div>`
+  }).join('')
+}
+
+async function validerProposition(id) {
+  const { error } = await sb.from('annonces_emploi')
+    .update({ statut_validation: 'validee', pilote_id: curPiloteId })
+    .eq('id', id)
+  if (error) return showAlert('alert-emploi', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-emploi', '✓ Annonce publiée', 's')
+  loadEmploi()
+}
+
+async function refuserProposition(id) {
+  const msg = await promptModal({
+    icon: '✗',
+    title: 'Refuser cette proposition',
+    message: 'Indique une raison (visible par le bénévole).',
+    placeholder: 'Annonce hors-sujet du club...',
+    confirmText: 'Refuser',
+    confirmStyle: 'red',
+  })
+  if (msg === null) return
+  const { error } = await sb.from('annonces_emploi')
+    .update({ statut_validation: 'refusee', pilote_message: msg || null, pilote_id: curPiloteId })
+    .eq('id', id)
+  if (error) return showAlert('alert-emploi', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-emploi', '✗ Proposition refusée', 's')
+  loadEmploi()
+}
+
+function copyFormulaireLink() {
+  const link = window.location.origin + '/formulaire-emploi-partenaire.pdf'
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link)
+    showAlert('alert-emploi', '🔗 Lien copié : ' + link, 's')
+  } else {
+    showAlert('alert-emploi', 'Lien : ' + link, 'i')
+  }
 }
 
 function updateEmploiKPIs() {
   const now = new Date()
-  const actives = empAnnonces.filter(a => a.active && (!a.expire_le || new Date(a.expire_le) > now))
+  const att = empAnnonces.filter(a => a.statut_validation === 'en_attente')
+  const actives = empAnnonces.filter(a => a.active && a.statut_validation === 'validee' && (!a.expire_le || new Date(a.expire_le) > now))
   const exp = empAnnonces.filter(a => a.expire_le && new Date(a.expire_le) <= now)
 
+  document.getElementById('emp-kpi-att').textContent = att.length
   document.getElementById('emp-kpi-actives').textContent = actives.length
   document.getElementById('emp-kpi-exp').textContent = exp.length
   document.getElementById('emp-kpi-tot').textContent = empAnnonces.length
+
+  // Badge sur l'onglet
+  const bdg = document.getElementById('bdg-emploi')
+  if (bdg) {
+    if (att.length > 0) {
+      bdg.textContent = att.length > 99 ? '99+' : String(att.length)
+      bdg.style.display = 'flex'
+    } else {
+      bdg.style.display = 'none'
+    }
+  }
 }
 
 function setEmpType(t, btn) {
@@ -1743,8 +1852,8 @@ function setEmpListFilter(f, btn) {
 
 function renderEmploiList() {
   const now = new Date()
-  let list = empAnnonces
-  if (empListFilter === 'actives') list = list.filter(a => a.active && (!a.expire_le || new Date(a.expire_le) > now))
+  let list = empAnnonces.filter(a => a.statut_validation !== 'en_attente') // les en_attente sont dans la section dédiée
+  if (empListFilter === 'actives') list = list.filter(a => a.active && a.statut_validation === 'validee' && (!a.expire_le || new Date(a.expire_le) > now))
   else if (empListFilter === 'exp') list = list.filter(a => a.expire_le && new Date(a.expire_le) <= now)
 
   const el = document.getElementById('emp-list')
@@ -1756,10 +1865,13 @@ function renderEmploiList() {
   el.innerHTML = list.map(a => {
     const isPart = a.type === 'partenaire'
     const isExp = a.expire_le && new Date(a.expire_le) <= now
-    const opacity = (a.active && !isExp) ? '1' : '0.5'
-    const statut = !a.active ? '<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);">⏸ Désactivée</span>'
-      : isExp ? '<span class="s-badge" style="background:rgba(201,130,26,0.15);color:#FAC775;">⏰ Expirée</span>'
-      : '<span class="s-badge" style="background:rgba(59,109,17,0.15);color:#C0DD97;">● Active</span>'
+    const isRefusee = a.statut_validation === 'refusee'
+    const opacity = (a.active && !isExp && !isRefusee) ? '1' : '0.5'
+    let statut
+    if (isRefusee) statut = '<span class="s-badge" style="background:rgba(153,53,86,0.15);color:#F09595;">✗ Refusée</span>'
+    else if (!a.active) statut = '<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);">⏸ Désactivée</span>'
+    else if (isExp) statut = '<span class="s-badge" style="background:rgba(201,130,26,0.15);color:#FAC775;">⏰ Expirée</span>'
+    else statut = '<span class="s-badge" style="background:rgba(59,109,17,0.15);color:#C0DD97;">● Active</span>'
 
     return `
       <div class="card" style="opacity:${opacity};">
@@ -1779,7 +1891,7 @@ function renderEmploiList() {
           ${a.expire_le ? ` · ⏰ Expire ${formatDate(a.expire_le)}` : ''}
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button class="btn btn-ghost btn-sm" onclick="toggleAnnonce('${a.id}', ${!a.active})">${a.active ? '⏸ Désactiver' : '▶ Réactiver'}</button>
+          ${!isRefusee ? `<button class="btn btn-ghost btn-sm" onclick="toggleAnnonce('${a.id}', ${!a.active})">${a.active ? '⏸ Désactiver' : '▶ Réactiver'}</button>` : ''}
           <button class="btn btn-red btn-sm" onclick="supprimerAnnonce('${a.id}')">🗑 Supprimer</button>
         </div>
       </div>`
