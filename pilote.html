@@ -564,7 +564,7 @@ async function loadMatch() {
 
   // Inscriptions disponibles (incluant statut_jour_match pour la validation)
   const { data: insc } = await sb.from('inscriptions')
-    .select('id, benevole_id, poste_id, statut, statut_jour_match, benevoles(prenom, nom, photo_url, matchs_joues)')
+    .select('id, benevole_id, poste_id, statut, statut_jour_match, benevoles!inscriptions_benevole_id_fkey(prenom, nom, photo_url, matchs_joues)')
     .eq('match_id', m.id)
     .eq('statut', 'disponible')
 
