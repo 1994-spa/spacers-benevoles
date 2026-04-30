@@ -162,7 +162,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 <div class="tabs">
   <button class="tab on" id="tab-accueil"     onclick="switchTab('accueil')">📊 Accueil</button>
   <button class="tab"    id="tab-accreds"     onclick="switchTab('accreds')">🪪 Accréds<span class="bdg" id="bdg-accreds" style="display:none;"></span></button>
-  <button class="tab"    id="tab-match"       onclick="switchTab('match')">⚽ Match</button>
+  <button class="tab"    id="tab-match"       onclick="switchTab('match')">🏐 Match</button>
   <button class="tab"    id="tab-benevoles"   onclick="switchTab('benevoles')">👥 Bénévoles</button>
   <button class="tab"    id="tab-suggestions" onclick="switchTab('suggestions')">💡 Suggestions<span class="bdg-num" id="bdg-suggestions" style="display:none;"></span></button>
   <button class="tab"    id="tab-reward"      onclick="switchTab('reward')">🎁 Cadeaux<span class="bdg-num" id="bdg-reward" style="display:none;"></span></button>
@@ -181,7 +181,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <div class="sec">Actions rapides</div>
   <button class="btn btn-orange btn-full" id="btn-acc-sug" onclick="switchTab('suggestions')" style="display:none;">💡 <span id="acc-sug-msg"></span></button>
   <button class="btn btn-blue btn-full" onclick="switchTab('accreds')">🪪 Valider les photos</button>
-  <button class="btn btn-ghost btn-full" onclick="switchTab('match')">⚽ Gérer le match</button>
+  <button class="btn btn-ghost btn-full" onclick="switchTab('match')">🏐 Gérer le match</button>
   <button class="btn btn-ghost btn-full" onclick="switchTab('benevoles')">👥 Tous les bénévoles</button>
   <div class="sec">Top 5 bénévoles</div>
   <div id="top5"></div>
@@ -1190,7 +1190,7 @@ async function loadNotesHistory() {
   el.innerHTML = matchs.map(m => `
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <div style="font-size:12px;font-weight:700;color:white;">⚽ vs ${m.adversaire}</div>
+        <div style="font-size:12px;font-weight:700;color:white;">🏐 vs ${m.adversaire}</div>
         <div style="font-size:10px;color:rgba(255,255,255,0.4);">${formatDate(m.date_match)}</div>
       </div>
       <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.7;white-space:pre-wrap;">${m.notes_pilote}</div>
