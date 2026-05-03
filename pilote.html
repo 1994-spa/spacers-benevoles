@@ -134,6 +134,30 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   border-left:3px solid #C9821A;
 }
 
+/* ── POSTES (fiches club V1) ── */
+.poste-row{
+  background:#2a2a28;border-radius:12px;padding:12px;margin-bottom:8px;
+  display:flex;align-items:center;gap:12px;cursor:pointer;
+  transition:background .15s;
+}
+.poste-row:hover{background:#33332f;}
+.poste-row-emoji{
+  font-size:32px;line-height:1;flex-shrink:0;
+  width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+  background:#1a1a18;border-radius:10px;
+}
+.poste-row-meta{flex:1;min-width:0;}
+.poste-row-name{font-size:14px;font-weight:700;color:white;margin-bottom:3px;}
+.poste-row-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.poste-tag-pilot{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;}
+.ptg-fac{background:rgba(59,109,17,0.2);color:#C0DD97;}
+.ptg-moy{background:rgba(201,130,26,0.2);color:#FAC775;}
+.ptg-avc{background:rgba(153,53,86,0.2);color:#F4B8CE;}
+.ptg-vid-ok{background:rgba(190,18,60,0.2);color:#F09595;}
+.ptg-vid-no{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);}
+.ptg-warn{background:rgba(201,130,26,0.2);color:#FAC775;}
+.modal-edit{max-width:560px;max-height:92vh;overflow-y:auto;}
+
 /* ACCÈS REFUSÉ */
 #access-denied{display:none;position:fixed;inset:0;background:#1a1a18;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
 #access-denied.show{display:flex;}
@@ -163,6 +187,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <button class="tab on" id="tab-accueil"     onclick="switchTab('accueil')">📊 Accueil</button>
   <button class="tab"    id="tab-accreds"     onclick="switchTab('accreds')">🪪 Accréds<span class="bdg" id="bdg-accreds" style="display:none;"></span></button>
   <button class="tab"    id="tab-match"       onclick="switchTab('match')">🏐 Match</button>
+  <button class="tab"    id="tab-postes"      onclick="switchTab('postes')">📋 Postes</button>
   <button class="tab"    id="tab-benevoles"   onclick="switchTab('benevoles')">👥 Bénévoles</button>
   <button class="tab"    id="tab-suggestions" onclick="switchTab('suggestions')">💡 Suggestions<span class="bdg-num" id="bdg-suggestions" style="display:none;"></span></button>
   <button class="tab"    id="tab-reward"      onclick="switchTab('reward')">🎁 Cadeaux<span class="bdg-num" id="bdg-reward" style="display:none;"></span></button>
@@ -182,6 +207,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <button class="btn btn-orange btn-full" id="btn-acc-sug" onclick="switchTab('suggestions')" style="display:none;">💡 <span id="acc-sug-msg"></span></button>
   <button class="btn btn-blue btn-full" onclick="switchTab('accreds')">🪪 Valider les photos</button>
   <button class="btn btn-ghost btn-full" onclick="switchTab('match')">🏐 Gérer le match</button>
+  <button class="btn btn-ghost btn-full" onclick="switchTab('postes')">📋 Éditer les fiches postes</button>
   <button class="btn btn-ghost btn-full" onclick="switchTab('benevoles')">👥 Tous les bénévoles</button>
   <div class="sec">Top 5 bénévoles</div>
   <div id="top5"></div>
@@ -231,6 +257,27 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
     <textarea class="note-area" id="note-match" placeholder="Points d'attention, retours d'expérience, infos logistiques..."></textarea>
     <button class="btn btn-blue btn-full" style="margin-top:10px;" onclick="saveNote()">💾 Sauvegarder la note</button>
   </div>
+</div>
+
+<!-- POSTES (NOUVEAU) -->
+<div class="screen" id="screen-postes">
+  <div id="alert-postes"></div>
+
+  <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="kpi"><div class="kpi-val" id="post-kpi-tot">—</div><div class="kpi-lbl">Postes</div></div>
+    <div class="kpi"><div class="kpi-val g" id="post-kpi-vid">—</div><div class="kpi-lbl">Avec vidéo</div></div>
+    <div class="kpi"><div class="kpi-val a" id="post-kpi-incompl">—</div><div class="kpi-lbl">À compléter</div></div>
+  </div>
+
+  <div class="card" style="padding:11px 13px;">
+    <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5;">
+      <strong style="color:white;">Les fiches postes</strong> sont visibles par tous les bénévoles depuis leur accueil.
+      Clique sur une fiche pour modifier son contenu (description, missions, vidéo...).
+    </div>
+  </div>
+
+  <div class="sec">Fiches des postes du club</div>
+  <div id="postes-list"></div>
 </div>
 
 <!-- BÉNÉVOLES -->
@@ -520,6 +567,77 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
     <div class="modal-actions">
       <button class="btn btn-blue" style="flex:1;" id="btn-notif-send" onclick="confirmNotifAll()">📤 Envoyer</button>
       <button class="btn btn-ghost" style="flex:1;" onclick="closeModalNotif()">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ÉDITION FICHE POSTE -->
+<div class="modal-overlay" id="modal-poste-edit" style="display:none;">
+  <div class="modal modal-edit">
+    <h2 id="mpe-title">Éditer la fiche poste</h2>
+    <div id="alert-poste-edit"></div>
+
+    <label class="input-label">Emoji</label>
+    <input id="mpe-emoji" class="input-field" maxlength="4" placeholder="🍻" style="font-size:18px;text-align:center;width:80px;">
+
+    <div style="margin-top:10px;">
+      <label class="input-label">Nom du poste</label>
+      <input id="mpe-nom" class="input-field" placeholder="Buvette" disabled style="opacity:0.6;">
+      <div class="input-hint">Le nom n'est pas modifiable depuis l'app (lié aux affectations match).</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+      <div>
+        <label class="input-label">Difficulté</label>
+        <select id="mpe-difficulte" class="input-field">
+          <option value="">--</option>
+          <option>Facile</option>
+          <option>Moyen</option>
+          <option>Avancé</option>
+        </select>
+      </div>
+      <div>
+        <label class="input-label">Bénévoles / match</label>
+        <input id="mpe-max" class="input-field" type="number" min="1" placeholder="2">
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label class="input-label">Description (en quoi consiste ce poste)</label>
+      <textarea id="mpe-description" class="note-area" placeholder="Description courte du poste..."></textarea>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label class="input-label">🎯 Missions</label>
+      <textarea id="mpe-missions" class="note-area" style="height:100px;" placeholder="- Accueillir les supporters
+- Encaisser les commandes
+- Tenir la caisse propre"></textarea>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label class="input-label">🎒 Matériel</label>
+      <textarea id="mpe-materiel" class="note-area" placeholder="Caisse + fond de caisse 50€, terminal CB, badges..."></textarea>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label class="input-label">📍 Lieu & horaires</label>
+      <textarea id="mpe-lieu" class="note-area" placeholder="Hall principal, RDV 18h pour J de match 20h"></textarea>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label class="input-label">💡 Conseils</label>
+      <textarea id="mpe-conseils" class="note-area" placeholder="Astuces, points de vigilance..."></textarea>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label class="input-label">▶ Vidéo YouTube (URL ou ID)</label>
+      <input id="mpe-video" class="input-field" placeholder="https://youtu.be/dQw4w9WgXcQ ou dQw4w9WgXcQ">
+      <div class="input-hint">Colle l'URL complète ou juste l'ID. Laisse vide si pas de vidéo.</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-blue" style="flex:1;" id="btn-mpe-save" onclick="savePosteFiche()">💾 Sauvegarder</button>
+      <button class="btn btn-ghost" style="flex:1;" onclick="closePosteEdit()">Annuler</button>
     </div>
   </div>
 </div>
@@ -2087,6 +2205,138 @@ function escapeHtmlPilote(str) {
 }
 
 // ─────────────────────────────────────────────────
+// POSTES — Catalogue des fiches du club (NOUVEAU)
+// ─────────────────────────────────────────────────
+let allPostes = []
+let curPosteEdit = null
+
+async function loadPostes() {
+  const { data, error } = await sb.from('postes').select('*').order('nom')
+  if (error) {
+    showAlert('alert-postes', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+  allPostes = data || []
+  updatePostesKPIs()
+  renderPostesList()
+}
+
+function updatePostesKPIs() {
+  const tot = allPostes.length
+  const avecVid = allPostes.filter(p => extractYoutubeIdPilote(p.video_youtube_id, p.video_url)).length
+  const incompl = allPostes.filter(p => !p.description || !p.missions).length
+  document.getElementById('post-kpi-tot').textContent = tot
+  document.getElementById('post-kpi-vid').textContent = avecVid
+  document.getElementById('post-kpi-incompl').textContent = incompl
+}
+
+function renderPostesList() {
+  const el = document.getElementById('postes-list')
+  if (!el) return
+  if (allPostes.length === 0) {
+    el.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:10px 0;font-style:italic;">Aucun poste configuré dans la base.</div>'
+    return
+  }
+  el.innerHTML = allPostes.map(p => {
+    const ytId = extractYoutubeIdPilote(p.video_youtube_id, p.video_url)
+    const diffClass = {'Facile':'ptg-fac','Moyen':'ptg-moy','Avancé':'ptg-avc'}[p.difficulte] || ''
+    const emoji = p.emoji || p.icone || '📋'
+    const incomplet = !p.description || !p.missions
+    return `
+      <div class="poste-row" onclick="openPosteEdit('${p.id}')">
+        <div class="poste-row-emoji">${emoji}</div>
+        <div class="poste-row-meta">
+          <div class="poste-row-name">${escapeHtmlPilote(p.nom || '')}</div>
+          <div class="poste-row-tags">
+            ${p.difficulte ? `<span class="poste-tag-pilot ${diffClass}">${escapeHtmlPilote(p.difficulte)}</span>` : ''}
+            <span class="poste-tag-pilot ${ytId ? 'ptg-vid-ok' : 'ptg-vid-no'}">${ytId ? '▶ Vidéo' : '○ Sans vidéo'}</span>
+            ${p.benevoles_max_match ? `<span class="poste-tag-pilot" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);">👥 ${p.benevoles_max_match}/match</span>` : ''}
+            ${incomplet ? '<span class="poste-tag-pilot ptg-warn">⚠️ À compléter</span>' : ''}
+          </div>
+        </div>
+        <div style="font-size:18px;color:rgba(255,255,255,0.3);">›</div>
+      </div>`
+  }).join('')
+}
+
+function extractYoutubeIdPilote(youtubeId, videoUrl) {
+  if (youtubeId && String(youtubeId).trim()) return String(youtubeId).trim()
+  if (!videoUrl) return null
+  const m = String(videoUrl).match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/)([a-zA-Z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+
+function openPosteEdit(posteId) {
+  const p = allPostes.find(x => x.id === posteId)
+  if (!p) return
+  curPosteEdit = p
+  document.getElementById('mpe-title').textContent = `Éditer : ${p.nom || 'Poste'}`
+  document.getElementById('mpe-emoji').value = p.emoji || ''
+  document.getElementById('mpe-nom').value = p.nom || ''
+  document.getElementById('mpe-difficulte').value = p.difficulte || ''
+  document.getElementById('mpe-max').value = p.benevoles_max_match || ''
+  document.getElementById('mpe-description').value = p.description || ''
+  document.getElementById('mpe-missions').value = p.missions || ''
+  document.getElementById('mpe-materiel').value = p.materiel || ''
+  document.getElementById('mpe-lieu').value = p.lieu_horaires || ''
+  document.getElementById('mpe-conseils').value = p.conseils || ''
+  // Pour la vidéo, on affiche l'URL en priorité (plus parlant pour le pilote)
+  document.getElementById('mpe-video').value = p.video_url || p.video_youtube_id || ''
+  document.getElementById('alert-poste-edit').innerHTML = ''
+  document.getElementById('modal-poste-edit').style.display = 'flex'
+}
+
+function closePosteEdit() {
+  document.getElementById('modal-poste-edit').style.display = 'none'
+  curPosteEdit = null
+}
+
+async function savePosteFiche() {
+  if (!curPosteEdit) return
+  const btn = document.getElementById('btn-mpe-save')
+  btn.disabled = true
+  btn.textContent = 'Sauvegarde...'
+
+  const videoRaw = document.getElementById('mpe-video').value.trim()
+  // Détecte si c'est une URL ou juste un ID (11 caractères alphanumériques sans / ni :)
+  let video_url = null
+  let video_youtube_id = null
+  if (videoRaw) {
+    if (/^[a-zA-Z0-9_-]{11}$/.test(videoRaw)) {
+      video_youtube_id = videoRaw
+      video_url = `https://youtu.be/${videoRaw}`
+    } else {
+      video_url = videoRaw
+      video_youtube_id = extractYoutubeIdPilote(null, videoRaw)
+    }
+  }
+
+  const updates = {
+    emoji: document.getElementById('mpe-emoji').value.trim() || null,
+    difficulte: document.getElementById('mpe-difficulte').value || null,
+    benevoles_max_match: parseInt(document.getElementById('mpe-max').value, 10) || null,
+    description: document.getElementById('mpe-description').value.trim() || null,
+    missions: document.getElementById('mpe-missions').value.trim() || null,
+    materiel: document.getElementById('mpe-materiel').value.trim() || null,
+    lieu_horaires: document.getElementById('mpe-lieu').value.trim() || null,
+    conseils: document.getElementById('mpe-conseils').value.trim() || null,
+    video_url,
+    video_youtube_id,
+  }
+
+  const { error } = await sb.from('postes').update(updates).eq('id', curPosteEdit.id)
+  btn.disabled = false
+  btn.textContent = '💾 Sauvegarder'
+  if (error) {
+    document.getElementById('alert-poste-edit').innerHTML = '<div class="alert alert-e">❌ Erreur : ' + error.message + '</div>'
+    return
+  }
+  closePosteEdit()
+  showAlert('alert-postes', '✓ Fiche "' + (curPosteEdit.nom || '') + '" mise à jour', 's')
+  loadPostes()
+}
+
+// ─────────────────────────────────────────────────
 // TABS + UTILS
 // ─────────────────────────────────────────────────
 function switchTab(n) {
@@ -2098,6 +2348,7 @@ function switchTab(n) {
   if (n === 'suggestions') loadSuggestions()
   if (n === 'reward') loadReward()
   if (n === 'emploi') loadEmploi()
+  if (n === 'postes') loadPostes()
 }
 
 function showAlert(id,msg,type){
