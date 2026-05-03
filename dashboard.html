@@ -520,15 +520,15 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   <!-- ── EMPLOI (chantier 8) ── -->
   <div class="bscreen" id="bs-emploi">
     <div class="sec">💼 Minute emploi</div>
-    
+
     <!-- CTA : Proposer une annonce -->
     <button class="btn btn-blue" style="width:100%;font-size:13px;margin-bottom:12px;background:linear-gradient(135deg,#185FA5,#0C447C);" onclick="openProposerEmploi()">
       ✍️ Proposer une annonce
     </button>
-    
+
     <!-- Mes propositions (si y en a) -->
     <div id="mes-propositions"></div>
-    
+
     <div style="display:flex;gap:6px;margin-bottom:12px;">
       <button class="seg-b on" data-emp-filter="tous" onclick="setEmpFilter('tous',this)">Tous</button>
       <button class="seg-b" data-emp-filter="partenaire" onclick="setEmpFilter('partenaire',this)">🤝 Partenaires</button>
@@ -687,6 +687,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 <script>
 const SUPABASE_URL = 'https://xphuolvbamdkizydveij.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwaHVvbHZiYW1ka2l6eWR2ZWlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDQ2MDksImV4cCI6MjA5MjYyMDYwOX0.vpxV6ApwAkhlTx-LMCBZwee7LCdQGYP_5sbPMXEFFUQ'
+const PHOTOS_BUCKET = 'photos-benevoles'
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 let CU = null, CP = null
@@ -697,6 +698,72 @@ let newProfilSelected = ''
 
 // PHOTO state
 let pendingPhotoFile = null
+
+// ─────────────────────────────────────────────────────────────
+// SIGNED URLS — bucket privé (Chantier 11)
+// ─────────────────────────────────────────────────────────────
+// Cache en mémoire pour éviter de regénérer une signed URL à chaque render.
+// Les signed URLs sont valides 1h, on les garde 50 min en cache (10 min de marge).
+const _signedUrlCache = new Map() // path -> {url, expiresAt}
+const SIGNED_URL_TTL = 3600 // 1h
+const SIGNED_URL_REFRESH_MS = 50 * 60 * 1000 // 50 min
+
+async function getSignedPhotoUrl(path) {
+  if (!path) return null
+  const cached = _signedUrlCache.get(path)
+  if (cached && cached.expiresAt > Date.now()) return cached.url
+  try {
+    const { data, error } = await sb.storage
+      .from(PHOTOS_BUCKET)
+      .createSignedUrl(path, SIGNED_URL_TTL)
+    if (error || !data) {
+      console.warn('signed url failed for', path, error)
+      return null
+    }
+    _signedUrlCache.set(path, {
+      url: data.signedUrl,
+      expiresAt: Date.now() + SIGNED_URL_REFRESH_MS,
+    })
+    return data.signedUrl
+  } catch (e) {
+    console.warn('signed url exception', e)
+    return null
+  }
+}
+
+async function getSignedPhotoUrls(paths) {
+  // Batch — utile pour le forum / liste de bénévoles
+  const result = {}
+  if (!paths || paths.length === 0) return result
+  const toFetch = []
+  for (const p of paths) {
+    if (!p) continue
+    const cached = _signedUrlCache.get(p)
+    if (cached && cached.expiresAt > Date.now()) result[p] = cached.url
+    else toFetch.push(p)
+  }
+  if (toFetch.length > 0) {
+    try {
+      const { data, error } = await sb.storage
+        .from(PHOTOS_BUCKET)
+        .createSignedUrls(toFetch, SIGNED_URL_TTL)
+      if (!error && data) {
+        for (const item of data) {
+          if (item.signedUrl && item.path) {
+            result[item.path] = item.signedUrl
+            _signedUrlCache.set(item.path, {
+              url: item.signedUrl,
+              expiresAt: Date.now() + SIGNED_URL_REFRESH_MS,
+            })
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('signed urls batch failed', e)
+    }
+  }
+  return result
+}
 
 // ─────────────────────────────────────────────────
 // EMPLOI / MINUTE EMPLOI (chantier 8)
@@ -759,7 +826,6 @@ function renderMesPropositions(list) {
 }
 
 function openProposerEmploi() {
-  // Reset form
   ;['prop-titre','prop-desc','prop-lieu','prop-contact-email','prop-contact-tel','prop-contact-lien']
     .forEach(id => { document.getElementById(id).value = '' })
   document.getElementById('prop-contrat').value = ''
@@ -894,7 +960,7 @@ function formatRelativeDate(d) {
 }
 
 // ─────────────────────────────────────────────────
-// MODAL CONFIRMATION UNIFIÉE (remplace confirm/prompt natifs)
+// MODAL CONFIRMATION UNIFIÉE
 // ─────────────────────────────────────────────────
 function confirmModal(opts) {
   return new Promise((resolve) => {
@@ -1079,9 +1145,20 @@ function renderTopbar(p) {
   document.getElementById('profil-badge').style.background = cfg.bg
   document.getElementById('profil-badge').style.color = cfg.color
   document.getElementById('t-pts').textContent = (p.points_total||0) + ' pts'
+
+  // Avatar : placeholder synchrone, puis upgrade async via signed URL
   const wrap = document.getElementById('av-wrap')
-  if (p.photo_url) wrap.innerHTML = `<img src="${p.photo_url}" class="av" alt="">`
-  else wrap.innerHTML = `<div class="av-ph">${ini(p)}</div>`
+  wrap.innerHTML = `<div class="av-ph">${ini(p)}</div>`
+  const pathAtCall = p.photo_path
+  if (pathAtCall) {
+    getSignedPhotoUrl(pathAtCall).then(url => {
+      // Guard contre les race conditions : on ne remplace que si CP.photo_path n'a pas changé
+      if (CP?.photo_path === pathAtCall && url) {
+        wrap.innerHTML = `<img src="${url}" class="av" alt="">`
+      }
+    })
+  }
+
   document.querySelectorAll('.bn').forEach(b=>{
     b.classList.remove('hugo','virginie','joel')
     b.classList.add(p.profil_type||'hugo')
@@ -1146,11 +1223,11 @@ function renderHugoHome(el, p, pts, niveau, pct) {
 }
 
 function renderVirginieHome(el, p) {
-  // Checklist dynamique : photo done si photo_url présente
+  // Checklist dynamique : photo done si photo_path présent (chantier 11)
   const etapes = [
     {done:true,            txt:'Inscription validée ✓'},
     {done:true,            txt:'Compte créé et email reçu ✓'},
-    {done:!!p.photo_url,   txt:'Ajouter votre photo de profil'},
+    {done:!!p.photo_path,  txt:'Ajouter votre photo de profil'},
     {done:false,           txt:'Répondre au premier match'},
     {done:false,           txt:'Découvrir votre fiche de poste'},
   ]
@@ -1321,17 +1398,34 @@ function loadPoints() {
 
 // ── FORUM ────────────────────────────────────────────────────
 async function loadPosts() {
-  const el=document.getElementById('posts-list')
-  const{data:posts}=await sb.from('posts').select('*, benevoles(prenom,nom,photo_url,profil_type)').order('created_at',{ascending:false}).limit(20)
-  if(!posts||posts.length===0){el.innerHTML='<div style="text-align:center;color:#5F5E5A;padding:20px;font-size:12px;">Soyez le premier à poster !</div>';return}
-  el.innerHTML=posts.map(p=>{
-    const ptBg={hugo:'#E6F1FB',virginie:'#EDE9FE',joel:'#EAF3DE'}[p.benevoles?.profil_type||'hugo']||'#E6F1FB'
-    const ptC={hugo:'#0C447C',virginie:'#533BB7',joel:'#3B6D11'}[p.benevoles?.profil_type||'hugo']||'#0C447C'
-    return`<div style="background:white;border-radius:12px;padding:13px;margin-bottom:8px;">
+  const el = document.getElementById('posts-list')
+  // CHANGEMENT (chantier 11) : on récupère photo_path au lieu de photo_url
+  const { data: posts } = await sb.from('posts')
+    .select('*, benevoles(prenom, nom, photo_path, profil_type)')
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  if (!posts || posts.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:#5F5E5A;padding:20px;font-size:12px;">Soyez le premier à poster !</div>'
+    return
+  }
+
+  // Batch-resolve les signed URLs pour toutes les photos visibles
+  const paths = posts
+    .map(p => p.benevoles?.photo_path)
+    .filter(Boolean)
+  const urlMap = await getSignedPhotoUrls(paths)
+
+  el.innerHTML = posts.map(p => {
+    const ptBg = {hugo:'#E6F1FB',virginie:'#EDE9FE',joel:'#EAF3DE'}[p.benevoles?.profil_type||'hugo']||'#E6F1FB'
+    const ptC  = {hugo:'#0C447C',virginie:'#533BB7',joel:'#3B6D11'}[p.benevoles?.profil_type||'hugo']||'#0C447C'
+    const photoPath = p.benevoles?.photo_path
+    const photoUrl  = photoPath ? urlMap[photoPath] : null
+    return `<div style="background:white;border-radius:12px;padding:13px;margin-bottom:8px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
-        ${p.benevoles?.photo_url
-          ?`<img src="${p.benevoles.photo_url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid #B5D4F4;">`
-          :`<div style="width:28px;height:28px;border-radius:50%;background:${ptBg};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${ptC};">${((p.benevoles?.prenom||'?')[0]+(p.benevoles?.nom||'?')[0]).toUpperCase()}</div>`}
+        ${photoUrl
+          ? `<img src="${photoUrl}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid #B5D4F4;">`
+          : `<div style="width:28px;height:28px;border-radius:50%;background:${ptBg};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${ptC};">${((p.benevoles?.prenom||'?')[0]+(p.benevoles?.nom||'?')[0]).toUpperCase()}</div>`}
         <div>
           <div style="font-size:12px;font-weight:700;color:#0C447C;">${p.benevoles?(p.benevoles.prenom||'')+' '+(p.benevoles.nom||''):'Bénévole'}</div>
           <div style="font-size:9px;color:#5F5E5A;">${formatDateTime(p.created_at)}</div>
@@ -1369,7 +1463,7 @@ function loadProfilFields(p) {
       <div><div style="font-size:13px;font-weight:700;color:${c.color};">${c.name}</div>
         <div style="font-size:10px;color:#5F5E5A;margin-top:1px;">${c.desc}</div></div>
     </div>`
-  // Photo card
+  // Photo card (async)
   renderPhotoCard()
 }
 
@@ -1434,9 +1528,9 @@ async function saveSuggestion() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// PHOTO UPLOAD (chantier 4)
+// PHOTO UPLOAD (chantier 4) — adapté bucket privé (chantier 11)
 // ─────────────────────────────────────────────────────────────
-function renderPhotoCard() {
+async function renderPhotoCard() {
   const el = document.getElementById('photo-card-content')
   if (!el || !CP) return
 
@@ -1462,11 +1556,15 @@ function renderPhotoCard() {
     return
   }
 
-  // Mode normal : photo actuelle ou placeholder
+  // Mode normal : photo actuelle (signed URL) ou placeholder
   const p = CP
   const statut = p.statut_accreditation || 'sans_photo'
-  const photoHtml = p.photo_url
-    ? `<img src="${p.photo_url}" class="photo-display" alt="Ma photo">`
+
+  let photoUrl = null
+  if (p.photo_path) photoUrl = await getSignedPhotoUrl(p.photo_path)
+
+  const photoHtml = photoUrl
+    ? `<img src="${photoUrl}" class="photo-display" alt="Ma photo">`
     : `<div class="photo-display-ph">${ini(p)}</div>`
 
   const statusBadges = {
@@ -1478,7 +1576,6 @@ function renderPhotoCard() {
   }
   const statusBadge = statusBadges[statut] || statusBadges['sans_photo']
 
-  // Message contextualisé selon le statut
   let contextMsg = ''
   if (statut === 'refusee') {
     contextMsg = '<div style="background:#FBEAF0;color:#993556;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;font-weight:600;">Ta photo précédente a été refusée. Envoie une nouvelle photo plus claire.</div>'
@@ -1500,14 +1597,14 @@ function renderPhotoCard() {
       ✗ Pas de lunettes de soleil &nbsp; ✗ Pas de photo floue
     </div>
     <button class="btn btn-blue" style="font-size:13px;" onclick="document.getElementById('photo-file-input').click()">
-      📷 ${p.photo_url ? 'Changer ma photo' : 'Ajouter ma photo'}
+      📷 ${p.photo_path ? 'Changer ma photo' : 'Ajouter ma photo'}
     </button>
   `
 }
 
 function onPhotoSelected(ev) {
   const file = ev.target.files[0]
-  ev.target.value = '' // permet de re-sélectionner le même fichier
+  ev.target.value = ''
   if (!file) return
 
   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
@@ -1541,48 +1638,44 @@ async function confirmPhotoUpload() {
 
   try {
     const file = pendingPhotoFile
-    const ext = file.type === 'image/png' ? 'png'
+    const ext = file.type === 'image/png'  ? 'png'
               : file.type === 'image/webp' ? 'webp'
               : 'jpg'
     const path = `${CU.id}/profile.${ext}`
 
-    // 1. Upload vers Storage (overwrite si existe)
+    // 1. Upload (overwrite si existe — RLS check : own folder)
     const { error: upErr } = await sb.storage
-      .from('photos-benevoles')
+      .from(PHOTOS_BUCKET)
       .upload(path, file, {
         upsert: true,
         contentType: file.type,
-        cacheControl: '3600'
+        cacheControl: '3600',
       })
     if (upErr) throw upErr
 
-    // 2. Récupérer URL publique + cache-buster
-    const { data: pub } = sb.storage
-      .from('photos-benevoles')
-      .getPublicUrl(path)
-    const photoUrl = pub.publicUrl + '?v=' + Date.now()
-
-    // 3. Update DB : photo + repasse en attente (re-validation pilote)
+    // 2. Update DB : on stocke le PATH (chantier 11), photo_url devient null
     const { error: dbErr } = await sb.from('benevoles').update({
-      photo_url: photoUrl,
+      photo_path: path,
+      photo_url: null,
       statut_accreditation: 'en_attente',
       photo_validee: false,
     }).eq('email', CU.email)
     if (dbErr) throw dbErr
 
-    // 4. Refresh
+    // 3. Bust cache pour ce path (force la régénération de la signed URL)
+    _signedUrlCache.delete(path)
+
+    // 4. Refresh UI
     pendingPhotoFile = null
     const { data: refreshed } = await sb.from('benevoles').select('*').eq('email', CU.email).single()
     if (refreshed) {
       CP = refreshed
       renderTopbar(refreshed)
-      renderPhotoCard()
-      // Si profil Virginie, refresh la checklist d'accueil
+      await renderPhotoCard()
       if (refreshed.profil_type === 'virginie') {
         renderHomeForProfil(refreshed)
       }
     }
-
     showToast('Photo envoyée ! En attente de validation par un pilote.', 'success')
   } catch (err) {
     console.error('Photo upload error:', err)
@@ -1604,7 +1697,6 @@ function formatFileSize(bytes) {
 // CADEAUX / RÉCOMPENSES (chantier 6)
 // ─────────────────────────────────────────────────
 
-// Configuration des paliers (alignés sur la SQL)
 const PALIERS = [
   { pts: 200, valeur: 10, min: 50, label: '-10€ sur 50€', desc: 'Code de réduction Intersport · panier ≥ 50€' }
 ]
@@ -1615,7 +1707,6 @@ async function loadReward() {
   const el = document.getElementById('reward-content')
   if (!el) return
 
-  // Refresh CP pour avoir les bons points_total / points_depenses
   const { data: profil } = await sb.from('benevoles')
     .select('points_total, points_depenses')
     .eq('id', CP.id).single()
@@ -1624,7 +1715,6 @@ async function loadReward() {
     CP.points_depenses = profil.points_depenses
   }
 
-  // Load mes demandes
   const { data: demandes, error } = await sb.from('recompenses_demandes')
     .select('id, palier_pts, statut, code_id, cree_le, traite_le, pilote_message, recompenses_codes(code, valeur_eur, min_panier_eur, expire_le)')
     .eq('benevole_id', CP.id)
@@ -1639,7 +1729,6 @@ async function loadReward() {
   const ptsDep = CP.points_depenses || 0
   const ptsDispo = Math.max(0, ptsTotal - ptsDep)
 
-  // Demande en cours pour chaque palier
   const demandeEnCours = (demandes || []).find(d => d.statut === 'en_attente')
   const codesAttribues = (demandes || []).filter(d => d.statut === 'attribuee' && d.recompenses_codes)
 
@@ -1655,7 +1744,6 @@ async function loadReward() {
     </div>
   `
 
-  // Codes attribués (à utiliser maintenant)
   if (codesAttribues.length > 0) {
     html += `<div class="sec">✨ Mes codes disponibles</div>`
     codesAttribues.forEach(d => {
@@ -1674,7 +1762,6 @@ async function loadReward() {
     })
   }
 
-  // Paliers disponibles
   html += `<div class="sec">🎁 Catalogue des cadeaux</div>`
   PALIERS.forEach(p => {
     const dejaEnCours = demandeEnCours && demandeEnCours.palier_pts === p.pts
@@ -1704,7 +1791,6 @@ async function loadReward() {
       </div>`
   })
 
-  // Demande en attente
   if (demandeEnCours) {
     html += `
       <div class="pending-card">
@@ -1717,7 +1803,6 @@ async function loadReward() {
       </div>`
   }
 
-  // Lien boutique
   html += `
     <div class="sec">🛍️ La boutique</div>
     <a class="boutique-link" href="${BOUTIQUE_URL}" target="_blank" rel="noopener">
@@ -1730,7 +1815,6 @@ async function loadReward() {
     </a>
   `
 
-  // Historique
   const histo = (demandes || []).filter(d => d.statut !== 'en_attente')
   if (histo.length > 0) {
     html += `<div class="sec">📋 Historique de mes demandes</div>`
@@ -1808,7 +1892,6 @@ function copyCode(code) {
     navigator.clipboard.writeText(code)
     showToast('📋 Code copié !', 'success')
   } else {
-    // Fallback
     const ta = document.createElement('textarea')
     ta.value = code
     document.body.appendChild(ta)
@@ -1860,7 +1943,7 @@ function bSwitch(name) {
   if(name==='forum')loadPosts()
   if(name==='reward')loadReward()
   if(name==='emploi')loadEmploi()
-  if(name==='profil')renderPhotoCard() // refresh la carte photo en arrivant sur l'onglet
+  if(name==='profil')renderPhotoCard()
 }
 
 async function handleLogout(){await sb.auth.signOut();window.location.href='index.html'}

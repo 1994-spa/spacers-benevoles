@@ -87,6 +87,8 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:f
   background:rgba(0,0,0,0.15);
 }
 .login-footer p{font-size:10px;color:rgba(181,212,244,0.4);line-height:1.6;}
+.login-footer a{color:rgba(181,212,244,0.6);text-decoration:none;}
+.login-footer a:hover{color:rgba(181,212,244,0.9);text-decoration:underline;}
 
 /* ── ONBOARDING SCREENS ── */
 .ob-screen{
@@ -117,6 +119,7 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:f
   transition:all .2s;margin-bottom:8px;
 }
 .ob-btn-primary{background:white;color:#042C53;}
+.ob-btn-primary:disabled{background:rgba(255,255,255,0.2);color:rgba(255,255,255,0.4);cursor:not-allowed;}
 .ob-btn-skip{background:none;border:none;color:rgba(255,255,255,0.4);font-family:'Sora',sans-serif;font-size:11px;cursor:pointer;width:100%;padding:4px;}
 
 /* Step icons */
@@ -139,6 +142,49 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:f
 .stat-box{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;flex:1;text-align:center;}
 .stat-val{font-size:24px;font-weight:800;color:white;font-family:monospace;}
 .stat-lbl{font-size:9px;color:rgba(181,212,244,0.6);margin-top:2px;}
+
+/* ── CONSENT SCREEN (RGPD) ── */
+.consent-row{
+  display:flex;gap:11px;align-items:flex-start;
+  background:rgba(255,255,255,0.05);
+  border:1.5px solid rgba(255,255,255,0.08);
+  border-radius:12px;padding:12px;margin-bottom:8px;
+  cursor:pointer;transition:all .2s;
+}
+.consent-row:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);}
+.consent-row.checked{
+  background:rgba(59,109,17,0.18);
+  border-color:rgba(59,109,17,0.5);
+}
+.consent-cb{
+  width:18px;height:18px;flex-shrink:0;margin-top:1px;
+  accent-color:#3B6D11;cursor:pointer;
+}
+.consent-label{flex:1;}
+.consent-title{font-size:12px;font-weight:700;color:white;margin-bottom:3px;line-height:1.3;}
+.consent-text{font-size:10.5px;color:rgba(181,212,244,0.78);line-height:1.55;}
+.consent-link{color:#9BC4F1;text-decoration:underline;font-weight:600;}
+.consent-link:hover{color:#C9DEF5;}
+.consent-section-label{font-size:10px;letter-spacing:1.5px;color:rgba(181,212,244,0.5);text-transform:uppercase;margin:14px 0 8px;font-weight:700;}
+.consent-info{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;padding:10px 12px;margin-top:12px;
+  font-size:10.5px;color:rgba(181,212,244,0.72);line-height:1.6;
+}
+.final-step-badge{
+  font-size:9px;letter-spacing:2px;color:rgba(245,200,66,0.85);
+  text-transform:uppercase;margin-bottom:6px;font-weight:700;
+}
+.consent-progress{
+  height:3px;background:rgba(255,255,255,0.1);border-radius:2px;
+  overflow:hidden;margin:10px 0 4px;
+}
+.consent-progress-fill{
+  height:100%;background:linear-gradient(90deg,#3B6D11,#7BB04A);
+  border-radius:2px;transition:width .3s ease;width:0%;
+}
+.consent-counter{font-size:10px;color:rgba(181,212,244,0.55);text-align:center;margin-top:2px;}
 </style>
 </head>
 <body>
@@ -171,7 +217,11 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:f
   </div>
 
   <div class="login-footer">
-    <p>TOAC-TUC Volley-Ball · Palais des Sports · Toulouse<br>Application réservée aux bénévoles inscrits</p>
+    <p>
+      TOAC-TUC Volley-Ball · Palais des Sports · Toulouse<br>
+      Application réservée aux bénévoles inscrits<br>
+      <a href="/mentions-legales.html">Mentions légales</a> · <a href="/confidentialite.html">Confidentialité</a>
+    </p>
   </div>
 </div>
 
@@ -189,7 +239,7 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:f
   <div class="dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
   <div class="ob-footer">
     <button class="ob-btn ob-btn-primary" onclick="goOb(2)">Commencer la visite →</button>
-    <button class="ob-btn-skip" onclick="finishOb()">Passer le tutoriel</button>
+    <button class="ob-btn-skip" onclick="goConsent()">Passer le tutoriel</button>
   </div>
 </div>
 
@@ -222,7 +272,7 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:f
   <div class="dots"><div class="dot"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
   <div class="ob-footer">
     <button class="ob-btn ob-btn-primary" onclick="goOb(3)">Comment s'inscrire →</button>
-    <button class="ob-btn-skip" onclick="finishOb()">Passer</button>
+    <button class="ob-btn-skip" onclick="goConsent()">Passer</button>
   </div>
 </div>
 
@@ -265,7 +315,7 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:f
   <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot active"></div><div class="dot"></div></div>
   <div class="ob-footer">
     <button class="ob-btn ob-btn-primary" onclick="goOb(4)">Les points et avantages →</button>
-    <button class="ob-btn-skip" onclick="finishOb()">Passer</button>
+    <button class="ob-btn-skip" onclick="goConsent()">Passer</button>
   </div>
 </div>
 
@@ -299,7 +349,75 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:f
   </div>
   <div class="dots"><div class="dot" style="background:rgba(255,255,255,0.3);"></div><div class="dot" style="background:rgba(255,255,255,0.3);"></div><div class="dot" style="background:rgba(255,255,255,0.3);"></div><div class="dot active" style="background:#F5C842;width:20px;border-radius:3px;"></div></div>
   <div class="ob-footer" style="background:#0C1B2E;">
-    <button class="ob-btn" style="background:linear-gradient(135deg,#C9821A,#854F0B);color:white;" onclick="showAllSet()">Accéder à mon espace →</button>
+    <button class="ob-btn" style="background:linear-gradient(135deg,#C9821A,#854F0B);color:white;" onclick="goConsent()">Étape finale →</button>
+  </div>
+</div>
+
+<!-- ══ ONBOARDING — CONSENTEMENTS RGPD ════════════════════════ -->
+<div class="ob-screen" id="ob-consent">
+  <div class="ob-header">
+    <div class="final-step-badge">⚠️ DERNIÈRE ÉTAPE</div>
+    <div class="ob-title">Vos consentements</div>
+    <div class="ob-sub">Avant de commencer, quelques validations.</div>
+    <div class="consent-progress"><div class="consent-progress-fill" id="consent-progress-fill"></div></div>
+    <div class="consent-counter" id="consent-counter">0 / 3 requis</div>
+  </div>
+
+  <div class="ob-body">
+    <!-- Required consents -->
+    <label class="consent-row" for="cs-reglement">
+      <input type="checkbox" id="cs-reglement" class="consent-cb" onchange="updateConsentBtn()">
+      <div class="consent-label">
+        <div class="consent-title">📋 Règlement intérieur du club</div>
+        <div class="consent-text">
+          J'ai lu et j'accepte le règlement intérieur du club.<br>
+          <a href="/reglement-interieur.pdf" target="_blank" rel="noopener" class="consent-link">→ Lire le règlement</a>
+        </div>
+      </div>
+    </label>
+
+    <label class="consent-row" for="cs-rgpd">
+      <input type="checkbox" id="cs-rgpd" class="consent-cb" onchange="updateConsentBtn()">
+      <div class="consent-label">
+        <div class="consent-title">🔒 Politique de confidentialité</div>
+        <div class="consent-text">
+          J'ai lu et j'accepte la politique de traitement de mes données personnelles (nom, contact, photo, historique de bénévolat).<br>
+          <a href="/confidentialite.html" target="_blank" rel="noopener" class="consent-link">→ Lire la politique</a>
+        </div>
+      </div>
+    </label>
+
+    <label class="consent-row" for="cs-photo">
+      <input type="checkbox" id="cs-photo" class="consent-cb" onchange="updateConsentBtn()">
+      <div class="consent-label">
+        <div class="consent-title">📸 Photo d'accréditation</div>
+        <div class="consent-text">
+          J'autorise la prise et l'usage de ma photo pour mon badge d'accréditation lors des matchs. La photo est stockée de manière privée et sécurisée, accessible uniquement aux personnes habilitées du club.
+        </div>
+      </div>
+    </label>
+
+    <!-- Optional consent -->
+    <div class="consent-section-label">Optionnel</div>
+
+    <label class="consent-row" for="cs-newsletter">
+      <input type="checkbox" id="cs-newsletter" class="consent-cb" onchange="updateConsentBtn()">
+      <div class="consent-label">
+        <div class="consent-title">💌 Communications non-essentielles</div>
+        <div class="consent-text">
+          J'accepte de recevoir occasionnellement des informations sur la vie du club (newsletter, événements, sondages). Désabonnement possible à tout moment dans « Mon compte ».
+        </div>
+      </div>
+    </label>
+
+    <div class="consent-info">
+      ℹ️ Vous pouvez exercer vos droits (accès, rectification, effacement, portabilité) à tout moment depuis « Mon compte » ou en écrivant à <strong>contact@spacerstoulouse.fr</strong>.
+    </div>
+  </div>
+
+  <div class="ob-footer">
+    <button class="ob-btn ob-btn-primary" id="btn-consent" onclick="validateConsents()" disabled>Valider mes consentements →</button>
+    <div style="font-size:10px;color:rgba(181,212,244,0.4);text-align:center;margin-top:4px;">Les 3 premiers consentements sont requis pour utiliser l'application.</div>
   </div>
 </div>
 
@@ -330,6 +448,9 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:f
 <script>
 const SUPABASE_URL = 'https://xphuolvbamdkizydveij.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwaHVvbHZiYW1ka2l6eWR2ZWlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDQ2MDksImV4cCI6MjA5MjYyMDYwOX0.vpxV6ApwAkhlTx-LMCBZwee7LCdQGYP_5sbPMXEFFUQ'
+const CONSENT_VERSION = '1.0'  // À incrémenter quand on met à jour les politiques (force re-consentement)
+const AGE_MINIMUM = 15
+
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 // Check already logged in
@@ -337,7 +458,7 @@ sb.auth.getSession().then(({data}) => {
   if (data.session) window.location.href = 'dashboard.html'
 })
 
-// Login
+// ─── Login ──────────────────────────────────────────────────
 async function login() {
   const email = document.getElementById('email').value.trim()
   const pwd   = document.getElementById('pwd').value
@@ -345,15 +466,44 @@ async function login() {
   hideMsg()
   if (!email || !pwd) { showErr('Remplissez tous les champs.'); return }
   btn.disabled = true; btn.textContent = 'Connexion...'
+
   const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd })
   if (error) {
     showErr(getErrMsg(error.message))
     btn.disabled = false; btn.textContent = 'Se connecter →'
     return
   }
-  // Check onboarding
-  const { data: profil } = await sb.from('benevoles').select('onboarding_done, prenom').eq('email', email).single()
-  if (profil && !profil.onboarding_done) {
+
+  // Récupère le profil + champs RGPD/âge
+  const { data: profil, error: profilErr } = await sb
+    .from('benevoles')
+    .select('onboarding_done, prenom, date_naissance, consent_version')
+    .eq('email', email)
+    .single()
+
+  if (profilErr || !profil) {
+    await sb.auth.signOut()
+    showErr('Profil introuvable. Contactez le club.')
+    btn.disabled = false; btn.textContent = 'Se connecter →'
+    return
+  }
+
+  // ─── Age gate ─────────────────────────────────────────────
+  if (profil.date_naissance) {
+    const age = computeAge(profil.date_naissance)
+    if (age !== null && age < AGE_MINIMUM) {
+      await sb.auth.signOut()
+      showErr('Inscription réservée aux ' + AGE_MINIMUM + ' ans et plus. Contactez contact@spacerstoulouse.fr')
+      btn.disabled = false; btn.textContent = 'Se connecter →'
+      return
+    }
+  }
+
+  // ─── Routage : onboarding nécessaire si tutoriel non fait OU consentement obsolète ───
+  const needsConsent  = profil.consent_version !== CONSENT_VERSION
+  const needsTutorial = !profil.onboarding_done
+
+  if (needsTutorial || needsConsent) {
     const prenom = profil.prenom || ''
     document.getElementById('ob-prenom').textContent = prenom ? 'Bienvenue ' + prenom + ' !' : '!'
     showOb(1)
@@ -362,7 +512,19 @@ async function login() {
   }
 }
 
-// Password reset
+// ─── Calcul d'âge robuste ──────────────────────────────────
+function computeAge(dobStr) {
+  if (!dobStr) return null
+  const dob = new Date(dobStr)
+  if (isNaN(dob.getTime())) return null
+  const now = new Date()
+  let age = now.getFullYear() - dob.getFullYear()
+  const m = now.getMonth() - dob.getMonth()
+  if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--
+  return age
+}
+
+// ─── Password reset ────────────────────────────────────────
 async function resetPwd() {
   const email = document.getElementById('email').value.trim()
   if (!email) { showErr('Entrez votre email puis cliquez ici.'); return }
@@ -370,13 +532,16 @@ async function resetPwd() {
   showOk('Email envoyé ! Vérifiez votre boîte.')
 }
 
-// Onboarding navigation
+// ─── Onboarding navigation ─────────────────────────────────
 function showOb(n) {
   document.getElementById('screen-login').style.display = 'none'
   document.querySelectorAll('.ob-screen').forEach(s => s.classList.remove('active'))
-  document.getElementById('ob' + n).classList.add('active')
+  const id = (n === 'consent') ? 'ob-consent' : 'ob' + n
+  document.getElementById(id).classList.add('active')
 }
 function goOb(n) { showOb(n) }
+function goConsent() { showOb('consent') }
+function showAllSet() { showOb(5) }
 
 async function finishOb() {
   const { data: { session } } = await sb.auth.getSession()
@@ -386,9 +551,82 @@ async function finishOb() {
   window.location.href = 'dashboard.html'
 }
 
-function showAllSet() { showOb(5) }
+// ─── Consentements RGPD ────────────────────────────────────
+function updateConsentBtn() {
+  const required = ['cs-reglement', 'cs-rgpd', 'cs-photo']
+  const checkedCount = required.filter(id => document.getElementById(id).checked).length
+  const allChecked = checkedCount === required.length
 
-// Gamification simulator
+  const btn = document.getElementById('btn-consent')
+  btn.disabled = !allChecked
+
+  // Feedback visuel ligne par ligne
+  required.concat(['cs-newsletter']).forEach(id => {
+    const cb = document.getElementById(id)
+    const row = cb && cb.closest('.consent-row')
+    if (row) row.classList.toggle('checked', cb.checked)
+  })
+
+  // Barre de progression
+  const pct = (checkedCount / required.length) * 100
+  document.getElementById('consent-progress-fill').style.width = pct + '%'
+  document.getElementById('consent-counter').textContent = checkedCount + ' / 3 requis'
+}
+
+async function validateConsents() {
+  const btn = document.getElementById('btn-consent')
+  const originalLabel = btn.textContent
+  btn.disabled = true
+  btn.textContent = 'Enregistrement...'
+
+  const { data: { session } } = await sb.auth.getSession()
+  if (!session) {
+    btn.disabled = false
+    btn.textContent = originalLabel
+    showErr('Session expirée. Reconnectez-vous.')
+    return
+  }
+
+  const email = session.user.email
+  const ua = navigator.userAgent || ''
+  const newsletter = document.getElementById('cs-newsletter').checked
+
+  // Insertion dans le journal d'audit (preuve CNIL)
+  const consentRows = [
+    { type: 'reglement',  granted: true },
+    { type: 'rgpd',       granted: true },
+    { type: 'photo',      granted: true },
+    { type: 'newsletter', granted: newsletter }
+  ].map(c => ({
+    benevole_email:  email,
+    consent_type:    c.type,
+    consent_version: CONSENT_VERSION,
+    granted:         c.granted,
+    user_agent:      ua,
+    metadata:        {}
+  }))
+
+  const { error: insertErr } = await sb.from('consents').insert(consentRows)
+  if (insertErr) {
+    btn.disabled = false
+    btn.textContent = originalLabel
+    showErr('Erreur enregistrement consentements : ' + insertErr.message)
+    return
+  }
+
+  // Dénormalisation sur benevoles (best-effort)
+  const { error: updateErr } = await sb.from('benevoles').update({
+    consent_version:      CONSENT_VERSION,
+    consent_completed_at: new Date().toISOString(),
+    newsletter_optin:     newsletter
+  }).eq('email', email)
+  if (updateErr) console.warn('Update benevoles consent fields failed:', updateErr)
+
+  // OK → écran de succès
+  showAllSet()
+}
+
+// ─── Gamification simulator (inchangé) ─────────────────────
 let obPts = 50
 function obAdd(v) {
   obPts += v
@@ -402,7 +640,7 @@ function obAdd(v) {
   else { lvl.textContent = '🥉 Bronze'; nxt.textContent = (600-obPts) + ' pts avant Argent' }
 }
 
-// Helpers
+// ─── Helpers ───────────────────────────────────────────────
 function showErr(m) { const e = document.getElementById('msg-err'); e.textContent = m; e.style.display = 'block' }
 function showOk(m)  { const e = document.getElementById('msg-ok');  e.textContent = m; e.style.display = 'block' }
 function hideMsg()  { document.getElementById('msg-err').style.display = 'none'; document.getElementById('msg-ok').style.display = 'none' }
@@ -412,7 +650,10 @@ function getErrMsg(m) {
   if (m.includes('Too many'))        return 'Trop de tentatives. Attendez quelques minutes.'
   return 'Erreur : ' + m
 }
-document.addEventListener('keydown', e => { if (e.key === 'Enter') login() })
+document.addEventListener('keydown', e => {
+  // Enter ne déclenche login() que si le formulaire de login est visible
+  if (e.key === 'Enter' && document.getElementById('screen-login').style.display !== 'none') login()
+})
 </script>
 </body>
 </html>
