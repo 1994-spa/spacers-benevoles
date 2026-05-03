@@ -527,6 +527,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 <script>
 const SUPABASE_URL = 'https://xphuolvbamdkizydveij.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwaHVvbHZiYW1ka2l6eWR2ZWlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDQ2MDksImV4cCI6MjA5MjYyMDYwOX0.vpxV6ApwAkhlTx-LMCBZwee7LCdQGYP_5sbPMXEFFUQ'
+const PHOTOS_BUCKET = 'photos-benevoles'
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 let allBenv = []
@@ -542,6 +543,87 @@ let sugSearchDeb = null
 
 // VALIDATION state
 let curInscriptionsAffectes = []
+
+// ─────────────────────────────────────────────────────────────
+// SIGNED URLS — bucket privé (Chantier 11)
+// ─────────────────────────────────────────────────────────────
+const _signedUrlCache = new Map() // path -> {url, expiresAt}
+const SIGNED_URL_TTL = 3600 // 1h
+const SIGNED_URL_REFRESH_MS = 50 * 60 * 1000 // 50 min
+
+async function getSignedPhotoUrl(path) {
+  if (!path) return null
+  const cached = _signedUrlCache.get(path)
+  if (cached && cached.expiresAt > Date.now()) return cached.url
+  try {
+    const { data, error } = await sb.storage
+      .from(PHOTOS_BUCKET)
+      .createSignedUrl(path, SIGNED_URL_TTL)
+    if (error || !data) {
+      console.warn('signed url failed for', path, error)
+      return null
+    }
+    _signedUrlCache.set(path, {
+      url: data.signedUrl,
+      expiresAt: Date.now() + SIGNED_URL_REFRESH_MS,
+    })
+    return data.signedUrl
+  } catch (e) {
+    console.warn('signed url exception', e)
+    return null
+  }
+}
+
+async function getSignedPhotoUrls(paths) {
+  const result = {}
+  if (!paths || paths.length === 0) return result
+  const toFetch = []
+  for (const p of paths) {
+    if (!p) continue
+    const cached = _signedUrlCache.get(p)
+    if (cached && cached.expiresAt > Date.now()) result[p] = cached.url
+    else toFetch.push(p)
+  }
+  if (toFetch.length > 0) {
+    try {
+      const { data, error } = await sb.storage
+        .from(PHOTOS_BUCKET)
+        .createSignedUrls(toFetch, SIGNED_URL_TTL)
+      if (!error && data) {
+        for (const item of data) {
+          if (item.signedUrl && item.path) {
+            result[item.path] = item.signedUrl
+            _signedUrlCache.set(item.path, {
+              url: item.signedUrl,
+              expiresAt: Date.now() + SIGNED_URL_REFRESH_MS,
+            })
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('signed urls batch failed', e)
+    }
+  }
+  return result
+}
+
+// Wrapper générique : prend une liste (benevoles, inscriptions, demandes...) et
+// y attache un `_signedUrl` à chaque entrée selon la photo_path du bénévole.
+// `getBenevole` est une fonction pour extraire le bénévole depuis chaque item.
+async function resolvePhotosInList(list, getBenevole) {
+  if (!list || list.length === 0) return list
+  const accessor = getBenevole || ((x) => x)
+  const paths = list.map(item => accessor(item)?.photo_path).filter(Boolean)
+  if (paths.length === 0) return list
+  const urlMap = await getSignedPhotoUrls(paths)
+  list.forEach(item => {
+    const b = accessor(item)
+    if (b && b.photo_path && urlMap[b.photo_path]) {
+      b._signedUrl = urlMap[b.photo_path]
+    }
+  })
+  return list
+}
 
 // ─────────────────────────────────────────────────
 // MODAL CONFIRMATION UNIFIÉE (remplace confirm/prompt natifs)
@@ -646,6 +728,9 @@ async function loadAll() {
   if (!benv) return
   allBenv = benv
 
+  // Résout les signed URLs pour tous les bénévoles (chantier 11)
+  await resolvePhotosInList(allBenv)
+
   document.getElementById('kpi-b').textContent = benv.filter(b=>b.statut_compte==='actif').length
   const att = benv.filter(b=>b.statut_accreditation==='en_attente')
   document.getElementById('kpi-p').textContent = att.length
@@ -658,7 +743,7 @@ async function loadAll() {
   document.getElementById('top5').innerHTML = top.map((b,i)=>`
     <div class="benv-row">
       <div style="font-size:16px;min-width:24px;">${med[i]}</div>
-      ${b.photo_url?`<img src="${b.photo_url}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
+      ${b._signedUrl?`<img src="${b._signedUrl}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
       <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
         <div style="font-size:10px;color:rgba(255,255,255,0.4);">${b.matchs_joues||0} matchs</div></div>
       <div style="font-size:14px;font-weight:800;color:#F5C842;font-family:monospace;">${b.points_total||0}</div>
@@ -678,7 +763,7 @@ function renderPhotosAtt(list) {
     ? '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucune photo en attente</div>'
     : list.map(b=>`
       <div class="photo-card">
-        ${b.photo_url?`<img src="${b.photo_url}" class="thumb">`:`<div class="thumb-ph">${ini(b)}</div>`}
+        ${b._signedUrl?`<img src="${b._signedUrl}" class="thumb">`:`<div class="thumb-ph">${ini(b)}</div>`}
         <div style="flex:1;">
           <div style="font-size:13px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
           <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">${b.email}</div>
@@ -693,20 +778,20 @@ function renderAccredsGen(list) {
     ? '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:8px 0;">Aucune accréditation générée.</div>'
     : list.map((b,i)=>`
       <div class="photo-card">
-        ${b.photo_url?`<img src="${b.photo_url}" class="thumb">`:`<div class="thumb-ph">${ini(b)}</div>`}
+        ${b._signedUrl?`<img src="${b._signedUrl}" class="thumb">`:`<div class="thumb-ph">${ini(b)}</div>`}
         <div style="flex:1;">
           <div style="font-size:13px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
           <div style="font-size:10px;font-family:monospace;color:rgba(181,212,244,0.5);margin-top:2px;">ACC-2627-${String(i+1).padStart(3,'0')}</div>
           <span class="s-badge s-gen">✅ Générée</span>
         </div>
-        <button class="btn btn-blue" style="font-size:10px;padding:6px 12px;" onclick="printAccred('${b.id}','${b.prenom||''}','${b.nom||''}',${i+1})">⬇ PDF</button>
+        <button class="btn btn-blue" style="font-size:10px;padding:6px 12px;" onclick="printAccred('${b.id}','${(b.prenom||'').replace(/'/g,'\\\'')}','${(b.nom||'').replace(/'/g,'\\\'')}',${i+1})">⬇ PDF</button>
       </div>`).join('')
 }
 
 function renderBenv(list) {
   document.getElementById('benv-list').innerHTML = list.map(b=>`
     <div class="benv-row">
-      ${b.photo_url?`<img src="${b.photo_url}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
+      ${b._signedUrl?`<img src="${b._signedUrl}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
       <div style="flex:1;min-width:0;">
         <div style="font-size:12px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${b.prenom||''} ${b.nom||''}</div>
         <div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;">
@@ -735,13 +820,19 @@ function getAccBadge(s) {
   return m[s]||''
 }
 
-function openModalPh(id) {
+async function openModalPh(id) {
   const b = allBenv.find(x=>x.id===id)
   if (!b) return
   curPh = b
+  // Régénère une signed URL fraîche au moment de l'ouverture (sécurité expiration)
+  let photoUrl = b._signedUrl
+  if (b.photo_path) {
+    photoUrl = await getSignedPhotoUrl(b.photo_path)
+    if (photoUrl) b._signedUrl = photoUrl
+  }
   document.getElementById('modal-ph-content').innerHTML=`
-    ${b.photo_url
-      ?`<img src="${b.photo_url}" class="modal-img" alt="">`
+    ${photoUrl
+      ?`<img src="${photoUrl}" class="modal-img" alt="">`
       :`<div style="width:100px;height:100px;border-radius:50%;background:#444441;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:white;margin:0 auto 14px;">${ini(b)}</div>`}
     <div style="text-align:center;margin-bottom:12px;">
       <div style="font-size:16px;font-weight:800;color:white;">${b.prenom||''} ${b.nom||''}</div>
@@ -781,9 +872,16 @@ function closeModalPh() {
   document.getElementById('btn-ref').disabled=false
 }
 
-function printAccred(id, prenom, nom, num) {
+async function printAccred(id, prenom, nom, num) {
   const b = allBenv.find(x=>x.id===id)
   const numF = 'ACC-2627-'+String(num).padStart(3,'0')
+
+  // Régénère une signed URL fraîche pour la photo dans le PDF
+  let photoUrl = null
+  if (b?.photo_path) {
+    photoUrl = await getSignedPhotoUrl(b.photo_path)
+  }
+
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>
 @page{size:85.6mm 54mm;margin:0;}
@@ -800,7 +898,7 @@ body{margin:0;display:flex;justify-content:center;align-items:center;min-height:
 <div class="card">
   <div class="top">
     <div class="club">Spacer's Toulouse Volley</div>
-    ${b?.photo_url?`<img src="${b.photo_url}" class="photo">`:`<div class="photo-ph">${(prenom[0]||'?')+(nom[0]||'?')}</div>`}
+    ${photoUrl?`<img class="photo" src="${photoUrl}" crossorigin="anonymous">`:`<div class="photo-ph">${(prenom[0]||'?')+(nom[0]||'?')}</div>`}
   </div>
   <div class="bottom">
     <div class="type">Bénévole · Accréditation officielle</div>
@@ -809,7 +907,17 @@ body{margin:0;display:flex;justify-content:center;align-items:center;min-height:
     <div class="num">${numF}</div>
   </div>
 </div>
-<script>window.onload=()=>{window.print()}<\/script>
+<script>
+// Attend le chargement complet (incluant l'image signée) avant de lancer l'impression
+function ready(){ setTimeout(()=>window.print(), 200); }
+const img = document.querySelector('img.photo');
+if (img) {
+  if (img.complete) ready();
+  else { img.onload = ready; img.onerror = ready; }
+} else {
+  window.onload = ready;
+}
+<\/script>
 </body></html>`
   const w = window.open('','_blank')
   w.document.write(html)
@@ -847,13 +955,16 @@ async function loadMatch() {
   const { data: postes } = await sb.from('postes').select('*').order('nom')
   curPostes = postes || []
 
-  // Inscriptions disponibles (incluant statut_jour_match pour la validation)
+  // Inscriptions disponibles (CHANTIER 11 : on récupère photo_path au lieu de photo_url)
   const { data: insc } = await sb.from('inscriptions')
-    .select('id, benevole_id, poste_id, statut, statut_jour_match, benevoles!inscriptions_benevole_id_fkey(prenom, nom, photo_url, matchs_joues)')
+    .select('id, benevole_id, poste_id, statut, statut_jour_match, benevoles!inscriptions_benevole_id_fkey(prenom, nom, photo_path, matchs_joues)')
     .eq('match_id', m.id)
     .eq('statut', 'disponible')
 
   const dispos = insc || []
+
+  // Résout les signed URLs pour les bénévoles inscrits (chantier 11)
+  await resolvePhotosInList(dispos, i => i.benevoles)
 
   // Tableau Postes
   document.getElementById('aff-table').innerHTML =
@@ -883,7 +994,7 @@ async function loadMatch() {
       const selClass = i.poste_id ? 'poste-sel ok' : 'poste-sel'
       return `
         <div class="benv-row">
-          ${b.photo_url?`<img src="${b.photo_url}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
+          ${b._signedUrl?`<img src="${b._signedUrl}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
           <div style="flex:1;">
             <div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.4);">${b.matchs_joues||0} matchs</div>
@@ -897,6 +1008,7 @@ async function loadMatch() {
   }
 
   // Bénévoles non-répondants (actifs sans inscription pour ce match)
+  // Note : `nonReps` vient de `allBenv` qui a déjà ses signed URLs résolues dans loadAll()
   const { data: allInsc } = await sb.from('inscriptions')
     .select('benevole_id')
     .eq('match_id', m.id)
@@ -909,7 +1021,7 @@ async function loadMatch() {
   } else {
     document.getElementById('non-rep-match').innerHTML = nonReps.map(b => `
       <div class="benv-row">
-        ${b.photo_url?`<img src="${b.photo_url}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
+        ${b._signedUrl?`<img src="${b._signedUrl}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
         <div style="flex:1;min-width:0;">
           <div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
           <div style="font-size:10px;color:rgba(255,255,255,0.4);">Pas encore répondu</div>
@@ -988,7 +1100,7 @@ function renderValidation(list) {
     return `
       <div class="benv-row" style="display:block;padding:11px 13px;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
-          ${b.photo_url ? `<img src="${b.photo_url}" class="bav">` : `<div class="bav-ph">${ini(b)}</div>`}
+          ${b._signedUrl ? `<img src="${b._signedUrl}" class="bav">` : `<div class="bav-ph">${ini(b)}</div>`}
           <div style="flex:1;min-width:0;">
             <div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.4);">📍 ${posteName}</div>
@@ -1008,15 +1120,12 @@ async function setValidation(inscId, newStatus) {
   const insc = curInscriptionsAffectes.find(i => i.id === inscId)
   if (!insc) return
 
-  // Toggle : si on click sur l'état déjà actif, on dé-active
   const finalStatus = (insc.statut_jour_match === newStatus) ? null : newStatus
   const oldStatus = insc.statut_jour_match
 
-  // Optimistic local update
   insc.statut_jour_match = finalStatus
   renderValidation(curInscriptionsAffectes)
 
-  // DB update
   const updates = {
     statut_jour_match: finalStatus,
     validee_par: finalStatus ? curPiloteId : null,
@@ -1025,7 +1134,6 @@ async function setValidation(inscId, newStatus) {
   const { error } = await sb.from('inscriptions').update(updates).eq('id', inscId)
 
   if (error) {
-    // Revert
     insc.statut_jour_match = oldStatus
     renderValidation(curInscriptionsAffectes)
     showAlert('alert-match', '❌ Erreur : ' + error.message, 'e')
@@ -1228,7 +1336,6 @@ function updateSugStats() {
   if (elUnr) elUnr.textContent = unread
   if (elPrv) elPrv.textContent = priv
 
-  // Badge sur l'onglet
   const bdg = document.getElementById('bdg-suggestions')
   if (bdg) {
     if (unread > 0) {
@@ -1239,7 +1346,6 @@ function updateSugStats() {
     }
   }
 
-  // Quick action en accueil
   const btnAcc = document.getElementById('btn-acc-sug')
   const msgAcc = document.getElementById('acc-sug-msg')
   if (btnAcc && msgAcc) {
@@ -1453,7 +1559,6 @@ function onSugSortChange() {
 }
 
 function getTagEmoji(s) {
-  // Cherche l'emoji dans tag ET dans titre (selon ce que dashboard.html stocke)
   const haystack = String(s.tag || '') + ' ' + String(s.titre || '')
   if (haystack.includes('📅')) return '📅'
   if (haystack.includes('🏠')) return '🏠'
@@ -1486,11 +1591,11 @@ let rewDemandes = []
 let rewCodes = []
 
 async function loadReward() {
-  // Charge demandes (avec info bénévole)
+  // Charge demandes (CHANTIER 11 : on récupère photo_path au lieu de photo_url)
   const { data: demandes, error: e1 } = await sb.from('recompenses_demandes')
     .select(`
       id, palier_pts, statut, code_id, cree_le, traite_le,
-      benevoles!recompenses_demandes_benevole_id_fkey(id, prenom, nom, photo_url, points_total, points_depenses),
+      benevoles!recompenses_demandes_benevole_id_fkey(id, prenom, nom, photo_path, points_total, points_depenses),
       recompenses_codes(code, valeur_eur, min_panier_eur)
     `)
     .order('cree_le', { ascending: false })
@@ -1516,6 +1621,9 @@ async function loadReward() {
   rewDemandes = demandes || []
   rewCodes = codes || []
 
+  // Résout les signed URLs pour les bénévoles ayant fait des demandes (chantier 11)
+  await resolvePhotosInList(rewDemandes, d => d.benevoles)
+
   updateRewKPIs()
   renderRewDemandes()
   renderRewCodes()
@@ -1530,7 +1638,6 @@ function updateRewKPIs() {
   document.getElementById('rew-kpi-att').textContent = att
   document.getElementById('rew-kpi-attr').textContent = attr
 
-  // Badge sur l'onglet
   const bdg = document.getElementById('bdg-reward')
   if (bdg) {
     if (att > 0) {
@@ -1559,7 +1666,7 @@ function renderRewDemandes() {
     return `
       <div class="demande-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          ${b.photo_url ? `<img src="${b.photo_url}" class="bav">` : `<div class="bav-ph">${ini(b)}</div>`}
+          ${b._signedUrl ? `<img src="${b._signedUrl}" class="bav">` : `<div class="bav-ph">${ini(b)}</div>`}
           <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.5);">
@@ -1664,7 +1771,6 @@ async function supprimerCode(codeId) {
 }
 
 async function attribuerCode(demandeId, palierPts) {
-  // Trouver un code dispo pour ce palier (premier du stock)
   const codeDispo = rewCodes.find(c => !c.utilise_par && c.palier_pts === palierPts)
   if (!codeDispo) {
     showAlert('alert-reward', '❌ Aucun code dispo pour ce palier', 'e')
@@ -1702,7 +1808,7 @@ async function refuserDemande(demandeId) {
     confirmText: 'Refuser la demande',
     confirmStyle: 'red',
   })
-  if (msg === null) return // Annulé
+  if (msg === null) return
 
   const { error } = await sb.from('recompenses_demandes').update({
     statut: 'refusee',
@@ -1724,10 +1830,11 @@ let empType = 'partenaire'
 let empListFilter = 'actives'
 
 async function loadEmploi() {
+  // CHANTIER 11 : on récupère photo_path au lieu de photo_url
   const { data, error } = await sb.from('annonces_emploi')
     .select(`
       *,
-      benevoles!annonces_emploi_soumise_par_fkey(prenom, nom, photo_url)
+      benevoles!annonces_emploi_soumise_par_fkey(prenom, nom, photo_path)
     `)
     .order('publiee_le', { ascending: false })
 
@@ -1736,6 +1843,10 @@ async function loadEmploi() {
     return
   }
   empAnnonces = data || []
+
+  // Résout les signed URLs (chantier 11)
+  await resolvePhotosInList(empAnnonces, a => a.benevoles)
+
   updateEmploiKPIs()
   renderEmpDemandes()
   renderEmploiList()
@@ -1755,7 +1866,7 @@ function renderEmpDemandes() {
     return `
       <div class="demande-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          ${b.photo_url ? `<img src="${b.photo_url}" class="bav">` : `<div class="bav-ph">${ini(b)}</div>`}
+          ${b._signedUrl ? `<img src="${b._signedUrl}" class="bav">` : `<div class="bav-ph">${ini(b)}</div>`}
           <div style="flex:1;min-width:0;">
             <div style="font-size:12px;font-weight:700;color:white;">${escapeHtmlPilote((b.prenom||'') + ' ' + (b.nom||''))}</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.5);">Soumis ${formatDate(a.publiee_le)}</div>
@@ -1823,7 +1934,6 @@ function updateEmploiKPIs() {
   document.getElementById('emp-kpi-exp').textContent = exp.length
   document.getElementById('emp-kpi-tot').textContent = empAnnonces.length
 
-  // Badge sur l'onglet
   const bdg = document.getElementById('bdg-emploi')
   if (bdg) {
     if (att.length > 0) {
@@ -1839,7 +1949,6 @@ function setEmpType(t, btn) {
   empType = t
   document.querySelectorAll('#emp-type-group .seg').forEach(s => s.classList.remove('on'))
   btn.classList.add('on')
-  // Hide partenaire-specific fields if type=benevole
   document.getElementById('emp-form-partenaire').style.display = t === 'partenaire' ? 'block' : 'none'
 }
 
@@ -1852,7 +1961,7 @@ function setEmpListFilter(f, btn) {
 
 function renderEmploiList() {
   const now = new Date()
-  let list = empAnnonces.filter(a => a.statut_validation !== 'en_attente') // les en_attente sont dans la section dédiée
+  let list = empAnnonces.filter(a => a.statut_validation !== 'en_attente')
   if (empListFilter === 'actives') list = list.filter(a => a.active && a.statut_validation === 'validee' && (!a.expire_le || new Date(a.expire_le) > now))
   else if (empListFilter === 'exp') list = list.filter(a => a.expire_le && new Date(a.expire_le) <= now)
 
@@ -1934,7 +2043,6 @@ async function ajouterAnnonce() {
     return
   }
 
-  // Reset form
   ;['emp-titre','emp-desc','emp-partenaire-nom','emp-partenaire-logo','emp-lieu',
     'emp-contact-nom','emp-contact-email','emp-contact-tel','emp-contact-lien','emp-expire']
     .forEach(id => { document.getElementById(id).value = '' })
@@ -1993,7 +2101,6 @@ function switchTab(n) {
 }
 
 function showAlert(id,msg,type){
-  // Toast flottant (visible partout)
   const toast=document.getElementById('toast-flot')
   if(toast){
     toast.textContent=msg
@@ -2001,7 +2108,6 @@ function showAlert(id,msg,type){
     clearTimeout(toast._t)
     toast._t=setTimeout(()=>toast.classList.remove('show'),3500)
   }
-  // Alerte inline (rétrocompat)
   const el=document.getElementById(id)
   if(!el)return
   el.innerHTML=`<div class="alert alert-${type}">${msg}</div>`
@@ -2037,7 +2143,6 @@ function openWhatsApp(phone, message, alertId) {
 
 const APP_URL = 'https://spacers-benevoles.spacersytb.workers.dev/'
 
-// Message dispo pour un non-répondant
 function whatsAppNonRepondant(benevoleId) {
   const b = allBenv.find(x => x.id === benevoleId)
   if (!b) return
@@ -2058,7 +2163,6 @@ Merci !`
   openWhatsApp(b.telephone, msg, 'alert-match')
 }
 
-// Message rappel J-1 pour un affecté
 function whatsAppRappelAffecte(benevoleId, posteName) {
   const b = allBenv.find(x => x.id === benevoleId)
   if (!b) return
@@ -2076,7 +2180,6 @@ RDV au ${lieu}.
   openWhatsApp(b.telephone, msg, 'alert-match')
 }
 
-// Message libre pour un bénévole quelconque
 async function whatsAppLibre(benevoleId, alertId) {
   const b = allBenv.find(x => x.id === benevoleId)
   if (!b) return
