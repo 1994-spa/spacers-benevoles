@@ -6,6 +6,7 @@
 <title>Dashboard Pilote — Spacers</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
@@ -134,30 +135,6 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   border-left:3px solid #C9821A;
 }
 
-/* ── POSTES (fiches club V1) ── */
-.poste-row{
-  background:#2a2a28;border-radius:12px;padding:12px;margin-bottom:8px;
-  display:flex;align-items:center;gap:12px;cursor:pointer;
-  transition:background .15s;
-}
-.poste-row:hover{background:#33332f;}
-.poste-row-emoji{
-  font-size:32px;line-height:1;flex-shrink:0;
-  width:48px;height:48px;display:flex;align-items:center;justify-content:center;
-  background:#1a1a18;border-radius:10px;
-}
-.poste-row-meta{flex:1;min-width:0;}
-.poste-row-name{font-size:14px;font-weight:700;color:white;margin-bottom:3px;}
-.poste-row-tags{display:flex;gap:5px;flex-wrap:wrap;}
-.poste-tag-pilot{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;}
-.ptg-fac{background:rgba(59,109,17,0.2);color:#C0DD97;}
-.ptg-moy{background:rgba(201,130,26,0.2);color:#FAC775;}
-.ptg-avc{background:rgba(153,53,86,0.2);color:#F4B8CE;}
-.ptg-vid-ok{background:rgba(190,18,60,0.2);color:#F09595;}
-.ptg-vid-no{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);}
-.ptg-warn{background:rgba(201,130,26,0.2);color:#FAC775;}
-.modal-edit{max-width:560px;max-height:92vh;overflow-y:auto;}
-
 /* ACCÈS REFUSÉ */
 #access-denied{display:none;position:fixed;inset:0;background:#1a1a18;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
 #access-denied.show{display:flex;}
@@ -187,12 +164,10 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <button class="tab on" id="tab-accueil"     onclick="switchTab('accueil')">📊 Accueil</button>
   <button class="tab"    id="tab-accreds"     onclick="switchTab('accreds')">🪪 Accréds<span class="bdg" id="bdg-accreds" style="display:none;"></span></button>
   <button class="tab"    id="tab-match"       onclick="switchTab('match')">🏐 Match</button>
-  <button class="tab"    id="tab-postes"      onclick="switchTab('postes')">📋 Postes</button>
   <button class="tab"    id="tab-benevoles"   onclick="switchTab('benevoles')">👥 Bénévoles</button>
   <button class="tab"    id="tab-suggestions" onclick="switchTab('suggestions')">💡 Suggestions<span class="bdg-num" id="bdg-suggestions" style="display:none;"></span></button>
   <button class="tab"    id="tab-reward"      onclick="switchTab('reward')">🎁 Cadeaux<span class="bdg-num" id="bdg-reward" style="display:none;"></span></button>
   <button class="tab"    id="tab-emploi"      onclick="switchTab('emploi')">💼 Emploi<span class="bdg-num" id="bdg-emploi" style="display:none;"></span></button>
-  <button class="tab"    id="tab-toulouse"    onclick="switchTab('toulouse')">🌟 Toulouse<span class="bdg-num" id="bdg-toulouse" style="display:none;"></span></button>
   <button class="tab"    id="tab-notes"       onclick="switchTab('notes')">📖 Mémoire</button>
 </div>
 
@@ -208,7 +183,6 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <button class="btn btn-orange btn-full" id="btn-acc-sug" onclick="switchTab('suggestions')" style="display:none;">💡 <span id="acc-sug-msg"></span></button>
   <button class="btn btn-blue btn-full" onclick="switchTab('accreds')">🪪 Valider les photos</button>
   <button class="btn btn-ghost btn-full" onclick="switchTab('match')">🏐 Gérer le match</button>
-  <button class="btn btn-ghost btn-full" onclick="switchTab('postes')">📋 Éditer les fiches postes</button>
   <button class="btn btn-ghost btn-full" onclick="switchTab('benevoles')">👥 Tous les bénévoles</button>
   <div class="sec">Top 5 bénévoles</div>
   <div id="top5"></div>
@@ -258,27 +232,6 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
     <textarea class="note-area" id="note-match" placeholder="Points d'attention, retours d'expérience, infos logistiques..."></textarea>
     <button class="btn btn-blue btn-full" style="margin-top:10px;" onclick="saveNote()">💾 Sauvegarder la note</button>
   </div>
-</div>
-
-<!-- POSTES (NOUVEAU) -->
-<div class="screen" id="screen-postes">
-  <div id="alert-postes"></div>
-
-  <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr;">
-    <div class="kpi"><div class="kpi-val" id="post-kpi-tot">—</div><div class="kpi-lbl">Postes</div></div>
-    <div class="kpi"><div class="kpi-val g" id="post-kpi-vid">—</div><div class="kpi-lbl">Avec vidéo</div></div>
-    <div class="kpi"><div class="kpi-val a" id="post-kpi-incompl">—</div><div class="kpi-lbl">À compléter</div></div>
-  </div>
-
-  <div class="card" style="padding:11px 13px;">
-    <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5;">
-      <strong style="color:white;">Les fiches postes</strong> sont visibles par tous les bénévoles depuis leur accueil.
-      Clique sur une fiche pour modifier son contenu (description, missions, vidéo...).
-    </div>
-  </div>
-
-  <div class="sec">Fiches des postes du club</div>
-  <div id="postes-list"></div>
 </div>
 
 <!-- BÉNÉVOLES -->
@@ -505,75 +458,6 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <div id="emp-list"></div>
 </div>
 
-<!-- 🌟 TOULOUSE (modération + ajout) -->
-<div class="screen" id="screen-toulouse">
-  <div id="alert-toulouse"></div>
-
-  <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
-    <div class="kpi"><div class="kpi-val a" id="tlse-kpi-att">—</div><div class="kpi-lbl">En attente</div></div>
-    <div class="kpi"><div class="kpi-val g" id="tlse-kpi-actives">—</div><div class="kpi-lbl">Validées</div></div>
-    <div class="kpi"><div class="kpi-val r" id="tlse-kpi-ref">—</div><div class="kpi-lbl">Refusées</div></div>
-    <div class="kpi"><div class="kpi-val" id="tlse-kpi-tot">—</div><div class="kpi-lbl">Total</div></div>
-  </div>
-
-  <div class="sec">📨 Propositions bénévoles en attente</div>
-  <div id="tlse-demandes"></div>
-
-  <div class="sec">➕ Ajouter une fiche (publication directe)</div>
-  <div class="card">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-      <div>
-        <label class="input-label">Catégorie *</label>
-        <select id="tlse-add-cat" class="input-field">
-          <option value="">--</option>
-          <option value="culture">🎨 Culture</option>
-          <option value="sortir">🌃 Sortir</option>
-          <option value="logement">🏠 Logement</option>
-          <option value="manger">🍽 Manger</option>
-        </select>
-      </div>
-      <div>
-        <label class="input-label">Quartier</label>
-        <input id="tlse-add-quartier" class="input-field" placeholder="Carmes, Capitole...">
-      </div>
-    </div>
-
-    <label class="input-label">Titre *</label>
-    <input id="tlse-add-titre" class="input-field" placeholder="L'Heure du Singe">
-
-    <div style="margin-top:8px;"></div>
-    <label class="input-label">Sous-titre court</label>
-    <input id="tlse-add-sous" class="input-field" placeholder="LE bar à cocktails de Toulouse">
-
-    <div style="margin-top:8px;"></div>
-    <label class="input-label">Description *</label>
-    <textarea id="tlse-add-desc" class="bulk-code-area" placeholder="Décris l'endroit, ce qui est spécial, prix, ambiance..."></textarea>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;">
-      <div>
-        <label class="input-label">Lien externe</label>
-        <input id="tlse-add-lien" class="input-field" placeholder="https://...">
-      </div>
-      <div>
-        <label class="input-label">Image (URL)</label>
-        <input id="tlse-add-image" class="input-field" placeholder="https://...">
-      </div>
-    </div>
-
-    <button class="btn btn-blue btn-full" style="background:linear-gradient(135deg,#E11D48,#BE123C);" onclick="ajouterFicheToulouse()">📤 Publier la fiche</button>
-  </div>
-
-  <div class="sec">📋 Toutes les fiches publiées</div>
-  <div style="margin-bottom:8px;">
-    <div class="seg-group" id="tlse-list-filter">
-      <button class="seg on" data-tlse-list-filter="actives" onclick="setTlseListFilter('actives',this)">Actives</button>
-      <button class="seg" data-tlse-list-filter="refusees" onclick="setTlseListFilter('refusees',this)">Refusées</button>
-      <button class="seg" data-tlse-list-filter="tous" onclick="setTlseListFilter('tous',this)">Toutes</button>
-    </div>
-  </div>
-  <div id="tlse-list"></div>
-</div>
-
 <!-- MÉMOIRE -->
 <div class="screen" id="screen-notes">
   <div class="sec">Historique des notes pilote</div>
@@ -618,6 +502,58 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   </div>
 </div>
 
+<!-- MODAL RGPD (livrable 4.4) -->
+<div class="modal-overlay" id="modal-rgpd" style="display:none;">
+  <div class="modal">
+    <h2>🛡️ Outils RGPD</h2>
+    <div id="modal-rgpd-header" style="text-align:center;font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:16px;line-height:1.6;"></div>
+    <div id="modal-rgpd-body">
+      <!-- Vue par défaut : 3 actions -->
+      <div id="rgpd-actions">
+        <button class="btn btn-ghost btn-full" style="margin-bottom:8px;text-align:left;" onclick="rgpdActionExport()">
+          <span style="font-size:18px;margin-right:8px;">📥</span>
+          <span style="display:inline-block;vertical-align:middle;">
+            <strong style="color:white;">Exporter les données</strong><br>
+            <span style="font-size:10px;color:rgba(255,255,255,0.5);">Télécharger JSON + PDF</span>
+          </span>
+        </button>
+        <button class="btn btn-ghost btn-full" style="margin-bottom:8px;text-align:left;" onclick="rgpdActionShowDelete()" id="rgpd-delete-btn">
+          <span style="font-size:18px;margin-right:8px;">🗑️</span>
+          <span style="display:inline-block;vertical-align:middle;">
+            <strong style="color:#F4B8CE;">Demander la suppression</strong><br>
+            <span style="font-size:10px;color:rgba(255,255,255,0.5);">Effacement programmé J+30 (annulable)</span>
+          </span>
+        </button>
+        <button class="btn btn-ghost btn-full" style="margin-bottom:8px;text-align:left;display:none;" onclick="rgpdActionCancel()" id="rgpd-cancel-btn">
+          <span style="font-size:18px;margin-right:8px;">↺</span>
+          <span style="display:inline-block;vertical-align:middle;">
+            <strong style="color:#C0DD97;">Annuler la suppression</strong><br>
+            <span style="font-size:10px;color:rgba(255,255,255,0.5);">Réactiver le compte immédiatement</span>
+          </span>
+        </button>
+      </div>
+      <!-- Vue formulaire suppression (cachée par défaut) -->
+      <div id="rgpd-delete-form" style="display:none;">
+        <div style="background:rgba(153,53,86,0.15);border:1px solid rgba(153,53,86,0.3);border-radius:10px;padding:12px;font-size:11px;color:#F4B8CE;line-height:1.7;margin-bottom:14px;">
+          ⚠️ La suppression sera <strong>effective dans 30 jours</strong>. Le bénévole recevra un email immédiat avec la possibilité de contester.
+        </div>
+        <label style="display:block;font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:6px;font-weight:600;">Motif de la suppression (obligatoire)</label>
+        <textarea id="rgpd-delete-reason" class="note-area" placeholder="Ex : non-respect du règlement, départ du club, etc."></textarea>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:6px;line-height:1.5;">
+          Ce motif est conservé dans l'audit RGPD et n'est pas envoyé au bénévole. Le bénévole reçoit uniquement la notification standard.
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions" id="rgpd-default-actions">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeRgpdMenu()">Fermer</button>
+    </div>
+    <div class="modal-actions" id="rgpd-delete-actions" style="display:none;">
+      <button class="btn btn-red" style="flex:1;" id="rgpd-delete-confirm" onclick="rgpdActionConfirmDelete()">Confirmer la suppression</button>
+      <button class="btn btn-ghost" style="flex:1;" onclick="rgpdShowMain()">← Retour</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL NOTIFICATION -->
 <div class="modal-overlay" id="modal-notif" style="display:none;">
   <div class="modal">
@@ -637,77 +573,6 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
     <div class="modal-actions">
       <button class="btn btn-blue" style="flex:1;" id="btn-notif-send" onclick="confirmNotifAll()">📤 Envoyer</button>
       <button class="btn btn-ghost" style="flex:1;" onclick="closeModalNotif()">Annuler</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL ÉDITION FICHE POSTE -->
-<div class="modal-overlay" id="modal-poste-edit" style="display:none;">
-  <div class="modal modal-edit">
-    <h2 id="mpe-title">Éditer la fiche poste</h2>
-    <div id="alert-poste-edit"></div>
-
-    <label class="input-label">Emoji</label>
-    <input id="mpe-emoji" class="input-field" maxlength="4" placeholder="🍻" style="font-size:18px;text-align:center;width:80px;">
-
-    <div style="margin-top:10px;">
-      <label class="input-label">Nom du poste</label>
-      <input id="mpe-nom" class="input-field" placeholder="Buvette" disabled style="opacity:0.6;">
-      <div class="input-hint">Le nom n'est pas modifiable depuis l'app (lié aux affectations match).</div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
-      <div>
-        <label class="input-label">Difficulté</label>
-        <select id="mpe-difficulte" class="input-field">
-          <option value="">--</option>
-          <option>Facile</option>
-          <option>Moyen</option>
-          <option>Avancé</option>
-        </select>
-      </div>
-      <div>
-        <label class="input-label">Bénévoles / match</label>
-        <input id="mpe-max" class="input-field" type="number" min="1" placeholder="2">
-      </div>
-    </div>
-
-    <div style="margin-top:10px;">
-      <label class="input-label">Description (en quoi consiste ce poste)</label>
-      <textarea id="mpe-description" class="note-area" placeholder="Description courte du poste..."></textarea>
-    </div>
-
-    <div style="margin-top:10px;">
-      <label class="input-label">🎯 Missions</label>
-      <textarea id="mpe-missions" class="note-area" style="height:100px;" placeholder="- Accueillir les supporters
-- Encaisser les commandes
-- Tenir la caisse propre"></textarea>
-    </div>
-
-    <div style="margin-top:10px;">
-      <label class="input-label">🎒 Matériel</label>
-      <textarea id="mpe-materiel" class="note-area" placeholder="Caisse + fond de caisse 50€, terminal CB, badges..."></textarea>
-    </div>
-
-    <div style="margin-top:10px;">
-      <label class="input-label">📍 Lieu & horaires</label>
-      <textarea id="mpe-lieu" class="note-area" placeholder="Hall principal, RDV 18h pour J de match 20h"></textarea>
-    </div>
-
-    <div style="margin-top:10px;">
-      <label class="input-label">💡 Conseils</label>
-      <textarea id="mpe-conseils" class="note-area" placeholder="Astuces, points de vigilance..."></textarea>
-    </div>
-
-    <div style="margin-top:10px;">
-      <label class="input-label">▶ Vidéo YouTube (URL ou ID)</label>
-      <input id="mpe-video" class="input-field" placeholder="https://youtu.be/dQw4w9WgXcQ ou dQw4w9WgXcQ">
-      <div class="input-hint">Colle l'URL complète ou juste l'ID. Laisse vide si pas de vidéo.</div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn btn-blue" style="flex:1;" id="btn-mpe-save" onclick="savePosteFiche()">💾 Sauvegarder</button>
-      <button class="btn btn-ghost" style="flex:1;" onclick="closePosteEdit()">Annuler</button>
     </div>
   </div>
 </div>
@@ -944,7 +809,6 @@ async function loadAll() {
   await loadSuggestions()
   await loadReward()
   await loadEmploi()
-  await loadToulouse()
 }
 
 function renderPhotosAtt(list) {
@@ -987,9 +851,12 @@ function renderBenv(list) {
           <span class="s-badge" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">${b.niveau||'Bronze'}</span>
           <span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);">${b.points_total||0} pts</span>
           ${getAccBadge(b.statut_accreditation)}
+          ${b.statut_compte==='pending_deletion'?`<span class="s-badge" style="background:rgba(153,53,86,0.25);color:#F4B8CE;">🗑️ Suppression</span>`:''}
+          ${b.statut_compte==='supprime'?`<span class="s-badge" style="background:rgba(95,94,90,0.3);color:rgba(255,255,255,0.5);">⚫ Supprimé</span>`:''}
         </div>
       </div>
-      <button class="btn btn-green btn-sm" title="WhatsApp" style="flex-shrink:0;" onclick="whatsAppLibre('${b.id}')">📱</button>
+      <button class="btn btn-green btn-sm" title="WhatsApp" style="flex-shrink:0;" onclick="whatsAppLibre('${b.id}')" ${b.statut_compte==='supprime'?'disabled style="opacity:0.3;cursor:not-allowed;flex-shrink:0;"':''}>📱</button>
+      <button class="btn btn-sm" title="RGPD" style="flex-shrink:0;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" onclick="openRgpdMenu('${b.id}')" ${b.statut_compte==='supprime'?'disabled':''}>🛡️</button>
     </div>`).join('')
 }
 
@@ -2276,366 +2143,6 @@ function escapeHtmlPilote(str) {
 }
 
 // ─────────────────────────────────────────────────
-// POSTES — Catalogue des fiches du club (NOUVEAU)
-// ─────────────────────────────────────────────────
-let allPostes = []
-let curPosteEdit = null
-
-async function loadPostes() {
-  const { data, error } = await sb.from('postes').select('*').order('nom')
-  if (error) {
-    showAlert('alert-postes', '❌ Erreur : ' + error.message, 'e')
-    return
-  }
-  allPostes = data || []
-  updatePostesKPIs()
-  renderPostesList()
-}
-
-function updatePostesKPIs() {
-  const tot = allPostes.length
-  const avecVid = allPostes.filter(p => extractYoutubeIdPilote(p.video_youtube_id, p.video_url)).length
-  const incompl = allPostes.filter(p => !p.description || !p.missions).length
-  document.getElementById('post-kpi-tot').textContent = tot
-  document.getElementById('post-kpi-vid').textContent = avecVid
-  document.getElementById('post-kpi-incompl').textContent = incompl
-}
-
-function renderPostesList() {
-  const el = document.getElementById('postes-list')
-  if (!el) return
-  if (allPostes.length === 0) {
-    el.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:10px 0;font-style:italic;">Aucun poste configuré dans la base.</div>'
-    return
-  }
-  el.innerHTML = allPostes.map(p => {
-    const ytId = extractYoutubeIdPilote(p.video_youtube_id, p.video_url)
-    const diffClass = {'Facile':'ptg-fac','Moyen':'ptg-moy','Avancé':'ptg-avc'}[p.difficulte] || ''
-    const emoji = p.emoji || p.icone || '📋'
-    const incomplet = !p.description || !p.missions
-    return `
-      <div class="poste-row" onclick="openPosteEdit('${p.id}')">
-        <div class="poste-row-emoji">${emoji}</div>
-        <div class="poste-row-meta">
-          <div class="poste-row-name">${escapeHtmlPilote(p.nom || '')}</div>
-          <div class="poste-row-tags">
-            ${p.difficulte ? `<span class="poste-tag-pilot ${diffClass}">${escapeHtmlPilote(p.difficulte)}</span>` : ''}
-            <span class="poste-tag-pilot ${ytId ? 'ptg-vid-ok' : 'ptg-vid-no'}">${ytId ? '▶ Vidéo' : '○ Sans vidéo'}</span>
-            ${p.benevoles_max_match ? `<span class="poste-tag-pilot" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);">👥 ${p.benevoles_max_match}/match</span>` : ''}
-            ${incomplet ? '<span class="poste-tag-pilot ptg-warn">⚠️ À compléter</span>' : ''}
-          </div>
-        </div>
-        <div style="font-size:18px;color:rgba(255,255,255,0.3);">›</div>
-      </div>`
-  }).join('')
-}
-
-function extractYoutubeIdPilote(youtubeId, videoUrl) {
-  if (youtubeId && String(youtubeId).trim()) return String(youtubeId).trim()
-  if (!videoUrl) return null
-  const m = String(videoUrl).match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/)([a-zA-Z0-9_-]{11})/)
-  return m ? m[1] : null
-}
-
-function openPosteEdit(posteId) {
-  const p = allPostes.find(x => x.id === posteId)
-  if (!p) return
-  curPosteEdit = p
-  document.getElementById('mpe-title').textContent = `Éditer : ${p.nom || 'Poste'}`
-  document.getElementById('mpe-emoji').value = p.emoji || ''
-  document.getElementById('mpe-nom').value = p.nom || ''
-  document.getElementById('mpe-difficulte').value = p.difficulte || ''
-  document.getElementById('mpe-max').value = p.benevoles_max_match || ''
-  document.getElementById('mpe-description').value = p.description || ''
-  document.getElementById('mpe-missions').value = p.missions || ''
-  document.getElementById('mpe-materiel').value = p.materiel || ''
-  document.getElementById('mpe-lieu').value = p.lieu_horaires || ''
-  document.getElementById('mpe-conseils').value = p.conseils || ''
-  // Pour la vidéo, on affiche l'URL en priorité (plus parlant pour le pilote)
-  document.getElementById('mpe-video').value = p.video_url || p.video_youtube_id || ''
-  document.getElementById('alert-poste-edit').innerHTML = ''
-  document.getElementById('modal-poste-edit').style.display = 'flex'
-}
-
-function closePosteEdit() {
-  document.getElementById('modal-poste-edit').style.display = 'none'
-  curPosteEdit = null
-}
-
-async function savePosteFiche() {
-  if (!curPosteEdit) return
-  const btn = document.getElementById('btn-mpe-save')
-  btn.disabled = true
-  btn.textContent = 'Sauvegarde...'
-
-  const videoRaw = document.getElementById('mpe-video').value.trim()
-  // Détecte si c'est une URL ou juste un ID (11 caractères alphanumériques sans / ni :)
-  let video_url = null
-  let video_youtube_id = null
-  if (videoRaw) {
-    if (/^[a-zA-Z0-9_-]{11}$/.test(videoRaw)) {
-      video_youtube_id = videoRaw
-      video_url = `https://youtu.be/${videoRaw}`
-    } else {
-      video_url = videoRaw
-      video_youtube_id = extractYoutubeIdPilote(null, videoRaw)
-    }
-  }
-
-  const updates = {
-    emoji: document.getElementById('mpe-emoji').value.trim() || null,
-    difficulte: document.getElementById('mpe-difficulte').value || null,
-    benevoles_max_match: parseInt(document.getElementById('mpe-max').value, 10) || null,
-    description: document.getElementById('mpe-description').value.trim() || null,
-    missions: document.getElementById('mpe-missions').value.trim() || null,
-    materiel: document.getElementById('mpe-materiel').value.trim() || null,
-    lieu_horaires: document.getElementById('mpe-lieu').value.trim() || null,
-    conseils: document.getElementById('mpe-conseils').value.trim() || null,
-    video_url,
-    video_youtube_id,
-  }
-
-  const { error } = await sb.from('postes').update(updates).eq('id', curPosteEdit.id)
-  btn.disabled = false
-  btn.textContent = '💾 Sauvegarder'
-  if (error) {
-    document.getElementById('alert-poste-edit').innerHTML = '<div class="alert alert-e">❌ Erreur : ' + error.message + '</div>'
-    return
-  }
-  closePosteEdit()
-  showAlert('alert-postes', '✓ Fiche "' + (curPosteEdit.nom || '') + '" mise à jour', 's')
-  loadPostes()
-}
-
-// ─────────────────────────────────────────────────
-// 🌟 TOULOUSE — Modération + ajout direct (NOUVEAU)
-// ─────────────────────────────────────────────────
-let tlseAll = []
-let tlseListFilter = 'actives'
-
-const TLSE_CAT_PILOTE = {
-  culture:  { label:'Culture',  emoji:'🎨' },
-  sortir:   { label:'Sortir',   emoji:'🌃' },
-  logement: { label:'Logement', emoji:'🏠' },
-  manger:   { label:'Manger',   emoji:'🍽'  },
-}
-
-async function loadToulouse() {
-  const { data, error } = await sb.from('ressources_toulouse')
-    .select('*, benevoles!ressources_toulouse_soumise_par_fkey(prenom, nom, photo_url)')
-    .order('cree_le', { ascending: false })
-
-  if (error) {
-    showAlert('alert-toulouse', '❌ Erreur : ' + error.message, 'e')
-    return
-  }
-  tlseAll = data || []
-  updateTlseKPIs()
-  renderTlseDemandes()
-  renderTlseList()
-}
-
-function updateTlseKPIs() {
-  const att = tlseAll.filter(r => r.statut_validation === 'en_attente').length
-  const val = tlseAll.filter(r => r.statut_validation === 'validee' && r.active).length
-  const ref = tlseAll.filter(r => r.statut_validation === 'refusee').length
-
-  document.getElementById('tlse-kpi-att').textContent = att
-  document.getElementById('tlse-kpi-actives').textContent = val
-  document.getElementById('tlse-kpi-ref').textContent = ref
-  document.getElementById('tlse-kpi-tot').textContent = tlseAll.length
-
-  const bdg = document.getElementById('bdg-toulouse')
-  if (bdg) {
-    if (att > 0) {
-      bdg.textContent = att > 99 ? '99+' : String(att)
-      bdg.style.display = 'flex'
-    } else {
-      bdg.style.display = 'none'
-    }
-  }
-}
-
-function renderTlseDemandes() {
-  const att = tlseAll.filter(r => r.statut_validation === 'en_attente')
-  const el = document.getElementById('tlse-demandes')
-
-  if (att.length === 0) {
-    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucune demande en attente</div>'
-    return
-  }
-
-  el.innerHTML = att.map(r => {
-    const b = r.benevoles || {}
-    const cat = TLSE_CAT_PILOTE[r.categorie] || {}
-    return `
-      <div class="demande-card">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          ${b.photo_url ? `<img src="${b.photo_url}" class="bav">` : `<div class="bav-ph">${b.prenom?(b.prenom[0]||'?'):'?'}${b.nom?(b.nom[0]||'?'):'?'}</div>`}
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:12px;font-weight:700;color:white;">${escapeHtmlPilote((b.prenom||'') + ' ' + (b.nom||''))}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.5);">Soumis ${new Date(r.cree_le).toLocaleDateString('fr-FR')}</div>
-          </div>
-          <span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);">${cat.emoji||''} ${cat.label||r.categorie}</span>
-        </div>
-        <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;margin-bottom:10px;">
-          <div style="font-size:14px;font-weight:700;color:white;margin-bottom:4px;">${escapeHtmlPilote(r.titre)}</div>
-          ${r.sous_titre ? `<div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:6px;font-style:italic;">${escapeHtmlPilote(r.sous_titre)}</div>` : ''}
-          <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;white-space:pre-line;margin-bottom:6px;">${escapeHtmlPilote(r.description)}</div>
-          ${r.quartier ? `<div style="font-size:10px;color:rgba(255,255,255,0.5);">📍 ${escapeHtmlPilote(r.quartier)}</div>` : ''}
-          ${r.lien_externe ? `<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:3px;">🔗 ${escapeHtmlPilote(r.lien_externe)}</div>` : ''}
-          ${r.image_url ? `<div style="margin-top:8px;"><img src="${escapeHtmlPilote(r.image_url)}" style="max-width:100%;height:auto;max-height:120px;border-radius:8px;" onerror="this.style.display='none'"></div>` : ''}
-        </div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-green btn-sm" style="flex:1;" onclick="validerToulouse('${r.id}')">✓ Valider et publier</button>
-          <button class="btn btn-red btn-sm" onclick="refuserToulouse('${r.id}')">✗ Refuser</button>
-        </div>
-      </div>`
-  }).join('')
-}
-
-async function validerToulouse(id) {
-  const { error } = await sb.from('ressources_toulouse')
-    .update({
-      statut_validation: 'validee',
-      pilote_id: curPiloteId,
-      publiee_le: new Date().toISOString(),
-      traitee_le: new Date().toISOString()
-    })
-    .eq('id', id)
-  if (error) return showAlert('alert-toulouse', '❌ Erreur : ' + error.message, 'e')
-  showAlert('alert-toulouse', '✓ Bon plan publié', 's')
-  loadToulouse()
-}
-
-async function refuserToulouse(id) {
-  const msg = await promptModal({
-    icon: '✗',
-    title: 'Refuser cette proposition',
-    message: 'Indique une raison (visible par le bénévole).',
-    placeholder: 'Hors-sujet, doublon, manque de contenu...',
-    confirmText: 'Refuser',
-    confirmStyle: 'red',
-  })
-  if (msg === null) return
-  const { error } = await sb.from('ressources_toulouse')
-    .update({
-      statut_validation: 'refusee',
-      pilote_message: msg || null,
-      pilote_id: curPiloteId,
-      traitee_le: new Date().toISOString()
-    })
-    .eq('id', id)
-  if (error) return showAlert('alert-toulouse', '❌ Erreur : ' + error.message, 'e')
-  showAlert('alert-toulouse', '✗ Proposition refusée', 's')
-  loadToulouse()
-}
-
-function setTlseListFilter(f, btn) {
-  tlseListFilter = f
-  document.querySelectorAll('#tlse-list-filter .seg').forEach(s => s.classList.remove('on'))
-  btn.classList.add('on')
-  renderTlseList()
-}
-
-function renderTlseList() {
-  let list = tlseAll.filter(r => r.statut_validation !== 'en_attente')
-  if (tlseListFilter === 'actives') list = list.filter(r => r.active && r.statut_validation === 'validee')
-  else if (tlseListFilter === 'refusees') list = list.filter(r => r.statut_validation === 'refusee')
-
-  const el = document.getElementById('tlse-list')
-  if (list.length === 0) {
-    el.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:10px 0;font-style:italic;">Aucune fiche dans cette catégorie.</div>'
-    return
-  }
-
-  el.innerHTML = list.map(r => {
-    const cat = TLSE_CAT_PILOTE[r.categorie] || {}
-    const isRefusee = r.statut_validation === 'refusee'
-    const opacity = (r.active && !isRefusee) ? '1' : '0.5'
-    let statut
-    if (isRefusee) statut = '<span class="s-badge" style="background:rgba(153,53,86,0.15);color:#F09595;">✗ Refusée</span>'
-    else if (!r.active) statut = '<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);">⏸ Désactivée</span>'
-    else statut = '<span class="s-badge" style="background:rgba(59,109,17,0.15);color:#C0DD97;">● Active</span>'
-
-    return `
-      <div class="card" style="opacity:${opacity};">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-          <span class="s-badge" style="background:rgba(225,29,72,0.15);color:#F4B8CE;">${cat.emoji||''} ${cat.label||r.categorie}</span>
-          ${r.quartier ? `<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);">📍 ${escapeHtmlPilote(r.quartier)}</span>` : ''}
-          ${statut}
-        </div>
-        <div style="font-size:14px;font-weight:700;color:white;margin-bottom:3px;">${escapeHtmlPilote(r.titre)}</div>
-        ${r.sous_titre ? `<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px;font-style:italic;">${escapeHtmlPilote(r.sous_titre)}</div>` : ''}
-        <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5;margin-bottom:8px;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtmlPilote(r.description)}</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${!isRefusee ? `<button class="btn btn-ghost btn-sm" onclick="toggleTlse('${r.id}', ${!r.active})">${r.active ? '⏸ Désactiver' : '▶ Réactiver'}</button>` : ''}
-          <button class="btn btn-red btn-sm" onclick="supprimerTlse('${r.id}')">🗑 Supprimer</button>
-        </div>
-      </div>`
-  }).join('')
-}
-
-async function toggleTlse(id, newActive) {
-  const { error } = await sb.from('ressources_toulouse')
-    .update({ active: newActive })
-    .eq('id', id)
-  if (error) return showAlert('alert-toulouse', '❌ Erreur : ' + error.message, 'e')
-  showAlert('alert-toulouse', newActive ? '▶ Fiche réactivée' : '⏸ Fiche désactivée', 's')
-  loadToulouse()
-}
-
-async function supprimerTlse(id) {
-  const ok = await confirmModal({
-    icon: '🗑',
-    title: 'Supprimer cette fiche ?',
-    message: 'Action irréversible. Si tu veux juste la cacher, utilise "Désactiver".',
-    confirmText: 'Supprimer',
-    confirmStyle: 'red',
-  })
-  if (!ok) return
-  const { error } = await sb.from('ressources_toulouse').delete().eq('id', id)
-  if (error) return showAlert('alert-toulouse', '❌ Erreur : ' + error.message, 'e')
-  showAlert('alert-toulouse', '🗑 Fiche supprimée', 's')
-  loadToulouse()
-}
-
-async function ajouterFicheToulouse() {
-  const categorie = document.getElementById('tlse-add-cat').value
-  const titre = document.getElementById('tlse-add-titre').value.trim()
-  const desc = document.getElementById('tlse-add-desc').value.trim()
-
-  if (!categorie) return showAlert('alert-toulouse', '❌ Catégorie obligatoire', 'e')
-  if (!titre) return showAlert('alert-toulouse', '❌ Titre obligatoire', 'e')
-  if (!desc) return showAlert('alert-toulouse', '❌ Description obligatoire', 'e')
-
-  const row = {
-    categorie,
-    titre,
-    sous_titre: document.getElementById('tlse-add-sous').value.trim() || null,
-    description: desc,
-    quartier: document.getElementById('tlse-add-quartier').value.trim() || null,
-    lien_externe: document.getElementById('tlse-add-lien').value.trim() || null,
-    image_url: document.getElementById('tlse-add-image').value.trim() || null,
-    soumise_par: curPiloteId,
-    pilote_id: curPiloteId,
-    statut_validation: 'validee',
-    publiee_le: new Date().toISOString(),
-    active: true,
-  }
-
-  const { error } = await sb.from('ressources_toulouse').insert(row)
-  if (error) return showAlert('alert-toulouse', '❌ Erreur : ' + error.message, 'e')
-
-  ;['tlse-add-titre','tlse-add-sous','tlse-add-desc','tlse-add-quartier','tlse-add-lien','tlse-add-image']
-    .forEach(id => { document.getElementById(id).value = '' })
-  document.getElementById('tlse-add-cat').value = ''
-
-  showAlert('alert-toulouse', '✓ Fiche publiée', 's')
-  loadToulouse()
-}
-
-// ─────────────────────────────────────────────────
 // TABS + UTILS
 // ─────────────────────────────────────────────────
 function switchTab(n) {
@@ -2647,8 +2154,6 @@ function switchTab(n) {
   if (n === 'suggestions') loadSuggestions()
   if (n === 'reward') loadReward()
   if (n === 'emploi') loadEmploi()
-  if (n === 'postes') loadPostes()
-  if (n === 'toulouse') loadToulouse()
 }
 
 function showAlert(id,msg,type){
@@ -2749,6 +2254,313 @@ async function whatsAppLibre(benevoleId, alertId) {
   })
   if (msg === null || !msg.trim()) return
   openWhatsApp(b.telephone, msg, alertId)
+}
+
+// ─────────────────────────────────────────────────────────────
+// OUTILS RGPD PILOTE (livrable 4.4)
+// ─────────────────────────────────────────────────────────────
+let _rgpdTarget = null
+
+function openRgpdMenu(benevoleId) {
+  const b = allBenv.find(x => x.id === benevoleId)
+  if (!b) return
+  _rgpdTarget = b
+
+  // Header
+  const fullName = ((b.prenom||'') + ' ' + (b.nom||'')).trim()
+  document.getElementById('modal-rgpd-header').innerHTML =
+    `<div style="font-size:14px;font-weight:700;color:white;margin-bottom:3px;">${fullName}</div>` +
+    `<div style="font-size:11px;color:rgba(255,255,255,0.5);">${b.email}</div>`
+
+  // Toggle delete vs cancel selon statut
+  const isPending = b.statut_compte === 'pending_deletion' || b.deletion_requested_at
+  document.getElementById('rgpd-delete-btn').style.display = isPending ? 'none' : ''
+  document.getElementById('rgpd-cancel-btn').style.display = isPending ? '' : 'none'
+
+  // Reset à la vue principale
+  rgpdShowMain()
+
+  document.getElementById('modal-rgpd').style.display = 'flex'
+}
+
+function closeRgpdMenu() {
+  document.getElementById('modal-rgpd').style.display = 'none'
+  _rgpdTarget = null
+}
+
+function rgpdShowMain() {
+  document.getElementById('rgpd-actions').style.display = ''
+  document.getElementById('rgpd-delete-form').style.display = 'none'
+  document.getElementById('rgpd-default-actions').style.display = ''
+  document.getElementById('rgpd-delete-actions').style.display = 'none'
+  document.getElementById('rgpd-delete-reason').value = ''
+}
+
+function rgpdActionShowDelete() {
+  document.getElementById('rgpd-actions').style.display = 'none'
+  document.getElementById('rgpd-delete-form').style.display = ''
+  document.getElementById('rgpd-default-actions').style.display = 'none'
+  document.getElementById('rgpd-delete-actions').style.display = ''
+  setTimeout(() => document.getElementById('rgpd-delete-reason').focus(), 100)
+}
+
+// ─── Export pilote (RPC export_account_data avec target_email) ────
+async function rgpdActionExport() {
+  if (!_rgpdTarget) return
+  const target = _rgpdTarget
+  const fullName = ((target.prenom||'') + ' ' + (target.nom||'')).trim()
+
+  const ok = await confirmModal({
+    icon: '📥',
+    title: 'Exporter les données ?',
+    message: `Tu vas télécharger l'intégralité des données de ${fullName} (JSON + PDF résumé).\n\nCette action sera tracée dans l'audit RGPD.`,
+    confirmText: 'Télécharger',
+    confirmStyle: 'blue',
+  })
+  if (!ok) return
+
+  closeRgpdMenu()
+  showAlert('alert-bnv', '⏳ Préparation de l\'export pour ' + fullName + '...', 'i')
+
+  const { data, error } = await sb.rpc('export_account_data', { p_target_email: target.email })
+  if (error) {
+    showAlert('alert-bnv', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+
+  const dateTag = new Date().toISOString().slice(0, 10)
+  const safePrenom = (target.prenom || 'benevole').toLowerCase().replace(/[^a-z0-9]/g, '')
+  const safeNom = (target.nom || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+  const baseName = `spacers-export-${safePrenom}${safeNom?'-'+safeNom:''}-${dateTag}`
+
+  // JSON
+  const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  rgpdTriggerDownload(jsonBlob, baseName + '.json')
+
+  // PDF (réutilise la même mise en forme que côté bénévole)
+  await new Promise(r => setTimeout(r, 200))
+  rgpdGenerateExportPDF(data, baseName + '.pdf')
+
+  showAlert('alert-bnv', '✓ Export téléchargé pour ' + fullName + ' (JSON + PDF)', 's')
+}
+
+function rgpdTriggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove() }, 1000)
+}
+
+function rgpdGenerateExportPDF(data, filename) {
+  const { jsPDF } = window.jspdf
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' })
+  const pageW = doc.internal.pageSize.getWidth()
+  const margin = 40
+  let y = margin
+
+  const addLine = (text, opts = {}) => {
+    const size = opts.size || 10
+    const bold = opts.bold || false
+    const color = opts.color || [26, 26, 24]
+    if (y > 780) { doc.addPage(); y = margin }
+    doc.setFont('helvetica', bold ? 'bold' : 'normal')
+    doc.setFontSize(size)
+    doc.setTextColor(...color)
+    const lines = doc.splitTextToSize(text, pageW - margin * 2)
+    doc.text(lines, margin, y)
+    y += (lines.length * size * 1.3) + (opts.after || 4)
+  }
+
+  const addSection = (title) => {
+    y += 8
+    if (y > 760) { doc.addPage(); y = margin }
+    doc.setFillColor(12, 68, 124)
+    doc.rect(margin, y - 12, pageW - margin * 2, 18, 'F')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.setTextColor(255, 255, 255)
+    doc.text(title, margin + 6, y + 1)
+    y += 14
+  }
+
+  // En-tête
+  doc.setFillColor(12, 68, 124)
+  doc.rect(0, 0, pageW, 70, 'F')
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(16)
+  doc.setTextColor(255, 255, 255)
+  doc.text('Export RGPD — Spacers Toulouse Volley', margin, 35)
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9)
+  doc.setTextColor(181, 212, 244)
+  doc.text('Export pilote · Article 15 et 20 du RGPD', margin, 52)
+  y = 90
+
+  // Métadonnées
+  const meta = data.export_metadata || {}
+  addLine('Date d\'export : ' + new Date(meta.export_date || Date.now()).toLocaleString('fr-FR'), { size: 9, color: [95, 94, 90] })
+  addLine('Demandé par : ' + (meta.requested_by || ''), { size: 9, color: [95, 94, 90] })
+  addLine('Bénévole concerné : ' + (data.profil?.email || '—'), { size: 9, color: [95, 94, 90] })
+  addLine('Responsable du traitement : ' + (meta.data_controller || 'TOAC-TUC VOLLEY-BALL'), { size: 9, color: [95, 94, 90] })
+  addLine('Contact RGPD : ' + (meta.rgpd_contact || 'contact@spacerstoulouse.fr'), { size: 9, color: [95, 94, 90], after: 12 })
+
+  // Profil
+  const p = data.profil || {}
+  addSection('Profil bénévole')
+  addLine('Prénom : ' + (p.prenom || '—'))
+  addLine('Nom : ' + (p.nom || '—'))
+  addLine('Email : ' + (p.email || '—'))
+  addLine('Téléphone : ' + (p.telephone || '—'))
+  addLine('Date de naissance : ' + (p.date_naissance || '—'))
+  addLine('Profil type : ' + (p.profil_type || '—'))
+  addLine('Rôle dans l\'app : ' + (p.role || 'benevole'))
+  addLine('Statut du compte : ' + (p.statut_compte || '—'))
+  addLine('Photo accréditation stockée : ' + (p.photo_path ? 'oui' : 'non'))
+  addLine('Compte créé le : ' + (p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : '—'))
+
+  addSection('Activité bénévole')
+  addLine('Matchs joués : ' + (p.matchs_joues || 0))
+  addLine('Points totaux : ' + (p.points_total || 0))
+  addLine('Points dépensés : ' + (p.points_depenses || 0))
+  addLine('Niveau : ' + (p.niveau || 'Bronze'))
+
+  addSection('Consentements (' + ((data.consentements || []).length) + ' au total)')
+  ;(data.consentements || []).slice(0, 30).forEach(c => {
+    const dt = new Date(c.granted_at).toLocaleDateString('fr-FR')
+    const status = c.granted ? '[OK]' : '[NON]'
+    addLine(`${status} ${c.consent_type} (v${c.consent_version}) — ${dt}`, { size: 9 })
+  })
+
+  const ins = data.inscriptions || []
+  addSection('Inscriptions aux matchs (' + ins.length + ')')
+  if (ins.length === 0) addLine('Aucune.', { size: 9, color: [95, 94, 90] })
+  ins.slice(0, 30).forEach(i => {
+    const dt = i.match_date ? new Date(i.match_date).toLocaleDateString('fr-FR') : '?'
+    const presence = i.statut_jour_match ? ' · ' + i.statut_jour_match : ''
+    addLine(`${dt} — vs ${i.match_adversaire || '?'} — ${i.statut}${presence}`, { size: 9 })
+  })
+
+  const posts = data.posts || []
+  addSection('Publications (' + posts.length + ')')
+  if (posts.length === 0) addLine('Aucune.', { size: 9, color: [95, 94, 90] })
+  posts.slice(0, 20).forEach(po => {
+    const dt = new Date(po.created_at).toLocaleDateString('fr-FR')
+    addLine(`${dt} — [${po.categorie}] ${po.titre || '(sans titre)'}`, { size: 9 })
+  })
+
+  const rec = data.recompenses || []
+  addSection('Demandes de récompenses (' + rec.length + ')')
+  if (rec.length === 0) addLine('Aucune.', { size: 9, color: [95, 94, 90] })
+  rec.forEach(r => {
+    const dt = new Date(r.cree_le).toLocaleDateString('fr-FR')
+    addLine(`${dt} — palier ${r.palier_pts} pts — statut : ${r.statut}`, { size: 9 })
+  })
+
+  // Footer
+  const totalPages = doc.getNumberOfPages()
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i)
+    doc.setFont('helvetica', 'italic')
+    doc.setFontSize(8)
+    doc.setTextColor(154, 153, 148)
+    doc.text(
+      'TOAC-TUC VOLLEY-BALL · Export RGPD · Page ' + i + ' / ' + totalPages,
+      pageW / 2, 825, { align: 'center' }
+    )
+  }
+
+  doc.save(filename)
+}
+
+// ─── Suppression pilote (RPC request_account_deletion) ────────
+async function rgpdActionConfirmDelete() {
+  if (!_rgpdTarget) return
+  const target = _rgpdTarget
+  const reason = (document.getElementById('rgpd-delete-reason').value || '').trim()
+  if (!reason) {
+    document.getElementById('rgpd-delete-reason').style.borderColor = '#993556'
+    document.getElementById('rgpd-delete-reason').focus()
+    return
+  }
+  const fullName = ((target.prenom||'') + ' ' + (target.nom||'')).trim()
+  const btn = document.getElementById('rgpd-delete-confirm')
+  btn.disabled = true
+  btn.textContent = 'Enregistrement...'
+
+  const { data, error } = await sb.rpc('request_account_deletion', {
+    p_target_email: target.email,
+    p_reason: reason,
+  })
+  if (error) {
+    btn.disabled = false
+    btn.textContent = 'Confirmer la suppression'
+    showAlert('alert-bnv', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+
+  // Email immédiat de notification au bénévole (mis dans email_outbox)
+  const dt = new Date(data.scheduled_for)
+  const dateStr = dt.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'})
+  await sb.from('email_outbox').insert({
+    to_email: target.email,
+    to_name: fullName,
+    subject: 'Important : ton compte Spacers Bénévoles va être supprimé',
+    body_html:
+      '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1a1a18;">' +
+      '<h2 style="color:#993556;">Action sur ton compte bénévole</h2>' +
+      '<p>Bonjour ' + (target.prenom||'') + ',</p>' +
+      '<p>Le club a programmé la <strong>suppression de ton compte bénévole Spacers</strong>.</p>' +
+      '<ul><li>Date de suppression définitive : <strong>' + dateStr + '</strong></li></ul>' +
+      '<p><strong>Que faire ?</strong></p>' +
+      '<ul>' +
+      '<li>Si tu souhaites <strong>contester cette décision</strong>, écris à <a href="mailto:contact@spacerstoulouse.fr">contact@spacerstoulouse.fr</a></li>' +
+      '<li>Si tu souhaites <strong>récupérer tes données</strong> avant la suppression, connecte-toi à l\'app et va dans Profil > Mon compte > Exporter mes données</li>' +
+      '<li>Si tu souhaites <strong>annuler la suppression toi-même</strong>, connecte-toi à l\'app : tu seras redirigé vers un écran de récupération.</li>' +
+      '</ul>' +
+      '<p style="margin-top:30px;font-size:12px;color:#5F5E5A;">— L\'équipe TOAC-TUC Volley-Ball<br>Référent RGPD : Didier CONJEAUD<br><a href="mailto:contact@spacerstoulouse.fr">contact@spacerstoulouse.fr</a></p>' +
+      '</div>',
+    body_text:
+      'Bonjour ' + (target.prenom||'') + ',\n\n' +
+      'Le club a programmé la suppression de ton compte bénévole Spacers.\n\n' +
+      'Date de suppression définitive : ' + dateStr + '\n\n' +
+      'Si tu souhaites contester ou récupérer tes données, connecte-toi à l\'app ou écris à contact@spacerstoulouse.fr.\n\n' +
+      '— TOAC-TUC Volley-Ball\nRéférent RGPD : Didier CONJEAUD',
+    template_key: 'pilote_account_deletion_notice',
+    metadata: { benevole_id: target.id, scheduled_for: data.scheduled_for, requested_by: 'pilote' }
+  })
+
+  closeRgpdMenu()
+  showAlert('alert-bnv', '✓ Suppression programmée pour ' + fullName + ' (effective le ' + dateStr + ')', 's')
+  await loadAll() // refresh la liste pour afficher le badge
+}
+
+async function rgpdActionCancel() {
+  if (!_rgpdTarget) return
+  const target = _rgpdTarget
+  const fullName = ((target.prenom||'') + ' ' + (target.nom||'')).trim()
+
+  const ok = await confirmModal({
+    icon: '↺',
+    title: 'Annuler la suppression ?',
+    message: `Le compte de ${fullName} sera réactivé immédiatement.`,
+    confirmText: 'Annuler la suppression',
+    confirmStyle: 'green',
+  })
+  if (!ok) return
+
+  const { data, error } = await sb.rpc('cancel_account_deletion', {
+    p_target_email: target.email,
+  })
+  if (error) {
+    showAlert('alert-bnv', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+  closeRgpdMenu()
+  showAlert('alert-bnv', '✓ Suppression annulée pour ' + fullName, 's')
+  await loadAll()
 }
 
 function ini(b){return((b.prenom||'?')[0]+(b.nom||'?')[0]).toUpperCase()}
