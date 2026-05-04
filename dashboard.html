@@ -586,6 +586,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <button class="bn"   id="bn-forum"    onclick="bSwitch('forum')"   ><span class="bn-icon">💬</span><span class="bn-label">Forum</span></button>
     <button class="bn"   id="bn-reward"   onclick="bSwitch('reward')"  ><span class="bn-icon">🎁</span><span class="bn-label">Cadeaux</span></button>
     <button class="bn"   id="bn-emploi"   onclick="bSwitch('emploi')"  ><span class="bn-icon">💼</span><span class="bn-label">Emploi</span></button>
+    <button class="bn"   id="bn-toulouse" onclick="bSwitch('toulouse')"><span class="bn-icon">🌟</span><span class="bn-label">Toulouse</span></button>
     <button class="bn"   id="bn-profil"   onclick="bSwitch('profil')"  ><span class="bn-icon">👤</span><span class="bn-label">Profil</span></button>
   </nav>
 
@@ -639,6 +640,37 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       <button class="seg-b" data-emp-filter="benevole" onclick="setEmpFilter('benevole',this)">🏐 Bénévoles</button>
     </div>
     <div id="emploi-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
+  </div>
+
+  <!-- ── 🌟 TOULOUSE (rubrique bons plans) ── -->
+  <div class="bscreen" id="bs-toulouse">
+    <div class="sec">🌟 Vivre à Toulouse</div>
+    <div id="toulouse-alert"></div>
+
+    <!-- Hero -->
+    <div style="background:linear-gradient(135deg,#E11D48,#BE123C);border-radius:18px;padding:16px;margin-bottom:12px;color:white;position:relative;overflow:hidden;">
+      <div style="font-size:13px;font-weight:800;margin-bottom:4px;">🌹 La ville rose, version Spacers</div>
+      <div style="font-size:11px;opacity:0.9;line-height:1.55;">Les meilleurs bons plans culture, sortir, logement et resto, partagés par les bénévoles qui connaissent vraiment la ville.</div>
+    </div>
+
+    <!-- CTA Proposer un bon plan -->
+    <button class="btn btn-blue" style="width:100%;font-size:13px;margin-bottom:12px;background:linear-gradient(135deg,#E11D48,#BE123C);" onclick="openProposerToulouse()">
+      ✨ Partager un bon plan
+    </button>
+
+    <!-- Mes propositions -->
+    <div id="mes-propositions-toulouse"></div>
+
+    <!-- Filtres catégories -->
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="seg-b on" data-tlse-filter="tous" onclick="setTlseFilter('tous',this)">Tout</button>
+      <button class="seg-b" data-tlse-filter="culture" onclick="setTlseFilter('culture',this)">🎨 Culture</button>
+      <button class="seg-b" data-tlse-filter="sortir" onclick="setTlseFilter('sortir',this)">🌃 Sortir</button>
+      <button class="seg-b" data-tlse-filter="logement" onclick="setTlseFilter('logement',this)">🏠 Logement</button>
+      <button class="seg-b" data-tlse-filter="manger" onclick="setTlseFilter('manger',this)">🍽 Manger</button>
+    </div>
+
+    <div id="toulouse-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
   </div>
 
   <!-- ── PROFIL ── -->
@@ -770,6 +802,67 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <div style="font-size:9px;color:#5F5E5A;text-align:center;margin-top:14px;font-style:italic;">
       * Champs obligatoires
     </div>
+  </div>
+</div>
+
+<!-- MODAL PROPOSER UN BON PLAN TOULOUSE -->
+<div class="modal-ov" id="modal-proposer-tlse" style="display:none;">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:520px;padding:22px;">
+    <div style="background:linear-gradient(135deg,#E11D48,#BE123C);margin:-22px -22px 14px -22px;padding:18px 22px 16px;border-radius:14px 14px 0 0;color:white;">
+      <h2 style="color:white;font-size:18px;font-weight:800;margin:0;">✨ Partager un bon plan</h2>
+      <div style="font-size:10px;opacity:0.85;margin-top:4px;">Aide les autres bénévoles à découvrir Toulouse !</div>
+    </div>
+
+    <div style="font-size:11px;color:#5F5E5A;line-height:1.5;text-align:center;margin-bottom:10px;">
+      Ta proposition sera examinée par un pilote avant publication.
+    </div>
+
+    <label style="display:block;font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;">Catégorie *</label>
+    <select id="tlse-prop-cat" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
+      <option value="">-- Choisir --</option>
+      <option value="culture">🎨 Culture</option>
+      <option value="sortir">🌃 Sortir</option>
+      <option value="logement">🏠 Logement</option>
+      <option value="manger">🍽 Manger</option>
+    </select>
+
+    <label style="display:block;font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;">Titre *</label>
+    <input id="tlse-prop-titre" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;" placeholder="L'Heure du Singe">
+
+    <label style="display:block;font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;">Sous-titre court</label>
+    <input id="tlse-prop-sous" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;" placeholder="LE bar à cocktails de Toulouse">
+
+    <label style="display:block;font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;">Description *</label>
+    <textarea id="tlse-prop-desc" class="post-textarea" style="height:120px;margin-bottom:10px;" placeholder="Ambiance, prix, ce qui est spécial... Sois concret(e) et utile !"></textarea>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div>
+        <label style="display:block;font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;">Quartier</label>
+        <input id="tlse-prop-quartier" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" placeholder="Carmes, Capitole...">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;">Lien externe</label>
+        <input id="tlse-prop-lien" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" placeholder="https://...">
+      </div>
+    </div>
+
+    <label style="display:block;font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;">Image (URL)</label>
+    <input id="tlse-prop-image" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:14px;" placeholder="https://... (optionnel)">
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-blue" style="flex:1;font-size:13px;background:linear-gradient(135deg,#E11D48,#BE123C);" onclick="soumettreToulouse()">📤 Envoyer</button>
+      <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="closeProposerToulouse()">Annuler</button>
+    </div>
+
+    <div style="font-size:9px;color:#5F5E5A;text-align:center;margin-top:14px;font-style:italic;">* Champs obligatoires</div>
+  </div>
+</div>
+
+<!-- MODAL FICHE TOULOUSE (lecture) -->
+<div class="modal-ov" id="modal-tlse-fiche" style="display:none;" onclick="if(event.target===this)closeTlseFiche()">
+  <div class="modal-poste-content">
+    <button class="mpf-close" onclick="closeTlseFiche()">✕</button>
+    <div id="tlse-fiche-content"></div>
   </div>
 </div>
 
@@ -1005,6 +1098,233 @@ function formatRelativeDate(d) {
   const diffJ = Math.floor(diffH / 24)
   if (diffJ < 7) return `Il y a ${diffJ}j`
   return date.toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'})
+}
+
+// ─────────────────────────────────────────────────
+// 🌟 TOULOUSE — Bons plans bénévoles
+// ─────────────────────────────────────────────────
+let tlseRessources = []
+let tlseFilter = 'tous'
+
+const TLSE_CAT_LABELS = {
+  culture:  { label:'Culture',  emoji:'🎨', color:'#185FA5' },
+  sortir:   { label:'Sortir',   emoji:'🌃', color:'#7C3FC4' },
+  logement: { label:'Logement', emoji:'🏠', color:'#3B6D11' },
+  manger:   { label:'Manger',   emoji:'🍽',  color:'#C9821A' },
+}
+
+async function loadToulouse() {
+  const el = document.getElementById('toulouse-content')
+  if (!el) return
+
+  // Mes propositions (toutes statuts) - séparées de la liste publique
+  if (CP) {
+    const { data: mesProps } = await sb.from('ressources_toulouse')
+      .select('id, titre, categorie, statut_validation, pilote_message, cree_le')
+      .eq('soumise_par', CP.id)
+      .order('cree_le', { ascending: false })
+      .limit(5)
+    renderMesPropositionsToulouse(mesProps || [])
+  }
+
+  // Liste publique
+  const { data, error } = await sb.from('ressources_toulouse')
+    .select('*, benevoles!ressources_toulouse_soumise_par_fkey(prenom, nom, photo_url)')
+    .eq('statut_validation', 'validee')
+    .eq('active', true)
+    .order('ordre_affichage', { ascending: true })
+    .order('publiee_le', { ascending: false })
+
+  if (error) {
+    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : ' + error.message + '</div>'
+    return
+  }
+
+  tlseRessources = data || []
+  renderToulouseList()
+}
+
+function renderMesPropositionsToulouse(list) {
+  const el = document.getElementById('mes-propositions-toulouse')
+  if (!el) return
+  if (list.length === 0) { el.innerHTML = ''; return }
+  el.innerHTML = `<div style="font-size:9px;color:rgba(181,212,244,0.4);letter-spacing:1.5px;margin-bottom:6px;">MES PROPOSITIONS</div>` +
+    list.map(p => {
+      const lbl = {
+        'en_attente': '<span class="histo-statut histo-att">⏳ En attente</span>',
+        'validee':    '<span class="histo-statut histo-attr">✓ Publiée</span>',
+        'refusee':    '<span class="histo-statut histo-ref">✗ Refusée</span>',
+      }[p.statut_validation] || ''
+      const cat = TLSE_CAT_LABELS[p.categorie] || {}
+      return `
+        <div class="histo-item" style="margin-bottom:6px;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:600;color:#0C447C;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cat.emoji||''} ${escapeHtml(p.titre)}</div>
+            ${p.pilote_message ? `<div style="font-size:9px;color:#5F5E5A;margin-top:2px;font-style:italic;">"${escapeHtml(p.pilote_message)}"</div>` : ''}
+          </div>
+          ${lbl}
+        </div>`
+    }).join('') + '<div style="margin-bottom:14px;"></div>'
+}
+
+function setTlseFilter(f, btn) {
+  tlseFilter = f
+  document.querySelectorAll('[data-tlse-filter]').forEach(b => b.classList.remove('on'))
+  btn.classList.add('on')
+  renderToulouseList()
+}
+
+function renderToulouseList() {
+  const el = document.getElementById('toulouse-content')
+  let list = tlseRessources
+  if (tlseFilter !== 'tous') list = list.filter(r => r.categorie === tlseFilter)
+
+  if (list.length === 0) {
+    el.innerHTML = `<div style="text-align:center;color:rgba(181,212,244,0.5);padding:40px 20px;font-size:12px;">
+      ${tlseFilter === 'tous'
+        ? 'Pas encore de bons plans !<br>Sois le/la premier·e à en partager 🌟'
+        : 'Pas encore de bon plan dans cette catégorie.<br>À toi de jouer !'}
+    </div>`
+    return
+  }
+
+  el.innerHTML = list.map(r => {
+    const cat = TLSE_CAT_LABELS[r.categorie] || {}
+    const auteur = r.benevoles
+      ? `${r.benevoles.prenom||''} ${(r.benevoles.nom||'')[0]||''}.`.trim()
+      : 'Spacers'
+    return `
+      <div onclick="openTlseFiche('${r.id}')" style="background:white;border-radius:14px;overflow:hidden;margin-bottom:10px;cursor:pointer;transition:transform .15s;" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" onmouseleave="this.style.transform=''">
+        ${r.image_url ? `<div style="height:140px;background:url('${escapeHtml(r.image_url)}') center/cover #E6F1FB;"></div>` : `<div style="height:60px;background:linear-gradient(135deg,${cat.color}40,${cat.color}20);"></div>`}
+        <div style="padding:13px 14px 14px;">
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;">
+            <span style="background:${cat.color}15;color:${cat.color};font-size:9px;font-weight:700;padding:2px 9px;border-radius:50px;">${cat.emoji||''} ${(cat.label||r.categorie).toUpperCase()}</span>
+            ${r.quartier ? `<span style="background:#F1EFE8;color:#5F5E5A;font-size:9px;font-weight:700;padding:2px 9px;border-radius:50px;">📍 ${escapeHtml(r.quartier)}</span>` : ''}
+          </div>
+          <div style="font-size:14px;font-weight:800;color:#0C447C;line-height:1.3;margin-bottom:3px;">${escapeHtml(r.titre)}</div>
+          ${r.sous_titre ? `<div style="font-size:11.5px;color:#5F5E5A;line-height:1.5;margin-bottom:6px;">${escapeHtml(r.sous_titre)}</div>` : ''}
+          <div style="font-size:10px;color:#888;display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+            <span>👤 ${escapeHtml(auteur)}</span>
+            <span style="color:${cat.color};font-weight:700;">Lire →</span>
+          </div>
+        </div>
+      </div>`
+  }).join('')
+}
+
+function openTlseFiche(id) {
+  const r = tlseRessources.find(x => x.id === id)
+  if (!r) return
+  const cat = TLSE_CAT_LABELS[r.categorie] || {}
+  const auteur = r.benevoles
+    ? `${r.benevoles.prenom||''} ${(r.benevoles.nom||'')[0]||''}.`.trim()
+    : 'Spacers'
+
+  let html = ''
+
+  // Hero avec image en fond ou couleur catégorie
+  if (r.image_url) {
+    html += `<div style="height:200px;background:url('${escapeHtml(r.image_url)}') center/cover;position:relative;">
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,0.6) 100%);"></div>
+      <div style="position:absolute;bottom:14px;left:18px;right:18px;color:white;">
+        <span style="background:${cat.color};color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:6px;">${cat.emoji||''} ${(cat.label||'').toUpperCase()}</span>
+        <div style="font-size:22px;font-weight:800;line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,0.5);">${escapeHtml(r.titre)}</div>
+      </div>
+    </div>`
+  } else {
+    html += `<div style="background:linear-gradient(135deg,${cat.color},${cat.color}AA);padding:24px 22px 18px;color:white;">
+      <span style="background:rgba(255,255,255,0.2);color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:8px;">${cat.emoji||''} ${(cat.label||'').toUpperCase()}</span>
+      <div style="font-size:22px;font-weight:800;line-height:1.2;">${escapeHtml(r.titre)}</div>
+    </div>`
+  }
+
+  html += `<div class="mpf-body">`
+
+  if (r.sous_titre) {
+    html += `<div style="font-size:14px;font-weight:600;color:#5F5E5A;line-height:1.5;margin-bottom:14px;font-style:italic;">${escapeHtml(r.sous_titre)}</div>`
+  }
+
+  if (r.quartier) {
+    html += `<div style="background:#F1EFE8;border-radius:8px;padding:8px 12px;font-size:11px;color:#5F5E5A;margin-bottom:14px;">📍 ${escapeHtml(r.quartier)}</div>`
+  }
+
+  // Description avec rendu markdown light (gras + listes)
+  html += `<div style="font-size:13px;color:#1a1a18;line-height:1.7;white-space:pre-line;margin-bottom:16px;">${renderMarkdownLight(r.description)}</div>`
+
+  if (r.lien_externe) {
+    html += `<a href="${escapeHtml(r.lien_externe)}" target="_blank" rel="noopener" style="display:block;background:${cat.color};color:white;text-align:center;padding:12px;border-radius:50px;text-decoration:none;font-size:13px;font-weight:700;margin-bottom:12px;">🔗 En savoir plus</a>`
+  }
+
+  html += `<div style="text-align:center;font-size:10px;color:#888;padding-top:8px;border-top:1px solid #F1EFE8;margin-top:14px;">
+    ✨ Partagé par <strong style="color:${cat.color};">${escapeHtml(auteur)}</strong>
+  </div>`
+
+  html += `</div>`
+
+  document.getElementById('tlse-fiche-content').innerHTML = html
+  document.getElementById('modal-tlse-fiche').style.display = 'flex'
+  document.body.style.overflow = 'hidden'
+}
+
+function closeTlseFiche() {
+  document.getElementById('tlse-fiche-content').innerHTML = ''
+  document.getElementById('modal-tlse-fiche').style.display = 'none'
+  document.body.style.overflow = ''
+}
+
+// Markdown ultra-light : juste **gras** et puces • / -
+function renderMarkdownLight(txt) {
+  if (!txt) return ''
+  let s = escapeHtml(txt)
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+  return s
+}
+
+function openProposerToulouse() {
+  ;['tlse-prop-titre','tlse-prop-sous','tlse-prop-desc','tlse-prop-quartier','tlse-prop-lien','tlse-prop-image']
+    .forEach(id => { const e = document.getElementById(id); if (e) e.value = '' })
+  const cat = document.getElementById('tlse-prop-cat')
+  if (cat) cat.value = ''
+  document.getElementById('modal-proposer-tlse').style.display = 'flex'
+}
+
+function closeProposerToulouse() {
+  document.getElementById('modal-proposer-tlse').style.display = 'none'
+}
+
+async function soumettreToulouse() {
+  if (!CP) return showToast('Pas connecté', 'error')
+
+  const categorie = document.getElementById('tlse-prop-cat').value
+  const titre = document.getElementById('tlse-prop-titre').value.trim()
+  const desc = document.getElementById('tlse-prop-desc').value.trim()
+
+  if (!categorie) return showToast('Choisis une catégorie', 'error')
+  if (!titre) return showToast('Titre obligatoire', 'error')
+  if (!desc) return showToast('Description obligatoire', 'error')
+
+  const row = {
+    categorie,
+    titre,
+    sous_titre: document.getElementById('tlse-prop-sous').value.trim() || null,
+    description: desc,
+    quartier: document.getElementById('tlse-prop-quartier').value.trim() || null,
+    lien_externe: document.getElementById('tlse-prop-lien').value.trim() || null,
+    image_url: document.getElementById('tlse-prop-image').value.trim() || null,
+    soumise_par: CP.id,
+    statut_validation: 'en_attente',
+    active: true,
+  }
+
+  const { error } = await sb.from('ressources_toulouse').insert(row)
+  if (error) {
+    showToast('Erreur : ' + error.message, 'error')
+    return
+  }
+
+  closeProposerToulouse()
+  showToast('🎉 Bon plan envoyé au pilote !', 'success')
+  loadToulouse()
 }
 
 // ─────────────────────────────────────────────────
@@ -2165,6 +2485,7 @@ function bSwitch(name) {
   if(name==='forum')loadPosts()
   if(name==='reward')loadReward()
   if(name==='emploi')loadEmploi()
+  if(name==='toulouse')loadToulouse()
   if(name==='profil')renderPhotoCard() // refresh la carte photo en arrivant sur l'onglet
 }
 

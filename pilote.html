@@ -192,6 +192,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <button class="tab"    id="tab-suggestions" onclick="switchTab('suggestions')">💡 Suggestions<span class="bdg-num" id="bdg-suggestions" style="display:none;"></span></button>
   <button class="tab"    id="tab-reward"      onclick="switchTab('reward')">🎁 Cadeaux<span class="bdg-num" id="bdg-reward" style="display:none;"></span></button>
   <button class="tab"    id="tab-emploi"      onclick="switchTab('emploi')">💼 Emploi<span class="bdg-num" id="bdg-emploi" style="display:none;"></span></button>
+  <button class="tab"    id="tab-toulouse"    onclick="switchTab('toulouse')">🌟 Toulouse<span class="bdg-num" id="bdg-toulouse" style="display:none;"></span></button>
   <button class="tab"    id="tab-notes"       onclick="switchTab('notes')">📖 Mémoire</button>
 </div>
 
@@ -502,6 +503,75 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
     </div>
   </div>
   <div id="emp-list"></div>
+</div>
+
+<!-- 🌟 TOULOUSE (modération + ajout) -->
+<div class="screen" id="screen-toulouse">
+  <div id="alert-toulouse"></div>
+
+  <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+    <div class="kpi"><div class="kpi-val a" id="tlse-kpi-att">—</div><div class="kpi-lbl">En attente</div></div>
+    <div class="kpi"><div class="kpi-val g" id="tlse-kpi-actives">—</div><div class="kpi-lbl">Validées</div></div>
+    <div class="kpi"><div class="kpi-val r" id="tlse-kpi-ref">—</div><div class="kpi-lbl">Refusées</div></div>
+    <div class="kpi"><div class="kpi-val" id="tlse-kpi-tot">—</div><div class="kpi-lbl">Total</div></div>
+  </div>
+
+  <div class="sec">📨 Propositions bénévoles en attente</div>
+  <div id="tlse-demandes"></div>
+
+  <div class="sec">➕ Ajouter une fiche (publication directe)</div>
+  <div class="card">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <div>
+        <label class="input-label">Catégorie *</label>
+        <select id="tlse-add-cat" class="input-field">
+          <option value="">--</option>
+          <option value="culture">🎨 Culture</option>
+          <option value="sortir">🌃 Sortir</option>
+          <option value="logement">🏠 Logement</option>
+          <option value="manger">🍽 Manger</option>
+        </select>
+      </div>
+      <div>
+        <label class="input-label">Quartier</label>
+        <input id="tlse-add-quartier" class="input-field" placeholder="Carmes, Capitole...">
+      </div>
+    </div>
+
+    <label class="input-label">Titre *</label>
+    <input id="tlse-add-titre" class="input-field" placeholder="L'Heure du Singe">
+
+    <div style="margin-top:8px;"></div>
+    <label class="input-label">Sous-titre court</label>
+    <input id="tlse-add-sous" class="input-field" placeholder="LE bar à cocktails de Toulouse">
+
+    <div style="margin-top:8px;"></div>
+    <label class="input-label">Description *</label>
+    <textarea id="tlse-add-desc" class="bulk-code-area" placeholder="Décris l'endroit, ce qui est spécial, prix, ambiance..."></textarea>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;">
+      <div>
+        <label class="input-label">Lien externe</label>
+        <input id="tlse-add-lien" class="input-field" placeholder="https://...">
+      </div>
+      <div>
+        <label class="input-label">Image (URL)</label>
+        <input id="tlse-add-image" class="input-field" placeholder="https://...">
+      </div>
+    </div>
+
+    <button class="btn btn-blue btn-full" style="background:linear-gradient(135deg,#E11D48,#BE123C);" onclick="ajouterFicheToulouse()">📤 Publier la fiche</button>
+  </div>
+
+  <div class="sec">📋 Toutes les fiches publiées</div>
+  <div style="margin-bottom:8px;">
+    <div class="seg-group" id="tlse-list-filter">
+      <button class="seg on" data-tlse-list-filter="actives" onclick="setTlseListFilter('actives',this)">Actives</button>
+      <button class="seg" data-tlse-list-filter="refusees" onclick="setTlseListFilter('refusees',this)">Refusées</button>
+      <button class="seg" data-tlse-list-filter="tous" onclick="setTlseListFilter('tous',this)">Toutes</button>
+    </div>
+  </div>
+  <div id="tlse-list"></div>
 </div>
 
 <!-- MÉMOIRE -->
@@ -874,6 +944,7 @@ async function loadAll() {
   await loadSuggestions()
   await loadReward()
   await loadEmploi()
+  await loadToulouse()
 }
 
 function renderPhotosAtt(list) {
@@ -2337,6 +2408,234 @@ async function savePosteFiche() {
 }
 
 // ─────────────────────────────────────────────────
+// 🌟 TOULOUSE — Modération + ajout direct (NOUVEAU)
+// ─────────────────────────────────────────────────
+let tlseAll = []
+let tlseListFilter = 'actives'
+
+const TLSE_CAT_PILOTE = {
+  culture:  { label:'Culture',  emoji:'🎨' },
+  sortir:   { label:'Sortir',   emoji:'🌃' },
+  logement: { label:'Logement', emoji:'🏠' },
+  manger:   { label:'Manger',   emoji:'🍽'  },
+}
+
+async function loadToulouse() {
+  const { data, error } = await sb.from('ressources_toulouse')
+    .select('*, benevoles!ressources_toulouse_soumise_par_fkey(prenom, nom, photo_url)')
+    .order('cree_le', { ascending: false })
+
+  if (error) {
+    showAlert('alert-toulouse', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+  tlseAll = data || []
+  updateTlseKPIs()
+  renderTlseDemandes()
+  renderTlseList()
+}
+
+function updateTlseKPIs() {
+  const att = tlseAll.filter(r => r.statut_validation === 'en_attente').length
+  const val = tlseAll.filter(r => r.statut_validation === 'validee' && r.active).length
+  const ref = tlseAll.filter(r => r.statut_validation === 'refusee').length
+
+  document.getElementById('tlse-kpi-att').textContent = att
+  document.getElementById('tlse-kpi-actives').textContent = val
+  document.getElementById('tlse-kpi-ref').textContent = ref
+  document.getElementById('tlse-kpi-tot').textContent = tlseAll.length
+
+  const bdg = document.getElementById('bdg-toulouse')
+  if (bdg) {
+    if (att > 0) {
+      bdg.textContent = att > 99 ? '99+' : String(att)
+      bdg.style.display = 'flex'
+    } else {
+      bdg.style.display = 'none'
+    }
+  }
+}
+
+function renderTlseDemandes() {
+  const att = tlseAll.filter(r => r.statut_validation === 'en_attente')
+  const el = document.getElementById('tlse-demandes')
+
+  if (att.length === 0) {
+    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucune demande en attente</div>'
+    return
+  }
+
+  el.innerHTML = att.map(r => {
+    const b = r.benevoles || {}
+    const cat = TLSE_CAT_PILOTE[r.categorie] || {}
+    return `
+      <div class="demande-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          ${b.photo_url ? `<img src="${b.photo_url}" class="bav">` : `<div class="bav-ph">${b.prenom?(b.prenom[0]||'?'):'?'}${b.nom?(b.nom[0]||'?'):'?'}</div>`}
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:700;color:white;">${escapeHtmlPilote((b.prenom||'') + ' ' + (b.nom||''))}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.5);">Soumis ${new Date(r.cree_le).toLocaleDateString('fr-FR')}</div>
+          </div>
+          <span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);">${cat.emoji||''} ${cat.label||r.categorie}</span>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;margin-bottom:10px;">
+          <div style="font-size:14px;font-weight:700;color:white;margin-bottom:4px;">${escapeHtmlPilote(r.titre)}</div>
+          ${r.sous_titre ? `<div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:6px;font-style:italic;">${escapeHtmlPilote(r.sous_titre)}</div>` : ''}
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;white-space:pre-line;margin-bottom:6px;">${escapeHtmlPilote(r.description)}</div>
+          ${r.quartier ? `<div style="font-size:10px;color:rgba(255,255,255,0.5);">📍 ${escapeHtmlPilote(r.quartier)}</div>` : ''}
+          ${r.lien_externe ? `<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:3px;">🔗 ${escapeHtmlPilote(r.lien_externe)}</div>` : ''}
+          ${r.image_url ? `<div style="margin-top:8px;"><img src="${escapeHtmlPilote(r.image_url)}" style="max-width:100%;height:auto;max-height:120px;border-radius:8px;" onerror="this.style.display='none'"></div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-green btn-sm" style="flex:1;" onclick="validerToulouse('${r.id}')">✓ Valider et publier</button>
+          <button class="btn btn-red btn-sm" onclick="refuserToulouse('${r.id}')">✗ Refuser</button>
+        </div>
+      </div>`
+  }).join('')
+}
+
+async function validerToulouse(id) {
+  const { error } = await sb.from('ressources_toulouse')
+    .update({
+      statut_validation: 'validee',
+      pilote_id: curPiloteId,
+      publiee_le: new Date().toISOString(),
+      traitee_le: new Date().toISOString()
+    })
+    .eq('id', id)
+  if (error) return showAlert('alert-toulouse', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-toulouse', '✓ Bon plan publié', 's')
+  loadToulouse()
+}
+
+async function refuserToulouse(id) {
+  const msg = await promptModal({
+    icon: '✗',
+    title: 'Refuser cette proposition',
+    message: 'Indique une raison (visible par le bénévole).',
+    placeholder: 'Hors-sujet, doublon, manque de contenu...',
+    confirmText: 'Refuser',
+    confirmStyle: 'red',
+  })
+  if (msg === null) return
+  const { error } = await sb.from('ressources_toulouse')
+    .update({
+      statut_validation: 'refusee',
+      pilote_message: msg || null,
+      pilote_id: curPiloteId,
+      traitee_le: new Date().toISOString()
+    })
+    .eq('id', id)
+  if (error) return showAlert('alert-toulouse', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-toulouse', '✗ Proposition refusée', 's')
+  loadToulouse()
+}
+
+function setTlseListFilter(f, btn) {
+  tlseListFilter = f
+  document.querySelectorAll('#tlse-list-filter .seg').forEach(s => s.classList.remove('on'))
+  btn.classList.add('on')
+  renderTlseList()
+}
+
+function renderTlseList() {
+  let list = tlseAll.filter(r => r.statut_validation !== 'en_attente')
+  if (tlseListFilter === 'actives') list = list.filter(r => r.active && r.statut_validation === 'validee')
+  else if (tlseListFilter === 'refusees') list = list.filter(r => r.statut_validation === 'refusee')
+
+  const el = document.getElementById('tlse-list')
+  if (list.length === 0) {
+    el.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:10px 0;font-style:italic;">Aucune fiche dans cette catégorie.</div>'
+    return
+  }
+
+  el.innerHTML = list.map(r => {
+    const cat = TLSE_CAT_PILOTE[r.categorie] || {}
+    const isRefusee = r.statut_validation === 'refusee'
+    const opacity = (r.active && !isRefusee) ? '1' : '0.5'
+    let statut
+    if (isRefusee) statut = '<span class="s-badge" style="background:rgba(153,53,86,0.15);color:#F09595;">✗ Refusée</span>'
+    else if (!r.active) statut = '<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);">⏸ Désactivée</span>'
+    else statut = '<span class="s-badge" style="background:rgba(59,109,17,0.15);color:#C0DD97;">● Active</span>'
+
+    return `
+      <div class="card" style="opacity:${opacity};">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <span class="s-badge" style="background:rgba(225,29,72,0.15);color:#F4B8CE;">${cat.emoji||''} ${cat.label||r.categorie}</span>
+          ${r.quartier ? `<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);">📍 ${escapeHtmlPilote(r.quartier)}</span>` : ''}
+          ${statut}
+        </div>
+        <div style="font-size:14px;font-weight:700;color:white;margin-bottom:3px;">${escapeHtmlPilote(r.titre)}</div>
+        ${r.sous_titre ? `<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px;font-style:italic;">${escapeHtmlPilote(r.sous_titre)}</div>` : ''}
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5;margin-bottom:8px;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtmlPilote(r.description)}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${!isRefusee ? `<button class="btn btn-ghost btn-sm" onclick="toggleTlse('${r.id}', ${!r.active})">${r.active ? '⏸ Désactiver' : '▶ Réactiver'}</button>` : ''}
+          <button class="btn btn-red btn-sm" onclick="supprimerTlse('${r.id}')">🗑 Supprimer</button>
+        </div>
+      </div>`
+  }).join('')
+}
+
+async function toggleTlse(id, newActive) {
+  const { error } = await sb.from('ressources_toulouse')
+    .update({ active: newActive })
+    .eq('id', id)
+  if (error) return showAlert('alert-toulouse', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-toulouse', newActive ? '▶ Fiche réactivée' : '⏸ Fiche désactivée', 's')
+  loadToulouse()
+}
+
+async function supprimerTlse(id) {
+  const ok = await confirmModal({
+    icon: '🗑',
+    title: 'Supprimer cette fiche ?',
+    message: 'Action irréversible. Si tu veux juste la cacher, utilise "Désactiver".',
+    confirmText: 'Supprimer',
+    confirmStyle: 'red',
+  })
+  if (!ok) return
+  const { error } = await sb.from('ressources_toulouse').delete().eq('id', id)
+  if (error) return showAlert('alert-toulouse', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-toulouse', '🗑 Fiche supprimée', 's')
+  loadToulouse()
+}
+
+async function ajouterFicheToulouse() {
+  const categorie = document.getElementById('tlse-add-cat').value
+  const titre = document.getElementById('tlse-add-titre').value.trim()
+  const desc = document.getElementById('tlse-add-desc').value.trim()
+
+  if (!categorie) return showAlert('alert-toulouse', '❌ Catégorie obligatoire', 'e')
+  if (!titre) return showAlert('alert-toulouse', '❌ Titre obligatoire', 'e')
+  if (!desc) return showAlert('alert-toulouse', '❌ Description obligatoire', 'e')
+
+  const row = {
+    categorie,
+    titre,
+    sous_titre: document.getElementById('tlse-add-sous').value.trim() || null,
+    description: desc,
+    quartier: document.getElementById('tlse-add-quartier').value.trim() || null,
+    lien_externe: document.getElementById('tlse-add-lien').value.trim() || null,
+    image_url: document.getElementById('tlse-add-image').value.trim() || null,
+    soumise_par: curPiloteId,
+    pilote_id: curPiloteId,
+    statut_validation: 'validee',
+    publiee_le: new Date().toISOString(),
+    active: true,
+  }
+
+  const { error } = await sb.from('ressources_toulouse').insert(row)
+  if (error) return showAlert('alert-toulouse', '❌ Erreur : ' + error.message, 'e')
+
+  ;['tlse-add-titre','tlse-add-sous','tlse-add-desc','tlse-add-quartier','tlse-add-lien','tlse-add-image']
+    .forEach(id => { document.getElementById(id).value = '' })
+  document.getElementById('tlse-add-cat').value = ''
+
+  showAlert('alert-toulouse', '✓ Fiche publiée', 's')
+  loadToulouse()
+}
+
+// ─────────────────────────────────────────────────
 // TABS + UTILS
 // ─────────────────────────────────────────────────
 function switchTab(n) {
@@ -2349,6 +2648,7 @@ function switchTab(n) {
   if (n === 'reward') loadReward()
   if (n === 'emploi') loadEmploi()
   if (n === 'postes') loadPostes()
+  if (n === 'toulouse') loadToulouse()
 }
 
 function showAlert(id,msg,type){
