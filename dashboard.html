@@ -165,6 +165,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .s-open{background:#EAF3DE;color:#3B6D11;font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;display:inline-block;margin-top:4px;}
 .s-closed{background:#F1EFE8;color:#5F5E5A;font-size:9px;padding:2px 8px;border-radius:50px;display:inline-block;margin-top:4px;}
 .s-dispo{background:#E6F1FB;color:#0C447C;font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;display:inline-block;margin-top:4px;}
+.s-poste{background:linear-gradient(90deg,#185FA5,#0C447C);color:white;font-size:9px;font-weight:700;padding:3px 10px;border-radius:50px;display:inline-block;margin-top:4px;cursor:pointer;}
 .match-actions{margin-top:8px;display:flex;gap:6px;}
 .btn-sm{border:none;border-radius:50px;padding:7px 13px;font-family:'Sora',sans-serif;font-size:11px;font-weight:700;cursor:pointer;}
 .btn-sm-green{background:#3B6D11;color:white;}
@@ -361,6 +362,108 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   width:46px;height:46px;
   object-fit:contain;
 }
+
+/* ── FICHES POSTES (chantier postes V1) ── */
+.postes-intro{
+  font-size:11px;color:rgba(181,212,244,0.6);
+  line-height:1.6;margin-bottom:10px;
+}
+.postes-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;
+}
+.poste-card{
+  background:white;border-radius:14px;padding:13px 10px 11px;
+  text-align:center;cursor:pointer;transition:transform .15s;
+  position:relative;overflow:hidden;
+}
+.poste-card:active{transform:scale(0.97);}
+.poste-card.affecte{
+  background:linear-gradient(135deg,#FEF7E6,white);
+  box-shadow:0 0 0 2px #F5C842;
+}
+.poste-card.affecte::before{
+  content:'🎯 TON POSTE';position:absolute;top:0;left:0;right:0;
+  background:#F5C842;color:#1a1a18;font-size:8px;font-weight:800;
+  letter-spacing:1px;padding:2px 0;
+}
+.poste-card.affecte .poste-emoji{margin-top:14px;}
+.poste-emoji{font-size:30px;line-height:1;margin-bottom:6px;}
+.poste-name{
+  font-size:12px;font-weight:700;color:#0C447C;
+  margin-bottom:6px;line-height:1.3;min-height:32px;
+  display:flex;align-items:center;justify-content:center;
+}
+.poste-tags{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;}
+.poste-tag{
+  font-size:8.5px;font-weight:700;padding:2px 6px;
+  border-radius:50px;letter-spacing:0.2px;
+}
+.poste-tag-fac{background:rgba(59,109,17,0.15);color:#3B6D11;}
+.poste-tag-moy{background:rgba(201,130,26,0.15);color:#C9821A;}
+.poste-tag-avc{background:rgba(153,53,86,0.15);color:#993556;}
+.poste-tag-vid{background:rgba(190,18,60,0.12);color:#BE123C;}
+
+/* MODAL FICHE POSTE */
+.modal-poste-content{
+  background:white;border-radius:24px 24px 0 0;
+  padding:0;width:100%;max-width:480px;
+  max-height:92vh;overflow-y:auto;position:relative;
+}
+.mpf-close{
+  position:fixed;top:8px;right:50%;transform:translateX(232px);
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(0,0,0,0.6);border:none;font-size:15px;
+  cursor:pointer;color:white;z-index:300;
+  display:flex;align-items:center;justify-content:center;
+}
+@media (max-width:520px){.mpf-close{right:14px;transform:none;}}
+.mpf-hero{
+  background:linear-gradient(135deg,#0C447C,#185FA5);
+  padding:24px 22px 18px;color:white;
+  position:relative;overflow:hidden;
+}
+.mpf-hero::before{
+  content:'';position:absolute;right:-30px;top:-30px;
+  width:140px;height:140px;background:rgba(245,200,66,0.08);
+  border-radius:50%;
+}
+.mpf-hero-emoji{font-size:54px;line-height:1;margin-bottom:8px;}
+.mpf-hero-name{font-size:22px;font-weight:800;margin-bottom:6px;line-height:1.2;}
+.mpf-hero-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.mpf-hero-tag{
+  font-size:10px;font-weight:700;padding:3px 9px;border-radius:50px;
+  background:rgba(255,255,255,0.15);color:white;
+}
+.mpf-affecte-banner{
+  background:linear-gradient(90deg,#F5C842,#FAC775);
+  color:#1a1a18;padding:11px 22px;
+  font-size:12px;font-weight:700;
+  display:flex;align-items:center;gap:8px;
+}
+.mpf-body{padding:18px 22px 28px;}
+.video-frame{
+  position:relative;padding-bottom:56.25%;height:0;
+  overflow:hidden;border-radius:12px;background:#000;
+  margin-bottom:18px;
+}
+.video-frame iframe{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;border:0;
+}
+.mpf-section{margin-bottom:16px;}
+.mpf-label{
+  font-size:10px;font-weight:700;letter-spacing:1.2px;
+  text-transform:uppercase;color:#185FA5;margin-bottom:6px;
+}
+.mpf-content{
+  font-size:13px;color:#1a1a18;line-height:1.65;
+  white-space:pre-line;
+}
+.mpf-meta-card{
+  background:#E6F1FB;border-radius:10px;
+  padding:10px 13px;font-size:11.5px;color:#0C447C;
+  display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;
+}
 </style>
 </head>
 <body>
@@ -520,15 +623,15 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   <!-- ── EMPLOI (chantier 8) ── -->
   <div class="bscreen" id="bs-emploi">
     <div class="sec">💼 Minute emploi</div>
-
+    
     <!-- CTA : Proposer une annonce -->
     <button class="btn btn-blue" style="width:100%;font-size:13px;margin-bottom:12px;background:linear-gradient(135deg,#185FA5,#0C447C);" onclick="openProposerEmploi()">
       ✍️ Proposer une annonce
     </button>
-
+    
     <!-- Mes propositions (si y en a) -->
     <div id="mes-propositions"></div>
-
+    
     <div style="display:flex;gap:6px;margin-bottom:12px;">
       <button class="seg-b on" data-emp-filter="tous" onclick="setEmpFilter('tous',this)">Tous</button>
       <button class="seg-b" data-emp-filter="partenaire" onclick="setEmpFilter('partenaire',this)">🤝 Partenaires</button>
@@ -585,6 +688,14 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       <button class="btn btn-blue" style="flex:1;font-size:13px;" id="modal-confirm-ok">Confirmer</button>
       <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" id="modal-confirm-cancel">Annuler</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL FICHE POSTE (NOUVEAU) -->
+<div class="modal-ov" id="modal-poste-fiche" style="display:none;" onclick="if(event.target===this)closePosteFiche()">
+  <div class="modal-poste-content">
+    <button class="mpf-close" onclick="closePosteFiche()">✕</button>
+    <div id="mpf-content"></div>
   </div>
 </div>
 
@@ -687,10 +798,11 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 <script>
 const SUPABASE_URL = 'https://xphuolvbamdkizydveij.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwaHVvbHZiYW1ka2l6eWR2ZWlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDQ2MDksImV4cCI6MjA5MjYyMDYwOX0.vpxV6ApwAkhlTx-LMCBZwee7LCdQGYP_5sbPMXEFFUQ'
-const PHOTOS_BUCKET = 'photos-benevoles'
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 let CU = null, CP = null
+let CATALOGUE_POSTES = []
+let MON_POSTE_AFFECTE = null // {match_id, poste_id, match_info} si bénévole affecté à un poste pour un match à venir
 let quizScores = {h:0,v:0,j:0}
 let quizCurrentStep = 1
 let detectedProfil = ''
@@ -698,72 +810,6 @@ let newProfilSelected = ''
 
 // PHOTO state
 let pendingPhotoFile = null
-
-// ─────────────────────────────────────────────────────────────
-// SIGNED URLS — bucket privé (Chantier 11)
-// ─────────────────────────────────────────────────────────────
-// Cache en mémoire pour éviter de regénérer une signed URL à chaque render.
-// Les signed URLs sont valides 1h, on les garde 50 min en cache (10 min de marge).
-const _signedUrlCache = new Map() // path -> {url, expiresAt}
-const SIGNED_URL_TTL = 3600 // 1h
-const SIGNED_URL_REFRESH_MS = 50 * 60 * 1000 // 50 min
-
-async function getSignedPhotoUrl(path) {
-  if (!path) return null
-  const cached = _signedUrlCache.get(path)
-  if (cached && cached.expiresAt > Date.now()) return cached.url
-  try {
-    const { data, error } = await sb.storage
-      .from(PHOTOS_BUCKET)
-      .createSignedUrl(path, SIGNED_URL_TTL)
-    if (error || !data) {
-      console.warn('signed url failed for', path, error)
-      return null
-    }
-    _signedUrlCache.set(path, {
-      url: data.signedUrl,
-      expiresAt: Date.now() + SIGNED_URL_REFRESH_MS,
-    })
-    return data.signedUrl
-  } catch (e) {
-    console.warn('signed url exception', e)
-    return null
-  }
-}
-
-async function getSignedPhotoUrls(paths) {
-  // Batch — utile pour le forum / liste de bénévoles
-  const result = {}
-  if (!paths || paths.length === 0) return result
-  const toFetch = []
-  for (const p of paths) {
-    if (!p) continue
-    const cached = _signedUrlCache.get(p)
-    if (cached && cached.expiresAt > Date.now()) result[p] = cached.url
-    else toFetch.push(p)
-  }
-  if (toFetch.length > 0) {
-    try {
-      const { data, error } = await sb.storage
-        .from(PHOTOS_BUCKET)
-        .createSignedUrls(toFetch, SIGNED_URL_TTL)
-      if (!error && data) {
-        for (const item of data) {
-          if (item.signedUrl && item.path) {
-            result[item.path] = item.signedUrl
-            _signedUrlCache.set(item.path, {
-              url: item.signedUrl,
-              expiresAt: Date.now() + SIGNED_URL_REFRESH_MS,
-            })
-          }
-        }
-      }
-    } catch (e) {
-      console.warn('signed urls batch failed', e)
-    }
-  }
-  return result
-}
 
 // ─────────────────────────────────────────────────
 // EMPLOI / MINUTE EMPLOI (chantier 8)
@@ -826,6 +872,7 @@ function renderMesPropositions(list) {
 }
 
 function openProposerEmploi() {
+  // Reset form
   ;['prop-titre','prop-desc','prop-lieu','prop-contact-email','prop-contact-tel','prop-contact-lien']
     .forEach(id => { document.getElementById(id).value = '' })
   document.getElementById('prop-contrat').value = ''
@@ -960,7 +1007,7 @@ function formatRelativeDate(d) {
 }
 
 // ─────────────────────────────────────────────────
-// MODAL CONFIRMATION UNIFIÉE
+// MODAL CONFIRMATION UNIFIÉE (remplace confirm/prompt natifs)
 // ─────────────────────────────────────────────────
 function confirmModal(opts) {
   return new Promise((resolve) => {
@@ -1125,11 +1172,40 @@ async function saveProfilAndContinue() {
 }
 
 // ── APP ───────────────────────────────────────────────────────
-function showApp(p) {
+async function showApp(p) {
   document.getElementById('app').style.display = 'block'
   renderTopbar(p)
+  await Promise.all([loadCataloguePostes(), loadMonPosteAffecte()])
   renderHomeForProfil(p)
   loadProfilFields(p)
+}
+
+async function loadCataloguePostes() {
+  const { data, error } = await sb.from('postes').select('*').order('nom')
+  if (!error && data) CATALOGUE_POSTES = data
+}
+
+async function loadMonPosteAffecte() {
+  // Cherche : inscription disponible + poste affecté + match à venir + statut ouvert
+  if (!CU) return
+  const todayIso = new Date().toISOString().split('T')[0]
+  const { data, error } = await sb.from('inscriptions')
+    .select('match_id, poste_id, matchs!inner(id, adversaire, date_match, heure, lieu, statut_inscriptions)')
+    .eq('benevole_id', CU.id)
+    .eq('statut', 'disponible')
+    .not('poste_id', 'is', null)
+    .gte('matchs.date_match', todayIso)
+    .order('matchs(date_match)', { ascending: true })
+    .limit(1)
+  if (!error && data && data.length > 0) {
+    MON_POSTE_AFFECTE = {
+      match_id: data[0].match_id,
+      poste_id: data[0].poste_id,
+      match_info: data[0].matchs,
+    }
+  } else {
+    MON_POSTE_AFFECTE = null
+  }
 }
 
 function renderTopbar(p) {
@@ -1145,20 +1221,9 @@ function renderTopbar(p) {
   document.getElementById('profil-badge').style.background = cfg.bg
   document.getElementById('profil-badge').style.color = cfg.color
   document.getElementById('t-pts').textContent = (p.points_total||0) + ' pts'
-
-  // Avatar : placeholder synchrone, puis upgrade async via signed URL
   const wrap = document.getElementById('av-wrap')
-  wrap.innerHTML = `<div class="av-ph">${ini(p)}</div>`
-  const pathAtCall = p.photo_path
-  if (pathAtCall) {
-    getSignedPhotoUrl(pathAtCall).then(url => {
-      // Guard contre les race conditions : on ne remplace que si CP.photo_path n'a pas changé
-      if (CP?.photo_path === pathAtCall && url) {
-        wrap.innerHTML = `<img src="${url}" class="av" alt="">`
-      }
-    })
-  }
-
+  if (p.photo_url) wrap.innerHTML = `<img src="${p.photo_url}" class="av" alt="">`
+  else wrap.innerHTML = `<div class="av-ph">${ini(p)}</div>`
   document.querySelectorAll('.bn').forEach(b=>{
     b.classList.remove('hugo','virginie','joel')
     b.classList.add(p.profil_type||'hugo')
@@ -1167,6 +1232,113 @@ function renderTopbar(p) {
   if (btnPilote) {
     btnPilote.style.display = (p.role === 'admin' || p.role === 'pilote') ? 'inline-block' : 'none'
   }
+}
+
+// ─────────────────────────────────────────────────
+// FICHES POSTES (catalogue club)
+// ─────────────────────────────────────────────────
+function extractYoutubeId(youtubeId, videoUrl) {
+  if (youtubeId && String(youtubeId).trim()) return String(youtubeId).trim()
+  if (!videoUrl) return null
+  const m = String(videoUrl).match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/)([a-zA-Z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+
+function renderPostesSection() {
+  if (!CATALOGUE_POSTES || CATALOGUE_POSTES.length === 0) return ''
+  const monPosteId = MON_POSTE_AFFECTE ? MON_POSTE_AFFECTE.poste_id : null
+  return `
+    <div class="sec">📋 Les postes du club</div>
+    <div class="postes-intro">Découvre toutes les missions des jours de match. Clique sur une fiche pour voir les détails et la vidéo (quand elle est dispo).</div>
+    <div class="postes-grid">${CATALOGUE_POSTES.map(p => renderPosteCard(p, p.id === monPosteId)).join('')}</div>`
+}
+
+function renderPosteCard(p, affecte) {
+  const hasVideo = !!extractYoutubeId(p.video_youtube_id, p.video_url)
+  const diffClass = {'Facile':'poste-tag-fac','Moyen':'poste-tag-moy','Avancé':'poste-tag-avc'}[p.difficulte] || ''
+  const emoji = p.emoji || p.icone || '📋'
+  return `
+    <div class="poste-card${affecte?' affecte':''}" onclick="openPosteFiche('${p.id}')">
+      <div class="poste-emoji">${emoji}</div>
+      <div class="poste-name">${escapeHtml(p.nom || '')}</div>
+      <div class="poste-tags">
+        ${p.difficulte ? `<span class="poste-tag ${diffClass}">${escapeHtml(p.difficulte)}</span>` : ''}
+        ${hasVideo ? '<span class="poste-tag poste-tag-vid">▶ Vidéo</span>' : ''}
+      </div>
+    </div>`
+}
+
+function openPosteFiche(posteId) {
+  const p = CATALOGUE_POSTES.find(x => x.id === posteId)
+  if (!p) return
+  const ytId = extractYoutubeId(p.video_youtube_id, p.video_url)
+  const emoji = p.emoji || p.icone || '📋'
+  const isMon = MON_POSTE_AFFECTE && MON_POSTE_AFFECTE.poste_id === p.id
+  const diffClass = {'Facile':'poste-tag-fac','Moyen':'poste-tag-moy','Avancé':'poste-tag-avc'}[p.difficulte] || ''
+
+  // Hero (gradient bleu)
+  let html = `
+    <div class="mpf-hero">
+      <div class="mpf-hero-emoji">${emoji}</div>
+      <div class="mpf-hero-name">${escapeHtml(p.nom || '')}</div>
+      <div class="mpf-hero-tags">
+        ${p.difficulte ? `<span class="mpf-hero-tag">${escapeHtml(p.difficulte)}</span>` : ''}
+        ${ytId ? '<span class="mpf-hero-tag">▶ Vidéo dispo</span>' : ''}
+        ${p.benevoles_max_match ? `<span class="mpf-hero-tag">👥 ${p.benevoles_max_match} bénévole${p.benevoles_max_match>1?'s':''}</span>` : ''}
+      </div>
+    </div>`
+
+  // Bandeau "ton poste pour le prochain match"
+  if (isMon && MON_POSTE_AFFECTE.match_info) {
+    const mi = MON_POSTE_AFFECTE.match_info
+    html += `<div class="mpf-affecte-banner">🎯 Tu tiens ce poste pour le match du ${formatDate(mi.date_match)} (vs ${escapeHtml(mi.adversaire)})</div>`
+  }
+
+  html += `<div class="mpf-body">`
+
+  // Vidéo embeddée
+  if (ytId) {
+    html += `<div class="video-frame"><iframe src="https://www.youtube.com/embed/${ytId}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
+  }
+
+  // Sections texte
+  if (p.description) {
+    html += `<div class="mpf-section"><div class="mpf-label">📌 En quoi consiste ce poste</div><div class="mpf-content">${escapeHtml(p.description)}</div></div>`
+  }
+  if (p.missions) {
+    html += `<div class="mpf-section"><div class="mpf-label">🎯 Missions</div><div class="mpf-content">${escapeHtml(p.missions)}</div></div>`
+  }
+  if (p.materiel) {
+    html += `<div class="mpf-section"><div class="mpf-label">🎒 Matériel</div><div class="mpf-content">${escapeHtml(p.materiel)}</div></div>`
+  }
+  if (p.lieu_horaires) {
+    html += `<div class="mpf-section"><div class="mpf-label">📍 Lieu & horaires</div><div class="mpf-content">${escapeHtml(p.lieu_horaires)}</div></div>`
+  }
+  if (p.conseils) {
+    html += `<div class="mpf-section"><div class="mpf-label">💡 Conseils</div><div class="mpf-content">${escapeHtml(p.conseils)}</div></div>`
+  }
+
+  // Meta info compactée
+  const metaItems = []
+  if (p.benevoles_max_match) metaItems.push(`👥 ${p.benevoles_max_match} bénévole${p.benevoles_max_match>1?'s':''} par match`)
+  if (p.heures_estimees) metaItems.push(`⏱️ ${p.heures_estimees}h estimées`)
+  if (p.postes_critiques) metaItems.push(`⚠️ Poste critique`)
+  if (metaItems.length > 0) {
+    html += `<div class="mpf-meta-card">${metaItems.map(m => `<span>${m}</span>`).join('')}</div>`
+  }
+
+  html += `</div>` // /mpf-body
+
+  document.getElementById('mpf-content').innerHTML = html
+  document.getElementById('modal-poste-fiche').style.display = 'flex'
+  document.body.style.overflow = 'hidden'
+}
+
+function closePosteFiche() {
+  // On vide le contenu pour stopper l'iframe YouTube (sinon elle continue de jouer en background)
+  document.getElementById('mpf-content').innerHTML = ''
+  document.getElementById('modal-poste-fiche').style.display = 'none'
+  document.body.style.overflow = ''
 }
 
 // ── HOME ADAPTATIF ────────────────────────────────────────────
@@ -1182,8 +1354,28 @@ function renderHomeForProfil(p) {
   else renderJoelHome(home, p, pts)
 }
 
+function renderMonPosteBanner() {
+  // Bannière "🎯 Tu tiens X pour le match Y" — affichée en haut de l'accueil
+  if (!MON_POSTE_AFFECTE) return ''
+  const poste = CATALOGUE_POSTES.find(p => p.id === MON_POSTE_AFFECTE.poste_id)
+  if (!poste) return ''
+  const mi = MON_POSTE_AFFECTE.match_info
+  const emoji = poste.emoji || poste.icone || '📋'
+  return `
+    <div onclick="openPosteFiche('${poste.id}')" style="background:linear-gradient(90deg,#F5C842,#FAC775);border-radius:14px;padding:13px 14px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(245,200,66,0.25);">
+      <div style="font-size:30px;line-height:1;">${emoji}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:9px;font-weight:800;color:#1a1a18;letter-spacing:1.5px;">🎯 TON POSTE POUR LE PROCHAIN MATCH</div>
+        <div style="font-size:14px;font-weight:800;color:#1a1a18;margin-top:2px;">${escapeHtml(poste.nom)}</div>
+        <div style="font-size:11px;color:#5F4D11;margin-top:2px;">${formatDate(mi.date_match)} · vs ${escapeHtml(mi.adversaire)}</div>
+      </div>
+      <div style="font-size:18px;color:#1a1a18;">›</div>
+    </div>`
+}
+
 function renderHugoHome(el, p, pts, niveau, pct) {
   el.innerHTML = `
+    ${renderMonPosteBanner()}
     <div class="hugo-hero">
       <div style="font-size:9px;color:rgba(245,200,66,0.5);letter-spacing:2px;margin-bottom:3px;">VOS POINTS SAISON</div>
       <div class="hugo-pts">${pts}</div>
@@ -1219,20 +1411,22 @@ function renderHugoHome(el, p, pts, niveau, pct) {
         <div style="font-size:10px;color:#185FA5;font-weight:600;">Voir mon rang</div>
       </div>
     </div>
+    ${renderPostesSection()}
     ${renderSuggestionSection('hugo')}`
 }
 
 function renderVirginieHome(el, p) {
-  // Checklist dynamique : photo done si photo_path présent (chantier 11)
+  // Checklist dynamique : photo done si photo_url présente
   const etapes = [
     {done:true,            txt:'Inscription validée ✓'},
     {done:true,            txt:'Compte créé et email reçu ✓'},
-    {done:!!p.photo_path,  txt:'Ajouter votre photo de profil'},
+    {done:!!p.photo_url,   txt:'Ajouter votre photo de profil'},
     {done:false,           txt:'Répondre au premier match'},
     {done:false,           txt:'Découvrir votre fiche de poste'},
   ]
 
   el.innerHTML = `
+    ${renderMonPosteBanner()}
     <div class="bienvenue-card">
       <div style="font-size:20px;margin-bottom:6px;">👋</div>
       <div style="font-size:16px;font-weight:800;color:#533BB7;">Bonjour ${p.prenom||''} !</div>
@@ -1258,6 +1452,8 @@ function renderVirginieHome(el, p) {
         </div>`).join('')}
     </div>
 
+    ${renderPostesSection()}
+
     <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:10px 0 7px;">❓ FAQ RAPIDE</div>
     ${[
       {q:'Comment m\'inscrire à un match ?', a:'Dans l\'onglet Planning → cliquez "Je suis disponible" sur le match souhaité. Le pilote confirmera votre affectation.'},
@@ -1274,6 +1470,7 @@ function renderVirginieHome(el, p) {
 
 function renderJoelHome(el, p, pts) {
   el.innerHTML = `
+    ${renderMonPosteBanner()}
     <div class="joel-hero">
       <div style="font-size:10px;color:rgba(192,221,151,0.6);letter-spacing:2px;margin-bottom:3px;">${p.role==='referent'||p.role==='pilote'||p.role==='admin'?'🏅 RÉFÉRENT OFFICIEL':'BÉNÉVOLE EXPÉRIMENTÉ'}</div>
       <div style="font-size:18px;font-weight:800;color:white;margin-bottom:4px;">${p.prenom||''} ${p.nom||''}</div>
@@ -1295,6 +1492,8 @@ function renderJoelHome(el, p, pts) {
       <div><div class="joel-btn-title">Mon profil</div><div class="joel-btn-sub">Infos et accréditation</div></div>
       <div style="font-size:18px;color:#D3D1C7;">›</div>
     </div>
+
+    ${renderPostesSection()}
 
     ${renderSuggestionSection('joel')}`
 }
@@ -1347,28 +1546,56 @@ async function loadPlanning() {
   const el = document.getElementById('planning-list')
   const { data: matchs } = await sb.from('matchs').select('*').order('date_match',{ascending:true})
   if (!matchs||matchs.length===0){el.innerHTML='<div style="text-align:center;color:rgba(181,212,244,0.4);padding:30px;font-size:12px;">Aucun match programmé pour l\'instant.</div>';return}
-  const { data: ins } = await sb.from('inscriptions').select('match_id,statut').eq('benevole_id',CU.id)
-  const insMap={}; if(ins) ins.forEach(i=>insMap[i.match_id]=i.statut)
-  el.innerHTML = matchs.map(m=>`
-    <div class="match-item">
-      <div class="match-vs">Spacers vs ${m.adversaire}</div>
-      <div class="match-info">📅 ${formatDate(m.date_match)} · ${m.heure||''} · ${m.lieu||'Palais des Sports'}</div>
-      ${m.statut_inscriptions==='ouvert'
-        ? insMap[m.id]
-          ? `<span class="s-dispo">${insMap[m.id]==='disponible'?'✓ Disponible':'✗ Indisponible'}</span>`
-          : `<span class="s-open">✅ Ouvert</span>
-             <div class="match-actions">
-               <button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Dispo</button>
-               <button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">👎 Indispo</button>
-             </div>`
-        : `<span class="s-closed">Fermé</span>`}
-    </div>`).join('')
+  const { data: ins } = await sb.from('inscriptions').select('match_id,statut,poste_id').eq('benevole_id',CU.id)
+  const insMap={}; if(ins) ins.forEach(i=>insMap[i.match_id]={statut:i.statut, poste_id:i.poste_id})
+  el.innerHTML = matchs.map(m=>{
+    const myIns = insMap[m.id]
+    let statusBlock = ''
+    if (m.statut_inscriptions === 'ouvert') {
+      if (myIns) {
+        if (myIns.statut === 'disponible' && myIns.poste_id) {
+          // Affecté à un poste : badge cliquable qui ouvre la fiche
+          const poste = CATALOGUE_POSTES.find(p => p.id === myIns.poste_id)
+          if (poste) {
+            const emoji = poste.emoji || poste.icone || '📋'
+            statusBlock = `<span class="s-poste" onclick="event.stopPropagation();openPosteFiche('${poste.id}')">🎯 ${emoji} ${escapeHtml(poste.nom)} — Voir la fiche</span>`
+          } else {
+            statusBlock = '<span class="s-dispo">✓ Disponible</span>'
+          }
+        } else if (myIns.statut === 'disponible') {
+          statusBlock = '<span class="s-dispo">✓ Disponible</span>'
+        } else {
+          statusBlock = '<span class="s-dispo">✗ Indisponible</span>'
+        }
+      } else {
+        statusBlock = `<span class="s-open">✅ Ouvert</span>
+          <div class="match-actions">
+            <button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Dispo</button>
+            <button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">👎 Indispo</button>
+          </div>`
+      }
+    } else {
+      statusBlock = '<span class="s-closed">Fermé</span>'
+    }
+    return `
+      <div class="match-item">
+        <div class="match-vs">Spacers vs ${escapeHtml(m.adversaire)}</div>
+        <div class="match-info">📅 ${formatDate(m.date_match)} · ${escapeHtml(m.heure||'')} · ${escapeHtml(m.lieu||'Palais des Sports')}</div>
+        ${statusBlock}
+      </div>`
+  }).join('')
 }
 
 async function setDispo(matchId,statut,btn) {
   btn.textContent='...';btn.disabled=true
   const{error}=await sb.from('inscriptions').upsert({benevole_id:CU.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'})
-  if(!error){btn.textContent=statut==='disponible'?'✓':'✗';btn.style.background=statut==='disponible'?'#3B6D11':'#888';setTimeout(loadPlanning,800)}
+  if(!error){
+    btn.textContent=statut==='disponible'?'✓':'✗'
+    btn.style.background=statut==='disponible'?'#3B6D11':'#888'
+    // Recharge le poste affecté (au cas où le pilote l'ait affecté entre-temps)
+    await loadMonPosteAffecte()
+    setTimeout(loadPlanning,800)
+  }
   else{btn.textContent='Err';btn.disabled=false}
 }
 
@@ -1398,34 +1625,17 @@ function loadPoints() {
 
 // ── FORUM ────────────────────────────────────────────────────
 async function loadPosts() {
-  const el = document.getElementById('posts-list')
-  // CHANGEMENT (chantier 11) : on récupère photo_path au lieu de photo_url
-  const { data: posts } = await sb.from('posts')
-    .select('*, benevoles(prenom, nom, photo_path, profil_type)')
-    .order('created_at', { ascending: false })
-    .limit(20)
-
-  if (!posts || posts.length === 0) {
-    el.innerHTML = '<div style="text-align:center;color:#5F5E5A;padding:20px;font-size:12px;">Soyez le premier à poster !</div>'
-    return
-  }
-
-  // Batch-resolve les signed URLs pour toutes les photos visibles
-  const paths = posts
-    .map(p => p.benevoles?.photo_path)
-    .filter(Boolean)
-  const urlMap = await getSignedPhotoUrls(paths)
-
-  el.innerHTML = posts.map(p => {
-    const ptBg = {hugo:'#E6F1FB',virginie:'#EDE9FE',joel:'#EAF3DE'}[p.benevoles?.profil_type||'hugo']||'#E6F1FB'
-    const ptC  = {hugo:'#0C447C',virginie:'#533BB7',joel:'#3B6D11'}[p.benevoles?.profil_type||'hugo']||'#0C447C'
-    const photoPath = p.benevoles?.photo_path
-    const photoUrl  = photoPath ? urlMap[photoPath] : null
-    return `<div style="background:white;border-radius:12px;padding:13px;margin-bottom:8px;">
+  const el=document.getElementById('posts-list')
+  const{data:posts}=await sb.from('posts').select('*, benevoles(prenom,nom,photo_url,profil_type)').order('created_at',{ascending:false}).limit(20)
+  if(!posts||posts.length===0){el.innerHTML='<div style="text-align:center;color:#5F5E5A;padding:20px;font-size:12px;">Soyez le premier à poster !</div>';return}
+  el.innerHTML=posts.map(p=>{
+    const ptBg={hugo:'#E6F1FB',virginie:'#EDE9FE',joel:'#EAF3DE'}[p.benevoles?.profil_type||'hugo']||'#E6F1FB'
+    const ptC={hugo:'#0C447C',virginie:'#533BB7',joel:'#3B6D11'}[p.benevoles?.profil_type||'hugo']||'#0C447C'
+    return`<div style="background:white;border-radius:12px;padding:13px;margin-bottom:8px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
-        ${photoUrl
-          ? `<img src="${photoUrl}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid #B5D4F4;">`
-          : `<div style="width:28px;height:28px;border-radius:50%;background:${ptBg};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${ptC};">${((p.benevoles?.prenom||'?')[0]+(p.benevoles?.nom||'?')[0]).toUpperCase()}</div>`}
+        ${p.benevoles?.photo_url
+          ?`<img src="${p.benevoles.photo_url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid #B5D4F4;">`
+          :`<div style="width:28px;height:28px;border-radius:50%;background:${ptBg};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${ptC};">${((p.benevoles?.prenom||'?')[0]+(p.benevoles?.nom||'?')[0]).toUpperCase()}</div>`}
         <div>
           <div style="font-size:12px;font-weight:700;color:#0C447C;">${p.benevoles?(p.benevoles.prenom||'')+' '+(p.benevoles.nom||''):'Bénévole'}</div>
           <div style="font-size:9px;color:#5F5E5A;">${formatDateTime(p.created_at)}</div>
@@ -1463,7 +1673,7 @@ function loadProfilFields(p) {
       <div><div style="font-size:13px;font-weight:700;color:${c.color};">${c.name}</div>
         <div style="font-size:10px;color:#5F5E5A;margin-top:1px;">${c.desc}</div></div>
     </div>`
-  // Photo card (async)
+  // Photo card
   renderPhotoCard()
 }
 
@@ -1528,9 +1738,9 @@ async function saveSuggestion() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// PHOTO UPLOAD (chantier 4) — adapté bucket privé (chantier 11)
+// PHOTO UPLOAD (chantier 4)
 // ─────────────────────────────────────────────────────────────
-async function renderPhotoCard() {
+function renderPhotoCard() {
   const el = document.getElementById('photo-card-content')
   if (!el || !CP) return
 
@@ -1556,15 +1766,11 @@ async function renderPhotoCard() {
     return
   }
 
-  // Mode normal : photo actuelle (signed URL) ou placeholder
+  // Mode normal : photo actuelle ou placeholder
   const p = CP
   const statut = p.statut_accreditation || 'sans_photo'
-
-  let photoUrl = null
-  if (p.photo_path) photoUrl = await getSignedPhotoUrl(p.photo_path)
-
-  const photoHtml = photoUrl
-    ? `<img src="${photoUrl}" class="photo-display" alt="Ma photo">`
+  const photoHtml = p.photo_url
+    ? `<img src="${p.photo_url}" class="photo-display" alt="Ma photo">`
     : `<div class="photo-display-ph">${ini(p)}</div>`
 
   const statusBadges = {
@@ -1576,6 +1782,7 @@ async function renderPhotoCard() {
   }
   const statusBadge = statusBadges[statut] || statusBadges['sans_photo']
 
+  // Message contextualisé selon le statut
   let contextMsg = ''
   if (statut === 'refusee') {
     contextMsg = '<div style="background:#FBEAF0;color:#993556;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;font-weight:600;">Ta photo précédente a été refusée. Envoie une nouvelle photo plus claire.</div>'
@@ -1597,14 +1804,14 @@ async function renderPhotoCard() {
       ✗ Pas de lunettes de soleil &nbsp; ✗ Pas de photo floue
     </div>
     <button class="btn btn-blue" style="font-size:13px;" onclick="document.getElementById('photo-file-input').click()">
-      📷 ${p.photo_path ? 'Changer ma photo' : 'Ajouter ma photo'}
+      📷 ${p.photo_url ? 'Changer ma photo' : 'Ajouter ma photo'}
     </button>
   `
 }
 
 function onPhotoSelected(ev) {
   const file = ev.target.files[0]
-  ev.target.value = ''
+  ev.target.value = '' // permet de re-sélectionner le même fichier
   if (!file) return
 
   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
@@ -1638,44 +1845,48 @@ async function confirmPhotoUpload() {
 
   try {
     const file = pendingPhotoFile
-    const ext = file.type === 'image/png'  ? 'png'
+    const ext = file.type === 'image/png' ? 'png'
               : file.type === 'image/webp' ? 'webp'
               : 'jpg'
     const path = `${CU.id}/profile.${ext}`
 
-    // 1. Upload (overwrite si existe — RLS check : own folder)
+    // 1. Upload vers Storage (overwrite si existe)
     const { error: upErr } = await sb.storage
-      .from(PHOTOS_BUCKET)
+      .from('photos-benevoles')
       .upload(path, file, {
         upsert: true,
         contentType: file.type,
-        cacheControl: '3600',
+        cacheControl: '3600'
       })
     if (upErr) throw upErr
 
-    // 2. Update DB : on stocke le PATH (chantier 11), photo_url devient null
+    // 2. Récupérer URL publique + cache-buster
+    const { data: pub } = sb.storage
+      .from('photos-benevoles')
+      .getPublicUrl(path)
+    const photoUrl = pub.publicUrl + '?v=' + Date.now()
+
+    // 3. Update DB : photo + repasse en attente (re-validation pilote)
     const { error: dbErr } = await sb.from('benevoles').update({
-      photo_path: path,
-      photo_url: null,
+      photo_url: photoUrl,
       statut_accreditation: 'en_attente',
       photo_validee: false,
     }).eq('email', CU.email)
     if (dbErr) throw dbErr
 
-    // 3. Bust cache pour ce path (force la régénération de la signed URL)
-    _signedUrlCache.delete(path)
-
-    // 4. Refresh UI
+    // 4. Refresh
     pendingPhotoFile = null
     const { data: refreshed } = await sb.from('benevoles').select('*').eq('email', CU.email).single()
     if (refreshed) {
       CP = refreshed
       renderTopbar(refreshed)
-      await renderPhotoCard()
+      renderPhotoCard()
+      // Si profil Virginie, refresh la checklist d'accueil
       if (refreshed.profil_type === 'virginie') {
         renderHomeForProfil(refreshed)
       }
     }
+
     showToast('Photo envoyée ! En attente de validation par un pilote.', 'success')
   } catch (err) {
     console.error('Photo upload error:', err)
@@ -1697,6 +1908,7 @@ function formatFileSize(bytes) {
 // CADEAUX / RÉCOMPENSES (chantier 6)
 // ─────────────────────────────────────────────────
 
+// Configuration des paliers (alignés sur la SQL)
 const PALIERS = [
   { pts: 200, valeur: 10, min: 50, label: '-10€ sur 50€', desc: 'Code de réduction Intersport · panier ≥ 50€' }
 ]
@@ -1707,6 +1919,7 @@ async function loadReward() {
   const el = document.getElementById('reward-content')
   if (!el) return
 
+  // Refresh CP pour avoir les bons points_total / points_depenses
   const { data: profil } = await sb.from('benevoles')
     .select('points_total, points_depenses')
     .eq('id', CP.id).single()
@@ -1715,6 +1928,7 @@ async function loadReward() {
     CP.points_depenses = profil.points_depenses
   }
 
+  // Load mes demandes
   const { data: demandes, error } = await sb.from('recompenses_demandes')
     .select('id, palier_pts, statut, code_id, cree_le, traite_le, pilote_message, recompenses_codes(code, valeur_eur, min_panier_eur, expire_le)')
     .eq('benevole_id', CP.id)
@@ -1729,6 +1943,7 @@ async function loadReward() {
   const ptsDep = CP.points_depenses || 0
   const ptsDispo = Math.max(0, ptsTotal - ptsDep)
 
+  // Demande en cours pour chaque palier
   const demandeEnCours = (demandes || []).find(d => d.statut === 'en_attente')
   const codesAttribues = (demandes || []).filter(d => d.statut === 'attribuee' && d.recompenses_codes)
 
@@ -1744,6 +1959,7 @@ async function loadReward() {
     </div>
   `
 
+  // Codes attribués (à utiliser maintenant)
   if (codesAttribues.length > 0) {
     html += `<div class="sec">✨ Mes codes disponibles</div>`
     codesAttribues.forEach(d => {
@@ -1762,6 +1978,7 @@ async function loadReward() {
     })
   }
 
+  // Paliers disponibles
   html += `<div class="sec">🎁 Catalogue des cadeaux</div>`
   PALIERS.forEach(p => {
     const dejaEnCours = demandeEnCours && demandeEnCours.palier_pts === p.pts
@@ -1791,6 +2008,7 @@ async function loadReward() {
       </div>`
   })
 
+  // Demande en attente
   if (demandeEnCours) {
     html += `
       <div class="pending-card">
@@ -1803,6 +2021,7 @@ async function loadReward() {
       </div>`
   }
 
+  // Lien boutique
   html += `
     <div class="sec">🛍️ La boutique</div>
     <a class="boutique-link" href="${BOUTIQUE_URL}" target="_blank" rel="noopener">
@@ -1815,6 +2034,7 @@ async function loadReward() {
     </a>
   `
 
+  // Historique
   const histo = (demandes || []).filter(d => d.statut !== 'en_attente')
   if (histo.length > 0) {
     html += `<div class="sec">📋 Historique de mes demandes</div>`
@@ -1892,6 +2112,7 @@ function copyCode(code) {
     navigator.clipboard.writeText(code)
     showToast('📋 Code copié !', 'success')
   } else {
+    // Fallback
     const ta = document.createElement('textarea')
     ta.value = code
     document.body.appendChild(ta)
@@ -1943,7 +2164,7 @@ function bSwitch(name) {
   if(name==='forum')loadPosts()
   if(name==='reward')loadReward()
   if(name==='emploi')loadEmploi()
-  if(name==='profil')renderPhotoCard()
+  if(name==='profil')renderPhotoCard() // refresh la carte photo en arrivant sur l'onglet
 }
 
 async function handleLogout(){await sb.auth.signOut();window.location.href='index.html'}
