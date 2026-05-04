@@ -410,13 +410,14 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   max-height:92vh;overflow-y:auto;position:relative;
 }
 .mpf-close{
-  position:fixed;top:8px;right:50%;transform:translateX(232px);
+  position:absolute;top:12px;right:12px;
   width:34px;height:34px;border-radius:50%;
-  background:rgba(0,0,0,0.6);border:none;font-size:15px;
-  cursor:pointer;color:white;z-index:300;
+  background:rgba(0,0,0,0.55);border:none;font-size:15px;
+  cursor:pointer;color:white;z-index:10;
   display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
 }
-@media (max-width:520px){.mpf-close{right:14px;transform:none;}}
+.mpf-close:hover{background:rgba(0,0,0,0.75);}
 .mpf-hero{
   background:linear-gradient(135deg,#0C447C,#185FA5);
   padding:24px 22px 18px;color:white;
