@@ -443,6 +443,41 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:f
   </div>
 </div>
 
+<!-- ══ RECOVERY — COMPTE EN COURS DE SUPPRESSION ═════════════ -->
+<div class="ob-screen" id="screen-recovery" style="background:linear-gradient(160deg,#5C0F25,#993556,#C04D72);">
+  <div class="ob-header" style="text-align:center;padding-top:40px;">
+    <div style="font-size:56px;margin-bottom:14px;">⚠️</div>
+    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-bottom:10px;">SUPPRESSION EN COURS</div>
+    <div class="ob-title" style="font-size:24px;">Récupérer mon compte</div>
+    <div class="ob-sub" style="margin-top:8px;color:rgba(255,255,255,0.85);">Bonjour <span id="recovery-name" style="font-weight:700;">!</span></div>
+  </div>
+
+  <div class="ob-body">
+    <div style="background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:11px;color:rgba(255,255,255,0.85);line-height:1.7;">
+        Une demande de suppression de ton compte est en cours.<br><br>
+        📅 <strong>Suppression définitive prévue le <span id="recovery-date">—</span></strong><br>
+        ⏳ Il te reste <strong><span id="recovery-days">—</span></strong> pour annuler.
+      </div>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:12px;color:white;line-height:1.7;">
+        <strong>Tu as deux choix :</strong><br>
+        ✓ <strong>Annuler la suppression</strong> et réactiver ton compte<br>
+        ✗ <strong>Confirmer la suppression</strong> en te déconnectant (la suppression aura lieu à la date prévue)
+      </div>
+    </div>
+
+    <div id="recovery-msg" style="font-size:11px;text-align:center;min-height:18px;margin:6px 0;color:rgba(255,255,255,0.85);"></div>
+  </div>
+
+  <div class="ob-footer">
+    <button class="ob-btn ob-btn-primary" id="btn-recover" onclick="recoverAccount()">↺ Réactiver mon compte</button>
+    <button class="ob-btn-skip" onclick="abandonRecovery()" style="color:rgba(255,255,255,0.6);">Maintenir la suppression et se déconnecter</button>
+  </div>
+</div>
+
 </div><!-- /frame -->
 
 <script>
@@ -454,8 +489,18 @@ const AGE_MINIMUM = 15
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 // Check already logged in
-sb.auth.getSession().then(({data}) => {
-  if (data.session) window.location.href = 'dashboard.html'
+sb.auth.getSession().then(async ({data}) => {
+  if (!data.session) return
+  // Vérifie qu'on n'est pas en pending_deletion
+  const { data: profil } = await sb.from('benevoles')
+    .select('prenom, nom, statut_compte, deletion_requested_at, deletion_scheduled_for')
+    .eq('email', data.session.user.email)
+    .single()
+  if (profil && (profil.statut_compte === 'pending_deletion' || profil.deletion_requested_at)) {
+    showRecoveryScreen(profil)
+    return
+  }
+  window.location.href = 'dashboard.html'
 })
 
 // ─── Login ──────────────────────────────────────────────────
@@ -474,16 +519,23 @@ async function login() {
     return
   }
 
-  // Récupère le profil + champs RGPD/âge
+  // Récupère le profil + champs RGPD/âge + état suppression
   const { data: profil, error: profilErr } = await sb
     .from('benevoles')
-    .select('onboarding_done, prenom, date_naissance, consent_version')
+    .select('onboarding_done, prenom, nom, date_naissance, consent_version, statut_compte, deletion_requested_at, deletion_scheduled_for')
     .eq('email', email)
     .single()
 
   if (profilErr || !profil) {
     await sb.auth.signOut()
     showErr('Profil introuvable. Contactez le club.')
+    btn.disabled = false; btn.textContent = 'Se connecter →'
+    return
+  }
+
+  // ─── Compte en cours de suppression : écran de récupération ──
+  if (profil.statut_compte === 'pending_deletion' || profil.deletion_requested_at) {
+    showRecoveryScreen(profil)
     btn.disabled = false; btn.textContent = 'Se connecter →'
     return
   }
@@ -510,6 +562,58 @@ async function login() {
   } else {
     window.location.href = 'dashboard.html'
   }
+}
+
+// ─── Écran de récupération de compte (pending_deletion) ──────
+function showRecoveryScreen(profil) {
+  // Stocke les infos pour les boutons d'action
+  window._recoveryProfil = profil
+  document.getElementById('screen-login').style.display = 'none'
+  document.querySelectorAll('.ob-screen').forEach(s => s.classList.remove('active'))
+
+  const dt = new Date(profil.deletion_scheduled_for)
+  const dateStr = dt.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'})
+  const daysLeft = Math.max(0, Math.ceil((dt - new Date()) / 86400000))
+  const fullName = ((profil.prenom||'') + ' ' + (profil.nom||'')).trim() || 'Bénévole'
+
+  document.getElementById('recovery-name').textContent = fullName
+  document.getElementById('recovery-date').textContent = dateStr
+  document.getElementById('recovery-days').textContent = daysLeft + ' jour' + (daysLeft>1?'s':'')
+
+  document.getElementById('screen-recovery').classList.add('active')
+}
+
+async function recoverAccount() {
+  const btn = document.getElementById('btn-recover')
+  const orig = btn.textContent
+  btn.disabled = true
+  btn.textContent = 'Réactivation...'
+
+  const { data, error } = await sb.rpc('cancel_account_deletion', {
+    p_target_email: null
+  })
+  if (error) {
+    btn.disabled = false
+    btn.textContent = orig
+    document.getElementById('recovery-msg').textContent = 'Erreur : ' + error.message
+    document.getElementById('recovery-msg').style.color = '#F4B8CE'
+    return
+  }
+  document.getElementById('recovery-msg').textContent = '✓ Compte réactivé. Redirection...'
+  document.getElementById('recovery-msg').style.color = '#C0DD97'
+  setTimeout(() => {
+    window.location.href = 'dashboard.html'
+  }, 1500)
+}
+
+async function abandonRecovery() {
+  // L'utilisateur ne veut pas annuler la suppression : on logout et on retourne au login
+  await sb.auth.signOut()
+  document.querySelectorAll('.ob-screen').forEach(s => s.classList.remove('active'))
+  document.getElementById('screen-login').style.display = 'flex'
+  hideMsg()
+  document.getElementById('email').value = ''
+  document.getElementById('pwd').value = ''
 }
 
 // ─── Calcul d'âge robuste ──────────────────────────────────
