@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -1257,7 +1257,7 @@ function renderVirginieHome(el, p) {
     <div style="background:white;border-radius:14px;padding:13px;margin-bottom:10px;">
       ${etapes.map(e=>`
         <div class="etape-item">
-          <div class="etape-num ${e.done?'etape-done':''}">${e.done?'✓':'→'}</div>
+          <div class="etape-num ${e.done?'etape-done':''}">${e.done?'[OK]':'→'}</div>
           <div style="font-size:12px;color:${e.done?'#5F5E5A':'#1a1a18'};font-weight:${e.done?'400':'600'};${e.done?'text-decoration:line-through;':''}text-decoration-color:#C0DD97;">${e.txt}</div>
         </div>`).join('')}
     </div>
@@ -1372,7 +1372,7 @@ async function loadPlanning() {
 async function setDispo(matchId,statut,btn) {
   btn.textContent='...';btn.disabled=true
   const{error}=await sb.from('inscriptions').upsert({benevole_id:CU.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'})
-  if(!error){btn.textContent=statut==='disponible'?'✓':'✗';btn.style.background=statut==='disponible'?'#3B6D11':'#888';setTimeout(loadPlanning,800)}
+  if(!error){btn.textContent=statut==='disponible'?'[OK]':'[NON]';btn.style.background=statut==='disponible'?'#3B6D11':'#888';setTimeout(loadPlanning,800)}
   else{btn.textContent='Err';btn.disabled=false}
 }
 
@@ -2175,7 +2175,7 @@ function generateExportPDF(data, filename) {
   addSection('Mes consentements (' + ((data.consentements || []).length) + ' au total)')
   ;(data.consentements || []).slice(0, 30).forEach(c => {
     const dt = new Date(c.granted_at).toLocaleDateString('fr-FR')
-    const status = c.granted ? '✓' : '✗'
+    const status = c.granted ? '[OK]' : '[NON]'
     addLine(`${status} ${c.consent_type} (v${c.consent_version}) — ${dt}`, { size: 9 })
   })
   if ((data.consentements || []).length > 30) {
