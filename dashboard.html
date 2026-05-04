@@ -2198,7 +2198,7 @@ function generateExportPDF(data, filename) {
   if (posts.length === 0) addLine('Aucune publication.', { size: 9, color: [95, 94, 90] })
   posts.slice(0, 20).forEach(po => {
     const dt = new Date(po.created_at).toLocaleDateString('fr-FR')
-    addLine(`${dt} — [${po.categorie}] ${po.titre || '(sans titre)'}`, { size: 9 })
+    addLine(`${dt} — [${po.categorie}] ${(po.titre || '(sans titre)').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}]/gu, '').trim() || '(sans titre)'}`, { size: 9 })
   })
 
   // Récompenses
