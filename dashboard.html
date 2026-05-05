@@ -362,6 +362,22 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   width:46px;height:46px;
   object-fit:contain;
 }
+
+/* ── INSTAGRAM FEED (Actu du club) ── */
+.spi-feed{background:white;border-radius:14px;padding:12px;margin-bottom:10px;}
+.spi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.spi-tile{position:relative;aspect-ratio:1/1;overflow:hidden;border-radius:8px;background:#E6F1FB;text-decoration:none;display:block;}
+.spi-tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease;}
+.spi-tile:active img{transform:scale(0.96);}
+.spi-tile-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(4,44,83,.92) 0%,rgba(4,44,83,.4) 50%,transparent 100%);opacity:0;transition:opacity .2s;display:flex;align-items:flex-end;padding:8px;}
+.spi-tile:hover .spi-tile-ov{opacity:1;}
+.spi-tile-cap{color:white;font-size:10px;line-height:1.4;font-weight:500;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
+.spi-tile-badge{position:absolute;top:6px;right:6px;background:rgba(4,44,83,.7);backdrop-filter:blur(6px);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.spi-tile-badge svg{width:11px;height:11px;fill:white;}
+.spi-skel{background:linear-gradient(90deg,#E6F1FB 0%,#F1EFE8 50%,#E6F1FB 100%);background-size:200% 100%;animation:spi-shim 1.4s infinite;}
+@keyframes spi-shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.spi-more{display:block;text-align:center;font-size:11px;font-weight:600;color:#185FA5;text-decoration:none;padding:10px 0 4px;margin-top:8px;border-top:1px solid #F1EFE8;}
+.spi-empty{grid-column:1/-1;color:#5F5E5A;text-align:center;padding:24px 0;font-size:11px;}
 </style>
 </head>
 <body>
@@ -1037,6 +1053,54 @@ function promptModal(opts) {
   })
 }
 
+// ─────────────────────────────────────────────────
+// INSTAGRAM FEED (Actu du club)
+// ─────────────────────────────────────────────────
+const SPI_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
+const SPI_CARO = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="16" height="16" rx="2"/><path d="M22 6v14a2 2 0 0 1-2 2H6"/></svg>'
+
+function renderInstaFeed() {
+  return `
+    <div class="sec">📸 Actu du club</div>
+    <div class="spi-feed">
+      <div class="spi-grid" id="spi-grid">
+        ${'<div class="spi-tile spi-skel"></div>'.repeat(6)}
+      </div>
+      <a class="spi-more" href="https://instagram.com/spacerstoulouse" target="_blank" rel="noopener">Voir plus sur @spacerstoulouse →</a>
+    </div>`
+}
+
+async function loadInstaFeed() {
+  const grid = document.getElementById('spi-grid')
+  if (!grid) return
+  try {
+    const { data, error } = await sb.from('instagram_posts')
+      .select('id, caption, media_type, media_url, thumbnail_url, permalink')
+      .order('posted_at', { ascending: false })
+      .limit(6)
+    if (error) throw error
+    if (!data || data.length === 0) {
+      grid.innerHTML = '<div class="spi-empty">Aucun post pour le moment</div>'
+      return
+    }
+    grid.innerHTML = data.map(p => {
+      const img = p.media_type === 'VIDEO' ? p.thumbnail_url : p.media_url
+      const caption = (p.caption || '').replace(/\n/g, ' ')
+      let badge = ''
+      if (p.media_type === 'VIDEO') badge = `<div class="spi-tile-badge">${SPI_PLAY}</div>`
+      else if (p.media_type === 'CAROUSEL_ALBUM') badge = `<div class="spi-tile-badge">${SPI_CARO}</div>`
+      return `<a class="spi-tile" href="${escapeHtml(p.permalink)}" target="_blank" rel="noopener" aria-label="${escapeHtml(caption.slice(0,100))}">
+        <img src="${escapeHtml(img||'')}" alt="" loading="lazy" referrerpolicy="no-referrer">
+        ${badge}
+        <div class="spi-tile-ov"><div class="spi-tile-cap">${escapeHtml(caption)}</div></div>
+      </a>`
+    }).join('')
+  } catch (err) {
+    console.error('[insta-feed]', err)
+    grid.innerHTML = '<div class="spi-empty">Suivez-nous sur <a href="https://instagram.com/spacerstoulouse" target="_blank" style="color:#185FA5;font-weight:600;">@spacerstoulouse</a></div>'
+  }
+}
+
 // ── INIT ─────────────────────────────────────────────────────
 async function init() {
   const { data: { session } } = await sb.auth.getSession()
@@ -1134,6 +1198,7 @@ function showApp(p) {
   renderTopbar(p)
   renderHomeForProfil(p)
   loadProfilFields(p)
+  loadInstaFeed()
 }
 
 function renderTopbar(p) {
@@ -1223,6 +1288,7 @@ function renderHugoHome(el, p, pts, niveau, pct) {
         <div style="font-size:10px;color:#185FA5;font-weight:600;">Voir mon rang</div>
       </div>
     </div>
+    ${renderInstaFeed()}
     ${renderSuggestionSection('hugo')}`
 }
 
@@ -1273,6 +1339,7 @@ function renderVirginieHome(el, p) {
         <div class="faq-q">${f.q} <span>+</span></div>
         <div class="faq-a">${f.a}</div>
       </div>`).join('')}
+    ${renderInstaFeed()}
     ${renderSuggestionSection('virginie')}`
 }
 
@@ -1300,6 +1367,7 @@ function renderJoelHome(el, p, pts) {
       <div style="font-size:18px;color:#D3D1C7;">›</div>
     </div>
 
+    ${renderInstaFeed()}
     ${renderSuggestionSection('joel')}`
 }
 
@@ -1933,6 +2001,7 @@ async function confirmChangeProfil() {
   renderTopbar(CP)
   renderHomeForProfil(CP)
   loadProfilFields(CP)
+  loadInstaFeed()
 }
 
 function closeChangeProfil(){document.getElementById('modal-profil').style.display='none'}
