@@ -126,6 +126,10 @@ tr:last-child td{border-bottom:none;}
 .placeholder{background:repeating-linear-gradient(45deg,#F1EFE8,#F1EFE8 10px,#FBFAF6 10px,#FBFAF6 20px);border:1.5px dashed var(--gris-clair);padding:30px;text-align:center;color:var(--gris);font-size:13px;font-style:italic;margin:14px 0;border-radius:6px;}
 .placeholder strong{color:var(--gris-fonce);font-style:normal;}
 
+.screenshot{display:block;margin:18px auto;max-width:100%;width:100%;height:auto;border:1px solid var(--rule);border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.08);background:white;}
+.screenshot-caption{font-size:12px;color:var(--gris);text-align:center;margin-top:-8px;margin-bottom:16px;font-style:italic;}
+.screenshot-wrap{margin:18px 0;}
+
 .vendor{background:white;border:1px solid var(--rule);padding:24px 26px;margin:18px 0;}
 .vendor-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:14px;border-bottom:1px solid var(--rule);padding-bottom:12px;}
 .vendor-name{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--bleu-fonce);margin:0;line-height:1.2;}
@@ -159,7 +163,7 @@ tr:last-child td{border-bottom:none;}
 
 <!-- ═══════════════ COVER ═══════════════ -->
 <header class="cover">
-  <span class="label-eyebrow">Note au Bureau Directeur · Mai 2026 · v1.0</span>
+  <span class="label-eyebrow">Note au Bureau Directeur · Mai 2026 · v1.1</span>
   <h1>Application <em>Bénévoles</em><br>Spacers Toulouse&nbsp;Volley</h1>
   <p class="lead">
     Plateforme numérique d'accompagnement des bénévoles du club, prête à être déployée pour la saison&nbsp;2026‑2027. Cette note présente l'outil dans son intégralité, les garanties juridiques et techniques associées, et la décision attendue de votre part avant lancement officiel.
@@ -173,7 +177,7 @@ tr:last-child td{border-bottom:none;}
 </header>
 
 <div class="version-banner">
-  <strong>Version 1.0 — document évolutif.</strong> Cette présentation sera mise à jour au fil des évolutions de l'application et des retours du Bureau. Les emplacements de captures d'écran sont marqués comme tels et seront complétés dans la version 1.1.
+  <strong>Version 1.1 — document évolutif.</strong> Captures d'écran intégrées pour l'accueil bénévole, le planning, le forum, l'espace emploi et la vue pilote. Les sections fiches de poste, accréditations, paliers de récompenses et "Mon compte" RGPD seront illustrées en version 1.2.
 </div>
 
 <!-- ═══════════════ TL;DR ═══════════════ -->
@@ -253,12 +257,17 @@ tr:last-child td{border-bottom:none;}
     </div>
     <p>En se connectant, le bénévole arrive sur son <strong>tableau de bord personnalisé</strong>. Il y voit en un coup d'œil&nbsp;:</p>
     <ul>
-      <li>Son <strong>nombre de points</strong> et son <strong>niveau</strong> (Bronze, Argent, Or) avec une jauge de progression.</li>
-      <li>Le <strong>prochain match</strong> auquel il participe, avec date, heure de rendez-vous et poste affecté.</li>
-      <li>Un <strong>accès rapide</strong> aux 7 fonctions principales (planning, points, forum, récompenses, espace emploi, profil, etc.).</li>
-      <li>Un <strong>bouton d'accès direct au groupe WhatsApp</strong> des bénévoles, pour ne rater aucun message.</li>
+      <li>Son <strong>nombre de points de saison</strong> et son <strong>niveau actuel</strong> (Bronze, Argent, Or) avec une jauge de progression vers le palier suivant.</li>
+      <li>Ses <strong>défis en cours</strong>&nbsp;: missions ponctuelles à objectifs (par ex. «&nbsp;5 matchs consécutifs&nbsp;», «&nbsp;Atteindre 600 points&nbsp;»), avec barre d'avancement.</li>
+      <li>Deux <strong>raccourcis prioritaires</strong>&nbsp;: Planning (matchs ouverts) et Classement (rang général).</li>
+      <li>Une section <strong>«&nbsp;Actu du club&nbsp;»</strong> qui affiche directement les derniers posts Instagram du club, sans avoir à quitter l'application.</li>
+      <li>Un encart <strong>«&nbsp;Améliorer l'expérience bénévole&nbsp;»</strong> qui permet à chacun de partager une suggestion ou une idée pour faire évoluer le club.</li>
+      <li>Une <strong>barre de navigation inférieure</strong> qui donne accès, en un seul tap, aux 7 espaces principaux&nbsp;: Accueil, Planning, Points, Forum, Cadeaux, Emploi, Profil.</li>
     </ul>
-    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Tableau de bord d'accueil bénévole</div>
+    <div class="screenshot-wrap">
+      <img src="img-presentation/01-accueil-benevole.png" class="screenshot" alt="Tableau de bord d'accueil bénévole avec points, défis, actu du club">
+      <p class="screenshot-caption">Tableau de bord d'accueil — vue compétiteur, niveau Bronze</p>
+    </div>
   </div>
 
   <!-- 2.2 Inscriptions aux matchs -->
@@ -278,7 +287,10 @@ tr:last-child td{border-bottom:none;}
     </ul>
     <p>Une fois affecté à un poste par un pilote, il reçoit une notification, voit l'information sur son tableau de bord et reçoit <strong>un rappel par email à J-3</strong> du match avec sa fiche de poste détaillée.</p>
     <p>En cas d'empêchement de dernière minute, il peut se désinscrire&nbsp;; le pilote est alors averti automatiquement et peut reprogrammer un autre bénévole.</p>
-    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Vue planning des matchs avec disponibilité</div>
+    <div class="screenshot-wrap">
+      <img src="img-presentation/02-planning-matchs.png" class="screenshot" alt="Vue planning des matchs avec carte de match disponible">
+      <p class="screenshot-caption">Onglet Planning — un match Spacers à venir, statut «&nbsp;Disponible&nbsp;»</p>
+    </div>
   </div>
 
   <!-- 2.3 Fiches de poste -->
@@ -362,7 +374,11 @@ tr:last-child td{border-bottom:none;}
       <li><strong>Annonces officielles</strong>&nbsp;: les pilotes diffusent les informations importantes (changements de planning, événements spéciaux, ouvertures d'inscriptions exceptionnelles).</li>
     </ul>
     <p>Le forum est modéré par les pilotes. Les messages sont <strong>conservés à valeur informelle</strong> uniquement&nbsp;: ils ne se substituent pas aux échanges officiels par email.</p>
-    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Vue d'un fil de discussion forum</div>
+    <p>Lorsqu'un bénévole supprime son compte ou que son compte est supprimé, ses messages restent visibles pour la cohérence des conversations, mais son identité est <strong>automatiquement anonymisée</strong>&nbsp;: le nom est remplacé par <em>«&nbsp;Bénévole supprimé&nbsp;»</em> et la photo retirée. C'est l'application concrète du droit à l'effacement RGPD, sans casser l'historique des discussions.</p>
+    <div class="screenshot-wrap">
+      <img src="img-presentation/03-forum.png" class="screenshot" alt="Forum bénévoles avec messages et exemple de bénévole anonymisé">
+      <p class="screenshot-caption">Forum bénévoles — noter en haut le message d'un compte supprimé, automatiquement anonymisé</p>
+    </div>
   </div>
 
   <!-- 2.7 Espace emploi -->
@@ -381,7 +397,11 @@ tr:last-child td{border-bottom:none;}
       <li>Un <strong>bénévole entrepreneur ou indépendant</strong> peut soumettre une annonce pour ses propres services. Chaque annonce est validée par un pilote avant publication, ce qui garantit la qualité et l'adéquation des contenus.</li>
     </ul>
     <p>L'espace emploi est <strong>une vitrine de l'écosystème du club</strong>&nbsp;: il valorise les partenariats, soutient les bénévoles dans leurs activités professionnelles, et renforce l'identité communautaire des Spacers.</p>
-    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Espace emploi avec annonces</div>
+    <p>L'interface propose un <strong>filtrage par origine</strong>&nbsp;: «&nbsp;Tous&nbsp;», «&nbsp;Partenaires&nbsp;» (sponsors et entreprises liées au club) ou «&nbsp;Bénévoles&nbsp;» (annonces personnelles). Chaque annonce affiche un type de contrat (CDI, CDD, stage, prestation), un descriptif, l'auteur et les coordonnées de contact (email, téléphone) pour postuler directement.</p>
+    <div class="screenshot-wrap">
+      <img src="img-presentation/05-espace-emploi.png" class="screenshot" alt="Espace emploi avec une annonce CDI bénévole">
+      <p class="screenshot-caption">Espace emploi — exemple d'annonce avec contact direct du proposant</p>
+    </div>
   </div>
 
   <!-- 2.8 Communications automatiques -->
@@ -445,7 +465,11 @@ tr:last-child td{border-bottom:none;}
       <li><strong>Emploi</strong>&nbsp;: modérer les annonces soumises par les bénévoles avant publication.</li>
     </ul>
     <p>Le pilote peut <strong>contacter directement un bénévole par WhatsApp</strong> depuis l'app, avec des messages pré-remplis selon le contexte (rappel, demande, remerciement). Cela évite de chercher manuellement un numéro de téléphone tout en gardant le bénéfice du contact direct.</p>
-    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Vue pilote — onglet Bénévoles avec liste et boutons d'action</div>
+    <p>Sur cette même vue, on peut observer les <strong>indicateurs de conformité RGPD</strong> directement dans la liste&nbsp;: les comptes supprimés apparaissent étiquetés «&nbsp;Supprimé&nbsp;» avec un identifiant générique <em>«&nbsp;[Bénévole supprimé]&nbsp;»</em>, garantissant la préservation de la vie privée tout en conservant la cohérence des données historiques.</p>
+    <div class="screenshot-wrap">
+      <img src="img-presentation/04-pilote-benevoles.png" class="screenshot" alt="Dashboard pilote — onglet bénévoles avec liste et boutons d'action">
+      <p class="screenshot-caption">Dashboard pilote — onglet Bénévoles, accès aux outils RGPD à droite (icône bouclier)</p>
+    </div>
   </div>
 
   <!-- 2.11 Pour les admins -->
@@ -955,7 +979,7 @@ tr:last-child td{border-bottom:none;}
   </div>
 </footer>
 
-<p class="note-version">Version 1.0 · 5 mai 2026 · Document évolutif</p>
+<p class="note-version">Version 1.1 · 5 mai 2026 · Document évolutif</p>
 
 </div>
 </body>
