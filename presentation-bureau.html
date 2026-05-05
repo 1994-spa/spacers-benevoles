@@ -163,7 +163,7 @@ tr:last-child td{border-bottom:none;}
 
 <!-- ═══════════════ COVER ═══════════════ -->
 <header class="cover">
-  <span class="label-eyebrow">Note au Bureau Directeur · Mai 2026 · v1.1</span>
+  <span class="label-eyebrow">Note au Bureau Directeur · Mai 2026 · v1.2</span>
   <h1>Application <em>Bénévoles</em><br>Spacers Toulouse&nbsp;Volley</h1>
   <p class="lead">
     Plateforme numérique d'accompagnement des bénévoles du club, prête à être déployée pour la saison&nbsp;2026‑2027. Cette note présente l'outil dans son intégralité, les garanties juridiques et techniques associées, et la décision attendue de votre part avant lancement officiel.
@@ -177,7 +177,7 @@ tr:last-child td{border-bottom:none;}
 </header>
 
 <div class="version-banner">
-  <strong>Version 1.1 — document évolutif.</strong> Captures d'écran intégrées pour l'accueil bénévole, le planning, le forum, l'espace emploi et la vue pilote. Les sections fiches de poste, accréditations, paliers de récompenses et "Mon compte" RGPD seront illustrées en version 1.2.
+  <strong>Version 1.2 — document évolutif.</strong> 9 captures d'écran intégrées (accueil bénévole, planning, fiches de poste, points et barème, forum, espace emploi, mon compte RGPD, vue pilote). Une dernière capture de l'accréditation PDF générée sera intégrée en version 1.3.
 </div>
 
 <!-- ═══════════════ TL;DR ═══════════════ -->
@@ -302,16 +302,31 @@ tr:last-child td{border-bottom:none;}
         <div class="feature-sub">Chaque mission est documentée pour réussir le jour J</div>
       </div>
     </div>
-    <p>Chaque poste de bénévole (sécurité, accueil, billetterie, buvette, vestiaire VIP, contrôle d'accès, photographie, etc.) dispose d'une <strong>fiche de poste détaillée</strong>, accessible directement depuis l'application.</p>
-    <p>Cette fiche contient&nbsp;:</p>
+    <p>Chaque poste de bénévole (sécurité, accueil, billetterie, buvette, scan entrée, animation, boutique, sécu VIP, consigne, placement, etc.) dispose d'une <strong>fiche de poste détaillée</strong>, accessible directement depuis l'application.</p>
+    <p>Sur l'écran d'accueil des fiches, le bénévole voit pour chaque poste&nbsp;:</p>
     <ul>
-      <li>La <strong>mission précise</strong> du poste et les attentes du club.</li>
+      <li>Le <strong>nom de la mission</strong> avec une icône évocatrice.</li>
+      <li>Un <strong>niveau de difficulté</strong> (Facile, Moyen, Avancé) qui aide à choisir un poste adapté à son expérience.</li>
+      <li>La <strong>durée moyenne</strong> de la mission (~3h pour la majorité des postes).</li>
+      <li>Le <strong>nombre de bénévoles requis</strong> pour ce poste (de 2 à 12 selon les missions).</li>
+      <li>Un picto «&nbsp;Vidéo&nbsp;» qui indique si une vidéo de présentation est disponible.</li>
+      <li>Un résumé en deux lignes de la mission.</li>
+    </ul>
+    <div class="screenshot-wrap">
+      <img src="img-presentation/08-liste-postes.png" class="screenshot" alt="Liste des postes bénévoles avec niveau de difficulté et durée">
+      <p class="screenshot-caption">Liste des postes — chaque carte donne en un coup d'œil les infos essentielles</p>
+    </div>
+    <p>En cliquant sur un poste, le bénévole accède à la <strong>fiche détaillée</strong> qui contient&nbsp;:</p>
+    <ul>
+      <li>La <strong>vidéo de présentation</strong> (hébergée sur YouTube), tournée dans les conditions réelles du Palais des Sports avec des bénévoles en situation.</li>
+      <li>Une rubrique <strong>«&nbsp;Missions&nbsp;»</strong> structurée par moment (Avant le match, Pendant le match, Après le match) avec des consignes concrètes et opérationnelles.</li>
       <li>L'<strong>heure d'arrivée</strong>, le <strong>lieu de rendez-vous</strong> et les contacts utiles le jour J.</li>
       <li>Les <strong>consignes de sécurité</strong> et les bonnes pratiques.</li>
-      <li>Le cas échéant, des <strong>vidéos ou photos</strong> illustrant les gestes techniques.</li>
     </ul>
-    <p>Le bénévole peut consulter cette fiche autant de fois qu'il le souhaite avant le match. Il peut aussi la télécharger en PDF pour la conserver hors ligne.</p>
-    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Exemple de fiche de poste détaillée</div>
+    <div class="screenshot-wrap">
+      <img src="img-presentation/09-detail-poste-video.png" class="screenshot" alt="Détail d'une fiche de poste avec vidéo de présentation et liste des missions">
+      <p class="screenshot-caption">Fiche détaillée du poste «&nbsp;Scan Entrée&nbsp;» avec vidéo et checklist «&nbsp;Avant le match&nbsp;»</p>
+    </div>
   </div>
 
   <!-- 2.4 Accréditations -->
@@ -343,7 +358,17 @@ tr:last-child td{border-bottom:none;}
         <div class="feature-sub">Reconnaître l'engagement par des avantages concrets</div>
       </div>
     </div>
-    <p>Pour chaque mission accomplie, le bénévole gagne des points qui s'accumulent dans son compte. Le club peut aussi attribuer des points bonus pour&nbsp;: ponctualité, présence aux matchs cruciaux, fidélité sur la durée, anniversaire, etc.</p>
+    <p>Pour chaque mission accomplie, le bénévole gagne des points qui s'accumulent dans son compte. Le barème est <strong>transparent et affiché en permanence</strong> dans l'application&nbsp;:</p>
+    <table>
+      <thead><tr><th>Action</th><th>Points</th></tr></thead>
+      <tbody>
+        <tr><td>📅 Présence confirmée à un match</td><td><strong>+50 pts</strong></td></tr>
+        <tr><td>⏱️ Ponctualité (arrivée à l'heure)</td><td><strong>+20 pts</strong></td></tr>
+        <tr><td>🏅 Badge «&nbsp;5 matchs&nbsp;» (5 présences cumulées)</td><td><strong>+100 pts</strong></td></tr>
+        <tr><td>🎂 Anniversaire (fête le jour J au club)</td><td><strong>+30 pts</strong></td></tr>
+        <tr><td>👥 Parrainage (recommandation d'un nouveau bénévole)</td><td><strong>+50 pts</strong></td></tr>
+      </tbody>
+    </table>
     <p>Trois paliers structurent la progression&nbsp;:</p>
     <table>
       <thead><tr><th>Niveau</th><th>Seuil</th><th>Avantages associés</th></tr></thead>
@@ -353,9 +378,12 @@ tr:last-child td{border-bottom:none;}
         <tr><td>🥇 Or</td><td>1000 pts et +</td><td>Argent + invitations exclusives, places match VIP, goodies</td></tr>
       </tbody>
     </table>
-    <p>Le système est <strong>transparent</strong>&nbsp;: le bénévole voit en temps réel d'où viennent ses points, combien il lui en manque pour le palier suivant, et l'historique de ses récompenses obtenues.</p>
+    <p>Le bénévole voit en temps réel son palier actuel, sa jauge de progression vers le palier suivant, et le barème complet pour comprendre comment optimiser ses points.</p>
+    <div class="screenshot-wrap">
+      <img src="img-presentation/07-points-bareme.png" class="screenshot" alt="Vue points avec barème détaillé d'attribution">
+      <p class="screenshot-caption">Onglet Points — affichage du palier en cours et barème transparent</p>
+    </div>
     <p>Les codes de réduction sont demandés depuis l'application, traités par un pilote (qui les attribue manuellement depuis sa réserve), et délivrés au bénévole par message direct.</p>
-    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Vue points et progression vers paliers</div>
   </div>
 
   <!-- 2.6 Forum -->
@@ -436,15 +464,18 @@ tr:last-child td{border-bottom:none;}
         <div class="feature-sub">Tous les droits RGPD accessibles en quelques clics</div>
       </div>
     </div>
-    <p>Chaque bénévole dispose d'un espace «&nbsp;Mon compte&nbsp;» (dans son profil) qui lui permet d'<strong>exercer ses droits RGPD</strong> sans avoir à écrire un courrier&nbsp;:</p>
+    <p>Chaque bénévole dispose d'un espace «&nbsp;Mon compte &amp; mes données&nbsp;» dans son profil, qui lui permet d'<strong>exercer ses droits RGPD</strong> sans avoir à écrire de courrier. La carte se compose de trois zones&nbsp;:</p>
     <ul>
-      <li><strong>📥 Exporter ses données</strong>&nbsp;: en un clic, télécharger l'intégralité de ses données (profil, inscriptions, points, posts) au format JSON et PDF lisible.</li>
-      <li><strong>💌 Gérer ses communications</strong>&nbsp;: activer ou désactiver la newsletter, les notifications non-essentielles.</li>
-      <li><strong>🗑️ Demander la suppression de son compte</strong>&nbsp;: la suppression est <strong>programmée à 30 jours</strong> (annulable pendant cette période). Au terme, les données identifiantes sont anonymisées de manière irréversible.</li>
-      <li><strong>📞 Contacter le référent RGPD</strong>&nbsp;: lien direct vers Didier CONJEAUD, désigné référent RGPD du club.</li>
+      <li><strong>💌 Communications non-essentielles</strong>&nbsp;: une simple case à cocher pour activer ou désactiver la newsletter et les annonces d'événements. Désabonnement à tout moment, modifiable à volonté.</li>
+      <li><strong>📥 Exporter mes données</strong>&nbsp;: en un clic, télécharge l'intégralité des données personnelles au format JSON et PDF résumé.</li>
+      <li><strong>🗑️ Supprimer mon compte</strong>&nbsp;: la suppression est <strong>programmée à 30 jours</strong> (annulable). Au terme du délai, les données identifiantes sont anonymisées de manière irréversible. Les contributions au forum et l'historique de bénévolat sont préservés mais anonymisés.</li>
     </ul>
+    <p>En pied de carte, l'application rappelle de manière permanente l'identité du <strong>référent RGPD du club</strong> (Didier CONJEAUD) et son adresse de contact (<a href="mailto:contact@spacerstoulouse.fr">contact@spacerstoulouse.fr</a>).</p>
+    <div class="screenshot-wrap">
+      <img src="img-presentation/06-mon-compte-rgpd.png" class="screenshot" alt="Carte Mon compte avec les 3 actions RGPD et référent">
+      <p class="screenshot-caption">Carte «&nbsp;Mon compte &amp; mes données&nbsp;» — accessible depuis l'onglet Profil</p>
+    </div>
     <p>Toutes ces actions sont <strong>tracées</strong> dans un registre d'audit. En cas de contrôle CNIL, le club peut produire la preuve que chaque bénévole a effectivement consenti à la collecte de ses données et que ses droits ont été respectés.</p>
-    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Carte "Mon compte" avec les 4 actions RGPD</div>
   </div>
 
   <!-- 2.10 Pour les pilotes -->
@@ -979,7 +1010,7 @@ tr:last-child td{border-bottom:none;}
   </div>
 </footer>
 
-<p class="note-version">Version 1.1 · 5 mai 2026 · Document évolutif</p>
+<p class="note-version">Version 1.2 · 5 mai 2026 · Document évolutif</p>
 
 </div>
 </body>
