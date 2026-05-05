@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Application Bénévoles Spacers — Note au Bureau Directeur</title>
+<meta name="description" content="Présentation de l'application bénévoles du club TOAC-TUC Volley-Ball à destination du Bureau Directeur. Saison 2026-2027.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bleu-club:#0C447C;--bleu-fonce:#042C53;--bleu-clair:#185FA5;--bleu-tres-clair:#E6F1FB;
+  --or:#C9821A;--or-clair:#F5C842;--rouge:#993556;--rouge-clair:#FBEAF0;
+  --vert:#3B6D11;--vert-clair:#E8F2DC;--noir:#1a1a18;--gris-fonce:#3D3C39;
+  --gris:#5F5E5A;--gris-clair:#9A9994;--gris-tres-clair:#F1EFE8;
+  --paper:#FBFAF6;--rule:#E5E2D9;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter Tight',system-ui,sans-serif;background:var(--paper);color:var(--noir);line-height:1.65;font-size:16px;}
+.page{max-width:880px;margin:0 auto;padding:60px 40px 100px;}
+@media(max-width:640px){.page{padding:32px 22px 80px;}}
+
+h1,h2,h3,h4{font-family:'Fraunces',Georgia,serif;font-weight:600;line-height:1.15;color:var(--bleu-fonce);letter-spacing:-0.01em;}
+h1{font-size:clamp(38px,6vw,58px);font-weight:500;letter-spacing:-0.025em;line-height:1.05;}
+h1 em{font-style:italic;font-weight:400;color:var(--bleu-club);}
+h2{font-size:clamp(26px,4vw,34px);font-weight:600;margin-top:60px;margin-bottom:18px;padding-top:48px;border-top:1px solid var(--rule);position:relative;}
+h2::before{content:attr(data-section);position:absolute;top:24px;left:0;font-family:'Inter Tight',sans-serif;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gris-clair);font-weight:500;}
+h3{font-size:21px;margin-top:36px;margin-bottom:10px;color:var(--bleu-club);}
+h4{font-size:16px;font-family:'Inter Tight',sans-serif;font-weight:600;color:var(--noir);text-transform:none;margin-top:18px;margin-bottom:6px;}
+
+.cover{padding:30px 0 50px;border-bottom:2px solid var(--bleu-fonce);}
+.label-eyebrow{font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--bleu-club);font-weight:600;margin-bottom:18px;display:inline-block;}
+.cover-meta{margin-top:32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px 32px;font-size:13px;}
+.cover-meta dt{color:var(--gris);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;font-weight:500;margin-bottom:3px;}
+.cover-meta dd{color:var(--noir);font-weight:500;}
+
+p{margin-bottom:14px;color:var(--gris-fonce);}
+p.lead{font-size:19px;line-height:1.55;color:var(--noir);font-weight:400;margin-top:24px;}
+strong{color:var(--noir);font-weight:600;}
+em{color:var(--gris-fonce);}
+a{color:var(--bleu-club);text-decoration:underline;text-underline-offset:3px;}
+a:hover{color:var(--bleu-clair);}
+
+ul,ol{margin:6px 0 16px 0;padding-left:0;}
+li{margin-bottom:8px;color:var(--gris-fonce);list-style:none;padding-left:22px;position:relative;}
+li::before{content:"";position:absolute;left:0;top:11px;width:8px;height:1.5px;background:var(--bleu-club);}
+ol{counter-reset:olcounter;}
+ol li{counter-increment:olcounter;padding-left:32px;}
+ol li::before{content:counter(olcounter);width:auto;height:auto;background:none;color:var(--bleu-club);font-weight:600;font-family:'Fraunces',serif;font-size:15px;top:0;left:0;}
+
+.tldr{background:var(--bleu-fonce);color:white;padding:34px 36px;margin:36px 0 0;position:relative;}
+.tldr::before{content:"§";position:absolute;top:18px;right:24px;font-family:'Fraunces',serif;font-size:42px;color:var(--or-clair);opacity:0.5;font-weight:300;}
+.tldr-label{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--or-clair);margin-bottom:14px;font-weight:600;}
+.tldr h3{font-family:'Fraunces',serif;color:white;font-size:22px;margin:0 0 14px;}
+.tldr p{color:rgba(255,255,255,0.85);margin-bottom:10px;}
+.tldr strong{color:white;}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:36px -8px 0;}
+@media(max-width:640px){.stats{grid-template-columns:1fr;gap:14px;margin:36px 0;}}
+.stat{padding:0 18px;border-left:1px solid rgba(255,255,255,0.18);}
+.stats .stat:first-child{border-left:none;padding-left:0;}
+.stat-num{font-family:'Fraunces',serif;font-size:38px;font-weight:500;color:var(--or-clair);line-height:1;}
+.stat-num small{font-size:18px;color:white;opacity:0.7;}
+.stat-lbl{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.7);margin-top:8px;font-weight:500;}
+
+.persona{background:white;border:1px solid var(--rule);padding:26px 28px;margin:18px 0;}
+.persona-tag{font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--bleu-club);font-weight:600;margin-bottom:8px;}
+.persona h3{margin-top:0;}
+.persona-list{font-size:14px;}
+.persona-list li::before{background:var(--or);}
+
+.pull-quote{font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:24px;line-height:1.4;color:var(--bleu-fonce);border-left:3px solid var(--or);padding:14px 0 14px 26px;margin:32px 0;}
+
+.tag-list{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0;}
+.tag{display:inline-block;font-size:11px;padding:5px 11px;background:var(--gris-tres-clair);border-radius:999px;color:var(--gris-fonce);font-weight:500;}
+.tag-success{background:var(--vert-clair);color:var(--vert);}
+.tag-info{background:var(--bleu-tres-clair);color:var(--bleu-club);}
+.tag-warn{background:#FBF1DE;color:#84540B;}
+
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px;}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top;}
+th{font-weight:600;color:var(--bleu-fonce);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;background:var(--gris-tres-clair);}
+tr:last-child td{border-bottom:none;}
+
+.risk-box{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:flex-start;padding:18px 20px;margin:14px 0;background:white;border:1px solid var(--rule);border-left:3px solid var(--bleu-club);}
+.risk-box-low{border-left-color:var(--vert);}
+.risk-box-med{border-left-color:var(--or);}
+.risk-box-high{border-left-color:var(--rouge);}
+.risk-level{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:4px 9px;border-radius:3px;margin-top:2px;background:var(--vert-clair);color:var(--vert);white-space:nowrap;}
+.risk-box-med .risk-level{background:#FBF1DE;color:#84540B;}
+.risk-box-high .risk-level{background:var(--rouge-clair);color:var(--rouge);}
+.risk-box h4{margin-top:0;margin-bottom:4px;}
+.risk-box p{font-size:14px;margin-bottom:0;color:var(--gris);}
+
+.decision{margin-top:50px;padding:36px 38px;background:var(--bleu-tres-clair);border:1px solid var(--bleu-clair);}
+.decision-label{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--bleu-club);font-weight:700;margin-bottom:14px;}
+.decision h3{font-family:'Fraunces',serif;color:var(--bleu-fonce);margin-top:0;font-size:24px;}
+.decision ol li{padding-left:42px;margin-bottom:14px;}
+.decision ol li::before{background:var(--bleu-club);color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-family:'Inter Tight',sans-serif;top:-1px;}
+
+.footer{margin-top:80px;padding-top:30px;border-top:1px solid var(--rule);font-size:13px;color:var(--gris);display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:640px){.footer{grid-template-columns:1fr;}}
+.footer p{font-size:13px;color:var(--gris);margin-bottom:4px;}
+.footer strong{color:var(--noir);}
+
+.toc{margin:36px 0;padding:24px 28px;background:white;border:1px solid var(--rule);font-size:14px;}
+.toc-label{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gris);font-weight:600;margin-bottom:12px;}
+.toc ol{margin:0;padding:0;}
+.toc ol li{padding-left:0;margin-bottom:6px;}
+.toc ol li::before{display:none;}
+.toc a{display:flex;justify-content:space-between;gap:18px;padding:6px 0;text-decoration:none;color:var(--noir);align-items:baseline;}
+.toc a:hover{color:var(--bleu-club);}
+.toc a span:first-child{flex:1;}
+.toc a span:last-child{font-family:'Fraunces',serif;color:var(--gris-clair);font-size:13px;font-variant-numeric:tabular-nums;}
+
+.feature{background:white;border:1px solid var(--rule);padding:22px 24px;margin:16px 0;}
+.feature-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:10px;}
+.feature-icon{font-size:24px;line-height:1;flex-shrink:0;width:44px;height:44px;background:var(--bleu-tres-clair);display:flex;align-items:center;justify-content:center;border-radius:8px;}
+.feature h3{margin:0;font-size:19px;}
+.feature-sub{font-size:12px;color:var(--gris);font-weight:500;margin-top:2px;letter-spacing:0.02em;}
+.feature p{margin-bottom:10px;font-size:14px;}
+.feature ul{font-size:14px;}
+
+.placeholder{background:repeating-linear-gradient(45deg,#F1EFE8,#F1EFE8 10px,#FBFAF6 10px,#FBFAF6 20px);border:1.5px dashed var(--gris-clair);padding:30px;text-align:center;color:var(--gris);font-size:13px;font-style:italic;margin:14px 0;border-radius:6px;}
+.placeholder strong{color:var(--gris-fonce);font-style:normal;}
+
+.vendor{background:white;border:1px solid var(--rule);padding:24px 26px;margin:18px 0;}
+.vendor-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:14px;border-bottom:1px solid var(--rule);padding-bottom:12px;}
+.vendor-name{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--bleu-fonce);margin:0;line-height:1.2;}
+.vendor-role{font-size:11px;color:var(--gris);font-weight:500;letter-spacing:0.05em;text-transform:uppercase;margin-top:3px;}
+.vendor-region{font-size:11px;font-weight:600;background:var(--vert-clair);color:var(--vert);padding:5px 10px;border-radius:3px;letter-spacing:0.04em;text-transform:uppercase;align-self:flex-start;}
+.vendor-region-cct{background:#FBF1DE;color:#84540B;}
+.vendor-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 28px;}
+@media(max-width:640px){.vendor-grid{grid-template-columns:1fr;gap:14px;}}
+.vendor-field{font-size:13px;}
+.vendor-field h4{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--gris);font-weight:600;margin-bottom:5px;font-family:'Inter Tight',sans-serif;margin-top:0;}
+.vendor-field p{font-size:13px;margin-bottom:0;line-height:1.55;}
+.cert-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.cert{display:inline-block;font-size:11px;padding:3px 8px;background:var(--bleu-tres-clair);color:var(--bleu-club);border-radius:3px;font-weight:500;}
+
+.note-version{font-size:12px;color:var(--gris-clair);font-style:italic;margin:30px 0 0;text-align:center;}
+.version-banner{background:#FBF1DE;border:1px solid #E8B958;border-radius:6px;padding:12px 16px;font-size:12px;color:#84540B;margin:24px 0;}
+.version-banner strong{color:#5D3C09;}
+
+@media print{
+  body{background:white;}
+  .page{padding:24px;max-width:none;}
+  h2{page-break-before:auto;}
+  .tldr,.persona,.decision,.feature,.vendor{break-inside:avoid;}
+  .placeholder{display:none;}
+  .version-banner{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ═══════════════ COVER ═══════════════ -->
+<header class="cover">
+  <span class="label-eyebrow">Note au Bureau Directeur · Mai 2026 · v1.0</span>
+  <h1>Application <em>Bénévoles</em><br>Spacers Toulouse&nbsp;Volley</h1>
+  <p class="lead">
+    Plateforme numérique d'accompagnement des bénévoles du club, prête à être déployée pour la saison&nbsp;2026‑2027. Cette note présente l'outil dans son intégralité, les garanties juridiques et techniques associées, et la décision attendue de votre part avant lancement officiel.
+  </p>
+  <dl class="cover-meta">
+    <div><dt>Auteur</dt><dd>Clément Augustin</dd></div>
+    <div><dt>Statut</dt><dd>Prête au lancement</dd></div>
+    <div><dt>Lancement visé</dt><dd>Saison 2026-2027</dd></div>
+    <div><dt>Coût annuel</dt><dd>0 €</dd></div>
+  </dl>
+</header>
+
+<div class="version-banner">
+  <strong>Version 1.0 — document évolutif.</strong> Cette présentation sera mise à jour au fil des évolutions de l'application et des retours du Bureau. Les emplacements de captures d'écran sont marqués comme tels et seront complétés dans la version 1.1.
+</div>
+
+<!-- ═══════════════ TL;DR ═══════════════ -->
+<aside class="tldr">
+  <div class="tldr-label">Ce qu'il faut retenir</div>
+  <h3>L'essentiel en trois points</h3>
+  <p><strong>Une application web</strong> a été développée pour gérer l'engagement des bénévoles autour des matchs à domicile&nbsp;: inscription aux missions, attribution des postes, fiches de poste, accréditations, points de fidélité, communications, forum interne, espace emploi.</p>
+  <p><strong>Elle est techniquement prête et juridiquement encadrée</strong>&nbsp;: conforme RGPD, hébergée chez des prestataires européens certifiés (ISO&nbsp;27001, SOC&nbsp;2 Type II), documents légaux rédigés et finalisés.</p>
+  <p><strong>Le Bureau est sollicité</strong> pour valider les trois documents légaux (mentions légales, politique de confidentialité, règlement intérieur) avant déploiement officiel à la rentrée 2026-2027.</p>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">11</div>
+      <div class="stat-lbl">Fonctionnalités<br>livrées</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0<small>&nbsp;€</small></div>
+      <div class="stat-lbl">Coût d'exploitation<br>annuel</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100<small>&nbsp;%</small></div>
+      <div class="stat-lbl">Hébergement<br>européen</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════ TOC ═══════════════ -->
+<nav class="toc" aria-label="Sommaire">
+  <div class="toc-label">Sommaire</div>
+  <ol>
+    <li><a href="#contexte"><span>Pourquoi cette application a été créée</span><span>01</span></a></li>
+    <li><a href="#fonctionnalites"><span>Ce que l'application permet de faire</span><span>02</span></a></li>
+    <li><a href="#niveaux"><span>Trois niveaux d'accès</span><span>03</span></a></li>
+    <li><a href="#securite"><span>Sécurité et conformité RGPD</span><span>04</span></a></li>
+    <li><a href="#hebergement"><span>Hébergement et prestataires techniques</span><span>05</span></a></li>
+    <li><a href="#risques"><span>Analyse des risques</span><span>06</span></a></li>
+    <li><a href="#couts"><span>Coûts et plan de continuité</span><span>07</span></a></li>
+    <li><a href="#gouvernance"><span>Gouvernance et maintenance</span><span>08</span></a></li>
+    <li><a href="#roadmap"><span>Évolutions prévues</span><span>09</span></a></li>
+    <li><a href="#decision"><span>Décision attendue du Bureau</span><span>10</span></a></li>
+  </ol>
+</nav>
+
+<!-- ═══════════════ 1. CONTEXTE ═══════════════ -->
+<section id="contexte">
+  <h2 data-section="01">Pourquoi cette application a été créée</h2>
+
+  <p class="lead">Les Spacers font appel à un nombre croissant de bénévoles pour l'organisation des matchs à domicile au Palais des Sports André Brouat. La gestion manuelle (tableurs, échanges WhatsApp dispersés, courriels) montre ses limites&nbsp;: oublis d'inscriptions, désistements de dernière minute non remontés, absence d'historique consolidé, manque de reconnaissance visible des bénévoles fidèles.</p>
+
+  <p>L'application <strong>Spacers Bénévoles</strong> a été conçue pour répondre à quatre besoins concrets identifiés au sein du club&nbsp;:</p>
+
+  <ul>
+    <li><strong>Centraliser</strong> les inscriptions aux matchs et l'attribution des postes (sécurité, accueil, billetterie, buvette, etc.) dans un outil unique.</li>
+    <li><strong>Simplifier la communication</strong> avec les bénévoles, notamment pour les rappels avant match et les changements de dernière minute.</li>
+    <li><strong>Reconnaître l'engagement</strong> par un système de points et de paliers permettant aux bénévoles fidèles de bénéficier d'avantages auprès du partenaire boutique.</li>
+    <li><strong>Tracer</strong> de manière transparente et conforme l'historique des missions et des consentements, dans le respect des droits des personnes.</li>
+  </ul>
+
+  <p class="pull-quote">L'objectif n'est pas de remplacer le lien humain, mais de le rendre possible à plus grande échelle, en libérant les pilotes d'une charge administrative qui les éloignait du terrain.</p>
+
+  <p>Le développement a été mené <strong>en interne</strong>, sans recours à un prestataire extérieur, par un membre du club agissant à titre personnel en dehors de ses missions salariées. Aucun coût de licence ni de prestation n'a été engagé&nbsp;: l'ensemble des outils utilisés s'inscrivent dans des offres gratuites (free tiers) parfaitement dimensionnées pour les besoins d'une association sportive.</p>
+</section>
+
+<!-- ═══════════════ 2. FONCTIONNALITÉS ═══════════════ -->
+<section id="fonctionnalites">
+  <h2 data-section="02">Ce que l'application permet de faire</h2>
+
+  <p class="lead">Voici un tour pédagogique de toutes les fonctionnalités disponibles, présentées par cas d'usage. Pour chaque grand bloc, on explique d'abord <strong>à quoi ça sert pour le bénévole ou pour le club</strong>, puis comment ça se passe concrètement.</p>
+
+  <!-- 2.1 Accueil et rythme du bénévole -->
+  <div class="feature">
+    <div class="feature-head">
+      <div class="feature-icon">🏠</div>
+      <div>
+        <h3>L'accueil et le rythme du bénévole</h3>
+        <div class="feature-sub">Tableau de bord personnel · Première chose vue après connexion</div>
+      </div>
+    </div>
+    <p>En se connectant, le bénévole arrive sur son <strong>tableau de bord personnalisé</strong>. Il y voit en un coup d'œil&nbsp;:</p>
+    <ul>
+      <li>Son <strong>nombre de points</strong> et son <strong>niveau</strong> (Bronze, Argent, Or) avec une jauge de progression.</li>
+      <li>Le <strong>prochain match</strong> auquel il participe, avec date, heure de rendez-vous et poste affecté.</li>
+      <li>Un <strong>accès rapide</strong> aux 7 fonctions principales (planning, points, forum, récompenses, espace emploi, profil, etc.).</li>
+      <li>Un <strong>bouton d'accès direct au groupe WhatsApp</strong> des bénévoles, pour ne rater aucun message.</li>
+    </ul>
+    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Tableau de bord d'accueil bénévole</div>
+  </div>
+
+  <!-- 2.2 Inscriptions aux matchs -->
+  <div class="feature">
+    <div class="feature-head">
+      <div class="feature-icon">📅</div>
+      <div>
+        <h3>Les inscriptions aux matchs</h3>
+        <div class="feature-sub">Du planning de la saison au jour du match</div>
+      </div>
+    </div>
+    <p><strong>15 jours avant chaque match</strong>, l'application ouvre les inscriptions automatiquement. Le bénévole reçoit un email d'ouverture, puis va dans son onglet «&nbsp;Planning&nbsp;».</p>
+    <p>Pour chaque match à venir, il peut indiquer s'il est&nbsp;:</p>
+    <ul>
+      <li><strong>Disponible</strong>&nbsp;: il accepte d'être affecté à un poste si besoin.</li>
+      <li><strong>Indisponible</strong>&nbsp;: il prévient à l'avance qu'il ne pourra pas être présent.</li>
+    </ul>
+    <p>Une fois affecté à un poste par un pilote, il reçoit une notification, voit l'information sur son tableau de bord et reçoit <strong>un rappel par email à J-3</strong> du match avec sa fiche de poste détaillée.</p>
+    <p>En cas d'empêchement de dernière minute, il peut se désinscrire&nbsp;; le pilote est alors averti automatiquement et peut reprogrammer un autre bénévole.</p>
+    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Vue planning des matchs avec disponibilité</div>
+  </div>
+
+  <!-- 2.3 Fiches de poste -->
+  <div class="feature">
+    <div class="feature-head">
+      <div class="feature-icon">🎯</div>
+      <div>
+        <h3>Le système de fiches de poste</h3>
+        <div class="feature-sub">Chaque mission est documentée pour réussir le jour J</div>
+      </div>
+    </div>
+    <p>Chaque poste de bénévole (sécurité, accueil, billetterie, buvette, vestiaire VIP, contrôle d'accès, photographie, etc.) dispose d'une <strong>fiche de poste détaillée</strong>, accessible directement depuis l'application.</p>
+    <p>Cette fiche contient&nbsp;:</p>
+    <ul>
+      <li>La <strong>mission précise</strong> du poste et les attentes du club.</li>
+      <li>L'<strong>heure d'arrivée</strong>, le <strong>lieu de rendez-vous</strong> et les contacts utiles le jour J.</li>
+      <li>Les <strong>consignes de sécurité</strong> et les bonnes pratiques.</li>
+      <li>Le cas échéant, des <strong>vidéos ou photos</strong> illustrant les gestes techniques.</li>
+    </ul>
+    <p>Le bénévole peut consulter cette fiche autant de fois qu'il le souhaite avant le match. Il peut aussi la télécharger en PDF pour la conserver hors ligne.</p>
+    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Exemple de fiche de poste détaillée</div>
+  </div>
+
+  <!-- 2.4 Accréditations -->
+  <div class="feature">
+    <div class="feature-head">
+      <div class="feature-icon">🪪</div>
+      <div>
+        <h3>Les accréditations nominatives</h3>
+        <div class="feature-sub">Photo, validation par un pilote, badge imprimable</div>
+      </div>
+    </div>
+    <p>Pour pouvoir accéder aux zones réservées du Palais des Sports, chaque bénévole reçoit une <strong>accréditation nominative</strong> avec sa photo. Le processus est entièrement géré par l'application.</p>
+    <p><strong>Comment ça marche&nbsp;:</strong></p>
+    <ol>
+      <li>Le bénévole charge une photo de profil depuis son téléphone ou son ordinateur.</li>
+      <li>Un pilote vérifie la photo (visage visible, pas de filtre, qualité suffisante) et la valide ou demande une correction.</li>
+      <li>Une fois validée, l'application génère automatiquement un PDF d'accréditation prêt à imprimer, aux couleurs du club.</li>
+    </ol>
+    <p>La photo n'est <strong>jamais accessible publiquement</strong>&nbsp;: elle est stockée dans un espace privé sécurisé, accessible uniquement aux personnes habilitées du club via des liens temporaires (1&nbsp;heure de validité).</p>
+    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Exemple d'accréditation générée</div>
+  </div>
+
+  <!-- 2.5 Points et récompenses -->
+  <div class="feature">
+    <div class="feature-head">
+      <div class="feature-icon">🏆</div>
+      <div>
+        <h3>La gamification et les récompenses</h3>
+        <div class="feature-sub">Reconnaître l'engagement par des avantages concrets</div>
+      </div>
+    </div>
+    <p>Pour chaque mission accomplie, le bénévole gagne des points qui s'accumulent dans son compte. Le club peut aussi attribuer des points bonus pour&nbsp;: ponctualité, présence aux matchs cruciaux, fidélité sur la durée, anniversaire, etc.</p>
+    <p>Trois paliers structurent la progression&nbsp;:</p>
+    <table>
+      <thead><tr><th>Niveau</th><th>Seuil</th><th>Avantages associés</th></tr></thead>
+      <tbody>
+        <tr><td>🥉 Bronze</td><td>0 → 599 pts</td><td>Accès à l'application, équipement standard, accès groupe WhatsApp</td></tr>
+        <tr><td>🥈 Argent</td><td>600 → 999 pts</td><td>Bronze + 1 code de réduction Intersport / saison</td></tr>
+        <tr><td>🥇 Or</td><td>1000 pts et +</td><td>Argent + invitations exclusives, places match VIP, goodies</td></tr>
+      </tbody>
+    </table>
+    <p>Le système est <strong>transparent</strong>&nbsp;: le bénévole voit en temps réel d'où viennent ses points, combien il lui en manque pour le palier suivant, et l'historique de ses récompenses obtenues.</p>
+    <p>Les codes de réduction sont demandés depuis l'application, traités par un pilote (qui les attribue manuellement depuis sa réserve), et délivrés au bénévole par message direct.</p>
+    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Vue points et progression vers paliers</div>
+  </div>
+
+  <!-- 2.6 Forum -->
+  <div class="feature">
+    <div class="feature-head">
+      <div class="feature-icon">💬</div>
+      <div>
+        <h3>Le forum interne</h3>
+        <div class="feature-sub">Échanger entre bénévoles, faire des suggestions au club</div>
+      </div>
+    </div>
+    <p>L'application intègre un <strong>forum interne réservé aux bénévoles inscrits</strong>. Trois usages principaux&nbsp;:</p>
+    <ul>
+      <li><strong>Discussions ouvertes</strong>&nbsp;: échanger des conseils, demander un coup de main, organiser un covoiturage entre bénévoles avant un match.</li>
+      <li><strong>Suggestions au club</strong>&nbsp;: proposer une idée, signaler un dysfonctionnement, faire un retour sur un poste. Les pilotes lisent et peuvent répondre.</li>
+      <li><strong>Annonces officielles</strong>&nbsp;: les pilotes diffusent les informations importantes (changements de planning, événements spéciaux, ouvertures d'inscriptions exceptionnelles).</li>
+    </ul>
+    <p>Le forum est modéré par les pilotes. Les messages sont <strong>conservés à valeur informelle</strong> uniquement&nbsp;: ils ne se substituent pas aux échanges officiels par email.</p>
+    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Vue d'un fil de discussion forum</div>
+  </div>
+
+  <!-- 2.7 Espace emploi -->
+  <div class="feature">
+    <div class="feature-head">
+      <div class="feature-icon">💼</div>
+      <div>
+        <h3>L'espace emploi</h3>
+        <div class="feature-sub">Annonces des partenaires et entraide entre bénévoles</div>
+      </div>
+    </div>
+    <p>Une fonctionnalité originale&nbsp;: l'<strong>espace emploi</strong>. Elle permet aux partenaires du club et aux bénévoles eux-mêmes de publier des <strong>annonces de recrutement, de stage, ou de prestations</strong>.</p>
+    <p>Deux usages&nbsp;:</p>
+    <ul>
+      <li>Un <strong>partenaire du club</strong> (sponsor, entreprise locale) peut diffuser une offre d'emploi, atteindre directement la communauté des bénévoles, et valoriser son partenariat.</li>
+      <li>Un <strong>bénévole entrepreneur ou indépendant</strong> peut soumettre une annonce pour ses propres services. Chaque annonce est validée par un pilote avant publication, ce qui garantit la qualité et l'adéquation des contenus.</li>
+    </ul>
+    <p>L'espace emploi est <strong>une vitrine de l'écosystème du club</strong>&nbsp;: il valorise les partenariats, soutient les bénévoles dans leurs activités professionnelles, et renforce l'identité communautaire des Spacers.</p>
+    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Espace emploi avec annonces</div>
+  </div>
+
+  <!-- 2.8 Communications automatiques -->
+  <div class="feature">
+    <div class="feature-head">
+      <div class="feature-icon">📲</div>
+      <div>
+        <h3>Les communications automatiques</h3>
+        <div class="feature-sub">Le bon message, au bon moment, sans intervention manuelle</div>
+      </div>
+    </div>
+    <p>L'application envoie automatiquement <strong>jusqu'à 4 emails par match</strong> aux bénévoles concernés&nbsp;:</p>
+    <table>
+      <thead><tr><th>Quand</th><th>À qui</th><th>Contenu</th></tr></thead>
+      <tbody>
+        <tr><td>J-15</td><td>Tous les bénévoles actifs</td><td>Ouverture des inscriptions au match</td></tr>
+        <tr><td>J-3</td><td>Bénévoles affectés</td><td>Rappel + fiche de poste + lien vidéo si disponible</td></tr>
+        <tr><td>J-1</td><td>Bénévoles affectés</td><td>Météo, info pratique de dernière minute</td></tr>
+        <tr><td>J+1</td><td>Tous les présents</td><td>Remerciement + crédit des points</td></tr>
+      </tbody>
+    </table>
+    <p>Tous les envois transitent par <strong>Mailjet</strong>, une solution professionnelle française, certifiée RGPD et ISO&nbsp;27001 (voir section 5). Aucun envoi n'est jamais effectué depuis une boîte personnelle.</p>
+    <p>Les bénévoles peuvent à tout moment <strong>se désabonner</strong> des emails non-essentiels (newsletter, événements) tout en conservant les emails opérationnels (matchs, points). C'est un choix RGPD&nbsp;: les communications relatives à l'engagement bénévole relèvent de l'exécution du contrat tacite, pas du consentement marketing.</p>
+  </div>
+
+  <!-- 2.9 Mon compte / RGPD -->
+  <div class="feature">
+    <div class="feature-head">
+      <div class="feature-icon">🛡️</div>
+      <div>
+        <h3>Mon compte et mes données</h3>
+        <div class="feature-sub">Tous les droits RGPD accessibles en quelques clics</div>
+      </div>
+    </div>
+    <p>Chaque bénévole dispose d'un espace «&nbsp;Mon compte&nbsp;» (dans son profil) qui lui permet d'<strong>exercer ses droits RGPD</strong> sans avoir à écrire un courrier&nbsp;:</p>
+    <ul>
+      <li><strong>📥 Exporter ses données</strong>&nbsp;: en un clic, télécharger l'intégralité de ses données (profil, inscriptions, points, posts) au format JSON et PDF lisible.</li>
+      <li><strong>💌 Gérer ses communications</strong>&nbsp;: activer ou désactiver la newsletter, les notifications non-essentielles.</li>
+      <li><strong>🗑️ Demander la suppression de son compte</strong>&nbsp;: la suppression est <strong>programmée à 30 jours</strong> (annulable pendant cette période). Au terme, les données identifiantes sont anonymisées de manière irréversible.</li>
+      <li><strong>📞 Contacter le référent RGPD</strong>&nbsp;: lien direct vers Didier CONJEAUD, désigné référent RGPD du club.</li>
+    </ul>
+    <p>Toutes ces actions sont <strong>tracées</strong> dans un registre d'audit. En cas de contrôle CNIL, le club peut produire la preuve que chaque bénévole a effectivement consenti à la collecte de ses données et que ses droits ont été respectés.</p>
+    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Carte "Mon compte" avec les 4 actions RGPD</div>
+  </div>
+
+  <!-- 2.10 Pour les pilotes -->
+  <div class="feature">
+    <div class="feature-head">
+      <div class="feature-icon">🎯</div>
+      <div>
+        <h3>Pour les pilotes&nbsp;: tableau de bord opérationnel</h3>
+        <div class="feature-sub">Tout ce qu'il faut pour gérer un match, en un seul écran</div>
+      </div>
+    </div>
+    <p>Les pilotes (référents bénévoles désignés par le Bureau) ont accès à un tableau de bord dédié, articulé autour de cinq onglets&nbsp;:</p>
+    <ul>
+      <li><strong>Match</strong>&nbsp;: créer et configurer les matchs, ouvrir les inscriptions, voir en temps réel qui s'est déclaré disponible.</li>
+      <li><strong>Accréds</strong>&nbsp;: valider ou refuser les photos d'accréditation soumises par les bénévoles.</li>
+      <li><strong>Bénévoles</strong>&nbsp;: liste complète des inscrits avec photo, niveau, statut. Outils RGPD intégrés (export, suppression sous 30 jours avec motif obligatoire).</li>
+      <li><strong>Récompenses</strong>&nbsp;: traiter les demandes de codes Intersport, ajuster les points, attribuer des bonus.</li>
+      <li><strong>Emploi</strong>&nbsp;: modérer les annonces soumises par les bénévoles avant publication.</li>
+    </ul>
+    <p>Le pilote peut <strong>contacter directement un bénévole par WhatsApp</strong> depuis l'app, avec des messages pré-remplis selon le contexte (rappel, demande, remerciement). Cela évite de chercher manuellement un numéro de téléphone tout en gardant le bénéfice du contact direct.</p>
+    <div class="placeholder"><strong>[Capture d'écran à insérer]</strong><br>Vue pilote — onglet Bénévoles avec liste et boutons d'action</div>
+  </div>
+
+  <!-- 2.11 Pour les admins -->
+  <div class="feature">
+    <div class="feature-head">
+      <div class="feature-icon">🛠️</div>
+      <div>
+        <h3>Pour les administrateurs&nbsp;: supervision technique</h3>
+        <div class="feature-sub">Niveau d'accès le plus élevé, réservé à la maintenance</div>
+      </div>
+    </div>
+    <p>Les administrateurs (Clément Augustin à ce jour) disposent de toutes les capacités pilote, augmentées de la <strong>supervision technique</strong>&nbsp;:</p>
+    <ul>
+      <li>Configuration des paramètres généraux du club (saisons, postes, paliers de récompenses).</li>
+      <li>Supervision des tâches automatisées (envoi des emails, suppression différée des comptes, sauvegardes).</li>
+      <li>Consultation du registre des consentements RGPD à des fins d'audit interne.</li>
+      <li>Accès aux logs techniques en cas de dysfonctionnement.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════════ 3. NIVEAUX D'ACCÈS ═══════════════ -->
+<section id="niveaux">
+  <h2 data-section="03">Trois niveaux d'accès</h2>
+
+  <p class="lead">L'application applique le principe de <strong>moindre privilège</strong>&nbsp;: chaque utilisateur ne voit que ce dont il a légitimement l'usage. Aucune information sensible n'est exposée à un niveau qui n'en aurait pas besoin.</p>
+
+  <article class="persona">
+    <div class="persona-tag">Niveau 1 · Bénévole</div>
+    <h3>Pour celles et ceux qui s'engagent</h3>
+    <p>Accès personnel limité à ses propres données et aux fonctions opérationnelles communes. Ne peut pas voir les coordonnées ou statistiques d'autres bénévoles. Ne peut pas modifier la configuration du club.</p>
+    <ul class="persona-list">
+      <li>Tableau de bord, planning, points, fiches de poste.</li>
+      <li>Forum (lecture et écriture), espace emploi (lecture, soumission d'annonce).</li>
+      <li>Mon compte (export, suppression, préférences).</li>
+    </ul>
+  </article>
+
+  <article class="persona">
+    <div class="persona-tag">Niveau 2 · Pilote</div>
+    <h3>Pour les responsables d'organisation</h3>
+    <p>Accès opérationnel élargi. Peut voir et agir sur les bénévoles, les matchs, les récompenses. Toutes ses actions sensibles sont tracées (qui, quand, pourquoi).</p>
+    <ul class="persona-list">
+      <li>Tout ce qui précède + tableau de bord pilote complet.</li>
+      <li>Création et configuration des matchs.</li>
+      <li>Validation des photos d'accréditation, attribution des codes Intersport.</li>
+      <li>Modération du forum, validation des annonces emploi.</li>
+      <li>Outils RGPD pour autrui (export et suppression sous 30 jours, avec motif obligatoire).</li>
+    </ul>
+  </article>
+
+  <article class="persona">
+    <div class="persona-tag">Niveau 3 · Administrateur</div>
+    <h3>Pour la supervision technique</h3>
+    <p>Niveau le plus élevé. Réservé aux personnes en charge de la maintenance technique. Tout accès admin est journalisé.</p>
+    <ul class="persona-list">
+      <li>Tout ce qui précède + paramétrage général du club.</li>
+      <li>Supervision des tâches automatisées et des sauvegardes.</li>
+      <li>Audit du registre RGPD complet.</li>
+      <li>Accès aux logs techniques.</li>
+    </ul>
+  </article>
+
+  <p style="margin-top:24px;">À ce jour, <strong>Clément Augustin</strong> assure le rôle d'administrateur. Le Bureau désigne les pilotes parmi les bénévoles de confiance. Les rôles peuvent être ajustés à tout moment depuis l'interface admin.</p>
+</section>
+
+<!-- ═══════════════ 4. SÉCURITÉ ET RGPD ═══════════════ -->
+<section id="securite">
+  <h2 data-section="04">Sécurité et conformité RGPD</h2>
+
+  <p class="lead">L'ensemble des choix techniques a été guidé par l'objectif d'une <strong>conformité RGPD complète</strong>, sans compromis. Cette section détaille les garanties offertes aux bénévoles et au club.</p>
+
+  <h3>Trois documents légaux structurent la relation</h3>
+  <p>Pour encadrer juridiquement la relation entre le club et les bénévoles utilisateurs de l'application&nbsp;:</p>
+  <ul>
+    <li><strong>Mentions légales</strong>&nbsp;— identifient l'éditeur (TOAC-TUC Volley-Ball), le responsable de publication, l'hébergement, les éléments de propriété intellectuelle. Données réelles intégrées (RNA W313011168, SIRET 392&nbsp;771&nbsp;275&nbsp;00022, FFVB n°&nbsp;0314739).</li>
+    <li><strong>Politique de confidentialité</strong>&nbsp;— décrit en français accessible quelles données sont collectées, pour quelle finalité, combien de temps elles sont conservées, et comment le bénévole peut exercer ses droits.</li>
+    <li><strong>Règlement intérieur des bénévoles</strong>&nbsp;— PDF de 5 pages, 11 articles, qui pose le cadre de l'engagement (valeurs, disponibilités, jour J, confidentialité, image, récompenses, discipline, RGPD, modification, acceptation). Politique no-show souple (1ᵉ et 2ᵉ tolérées, discussion à la 3ᵉ). Tenue libre mais correcte. 18+ uniquement (avec clause d'ouverture future aux 15-17 ans si la politique évolue).</li>
+  </ul>
+
+  <h3>Les six droits RGPD garantis aux bénévoles</h3>
+  <p>Chaque bénévole peut exercer les six droits prévus par le RGPD, directement depuis l'application&nbsp;:</p>
+  <table>
+    <thead><tr><th>Droit (article RGPD)</th><th>Comment c'est implémenté</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Accès</strong> (art. 15)</td><td>Bouton «&nbsp;Exporter mes données&nbsp;» dans Mon compte → JSON + PDF résumé téléchargé instantanément.</td></tr>
+      <tr><td><strong>Rectification</strong> (art. 16)</td><td>Le bénévole modifie lui-même ses informations (nom, téléphone, photo) depuis son profil.</td></tr>
+      <tr><td><strong>Effacement</strong> (art. 17)</td><td>Bouton «&nbsp;Demander la suppression&nbsp;» → suppression programmée à J+30, annulable. À J+30, anonymisation forte irréversible.</td></tr>
+      <tr><td><strong>Opposition</strong> (art. 21)</td><td>Toggle newsletter dans Mon compte. Le bénévole peut refuser les communications non-essentielles à tout moment.</td></tr>
+      <tr><td><strong>Portabilité</strong> (art. 20)</td><td>L'export JSON est lisible par toute application standard, garantissant la portabilité.</td></tr>
+      <tr><td><strong>Limitation</strong> (art. 18)</td><td>Sur demande écrite à <a href="mailto:contact@spacerstoulouse.fr">contact@spacerstoulouse.fr</a>, traitement sous 30 jours par le référent RGPD.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Mesures de sécurité applicatives</h3>
+  <p>Au-delà des certifications des prestataires (voir section 5), l'application elle-même intègre des mesures de sécurité de niveau professionnel&nbsp;:</p>
+  <ul>
+    <li><strong>Chiffrement complet</strong>&nbsp;: HTTPS/TLS pour toutes les communications, AES-256 au repos pour les données stockées.</li>
+    <li><strong>Authentification renforcée</strong>&nbsp;: chaque bénévole a un compte avec mot de passe (minimum 8 caractères), email vérifié.</li>
+    <li><strong>Cloisonnement par utilisateur</strong>&nbsp;: technologie Row Level Security (RLS) au niveau de la base de données, qui empêche un bénévole d'accéder aux données d'un autre, même par exploit technique.</li>
+    <li><strong>Photos privées</strong>&nbsp;: les photos d'accréditation sont stockées dans un espace privé. Aucune URL publique ne permet d'y accéder. Les liens d'accès sont temporaires (validité 1 heure).</li>
+    <li><strong>Registre d'audit</strong>&nbsp;: toutes les actions sensibles (consentement, export, suppression, annulation) sont tracées avec horodatage, identifiant de l'auteur, motif éventuel.</li>
+    <li><strong>Sauvegardes automatiques</strong>&nbsp;: la base de données est sauvegardée tous les jours par le prestataire d'hébergement, avec rétention de 7 jours minimum.</li>
+  </ul>
+
+  <h3>Référent RGPD désigné</h3>
+  <p><strong>Didier CONJEAUD</strong>, co-président du club, a été désigné référent RGPD. Il est joignable à <a href="mailto:contact@spacerstoulouse.fr">contact@spacerstoulouse.fr</a> pour toute demande relative aux données personnelles (du bénévole ou de tiers).</p>
+  <p>Cette désignation correspond à une bonne pratique pour une association de notre taille, où la nomination d'un Délégué à la Protection des Données (DPO) externe n'est pas obligatoire, mais où la responsabilité doit être clairement attribuée.</p>
+</section>
+
+<!-- ═══════════════ 5. HÉBERGEMENT (PLACEHOLDER, sera rempli juste après) ═══════════════ -->
+<section id="hebergement">
+  <h2 data-section="05">Hébergement et prestataires techniques</h2>
+
+  <p class="lead">L'application repose sur cinq prestataires techniques, choisis pour leur niveau de certification reconnu. Cette section présente chacun d'entre eux en toute transparence&nbsp;: où sont stockées les données, quelles certifications, et quel risque résiduel pour le club.</p>
+
+  <h3>Vue d'ensemble&nbsp;: 100&nbsp;% des données stockées en Union Européenne</h3>
+  <p>L'élément essentiel à retenir&nbsp;: <strong>aucune donnée personnelle de bénévole n'est stockée en dehors de l'Union européenne</strong>. Les serveurs qui hébergent les données sensibles sont tous physiquement situés dans des data centers européens (Irlande, France, Allemagne, Belgique, Tchéquie).</p>
+
+  <p>Deux prestataires (Cloudflare et GitHub) ont leur siège aux États-Unis. Pour eux, le club est protégé par les <strong>Clauses Contractuelles Types (CCT)</strong> de la Commission européenne, qui garantissent contractuellement le respect du niveau de protection RGPD pour tout transfert international de données. Ces CCT sont automatiquement intégrées dans les accords de traitement (DPA) signés avec ces prestataires.</p>
+
+  <p>De plus, ces deux prestataires ne traitent que des <strong>données techniques très limitées</strong>&nbsp;: Cloudflare ne voit passer que les requêtes HTTP (sans contenu déchiffré, grâce au TLS de bout en bout) et GitHub ne contient que le code source de l'application, pas les données des bénévoles.</p>
+
+  <h3>Détail par prestataire</h3>
+
+  <!-- SUPABASE -->
+  <div class="vendor">
+    <div class="vendor-head">
+      <div>
+        <h3 class="vendor-name">Supabase</h3>
+        <div class="vendor-role">Base de données, authentification, stockage de fichiers</div>
+      </div>
+      <span class="vendor-region">UE — Irlande</span>
+    </div>
+    <div class="vendor-grid">
+      <div class="vendor-field">
+        <h4>Rôle dans l'application</h4>
+        <p>C'est le cœur technique. Supabase héberge la base de données PostgreSQL qui contient toutes les données des bénévoles (identité, inscriptions, points, etc.) ainsi que les photos d'accréditation et le système d'authentification.</p>
+      </div>
+      <div class="vendor-field">
+        <h4>Localisation des serveurs</h4>
+        <p>Région UE-Ouest 1 (Dublin, Irlande). Aucun transfert hors UE pour les données du club.</p>
+      </div>
+      <div class="vendor-field">
+        <h4>Certifications</h4>
+        <div class="cert-list">
+          <span class="cert">SOC 2 Type 2</span>
+          <span class="cert">ISO/IEC 27001:2022</span>
+          <span class="cert">HIPAA</span>
+          <span class="cert">PCI DSS</span>
+          <span class="cert">RGPD</span>
+        </div>
+      </div>
+      <div class="vendor-field">
+        <h4>Réversibilité</h4>
+        <p>La base de données est entièrement exportable au format SQL standard. Migration possible vers tout hébergement PostgreSQL (OVH, Scaleway, etc.) en quelques heures sans perte de données.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLOUDFLARE -->
+  <div class="vendor">
+    <div class="vendor-head">
+      <div>
+        <h3 class="vendor-name">Cloudflare</h3>
+        <div class="vendor-role">Diffusion des pages web, protection contre les attaques</div>
+      </div>
+      <span class="vendor-region vendor-region-cct">USA — CCT</span>
+    </div>
+    <div class="vendor-grid">
+      <div class="vendor-field">
+        <h4>Rôle dans l'application</h4>
+        <p>Cloudflare diffuse les pages HTML de l'application aux navigateurs des bénévoles. Il protège également contre les attaques (DDoS, bots malveillants). Aucune donnée personnelle n'y est stockée durablement&nbsp;: c'est un intermédiaire technique.</p>
+      </div>
+      <div class="vendor-field">
+        <h4>Localisation des serveurs</h4>
+        <p>Réseau mondial avec présence européenne forte (Paris, Francfort, Amsterdam). Le trafic des bénévoles passe par les serveurs européens. Données traitées sous CCT.</p>
+      </div>
+      <div class="vendor-field">
+        <h4>Certifications</h4>
+        <div class="cert-list">
+          <span class="cert">ISO 27001</span>
+          <span class="cert">ISO 27701 (privacy)</span>
+          <span class="cert">ISO 27018</span>
+          <span class="cert">SOC 2 Type II</span>
+          <span class="cert">PCI DSS</span>
+          <span class="cert">RGPD</span>
+        </div>
+      </div>
+      <div class="vendor-field">
+        <h4>Réversibilité</h4>
+        <p>Le code de l'application est totalement indépendant de Cloudflare. Migration vers Vercel, Netlify, OVH, ou tout serveur web en moins d'une heure.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAILJET -->
+  <div class="vendor">
+    <div class="vendor-head">
+      <div>
+        <h3 class="vendor-name">Mailjet (Sinch)</h3>
+        <div class="vendor-role">Envoi des emails transactionnels (rappels, notifications)</div>
+      </div>
+      <span class="vendor-region">UE — France &amp; Allemagne</span>
+    </div>
+    <div class="vendor-grid">
+      <div class="vendor-field">
+        <h4>Rôle dans l'application</h4>
+        <p>Mailjet envoie tous les emails opérationnels&nbsp;: rappels de match J-3, notifications d'inscription, confirmations de suppression de compte, etc. C'est une solution professionnelle française, dont le siège est à Paris.</p>
+      </div>
+      <div class="vendor-field">
+        <h4>Localisation des serveurs</h4>
+        <p>Data centers Google Cloud à Frankfurt (Allemagne) et Saint-Ghislain (Belgique). Aucune sortie de l'UE.</p>
+      </div>
+      <div class="vendor-field">
+        <h4>Certifications</h4>
+        <div class="cert-list">
+          <span class="cert">ISO 27001</span>
+          <span class="cert">SOC 2 Type II</span>
+          <span class="cert">RGPD (AFAQ AFNOR)</span>
+          <span class="cert">HIPAA-ready</span>
+        </div>
+        <p style="font-size:12px;margin-top:6px;color:var(--gris);">Mailjet est la <strong>première société au monde</strong> à avoir obtenu la certification AFAQ AFNOR de conformité RGPD (2018).</p>
+      </div>
+      <div class="vendor-field">
+        <h4>Réversibilité</h4>
+        <p>Les emails sortants sont stockés dans une table interne avant envoi (système d'outbox). Migration vers SendGrid, Brevo, Postmark possible en modifiant uniquement la fonction d'envoi.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAKE.COM -->
+  <div class="vendor">
+    <div class="vendor-head">
+      <div>
+        <h3 class="vendor-name">Make.com (Celonis)</h3>
+        <div class="vendor-role">Automatisations entre l'application et d'autres outils</div>
+      </div>
+      <span class="vendor-region">UE — Tchéquie</span>
+    </div>
+    <div class="vendor-grid">
+      <div class="vendor-field">
+        <h4>Rôle dans l'application</h4>
+        <p>Make.com (anciennement Integromat) automatise certaines tâches&nbsp;: synchronisations entre Google Sheets et l'application, envois groupés exceptionnels, déclencheurs ponctuels. C'est un outil d'automatisation visuelle, sans code.</p>
+      </div>
+      <div class="vendor-field">
+        <h4>Localisation des serveurs</h4>
+        <p>Siège à Brno (Tchéquie). Hébergement AWS Frankfurt (Allemagne) pour les comptes en région EU. Make.com appartient à Celonis (Allemagne/USA), enregistré au Data Privacy Framework européen.</p>
+      </div>
+      <div class="vendor-field">
+        <h4>Certifications</h4>
+        <div class="cert-list">
+          <span class="cert">ISO 27001</span>
+          <span class="cert">SOC 2 Type II</span>
+          <span class="cert">SOC 3</span>
+          <span class="cert">RGPD</span>
+        </div>
+      </div>
+      <div class="vendor-field">
+        <h4>Réversibilité</h4>
+        <p>Make.com n'est utilisé que pour des tâches secondaires. En cas d'arrêt, les fonctions essentielles de l'application continuent de tourner. Les automatisations seraient migrables vers n8n (open-source européen) ou Zapier.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- GITHUB -->
+  <div class="vendor">
+    <div class="vendor-head">
+      <div>
+        <h3 class="vendor-name">GitHub (Microsoft)</h3>
+        <div class="vendor-role">Gestion du code source de l'application</div>
+      </div>
+      <span class="vendor-region vendor-region-cct">USA — CCT</span>
+    </div>
+    <div class="vendor-grid">
+      <div class="vendor-field">
+        <h4>Rôle dans l'application</h4>
+        <p>GitHub stocke le code source de l'application (l'équivalent du «&nbsp;manuscrit&nbsp;» d'un livre). <strong>Aucune donnée de bénévole n'y figure jamais</strong>. Ce n'est utile que pour le développement et le déploiement automatique.</p>
+      </div>
+      <div class="vendor-field">
+        <h4>Localisation des serveurs</h4>
+        <p>Serveurs Microsoft Azure mondiaux. Données traitées sous Clauses Contractuelles Types pour les transferts USA.</p>
+      </div>
+      <div class="vendor-field">
+        <h4>Certifications</h4>
+        <div class="cert-list">
+          <span class="cert">SOC 1 Type 2</span>
+          <span class="cert">SOC 2 Type 2</span>
+          <span class="cert">ISO/IEC 27001</span>
+          <span class="cert">FedRAMP</span>
+          <span class="cert">RGPD</span>
+        </div>
+      </div>
+      <div class="vendor-field">
+        <h4>Réversibilité</h4>
+        <p>Le code est entièrement portable&nbsp;: migration vers GitLab (français/européen) ou auto-hébergement possible en quelques heures. Le code reste propriété du club dans tous les cas.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Synthèse des transferts de données</h3>
+  <table>
+    <thead><tr><th>Prestataire</th><th>Données stockées</th><th>Localisation</th><th>Cadre juridique</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Supabase</strong></td><td>Identité, inscriptions, points, photos</td><td>🇮🇪 Dublin</td><td>RGPD direct (UE)</td></tr>
+      <tr><td><strong>Mailjet</strong></td><td>Emails sortants, adresses des destinataires</td><td>🇩🇪🇧🇪 Francfort, Saint-Ghislain</td><td>RGPD direct (UE)</td></tr>
+      <tr><td><strong>Make.com</strong></td><td>Données techniques transitoires</td><td>🇩🇪 Francfort</td><td>RGPD direct (UE)</td></tr>
+      <tr><td><strong>Cloudflare</strong></td><td>Trafic web (chiffré, sans accès au contenu)</td><td>🌍 Réseau mondial, traitement EU</td><td>CCT + DPA</td></tr>
+      <tr><td><strong>GitHub</strong></td><td>Code source uniquement (pas de données bénévole)</td><td>🇺🇸 USA</td><td>CCT + DPA</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════ 6. RISQUES ═══════════════ -->
+<section id="risques">
+  <h2 data-section="06">Analyse des risques</h2>
+
+  <p class="lead">Une présentation honnête au Bureau implique de nommer les risques résiduels. Voici les cinq risques identifiés, leur niveau d'exposition, et les mesures de mitigation déjà en place.</p>
+
+  <div class="risk-box risk-box-low">
+    <span class="risk-level">Risque faible</span>
+    <div>
+      <h4>Faille de sécurité chez un prestataire</h4>
+      <p>Tous les prestataires sont certifiés ISO 27001 et SOC 2 Type II, c'est-à-dire audités annuellement par des cabinets indépendants. Le risque de faille majeure est très faible. En cas d'incident, le prestataire a l'obligation contractuelle d'informer le club sous 72 heures (RGPD art. 33), ce qui permet d'avertir les bénévoles et la CNIL le cas échéant.</p>
+    </div>
+  </div>
+
+  <div class="risk-box risk-box-low">
+    <span class="risk-level">Risque faible</span>
+    <div>
+      <h4>Perte ou corruption de données</h4>
+      <p>Les sauvegardes quotidiennes de la base de données sont automatisées par Supabase, avec rétention de 7 jours minimum. En cas de suppression accidentelle massive, restauration possible en quelques heures. Le code source est lui-même versionné sur GitHub, avec historique complet.</p>
+    </div>
+  </div>
+
+  <div class="risk-box risk-box-med">
+    <span class="risk-level">Risque modéré</span>
+    <div>
+      <h4>Disparition d'un prestataire (faillite, rachat, fermeture du free tier)</h4>
+      <p>Aucun des cinq prestataires n'est aujourd'hui en difficulté financière&nbsp;; tous sont des acteurs établis depuis plus de 10 ans. Néanmoins, l'évolution des conditions tarifaires des free tiers reste possible (passage à un plan payant). Un budget annuel de l'ordre de 200&nbsp;€ permettrait de basculer sur des plans payants équivalents si nécessaire. Migration possible chez des concurrents européens (OVH, Scaleway) en 1 à 2 jours de travail.</p>
+    </div>
+  </div>
+
+  <div class="risk-box risk-box-med">
+    <span class="risk-level">Risque modéré</span>
+    <div>
+      <h4>Dépendance à un seul mainteneur (bus factor)</h4>
+      <p>L'application est aujourd'hui maintenue par une seule personne. En cas d'indisponibilité prolongée du mainteneur, l'application continuerait de fonctionner sans intervention pendant plusieurs mois (les automatismes tournent), mais aucune évolution ou correction de bug ne pourrait être réalisée. Le risque est mitigé par la documentation complète du code et le choix de technologies standard, qui permettraient à un autre développeur de prendre la suite sans difficulté majeure.</p>
+    </div>
+  </div>
+
+  <div class="risk-box risk-box-low">
+    <span class="risk-level">Risque faible</span>
+    <div>
+      <h4>Demande de la CNIL ou contestation par un bénévole</h4>
+      <p>Le club peut produire à tout moment&nbsp;: les documents légaux, le registre des consentements horodatés, l'historique des actions de chaque bénévole, et les preuves de la sécurisation technique. La désignation de Didier CONJEAUD comme référent RGPD officialise le point de contact. La conformité a été pensée dès la conception (privacy by design).</p>
+    </div>
+  </div>
+
+  <div class="risk-box risk-box-high">
+    <span class="risk-level">Risque élevé</span>
+    <div>
+      <h4>Mauvais usage par un utilisateur du niveau pilote ou admin</h4>
+      <p>Un pilote ou administrateur a, par construction, accès à des données sensibles d'autres bénévoles. Une utilisation abusive (export non justifié, suppression injustifiée) est techniquement possible. La mitigation repose sur la <strong>traçabilité complète</strong>&nbsp;: toute action de niveau pilote/admin est journalisée avec auteur, date et motif, ce qui permet une enquête rapide en cas de plainte. C'est pourquoi le Bureau doit choisir avec soin les personnes désignées comme pilotes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 7. COÛTS ═══════════════ -->
+<section id="couts">
+  <h2 data-section="07">Coûts et plan de continuité</h2>
+
+  <p class="lead">L'application a été conçue pour fonctionner intégralement sur les offres gratuites des prestataires. Aucune dépense récurrente n'est nécessaire pour les volumes prévisibles d'un club de notre taille.</p>
+
+  <h3>Budget annuel actuel&nbsp;: 0 €</h3>
+  <table>
+    <thead><tr><th>Prestataire</th><th>Plan utilisé</th><th>Coût mensuel</th><th>Limites du plan</th></tr></thead>
+    <tbody>
+      <tr><td>Supabase</td><td>Free tier</td><td>0 €</td><td>500 Mo de base, 1 Go de stockage, 50&nbsp;000 utilisateurs auth.</td></tr>
+      <tr><td>Cloudflare</td><td>Free</td><td>0 €</td><td>100 000 requêtes/jour pour les Workers, illimité pour les pages.</td></tr>
+      <tr><td>Mailjet</td><td>Free</td><td>0 €</td><td>200 emails/jour, 6 000 emails/mois.</td></tr>
+      <tr><td>Make.com</td><td>Free</td><td>0 €</td><td>1 000 opérations/mois, 2 scénarios actifs.</td></tr>
+      <tr><td>GitHub</td><td>Free</td><td>0 €</td><td>Repositories illimités pour usage non commercial.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Budget de continuité estimé (si dépassement free tier)</h3>
+  <p>Pour anticiper l'évolution future du club (plus de matchs, plus de bénévoles, plus d'emails), un budget de l'ordre de <strong>200 € par an</strong> permettrait de basculer sur les plans payants intermédiaires de Supabase et Mailjet, qui couvriraient des volumes 10 à 20 fois supérieurs aux besoins actuels prévisibles. <strong>Aucune décision budgétaire n'est nécessaire à ce stade.</strong></p>
+
+  <h3>Plan de continuité en cas d'incident majeur</h3>
+  <ul>
+    <li><strong>Si Supabase devient indisponible</strong>&nbsp;: les sauvegardes quotidiennes peuvent être restaurées sur un autre hébergement PostgreSQL (Scaleway, OVH) en moins d'une journée de travail.</li>
+    <li><strong>Si Cloudflare devient indisponible</strong>&nbsp;: bascule des pages vers GitHub Pages ou Netlify (gratuits, européens) en moins d'une heure.</li>
+    <li><strong>Si Mailjet devient indisponible</strong>&nbsp;: bascule vers Brevo (français), SendGrid ou Postmark, sans perte d'historique grâce à l'outbox interne.</li>
+    <li><strong>Si Make.com devient indisponible</strong>&nbsp;: les fonctions essentielles continuent. Les automatisations secondaires peuvent être migrées vers n8n (open-source européen).</li>
+    <li><strong>Si GitHub devient indisponible</strong>&nbsp;: aucun impact pour les bénévoles. Le code source est dupliqué localement, migration possible vers GitLab.</li>
+  </ul>
+
+  <p>L'architecture a été conçue dès le départ avec la <strong>portabilité comme contrainte</strong>. Aucun verrou propriétaire n'enchaîne le club à un prestataire spécifique.</p>
+</section>
+
+<!-- ═══════════════ 8. GOUVERNANCE ═══════════════ -->
+<section id="gouvernance">
+  <h2 data-section="08">Gouvernance et maintenance</h2>
+
+  <p class="lead">Comment le club garde la main sur l'outil&nbsp;? Comment fonctionnent les évolutions et la maintenance&nbsp;? Cette section précise les responsabilités et les engagements.</p>
+
+  <h3>Propriété intellectuelle et licence d'usage</h3>
+  <p>La répartition des droits sur l'application repose sur une distinction claire entre <strong>les données</strong> et <strong>le code source</strong>&nbsp;:</p>
+  <ul>
+    <li><strong>Les données</strong> (informations des bénévoles, matchs, points, photos, historique) sont la propriété pleine et entière du club <strong>TOAC-TUC Volley-Ball</strong>. Le club en est seul responsable au sens du RGPD. Aucun prestataire technique ni le développeur ne peut en revendiquer de droit.</li>
+    <li><strong>Le code source de l'application</strong> est la propriété de son auteur, <strong>Clément Augustin</strong>. L'application a été développée à titre personnel, en dehors du cadre des missions salariées au sein du club.</li>
+  </ul>
+
+  <p>Pour permettre au club d'utiliser l'application en toute sérénité, l'auteur consent une <strong>licence d'usage gratuite, non-exclusive et perpétuelle</strong> au profit du TOAC-TUC Volley-Ball, couvrant&nbsp;:</p>
+  <ul>
+    <li>L'usage opérationnel de l'application pour la gestion des bénévoles du club.</li>
+    <li>L'évolution et la maintenance de l'application par l'auteur ou par toute personne désignée par le club.</li>
+    <li>L'accès complet au code source via le dépôt GitHub du club, garantissant la transparence et la possibilité d'une reprise en main.</li>
+  </ul>
+
+  <p>Cette licence reste valable même en cas de cessation des fonctions de l'auteur au sein du club. En contrepartie, l'auteur conserve le droit de réutiliser, dans d'autres contextes non concurrents, les briques techniques génériques qu'il a développées.</p>
+
+  <p>Le Bureau peut, s'il le souhaite, formaliser ces dispositions par un <strong>document de cession ou de licence écrite</strong> signé entre le club et l'auteur. Cette formalisation est une bonne pratique recommandée mais n'est pas un préalable au lancement.</p>
+
+  <h3>Maintenance et évolutions</h3>
+  <p>Trois niveaux de maintenance sont définis&nbsp;:</p>
+  <ul>
+    <li><strong>Maintenance corrective</strong> (corrections de bugs)&nbsp;: réalisée à la demande, généralement sous 7 jours pour les bugs non bloquants, sous 24 heures pour les bugs critiques.</li>
+    <li><strong>Maintenance évolutive</strong> (nouvelles fonctionnalités)&nbsp;: planifiée saison par saison en concertation avec le Bureau et les pilotes. Les demandes peuvent être centralisées via le forum ou directement par email.</li>
+    <li><strong>Maintenance technique</strong> (mises à jour de sécurité)&nbsp;: appliquée automatiquement par les prestataires pour la majorité des cas. Les mises à jour applicatives sont déployées par l'administrateur tous les trimestres.</li>
+  </ul>
+
+  <h3>Transparence et auditabilité</h3>
+  <p>Le Bureau peut à tout moment&nbsp;:</p>
+  <ul>
+    <li>Demander un export complet du registre RGPD pour vérification.</li>
+    <li>Consulter le code source sur GitHub (avec accompagnement d'un développeur si besoin).</li>
+    <li>Demander un changement de mainteneur en cas de désaccord ou d'indisponibilité du mainteneur actuel.</li>
+    <li>Désigner un comité ad hoc pour superviser l'application si nécessaire.</li>
+  </ul>
+
+  <h3>Accès administrateur</h3>
+  <p>L'accès administrateur est <strong>limité à une seule personne</strong> à ce jour (Clément Augustin). Le Bureau peut décider à tout moment d'élargir ce cercle, ou d'attribuer cet accès à une autre personne. La passation se ferait par transfert des identifiants et des clés d'accès aux prestataires.</p>
+</section>
+
+<!-- ═══════════════ 9. ROADMAP ═══════════════ -->
+<section id="roadmap">
+  <h2 data-section="09">Évolutions prévues</h2>
+
+  <p class="lead">L'application est livrable à l'état actuel. Les évolutions ci-dessous sont identifiées comme pertinentes et seront proposées au Bureau pour arbitrage saison par saison.</p>
+
+  <h3>Court terme (saison 2026-2027)</h3>
+  <ul>
+    <li><strong>Refonte de la gamification</strong>&nbsp;: ajustement des paliers, ajout de badges thématiques (fidélité, ponctualité, polyvalence).</li>
+    <li><strong>Widget Instagram</strong>&nbsp;: affichage des derniers posts du club dans le tableau de bord bénévole.</li>
+    <li><strong>Refonte visuelle des accréditations PDF</strong>&nbsp;: charte graphique aboutie, logo plus visible, code couleur des zones d'accès.</li>
+  </ul>
+
+  <h3>Moyen terme (saison 2027-2028)</h3>
+  <ul>
+    <li><strong>Application mobile native</strong> (iOS / Android), pour faciliter l'usage sur le terrain par les pilotes.</li>
+    <li><strong>Notifications push</strong> en complément des emails, pour les événements urgents.</li>
+    <li><strong>Module de covoiturage</strong> intégré au forum, pour faciliter les déplacements aux matchs à l'extérieur.</li>
+  </ul>
+
+  <h3>Long terme</h3>
+  <ul>
+    <li><strong>Mutualisation avec les autres équipes du club</strong> (jeunes, féminines), si pertinent.</li>
+    <li><strong>Ouverture aux mineurs (15-17 ans)</strong> avec dispositif d'encadrement et consentement parental, si la politique du club évolue. L'infrastructure technique est déjà préparée.</li>
+  </ul>
+</section>
+
+<!-- ═══════════════ 10. DÉCISION ═══════════════ -->
+<section id="decision">
+  <h2 data-section="10">Décision attendue du Bureau</h2>
+
+  <p class="lead">Cette présentation s'accompagne d'une demande concrète de validation. Le déploiement officiel de l'application à la saison 2026-2027 est conditionné à l'accord du Bureau sur les trois points ci-dessous.</p>
+
+  <div class="decision">
+    <div class="decision-label">Validation demandée</div>
+    <h3>Trois validations formelles</h3>
+    <ol>
+      <li><strong>Validation des Mentions légales</strong> (document accompagnant la présente note). Engagement formel sur les éléments d'identification du club, l'éditeur, et la propriété intellectuelle.</li>
+      <li><strong>Validation de la Politique de confidentialité</strong> (document accompagnant la présente note). Engagement formel sur les finalités de traitement, les durées de conservation, et les droits des bénévoles.</li>
+      <li><strong>Validation du Règlement intérieur des bénévoles</strong> (document accompagnant la présente note). Engagement formel sur les règles d'engagement, les politiques d'absence, et la procédure disciplinaire.</li>
+    </ol>
+    <p style="margin-top:18px;font-size:14px;">La désignation officielle de <strong>Didier CONJEAUD comme référent RGPD du club</strong> sera également entérinée par cette validation, conformément à sa qualité de co-président de l'association.</p>
+  </div>
+
+  <p style="margin-top:24px;">Une fois ces validations obtenues, l'application pourra être ouverte aux bénévoles à la rentrée de septembre 2026. Une communication d'inscription sera diffusée par les canaux habituels du club&nbsp;: site web, réseaux sociaux, groupe WhatsApp, communications presse-club.</p>
+
+  <p>Le Bureau peut à tout moment, à sa discrétion, demander des modifications aux documents légaux, suspendre le déploiement, ou réorienter le projet. La présente note ne constitue pas un engagement irréversible&nbsp;: c'est un point d'étape pour décision éclairée.</p>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer">
+  <div>
+    <p><strong>TOAC-TUC Volley-Ball</strong></p>
+    <p>Palais des Sports André Brouat<br>3 rue Pierre Laplace, 31000 Toulouse</p>
+    <p>RNA W313011168 · SIRET 392 771 275 00022</p>
+  </div>
+  <div>
+    <p><strong>Référent RGPD</strong>&nbsp;: Didier CONJEAUD</p>
+    <p><strong>Auteur de la présente note</strong>&nbsp;: Clément Augustin</p>
+    <p>Contact&nbsp;: <a href="mailto:contact@spacerstoulouse.fr">contact@spacerstoulouse.fr</a></p>
+  </div>
+</footer>
+
+<p class="note-version">Version 1.0 · 5 mai 2026 · Document évolutif</p>
+
+</div>
+</body>
+</html>
