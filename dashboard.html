@@ -363,6 +363,53 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   object-fit:contain;
 }
 
+/* ── BACK BUTTON (commun aux écrans secondaires) ── */
+.back-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(181,212,244,0.2);color:#B5D4F4;border-radius:50px;padding:6px 14px;font-family:'Sora',sans-serif;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:10px;}
+.back-btn:hover,.back-btn:active{background:rgba(255,255,255,0.15);}
+
+/* ── DÉCOUVERTE (CTAs sur home) ── */
+.decouv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.decouv-card{background:white;border-radius:14px;padding:13px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
+.decouv-card:hover,.decouv-card:active{border-color:#185FA5;}
+.decouv-icon{font-size:24px;margin-bottom:5px;line-height:1;}
+.decouv-title{font-size:12px;font-weight:700;color:#0C447C;}
+.decouv-sub{font-size:10px;color:#5F5E5A;margin-top:1px;}
+
+/* ── POSTES ── */
+.poste-card{background:white;border-radius:14px;padding:13px;margin-bottom:8px;display:flex;gap:12px;align-items:center;cursor:pointer;border:2px solid transparent;transition:all .15s;}
+.poste-card:hover,.poste-card:active{border-color:#185FA5;}
+.poste-icon{font-size:36px;flex-shrink:0;line-height:1;}
+.poste-info{flex:1;min-width:0;}
+.poste-nom{font-size:14px;font-weight:700;color:#0C447C;}
+.poste-meta{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center;}
+.poste-difficulte{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;}
+.poste-difficulte.facile{background:#EAF3DE;color:#3B6D11;}
+.poste-difficulte.moyen{background:#FEF3C7;color:#C9821A;}
+.poste-difficulte.avancé,.poste-difficulte.avance{background:#FBEAF0;color:#993556;}
+.poste-meta-info{font-size:9px;color:#5F5E5A;}
+.poste-video-tag{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#FFE4E1;color:#993556;}
+.poste-desc-preview{font-size:11px;color:#5F5E5A;margin-top:5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.poste-arrow{font-size:24px;color:#D3D1C7;flex-shrink:0;}
+
+.poste-section-header{font-size:10px;font-weight:800;letter-spacing:1px;color:#0C447C;background:linear-gradient(90deg,#E6F1FB,#D0E5F8);border-left:3px solid #185FA5;border-radius:6px;padding:7px 10px;margin:14px 0 8px;}
+.poste-section-body{font-size:11.5px;color:#1a1a18;line-height:1.7;}
+.poste-section-title{font-weight:700;color:#0C447C;margin-top:8px;margin-bottom:4px;}
+.poste-section-line{padding:2px 0 2px 4px;}
+.poste-video-wrap{position:relative;width:100%;max-width:280px;margin:0 auto;aspect-ratio:9/16;border-radius:12px;overflow:hidden;background:#000;}
+.poste-video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+
+/* ── TOULOUSE ── */
+.tlse-card{background:white;border-radius:14px;overflow:hidden;margin-bottom:10px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
+.tlse-card:hover,.tlse-card:active{border-color:#185FA5;}
+.tlse-img{width:100%;height:120px;object-fit:cover;display:block;background:#E6F1FB;}
+.tlse-content{padding:12px;}
+.tlse-cat{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;display:inline-block;}
+.tlse-cat-sortir{background:#FBEAF0;color:#993556;}
+.tlse-cat-culture{background:#EDE9FE;color:#533BB7;}
+.tlse-titre{font-size:14px;font-weight:800;color:#0C447C;margin-top:6px;line-height:1.3;}
+.tlse-soustitre{font-size:11px;color:#5F5E5A;margin-top:2px;}
+.tlse-desc-preview{font-size:11px;color:#5F5E5A;margin-top:8px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+
 /* ── INSTAGRAM FEED (Actu du club) ── */
 .spi-feed{background:white;border-radius:14px;padding:12px;margin-bottom:10px;}
 .spi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
@@ -586,6 +633,30 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <!-- ── MON COMPTE / RGPD (livrable 4) ── -->
     <div id="account-card-wrap"></div>
   </div>
+  <!-- ── POSTES (chantier découverte) ── -->
+  <div class="bscreen" id="bs-postes">
+    <button class="back-btn" onclick="bSwitch('home')">← Retour</button>
+    <div class="sec">📋 Les postes bénévoles</div>
+    <div style="font-size:11px;color:rgba(181,212,244,0.6);margin-bottom:12px;line-height:1.5;">
+      Découvre les différentes missions possibles pendant un match. Clique sur un poste pour voir les détails et la vidéo de présentation.
+    </div>
+    <div id="postes-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
+  </div>
+
+  <!-- ── TOULOUSE (chantier découverte) ── -->
+  <div class="bscreen" id="bs-toulouse">
+    <button class="back-btn" onclick="bSwitch('home')">← Retour</button>
+    <div class="sec">🌹 Découvrir Toulouse</div>
+    <div style="font-size:11px;color:rgba(181,212,244,0.6);margin-bottom:12px;line-height:1.5;">
+      Bons plans, sorties et vie culturelle dans la ville rose — sélection pour les bénévoles.
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;">
+      <button class="seg-b on" data-tlse-cat="tous" onclick="setToulouseFilter('tous',this)">Tous</button>
+      <button class="seg-b" data-tlse-cat="sortir" onclick="setToulouseFilter('sortir',this)">🌃 Sortir</button>
+      <button class="seg-b" data-tlse-cat="culture" onclick="setToulouseFilter('culture',this)">🎭 Culture</button>
+    </div>
+    <div id="toulouse-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
+  </div>
 
 </div><!-- /app -->
 
@@ -678,6 +749,20 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <div style="font-size:9px;color:#5F5E5A;text-align:center;margin-top:14px;font-style:italic;">
       * Champs obligatoires
     </div>
+  </div>
+</div>
+
+<!-- MODAL DÉTAIL POSTE -->
+<div class="modal-ov" id="modal-poste" style="display:none;">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:520px;padding:22px;">
+    <div id="modal-poste-content"></div>
+  </div>
+</div>
+
+<!-- MODAL DÉTAIL TOULOUSE -->
+<div class="modal-ov" id="modal-toulouse" style="display:none;">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:520px;padding:22px;">
+    <div id="modal-toulouse-content"></div>
   </div>
 </div>
 
@@ -1054,6 +1139,241 @@ function promptModal(opts) {
 }
 
 // ─────────────────────────────────────────────────
+// POSTES (fiches de poste avec vidéos)
+// ─────────────────────────────────────────────────
+let postesData = null
+
+async function loadPostes() {
+  const el = document.getElementById('postes-content')
+  if (!el) return
+  if (postesData) { renderPostesList(); return }
+  try {
+    const { data, error } = await sb.from('postes')
+      .select('id, nom, description, icone, emoji, missions, conseils, materiel, video_url, difficulte, heures_estimees, benevoles_max_match')
+      .order('nom', { ascending: true })
+    if (error) throw error
+    postesData = data || []
+    renderPostesList()
+  } catch (err) {
+    console.error('[postes]', err)
+    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : '+(err.message||err)+'</div>'
+  }
+}
+
+function renderPostesList() {
+  const el = document.getElementById('postes-content')
+  if (!postesData || postesData.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Aucun poste disponible.</div>'
+    return
+  }
+  el.innerHTML = postesData.map(p => {
+    const icone = p.icone || p.emoji || '📋'
+    // Extraire le nom sans emoji du début (le nom contient parfois l'emoji déjà)
+    const nomClean = (p.nom || '').replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]+/u, '').trim() || p.nom
+    const diff = (p.difficulte || '').toLowerCase().replace('é','e')
+    const hasVideo = !!p.video_url
+    return `
+      <div class="poste-card" onclick="openPosteDetail('${p.id}')">
+        <div class="poste-icon">${icone}</div>
+        <div class="poste-info">
+          <div class="poste-nom">${escapeHtml(nomClean)}</div>
+          <div class="poste-meta">
+            ${p.difficulte ? `<span class="poste-difficulte ${diff}">${escapeHtml(p.difficulte)}</span>` : ''}
+            <span class="poste-meta-info">⏱️ ~${p.heures_estimees||3}h</span>
+            ${p.benevoles_max_match ? `<span class="poste-meta-info">👥 ${p.benevoles_max_match} bénévoles</span>` : ''}
+            ${hasVideo ? '<span class="poste-video-tag">▶ Vidéo</span>' : ''}
+          </div>
+          <div class="poste-desc-preview">${escapeHtml(p.description || '')}</div>
+        </div>
+        <div class="poste-arrow">›</div>
+      </div>`
+  }).join('')
+}
+
+function extractYoutubeId(url) {
+  if (!url) return null
+  const m = url.match(/(?:shorts\/|watch\?v=|embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+
+function formatPosteText(text) {
+  if (!text) return ''
+  const normalized = text.replace(/\r\n/g, '\n').trim()
+  const blocks = normalized.split(/\n\s*\n+/)
+  return blocks.map(block => {
+    const lines = block.split('\n').map(l => l.trim()).filter(Boolean)
+    if (lines.length === 0) return ''
+    let html = ''
+    let bodyStarted = false
+    lines.forEach((line, i) => {
+      if (i === 0 && /^(▶|🎯|ℹ️)/.test(line)) {
+        html += `<div class="poste-section-title">${escapeHtml(line)}</div>`
+      } else {
+        html += `<div class="poste-section-line">${escapeHtml(line)}</div>`
+      }
+    })
+    return html
+  }).join('<div style="height:8px;"></div>')
+}
+
+function openPosteDetail(id) {
+  const p = (postesData || []).find(x => x.id === id)
+  if (!p) return
+  const videoId = extractYoutubeId(p.video_url)
+  const icone = p.icone || p.emoji || '📋'
+  const nomClean = (p.nom || '').replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]+/u, '').trim() || p.nom
+  const diff = (p.difficulte || '').toLowerCase().replace('é','e')
+
+  const html = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:10px;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:42px;line-height:1;">${icone}</div>
+        <div style="font-size:18px;font-weight:800;color:#0C447C;margin-top:8px;">${escapeHtml(nomClean)}</div>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
+          ${p.difficulte ? `<span class="poste-difficulte ${diff}">${escapeHtml(p.difficulte)}</span>` : ''}
+          <span class="poste-meta-info">⏱️ ~${p.heures_estimees||3}h</span>
+          ${p.benevoles_max_match ? `<span class="poste-meta-info">👥 ${p.benevoles_max_match} bénévoles/match</span>` : ''}
+        </div>
+      </div>
+      <button onclick="closePosteDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
+    </div>
+    ${p.description ? `<div style="font-size:12px;color:#1a1a18;line-height:1.7;margin-bottom:10px;">${escapeHtml(p.description)}</div>` : ''}
+    ${videoId ? `
+      <div class="poste-section-header">▶ VIDÉO DE PRÉSENTATION</div>
+      <div class="poste-video-wrap">
+        <iframe id="poste-video-iframe" src="https://www.youtube.com/embed/${videoId}" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    ` : `<div style="background:#F1EFE8;border-radius:10px;padding:12px;text-align:center;color:#5F5E5A;font-size:11px;margin:14px 0;">📹 Vidéo de présentation bientôt disponible</div>`}
+    ${p.missions ? `
+      <div class="poste-section-header">📋 MISSIONS</div>
+      <div class="poste-section-body">${formatPosteText(p.missions)}</div>
+    ` : ''}
+    ${p.conseils ? `
+      <div class="poste-section-header">💡 POINTS CLÉS</div>
+      <div class="poste-section-body">${formatPosteText(p.conseils)}</div>
+    ` : ''}
+    ${p.materiel ? `
+      <div class="poste-section-header">🎒 À APPORTER / PRÉVOIR</div>
+      <div class="poste-section-body">${formatPosteText(p.materiel)}</div>
+    ` : ''}
+    <button class="btn btn-ghost" style="font-size:13px;margin-top:18px;" onclick="closePosteDetail()">Fermer</button>
+  `
+  document.getElementById('modal-poste-content').innerHTML = html
+  document.getElementById('modal-poste').style.display = 'flex'
+}
+
+function closePosteDetail() {
+  document.getElementById('modal-poste').style.display = 'none'
+  // Vider le contenu pour stopper la lecture vidéo YouTube
+  document.getElementById('modal-poste-content').innerHTML = ''
+}
+
+// ─────────────────────────────────────────────────
+// TOULOUSE (ressources, bons plans)
+// ─────────────────────────────────────────────────
+let toulouseData = null
+let toulouseFilter = 'tous'
+
+async function loadToulouse() {
+  const el = document.getElementById('toulouse-content')
+  if (!el) return
+  if (toulouseData) { renderToulouseList(); return }
+  try {
+    const { data, error } = await sb.from('ressources_toulouse')
+      .select('id, categorie, titre, sous_titre, description, image_url, lien_externe, ordre_affichage')
+      .eq('active', true)
+      .eq('statut_validation', 'validee')
+      .order('ordre_affichage', { ascending: true })
+    if (error) throw error
+    toulouseData = data || []
+    renderToulouseList()
+  } catch (err) {
+    console.error('[toulouse]', err)
+    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : '+(err.message||err)+'</div>'
+  }
+}
+
+function setToulouseFilter(cat, btn) {
+  toulouseFilter = cat
+  document.querySelectorAll('[data-tlse-cat]').forEach(b => b.classList.remove('on'))
+  btn.classList.add('on')
+  renderToulouseList()
+}
+
+function renderToulouseList() {
+  const el = document.getElementById('toulouse-content')
+  let list = toulouseData || []
+  if (toulouseFilter !== 'tous') list = list.filter(t => t.categorie === toulouseFilter)
+  if (list.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Aucune ressource dans cette catégorie pour l\'instant.</div>'
+    return
+  }
+  el.innerHTML = list.map(t => {
+    const cat = t.categorie || 'autre'
+    const catLabel = cat === 'sortir' ? '🌃 SORTIR' : cat === 'culture' ? '🎭 CULTURE' : cat.toUpperCase()
+    return `
+      <div class="tlse-card" onclick="openToulouseDetail('${t.id}')">
+        ${t.image_url ? `<img class="tlse-img" src="${escapeHtml(t.image_url)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}
+        <div class="tlse-content">
+          <span class="tlse-cat tlse-cat-${cat}">${catLabel}</span>
+          <div class="tlse-titre">${escapeHtml(t.titre || '')}</div>
+          ${t.sous_titre ? `<div class="tlse-soustitre">${escapeHtml(t.sous_titre)}</div>` : ''}
+          ${t.description ? `<div class="tlse-desc-preview">${escapeHtml(t.description.replace(/[*•\n]/g,' ').replace(/\s+/g,' ').trim())}</div>` : ''}
+        </div>
+      </div>`
+  }).join('')
+}
+
+function renderMarkdownLite(text) {
+  if (!text) return ''
+  let html = escapeHtml(text)
+  // Bold
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+  // Bullets : ligne qui commence par • ou par 1./2./...
+  // Split en paragraphes
+  const paras = html.split(/\n\n+/).map(p => {
+    const lines = p.split('\n').map(l => l.trim()).filter(Boolean)
+    // Liste à puces ?
+    if (lines.every(l => /^•/.test(l))) {
+      return '<ul style="margin:0;padding-left:18px;">' + lines.map(l => `<li style="margin-bottom:6px;">${l.replace(/^•\s*/,'')}</li>`).join('') + '</ul>'
+    }
+    // Liste numérotée ?
+    if (lines.every(l => /^\d+\./.test(l))) {
+      return '<ol style="margin:0;padding-left:20px;">' + lines.map(l => `<li style="margin-bottom:6px;">${l.replace(/^\d+\.\s*/,'')}</li>`).join('') + '</ol>'
+    }
+    return '<p style="margin:0 0 10px;">' + lines.join('<br>') + '</p>'
+  })
+  return paras.join('')
+}
+
+function openToulouseDetail(id) {
+  const t = (toulouseData || []).find(x => x.id === id)
+  if (!t) return
+  const cat = t.categorie || 'autre'
+  const catLabel = cat === 'sortir' ? '🌃 SORTIR' : cat === 'culture' ? '🎭 CULTURE' : cat.toUpperCase()
+  const html = `
+    ${t.image_url ? `<img src="${escapeHtml(t.image_url)}" style="width:calc(100% + 44px);margin:-22px -22px 14px -22px;height:160px;object-fit:cover;display:block;" referrerpolicy="no-referrer">` : ''}
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:10px;">
+      <div style="flex:1;min-width:0;">
+        <span class="tlse-cat tlse-cat-${cat}">${catLabel}</span>
+        <div style="font-size:18px;font-weight:800;color:#0C447C;margin-top:8px;line-height:1.3;">${escapeHtml(t.titre || '')}</div>
+        ${t.sous_titre ? `<div style="font-size:12px;color:#5F5E5A;margin-top:4px;">${escapeHtml(t.sous_titre)}</div>` : ''}
+      </div>
+      <button onclick="closeToulouseDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
+    </div>
+    <div style="font-size:12px;color:#1a1a18;line-height:1.7;">${renderMarkdownLite(t.description || '')}</div>
+    ${t.lien_externe ? `<a class="btn btn-blue" style="display:block;text-align:center;text-decoration:none;font-size:13px;margin-top:14px;" href="${escapeHtml(t.lien_externe)}" target="_blank" rel="noopener">🔗 Plus d'infos</a>` : ''}
+    <button class="btn btn-ghost" style="font-size:13px;" onclick="closeToulouseDetail()">Fermer</button>
+  `
+  document.getElementById('modal-toulouse-content').innerHTML = html
+  document.getElementById('modal-toulouse').style.display = 'flex'
+}
+
+function closeToulouseDetail() {
+  document.getElementById('modal-toulouse').style.display = 'none'
+}
+
+// ─────────────────────────────────────────────────
 // INSTAGRAM FEED (Actu du club)
 // ─────────────────────────────────────────────────
 const SPI_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
@@ -1288,6 +1608,7 @@ function renderHugoHome(el, p, pts, niveau, pct) {
         <div style="font-size:10px;color:#185FA5;font-weight:600;">Voir mon rang</div>
       </div>
     </div>
+    ${renderDecouverteSection()}
     ${renderInstaFeed()}
     ${renderSuggestionSection('hugo')}`
 }
@@ -1339,6 +1660,7 @@ function renderVirginieHome(el, p) {
         <div class="faq-q">${f.q} <span>+</span></div>
         <div class="faq-a">${f.a}</div>
       </div>`).join('')}
+    ${renderDecouverteSection()}
     ${renderInstaFeed()}
     ${renderSuggestionSection('virginie')}`
 }
@@ -1367,8 +1689,27 @@ function renderJoelHome(el, p, pts) {
       <div style="font-size:18px;color:#D3D1C7;">›</div>
     </div>
 
+    ${renderDecouverteSection()}
     ${renderInstaFeed()}
     ${renderSuggestionSection('joel')}`
+}
+
+// ── SECTION DÉCOUVERTE (commune aux 3 profils) ──
+function renderDecouverteSection() {
+  return `
+    <div class="sec">🔍 Découverte</div>
+    <div class="decouv-grid">
+      <div class="decouv-card" onclick="bSwitch('postes')">
+        <div class="decouv-icon">📋</div>
+        <div class="decouv-title">Les postes</div>
+        <div class="decouv-sub">8 fiches détaillées</div>
+      </div>
+      <div class="decouv-card" onclick="bSwitch('toulouse')">
+        <div class="decouv-icon">🌹</div>
+        <div class="decouv-title">Toulouse</div>
+        <div class="decouv-sub">Bons plans bénévoles</div>
+      </div>
+    </div>`
 }
 
 // ── SECTION AMÉLIORER L'EXPÉRIENCE (commune aux 3 profils) ──
@@ -2362,6 +2703,8 @@ function bSwitch(name) {
   if(name==='forum')loadPosts()
   if(name==='reward')loadReward()
   if(name==='emploi')loadEmploi()
+  if(name==='postes')loadPostes()
+  if(name==='toulouse')loadToulouse()
   if(name==='profil'){
     renderPhotoCard()
     loadAccountState().then(() => renderAccountCard())
