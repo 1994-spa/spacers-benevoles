@@ -1,0 +1,12 @@
+{
+  "name": "spacers-benevoles",
+  "version": "1.0.0",
+  "description": "Application web de gestion des bénévoles pour Spacers Toulouse Volley",
+  "scripts": {
+    "deploy": "echo 'Use Cloudflare Pages, Vercel, or Netlify to deploy this static site'",
+    "serve": "python -m http.server 8080"
+  },
+  "keywords": ["volleyball", "volunteers", "supabase"],
+  "author": "Spacers Toulouse",
+  "license": "MIT"
+}

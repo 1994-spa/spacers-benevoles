@@ -766,21 +766,21 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   </div>
 </div>
 
-<!-- MODAL CHANGEMENT PROFIL -->
+<!-- MODAL CHANGEMENT PROFIL (PRÉNOMS SUPPRIMÉS) -->
 <div class="modal-ov" id="modal-profil" style="display:none;">
   <div class="modal">
     <h2>🎭 Changer de profil</h2>
     <div class="profil-choice" onclick="selectNewProfil('hugo')" id="pc-hugo">
       <div class="profil-choice-icon">⚡</div>
-      <div><div style="font-size:13px;font-weight:700;color:#0C447C;">Hugo — Compétiteur</div><div style="font-size:10px;color:#5F5E5A;">Gamification, points, classement</div></div>
+      <div><div style="font-size:13px;font-weight:700;color:#0C447C;">Compétiteur</div><div style="font-size:10px;color:#5F5E5A;">Gamification, points, classement</div></div>
     </div>
     <div class="profil-choice" onclick="selectNewProfil('virginie')" id="pc-virginie">
       <div class="profil-choice-icon">🌸</div>
-      <div><div style="font-size:13px;font-weight:700;color:#533BB7;">Virginie — Découverte</div><div style="font-size:10px;color:#5F5E5A;">Accompagnement, référent, FAQ</div></div>
+      <div><div style="font-size:13px;font-weight:700;color:#533BB7;">Découverte</div><div style="font-size:10px;color:#5F5E5A;">Accompagnement, référent, FAQ</div></div>
     </div>
     <div class="profil-choice" onclick="selectNewProfil('joel')" id="pc-joel">
       <div class="profil-choice-icon">🎯</div>
-      <div><div style="font-size:13px;font-weight:700;color:#3B6D11;">Joël — Expérimenté</div><div style="font-size:10px;color:#5F5E5A;">Interface simple, 3 boutons, référent</div></div>
+      <div><div style="font-size:13px;font-weight:700;color:#3B6D11;">Expérimenté</div><div style="font-size:10px;color:#5F5E5A;">Interface simple, 3 boutons, référent</div></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:12px;">
       <button class="btn btn-blue" style="flex:1;font-size:13px;" onclick="confirmChangeProfil()">Confirmer</button>
@@ -807,11 +807,9 @@ let pendingPhotoFile = null
 // ─────────────────────────────────────────────────────────────
 // SIGNED URLS — bucket privé (Chantier 11)
 // ─────────────────────────────────────────────────────────────
-// Cache en mémoire pour éviter de regénérer une signed URL à chaque render.
-// Les signed URLs sont valides 1h, on les garde 50 min en cache (10 min de marge).
-const _signedUrlCache = new Map() // path -> {url, expiresAt}
-const SIGNED_URL_TTL = 3600 // 1h
-const SIGNED_URL_REFRESH_MS = 50 * 60 * 1000 // 50 min
+const _signedUrlCache = new Map()
+const SIGNED_URL_TTL = 3600
+const SIGNED_URL_REFRESH_MS = 50 * 60 * 1000
 
 async function getSignedPhotoUrl(path) {
   if (!path) return null
@@ -837,7 +835,6 @@ async function getSignedPhotoUrl(path) {
 }
 
 async function getSignedPhotoUrls(paths) {
-  // Batch — utile pour le forum / liste de bénévoles
   const result = {}
   if (!paths || paths.length === 0) return result
   const toFetch = []
@@ -880,7 +877,6 @@ async function loadEmploi() {
   const el = document.getElementById('emploi-content')
   if (!el) return
 
-  // 1. Mes propositions (toutes statuts)
   if (CP) {
     const { data: mesProps } = await sb.from('annonces_emploi')
       .select('id, titre, statut_validation, pilote_message, publiee_le')
@@ -890,7 +886,6 @@ async function loadEmploi() {
     renderMesPropositions(mesProps || [])
   }
 
-  // 2. Annonces publiées (validées + actives + non expirées)
   const { data, error } = await sb.from('annonces_emploi')
     .select('*')
     .eq('active', true)
@@ -1168,7 +1163,6 @@ function renderPostesList() {
   }
   el.innerHTML = postesData.map(p => {
     const icone = p.icone || p.emoji || '📋'
-    // Extraire le nom sans emoji du début (le nom contient parfois l'emoji déjà)
     const nomClean = (p.nom || '').replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]+/u, '').trim() || p.nom
     const diff = (p.difficulte || '').toLowerCase().replace('é','e')
     const hasVideo = !!p.video_url
@@ -1204,7 +1198,6 @@ function formatPosteText(text) {
     const lines = block.split('\n').map(l => l.trim()).filter(Boolean)
     if (lines.length === 0) return ''
     let html = ''
-    let bodyStarted = false
     lines.forEach((line, i) => {
       if (i === 0 && /^(▶|🎯|ℹ️)/.test(line)) {
         html += `<div class="poste-section-title">${escapeHtml(line)}</div>`
@@ -1264,7 +1257,6 @@ function openPosteDetail(id) {
 
 function closePosteDetail() {
   document.getElementById('modal-poste').style.display = 'none'
-  // Vider le contenu pour stopper la lecture vidéo YouTube
   document.getElementById('modal-poste-content').innerHTML = ''
 }
 
@@ -1327,17 +1319,12 @@ function renderToulouseList() {
 function renderMarkdownLite(text) {
   if (!text) return ''
   let html = escapeHtml(text)
-  // Bold
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-  // Bullets : ligne qui commence par • ou par 1./2./...
-  // Split en paragraphes
   const paras = html.split(/\n\n+/).map(p => {
     const lines = p.split('\n').map(l => l.trim()).filter(Boolean)
-    // Liste à puces ?
     if (lines.every(l => /^•/.test(l))) {
       return '<ul style="margin:0;padding-left:18px;">' + lines.map(l => `<li style="margin-bottom:6px;">${l.replace(/^•\s*/,'')}</li>`).join('') + '</ul>'
     }
-    // Liste numérotée ?
     if (lines.every(l => /^\d+\./.test(l))) {
       return '<ol style="margin:0;padding-left:20px;">' + lines.map(l => `<li style="margin-bottom:6px;">${l.replace(/^\d+\.\s*/,'')}</li>`).join('') + '</ol>'
     }
@@ -1468,26 +1455,27 @@ function showQuizAgain() {
   })
 }
 
+// ─── RÉSULTAT QUIZ : prénoms supprimés des libellés affichés ───
 function showProfilResult() {
   const configs = {
     hugo: {
       icon:'⚡', bg:'linear-gradient(135deg,#E6F1FB,#B5D4F4)',
       tag:'PROFIL COMPÉTITEUR', tagBg:'#E6F1FB', tagColor:'#0C447C',
-      name:'Hugo', emoji:'🏆',
+      name:'Compétiteur', emoji:'🏆',
       desc:'Vous adorez les défis et la compétition ! Votre dashboard met en avant vos points, votre classement et vos badges. Chaque match est une nouvelle opportunité de progresser.',
       traits:['⚡ Gamification complète activée','🏆 Classement en temps réel','🎯 Défis et badges personnalisés','📊 Stats détaillées']
     },
     virginie: {
       icon:'🌸', bg:'linear-gradient(135deg,#EDE9FE,#DDD6FE)',
       tag:'PROFIL DÉCOUVERTE', tagBg:'#EDE9FE', tagColor:'#533BB7',
-      name:'Virginie', emoji:'🤝',
+      name:'Découverte', emoji:'🤝',
       desc:'Bienvenue dans l\'aventure ! Un référent va vous être assigné pour vous guider à chaque étape. Votre dashboard est pensé pour vous accompagner en douceur.',
       traits:['🤝 Référent assigné automatiquement','📖 Guide pas à pas intégré','💡 FAQ pratique accessible','💜 Interface douce et rassurante']
     },
     joel: {
       icon:'🎯', bg:'linear-gradient(135deg,#EAF3DE,#C0DD97)',
       tag:'PROFIL EXPÉRIMENTÉ', tagBg:'#EAF3DE', tagColor:'#3B6D11',
-      name:'Joël', emoji:'💪',
+      name:'Expérimenté', emoji:'💪',
       desc:'Vous connaissez le terrain ! Votre interface est épurée avec les 3 boutons essentiels. Vous pouvez aussi partager votre savoir-faire avec les nouveaux bénévoles.',
       traits:['⚡ Interface 3 boutons streamlinée','📋 Planning & dispos en 1 tap','📝 Section "Transmettre" activée','🏅 Rôle référent reconnu']
     }
@@ -1499,7 +1487,7 @@ function showProfilResult() {
   document.getElementById('profil-reveal').innerHTML = `
     <div class="profil-avatar" style="background:${c.bg};font-size:40px;">${c.icon}</div>
     <span class="profil-tag" style="background:${c.tagBg};color:${c.tagColor};">${c.tag}</span>
-    <div class="profil-name">${c.emoji} Profil ${c.name}</div>
+    <div class="profil-name">${c.emoji} ${c.name}</div>
     <p class="profil-desc">${c.desc}</p>
     <div class="profil-traits">${c.traits.map(t=>`<div class="trait">✓ <span>${t.substring(2)}</span></div>`).join('')}</div>`
 }
@@ -1535,13 +1523,11 @@ function renderTopbar(p) {
   document.getElementById('profil-badge').style.color = cfg.color
   document.getElementById('t-pts').textContent = (p.points_total||0) + ' pts'
 
-  // Avatar : placeholder synchrone, puis upgrade async via signed URL
   const wrap = document.getElementById('av-wrap')
   wrap.innerHTML = `<div class="av-ph">${ini(p)}</div>`
   const pathAtCall = p.photo_path
   if (pathAtCall) {
     getSignedPhotoUrl(pathAtCall).then(url => {
-      // Guard contre les race conditions : on ne remplace que si CP.photo_path n'a pas changé
       if (CP?.photo_path === pathAtCall && url) {
         wrap.innerHTML = `<img src="${url}" class="av" alt="">`
       }
@@ -1614,7 +1600,6 @@ function renderHugoHome(el, p, pts, niveau, pct) {
 }
 
 function renderVirginieHome(el, p) {
-  // Checklist dynamique : photo done si photo_path présent (chantier 11)
   const etapes = [
     {done:true,            txt:'Inscription validée ✓'},
     {done:true,            txt:'Compte créé et email reçu ✓'},
@@ -1694,7 +1679,6 @@ function renderJoelHome(el, p, pts) {
     ${renderSuggestionSection('joel')}`
 }
 
-// ── SECTION DÉCOUVERTE (commune aux 3 profils) ──
 function renderDecouverteSection() {
   return `
     <div class="sec">🔍 Découverte</div>
@@ -1712,7 +1696,6 @@ function renderDecouverteSection() {
     </div>`
 }
 
-// ── SECTION AMÉLIORER L'EXPÉRIENCE (commune aux 3 profils) ──
 function renderSuggestionSection(profilType) {
   const cfg = {
     hugo:    {bg:'linear-gradient(135deg,#0C447C,#185FA5)', sub:'rgba(181,212,244,0.75)'},
@@ -1746,7 +1729,6 @@ function renderSuggestionSection(profilType) {
     </div>`
 }
 
-// ── TOGGLE FAQ ────────────────────────────────────────────────
 function toggleFaq(el) {
   const ans = el.querySelector('.faq-a')
   const icon = el.querySelector('.faq-q span')
@@ -1812,7 +1794,6 @@ function loadPoints() {
 // ── FORUM ────────────────────────────────────────────────────
 async function loadPosts() {
   const el = document.getElementById('posts-list')
-  // CHANGEMENT (chantier 11) : on récupère photo_path au lieu de photo_url
   const { data: posts } = await sb.from('posts')
     .select('*, benevoles(prenom, nom, photo_path, profil_type)')
     .order('created_at', { ascending: false })
@@ -1823,7 +1804,6 @@ async function loadPosts() {
     return
   }
 
-  // Batch-resolve les signed URLs pour toutes les photos visibles
   const paths = posts
     .map(p => p.benevoles?.photo_path)
     .filter(Boolean)
@@ -1859,7 +1839,7 @@ async function publishPost() {
   loadPosts()
 }
 
-// ── PROFIL FIELDS ────────────────────────────────────────────
+// ── PROFIL FIELDS (prénoms déjà absents, libellés clean) ─────
 function loadProfilFields(p) {
   document.getElementById('f-prenom').value=p.prenom||''
   document.getElementById('f-nom').value=p.nom||''
@@ -1876,9 +1856,7 @@ function loadProfilFields(p) {
       <div><div style="font-size:13px;font-weight:700;color:${c.color};">${c.name}</div>
         <div style="font-size:10px;color:#5F5E5A;margin-top:1px;">${c.desc}</div></div>
     </div>`
-  // Photo card (async)
   renderPhotoCard()
-  // Account card RGPD (async)
   loadAccountState().then(() => renderAccountCard())
 }
 
@@ -1949,7 +1927,6 @@ async function renderPhotoCard() {
   const el = document.getElementById('photo-card-content')
   if (!el || !CP) return
 
-  // Mode preview : un fichier est en attente de confirmation
   if (pendingPhotoFile) {
     const previewUrl = URL.createObjectURL(pendingPhotoFile)
     el.innerHTML = `
@@ -1971,7 +1948,6 @@ async function renderPhotoCard() {
     return
   }
 
-  // Mode normal : photo actuelle (signed URL) ou placeholder
   const p = CP
   const statut = p.statut_accreditation || 'sans_photo'
 
@@ -2058,7 +2034,6 @@ async function confirmPhotoUpload() {
               : 'jpg'
     const path = `${CU.id}/profile.${ext}`
 
-    // 1. Upload (overwrite si existe — RLS check : own folder)
     const { error: upErr } = await sb.storage
       .from(PHOTOS_BUCKET)
       .upload(path, file, {
@@ -2068,7 +2043,6 @@ async function confirmPhotoUpload() {
       })
     if (upErr) throw upErr
 
-    // 2. Update DB : on stocke le PATH (chantier 11), photo_url devient null
     const { error: dbErr } = await sb.from('benevoles').update({
       photo_path: path,
       photo_url: null,
@@ -2077,10 +2051,8 @@ async function confirmPhotoUpload() {
     }).eq('email', CU.email)
     if (dbErr) throw dbErr
 
-    // 3. Bust cache pour ce path (force la régénération de la signed URL)
     _signedUrlCache.delete(path)
 
-    // 4. Refresh UI
     pendingPhotoFile = null
     const { data: refreshed } = await sb.from('benevoles').select('*').eq('email', CU.email).single()
     if (refreshed) {
@@ -2351,12 +2323,10 @@ function closeChangeProfil(){document.getElementById('modal-profil').style.displ
 // MON COMPTE / RGPD (livrable 4)
 // ─────────────────────────────────────────────────────────────
 
-// Cache pour l'état soft-delete (évite de re-querier à chaque render)
 let _accountState = null
 
 async function loadAccountState() {
   if (!CP) return null
-  // Refresh des champs deletion + newsletter directement depuis la BDD
   const { data, error } = await sb.from('benevoles')
     .select('email, prenom, nom, newsletter_optin, deletion_requested_at, deletion_scheduled_for, deletion_requested_by, statut_compte')
     .eq('id', CP.id).single()
@@ -2381,7 +2351,6 @@ function renderAccountCard() {
   const isPendingDeletion = !!a.deletion_requested_at
   const newsletterChecked = a.newsletter_optin === true
 
-  // Format date de suppression prévue
   let pendingHtml = ''
   if (isPendingDeletion) {
     const dt = new Date(a.deletion_scheduled_for)
@@ -2404,7 +2373,6 @@ function renderAccountCard() {
 
       ${pendingHtml}
 
-      <!-- Sous-section : Newsletter -->
       <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:6px;">
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
           <input type="checkbox" id="acc-newsletter" ${newsletterChecked?'checked':''} ${isPendingDeletion?'disabled':''} onchange="toggleNewsletter(this)" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:#3B6D11;cursor:pointer;">
@@ -2415,7 +2383,6 @@ function renderAccountCard() {
         </label>
       </div>
 
-      <!-- Sous-section : Export -->
       <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:12px;">
         <div style="font-size:12px;font-weight:600;color:#0C447C;margin-bottom:3px;">📥 Exporter mes données</div>
         <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-bottom:8px;">Télécharge l'intégralité des données te concernant (JSON + résumé PDF).</div>
@@ -2423,7 +2390,6 @@ function renderAccountCard() {
       </div>
 
       ${!isPendingDeletion ? `
-      <!-- Sous-section : Suppression -->
       <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:12px;">
         <div style="font-size:12px;font-weight:600;color:#993556;margin-bottom:3px;">🗑️ Supprimer mon compte</div>
         <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-bottom:8px;">
@@ -2433,7 +2399,6 @@ function renderAccountCard() {
       </div>
       ` : ''}
 
-      <!-- Sous-section : Contact RGPD -->
       <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:12px;">
         <div style="font-size:10px;color:#5F5E5A;line-height:1.6;text-align:center;">
           Référent RGPD : <strong>Didier CONJEAUD</strong><br>
@@ -2443,7 +2408,6 @@ function renderAccountCard() {
     </div>`
 }
 
-// ─── Toggle newsletter (RPC update_newsletter_consent) ────────
 async function toggleNewsletter(checkbox) {
   const newOptin = checkbox.checked
   checkbox.disabled = true
@@ -2453,7 +2417,7 @@ async function toggleNewsletter(checkbox) {
   checkbox.disabled = false
   if (error) {
     showToast('Erreur : ' + error.message, 'error')
-    checkbox.checked = !newOptin // revert
+    checkbox.checked = !newOptin
     return
   }
   if (_accountState) _accountState.newsletter_optin = newOptin
@@ -2461,7 +2425,6 @@ async function toggleNewsletter(checkbox) {
   showToast(newOptin ? '✓ Newsletter activée' : '✓ Newsletter désactivée', 'success')
 }
 
-// ─── Export JSON + PDF (RPC export_account_data) ──────────────
 async function exportMyData() {
   const btn = document.getElementById('btn-export')
   if (!btn) return
@@ -2474,15 +2437,13 @@ async function exportMyData() {
     if (error) throw new Error(error.message)
     if (!data) throw new Error('Aucune donnée retournée')
 
-    const dateTag = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
+    const dateTag = new Date().toISOString().slice(0, 10)
     const safePrenom = (CP?.prenom || 'benevole').toLowerCase().replace(/[^a-z0-9]/g, '')
 
-    // 1. JSON
     const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     triggerDownload(jsonBlob, `spacers-mes-donnees-${safePrenom}-${dateTag}.json`)
 
-    // 2. PDF résumé (jsPDF)
-    await new Promise(r => setTimeout(r, 200)) // léger délai pour que le 1er download s'initie
+    await new Promise(r => setTimeout(r, 200))
     generateExportPDF(data, `spacers-mes-donnees-${safePrenom}-${dateTag}.pdf`)
 
     showToast('✓ Export téléchargé (JSON + PDF)', 'success')
@@ -2540,7 +2501,6 @@ function generateExportPDF(data, filename) {
     y += 14
   }
 
-  // En-tête
   doc.setFillColor(12, 68, 124)
   doc.rect(0, 0, pageW, 70, 'F')
   doc.setFont('helvetica', 'bold')
@@ -2553,14 +2513,12 @@ function generateExportPDF(data, filename) {
   doc.text('Tes données personnelles · Article 15 et 20 du RGPD', margin, 52)
   y = 90
 
-  // Métadonnées
   const meta = data.export_metadata || {}
   addLine('Date d\'export : ' + new Date(meta.export_date || Date.now()).toLocaleString('fr-FR'), { size: 9, color: [95, 94, 90] })
   addLine('Demandé par : ' + (meta.requested_by || ''), { size: 9, color: [95, 94, 90] })
   addLine('Responsable du traitement : ' + (meta.data_controller || 'TOAC-TUC VOLLEY-BALL'), { size: 9, color: [95, 94, 90] })
   addLine('Contact RGPD : ' + (meta.rgpd_contact || 'contact@spacerstoulouse.fr'), { size: 9, color: [95, 94, 90], after: 12 })
 
-  // Profil
   const p = data.profil || {}
   addSection('Mon profil bénévole')
   addLine('Prénom : ' + (p.prenom || '—'))
@@ -2574,14 +2532,12 @@ function generateExportPDF(data, filename) {
   addLine('Photo accréditation stockée : ' + (p.photo_path ? 'oui' : 'non'))
   addLine('Compte créé le : ' + (p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : '—'))
 
-  // Stats
   addSection('Mon activité bénévole')
   addLine('Matchs joués : ' + (p.matchs_joues || 0))
   addLine('Points totaux : ' + (p.points_total || 0))
   addLine('Points dépensés : ' + (p.points_depenses || 0))
   addLine('Niveau : ' + (p.niveau || 'Bronze'))
 
-  // Consentements
   addSection('Mes consentements (' + ((data.consentements || []).length) + ' au total)')
   ;(data.consentements || []).slice(0, 30).forEach(c => {
     const dt = new Date(c.granted_at).toLocaleDateString('fr-FR')
@@ -2592,7 +2548,6 @@ function generateExportPDF(data, filename) {
     addLine('... et ' + ((data.consentements || []).length - 30) + ' de plus dans le JSON.', { size: 9, color: [95, 94, 90] })
   }
 
-  // Inscriptions
   const ins = data.inscriptions || []
   addSection('Mes inscriptions aux matchs (' + ins.length + ')')
   if (ins.length === 0) addLine('Aucune inscription enregistrée.', { size: 9, color: [95, 94, 90] })
@@ -2602,7 +2557,6 @@ function generateExportPDF(data, filename) {
     addLine(`${dt} — vs ${i.match_adversaire || '?'} — ${i.statut}${presence}`, { size: 9 })
   })
 
-  // Posts
   const posts = data.posts || []
   addSection('Mes publications (' + posts.length + ')')
   if (posts.length === 0) addLine('Aucune publication.', { size: 9, color: [95, 94, 90] })
@@ -2611,7 +2565,6 @@ function generateExportPDF(data, filename) {
     addLine(`${dt} — [${po.categorie}] ${(po.titre || '(sans titre)').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}]/gu, '').trim() || '(sans titre)'}`, { size: 9 })
   })
 
-  // Récompenses
   const rec = data.recompenses || []
   addSection('Mes demandes de récompenses (' + rec.length + ')')
   if (rec.length === 0) addLine('Aucune demande.', { size: 9, color: [95, 94, 90] })
@@ -2620,7 +2573,6 @@ function generateExportPDF(data, filename) {
     addLine(`${dt} — palier ${r.palier_pts} pts — statut : ${r.statut}`, { size: 9 })
   })
 
-  // Footer
   const totalPages = doc.getNumberOfPages()
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i)
@@ -2636,7 +2588,6 @@ function generateExportPDF(data, filename) {
   doc.save(filename)
 }
 
-// ─── Demande de suppression (RPC request_account_deletion) ────
 async function requestDeletion() {
   const ok = await confirmModal({
     icon: '🗑️',
@@ -2652,7 +2603,7 @@ async function requestDeletion() {
   if (!ok) return
 
   const { data, error } = await sb.rpc('request_account_deletion', {
-    p_target_email: null,  // self
+    p_target_email: null,
     p_reason: null,
   })
   if (error) {
@@ -2661,14 +2612,12 @@ async function requestDeletion() {
   }
   showToast('✓ Demande enregistrée. Tu vas être déconnecté(e).', 'info')
 
-  // Logout après 2s pour que l'utilisateur voie le message
   setTimeout(async () => {
     await sb.auth.signOut()
     window.location.href = 'index.html'
   }, 2200)
 }
 
-// ─── Annulation de la demande (RPC cancel_account_deletion) ──
 async function cancelDeletion() {
   const ok = await confirmModal({
     icon: '↺',
@@ -2680,7 +2629,7 @@ async function cancelDeletion() {
   if (!ok) return
 
   const { data, error } = await sb.rpc('cancel_account_deletion', {
-    p_target_email: null,  // self
+    p_target_email: null,
   })
   if (error) {
     showToast('Erreur : ' + error.message, 'error')
