@@ -1492,9 +1492,11 @@ function showProfilResult() {
     <div class="profil-traits">${c.traits.map(t=>`<div class="trait">✓ <span>${t.substring(2)}</span></div>`).join('')}</div>`
 }
 
+// ── PATCH F04 : passe par la RPC update_my_profile ──
 async function saveProfilAndContinue() {
   localStorage.setItem('quiz_done_'+CU.id, '1')
-  await sb.from('benevoles').update({profil_type: detectedProfil}).eq('email', CU.email)
+  const { error } = await sb.rpc('update_my_profile', { p_profil_type: detectedProfil })
+  if (error) { showToast('Erreur : '+error.message, 'error'); return }
   CP.profil_type = detectedProfil
   document.getElementById('quiz-wrap').style.display = 'none'
   showApp(CP)
@@ -1792,10 +1794,11 @@ function loadPoints() {
 }
 
 // ── FORUM ────────────────────────────────────────────────────
+// PATCH F01 : embed remplacé par requête séparée sur benevoles_public
 async function loadPosts() {
   const el = document.getElementById('posts-list')
   const { data: posts } = await sb.from('posts')
-    .select('*, benevoles(prenom, nom, photo_path, profil_type)')
+    .select('*')
     .order('created_at', { ascending: false })
     .limit(20)
 
@@ -1804,9 +1807,18 @@ async function loadPosts() {
     return
   }
 
-  const paths = posts
-    .map(p => p.benevoles?.photo_path)
-    .filter(Boolean)
+  // Hydrate les auteurs via la vue publique (RLS-friendly)
+  const auteurIds = [...new Set(posts.map(p => p.auteur_id).filter(Boolean))]
+  const auteursMap = {}
+  if (auteurIds.length > 0) {
+    const { data: auteurs } = await sb.from('benevoles_public')
+      .select('id, prenom, nom, photo_path, profil_type')
+      .in('id', auteurIds)
+    if (auteurs) auteurs.forEach(a => { auteursMap[a.id] = a })
+  }
+  posts.forEach(p => { p.benevoles = auteursMap[p.auteur_id] || null })
+
+  const paths = posts.map(p => p.benevoles?.photo_path).filter(Boolean)
   const urlMap = await getSignedPhotoUrls(paths)
 
   el.innerHTML = posts.map(p => {
@@ -1860,15 +1872,18 @@ function loadProfilFields(p) {
   loadAccountState().then(() => renderAccountCard())
 }
 
+// PATCH F04 : passe par la RPC update_my_profile
 async function saveProfile() {
-  const{error}=await sb.from('benevoles').update({
-    prenom:document.getElementById('f-prenom').value.trim(),
-    nom:document.getElementById('f-nom').value.trim(),
-    telephone:document.getElementById('f-tel').value.trim(),
-  }).eq('email',CU.email)
-  if(error){showToast('Erreur : '+error.message,'error');return}
-  showToast('Profil sauvegardé ✓','success')
-  const{data:p}=await sb.from('benevoles').select('*').eq('email',CU.email).single();CP=p;renderTopbar(p)
+  const { error } = await sb.rpc('update_my_profile', {
+    p_prenom: document.getElementById('f-prenom').value.trim(),
+    p_nom: document.getElementById('f-nom').value.trim(),
+    p_telephone: document.getElementById('f-tel').value.trim(),
+  })
+  if (error) { showToast('Erreur : '+error.message, 'error'); return }
+  showToast('Profil sauvegardé ✓', 'success')
+  const { data: p } = await sb.from('benevoles').select('*').eq('email', CU.email).single()
+  CP = p
+  renderTopbar(p)
 }
 
 async function saveSuggestion() {
@@ -2018,6 +2033,8 @@ function cancelPhotoUpload() {
   renderPhotoCard()
 }
 
+// PATCH F04 : passe par la RPC update_my_profile
+// (la RPC reset auto photo_url, statut_accreditation, photo_validee quand p_photo_path est défini)
 async function confirmPhotoUpload() {
   if (!pendingPhotoFile || !CU) return
 
@@ -2043,12 +2060,9 @@ async function confirmPhotoUpload() {
       })
     if (upErr) throw upErr
 
-    const { error: dbErr } = await sb.from('benevoles').update({
-      photo_path: path,
-      photo_url: null,
-      statut_accreditation: 'en_attente',
-      photo_validee: false,
-    }).eq('email', CU.email)
+    const { error: dbErr } = await sb.rpc('update_my_profile', {
+      p_photo_path: path,
+    })
     if (dbErr) throw dbErr
 
     _signedUrlCache.delete(path)
@@ -2306,10 +2320,12 @@ function selectNewProfil(p) {
   })
 }
 
+// PATCH F04 : passe par la RPC update_my_profile
 async function confirmChangeProfil() {
-  if(!newProfilSelected)return
-  await sb.from('benevoles').update({profil_type:newProfilSelected}).eq('email',CU.email)
-  CP.profil_type=newProfilSelected
+  if (!newProfilSelected) return
+  const { error } = await sb.rpc('update_my_profile', { p_profil_type: newProfilSelected })
+  if (error) { showToast('Erreur : '+error.message, 'error'); return }
+  CP.profil_type = newProfilSelected
   closeChangeProfil()
   renderTopbar(CP)
   renderHomeForProfil(CP)
