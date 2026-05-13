@@ -2277,9 +2277,9 @@ async function cancelRequest(demandeId) {
     confirmStyle: 'red',
   })
   if (!ok) return
-  const { error } = await sb.from('recompenses_demandes')
-    .update({ statut: 'annulee', traite_le: new Date().toISOString() })
-    .eq('id', demandeId)
+  const { error } = await sb.rpc('cancel_my_reward_request', {
+    p_demande_id: demandeId,
+  })
   if (error) {
     showToast('Erreur : ' + error.message, 'error')
     return
