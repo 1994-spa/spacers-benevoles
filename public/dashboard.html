@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spacers Bénévoles</title>
+<title>Spacers B�n�voles</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -11,7 +11,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 
-/* ── QUIZ PROFIL ── */
+/* -- QUIZ PROFIL -- */
 .quiz-wrap{
   min-height:100vh;display:flex;flex-direction:column;
   align-items:center;justify-content:center;padding:24px;
@@ -43,7 +43,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .quiz-progress{height:4px;background:#E6F1FB;border-radius:2px;margin-bottom:20px;overflow:hidden;}
 .quiz-progress-fill{height:100%;background:linear-gradient(90deg,#0C447C,#185FA5);border-radius:2px;transition:width .4s ease;}
 
-/* RÉSULTAT PROFIL */
+/* R�SULTAT PROFIL */
 .profil-reveal{text-align:center;padding:10px 0;}
 .profil-avatar{
   width:80px;height:80px;border-radius:24px;
@@ -67,7 +67,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .btn-ghost{background:#F1EFE8;color:#5F5E5A;margin-top:8px;}
 .btn:disabled{opacity:0.5;cursor:not-allowed;}
 
-/* ── TOPBAR ── */
+/* -- TOPBAR -- */
 .topbar{
   background:white;padding:10px 14px;
   display:flex;justify-content:space-between;align-items:center;
@@ -84,7 +84,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .btn-logout{background:#FBEAF0;color:#993556;border:none;border-radius:50px;padding:6px 10px;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;cursor:pointer;}
 .btn-pilote{background:#E6F1FB;color:#0C447C;border:none;border-radius:50px;padding:6px 10px;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;cursor:pointer;}
 
-/* ── BOTTOM NAV ── */
+/* -- BOTTOM NAV -- */
 .bnav{background:white;position:fixed;bottom:0;left:0;right:0;display:flex;border-top:1px solid #F1EFE8;z-index:99;}
 .bn{flex:1;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:none;cursor:pointer;font-family:'Sora',sans-serif;}
 .bn-icon{font-size:18px;line-height:1;}
@@ -94,11 +94,11 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .bn.on.virginie .bn-label{color:#533BB7;}
 .bn.on.joel .bn-label{color:#3B6D11;}
 
-/* ── SCREENS ── */
+/* -- SCREENS -- */
 .bscreen{display:none;padding:14px 14px 80px;max-width:480px;margin:0 auto;}
 .bscreen.on{display:block;}
 
-/* HUGO — GAMIFICATION */
+/* HUGO � GAMIFICATION */
 .hugo-hero{
   background:linear-gradient(135deg,#1a1a18,#042C53,#0C447C);
   border-radius:20px;padding:18px;margin-bottom:12px;
@@ -118,7 +118,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .rank-mini{background:white;border-radius:12px;padding:11px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
 .rank-pos{font-size:16px;min-width:24px;}
 
-/* VIRGINIE — ACCOMPAGNEMENT */
+/* VIRGINIE � ACCOMPAGNEMENT */
 .referent-card{
   background:linear-gradient(135deg,#3a1a5e,#533BB7,#7C3FC4);
   border-radius:20px;padding:16px;margin-bottom:12px;
@@ -135,7 +135,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .faq-a{font-size:11px;color:#5F5E5A;line-height:1.7;margin-top:6px;display:none;}
 .faq-a.on{display:block;}
 
-/* JOËL — EFFICACITÉ */
+/* JO�L � EFFICACIT� */
 .joel-hero{background:linear-gradient(135deg,#1a3d2e,#3B6D11);border-radius:20px;padding:18px;margin-bottom:12px;}
 .joel-btn{
   background:white;border-radius:16px;padding:18px;
@@ -196,7 +196,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .toast-flot.error{background:#993556;}
 .toast-flot.info{background:#185FA5;}
 
-/* ── PHOTO UPLOAD (chantier 4) ── */
+/* -- PHOTO UPLOAD (chantier 4) -- */
 .photo-card{background:white;border-radius:16px;padding:16px;margin-bottom:10px;}
 .photo-display{
   width:140px;height:140px;border-radius:50%;
@@ -226,7 +226,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 }
 .photo-tips strong{color:#0C447C;}
 
-/* ── RÉCOMPENSES (chantier 6) ── */
+/* -- R�COMPENSES (chantier 6) -- */
 .rew-hero{
   background:linear-gradient(135deg,#1a1a18,#042C53,#0C447C);
   border-radius:20px;padding:18px;margin-bottom:12px;
@@ -286,7 +286,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .histo-ann{background:#F1EFE8;color:#5F5E5A;}
 .histo-ref{background:#FBEAF0;color:#993556;}
 
-/* ── EMPLOI (chantier 8) ── */
+/* -- EMPLOI (chantier 8) -- */
 .seg-b{
   flex:1;padding:7px 8px;border:1px solid rgba(181,212,244,0.15);background:rgba(255,255,255,0.04);
   color:rgba(181,212,244,0.6);font-size:11px;font-weight:600;border-radius:50px;cursor:pointer;
@@ -323,7 +323,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   flex-wrap:wrap;
 }
 
-/* ── PROPOSER ANNONCE (modale PDF-like) ── */
+/* -- PROPOSER ANNONCE (modale PDF-like) -- */
 .prop-section-header{
   background:linear-gradient(90deg,#E6F1FB,#D0E5F8);
   border-left:4px solid #185FA5;
@@ -363,11 +363,11 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   object-fit:contain;
 }
 
-/* ── BACK BUTTON (commun aux écrans secondaires) ── */
+/* -- BACK BUTTON (commun aux �crans secondaires) -- */
 .back-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(181,212,244,0.2);color:#B5D4F4;border-radius:50px;padding:6px 14px;font-family:'Sora',sans-serif;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:10px;}
 .back-btn:hover,.back-btn:active{background:rgba(255,255,255,0.15);}
 
-/* ── DÉCOUVERTE (CTAs sur home) ── */
+/* -- D�COUVERTE (CTAs sur home) -- */
 .decouv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .decouv-card{background:white;border-radius:14px;padding:13px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
 .decouv-card:hover,.decouv-card:active{border-color:#185FA5;}
@@ -375,7 +375,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .decouv-title{font-size:12px;font-weight:700;color:#0C447C;}
 .decouv-sub{font-size:10px;color:#5F5E5A;margin-top:1px;}
 
-/* ── POSTES ── */
+/* -- POSTES -- */
 .poste-card{background:white;border-radius:14px;padding:13px;margin-bottom:8px;display:flex;gap:12px;align-items:center;cursor:pointer;border:2px solid transparent;transition:all .15s;}
 .poste-card:hover,.poste-card:active{border-color:#185FA5;}
 .poste-icon{font-size:36px;flex-shrink:0;line-height:1;}
@@ -385,7 +385,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .poste-difficulte{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;}
 .poste-difficulte.facile{background:#EAF3DE;color:#3B6D11;}
 .poste-difficulte.moyen{background:#FEF3C7;color:#C9821A;}
-.poste-difficulte.avancé,.poste-difficulte.avance{background:#FBEAF0;color:#993556;}
+.poste-difficulte.avanc�,.poste-difficulte.avance{background:#FBEAF0;color:#993556;}
 .poste-meta-info{font-size:9px;color:#5F5E5A;}
 .poste-video-tag{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#FFE4E1;color:#993556;}
 .poste-desc-preview{font-size:11px;color:#5F5E5A;margin-top:5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
@@ -398,7 +398,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .poste-video-wrap{position:relative;width:100%;max-width:280px;margin:0 auto;aspect-ratio:9/16;border-radius:12px;overflow:hidden;background:#000;}
 .poste-video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
 
-/* ── TOULOUSE ── */
+/* -- TOULOUSE -- */
 .tlse-card{background:white;border-radius:14px;overflow:hidden;margin-bottom:10px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
 .tlse-card:hover,.tlse-card:active{border-color:#185FA5;}
 .tlse-img{width:100%;height:120px;object-fit:cover;display:block;background:#E6F1FB;}
@@ -410,7 +410,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .tlse-soustitre{font-size:11px;color:#5F5E5A;margin-top:2px;}
 .tlse-desc-preview{font-size:11px;color:#5F5E5A;margin-top:8px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
 
-/* ── INSTAGRAM FEED (Actu du club) ── */
+/* -- INSTAGRAM FEED (Actu du club) -- */
 .spi-feed{background:white;border-radius:14px;padding:12px;margin-bottom:10px;}
 .spi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
 .spi-tile{position:relative;aspect-ratio:1/1;overflow:hidden;border-radius:8px;background:#E6F1FB;text-decoration:none;display:block;}
@@ -429,7 +429,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 </head>
 <body>
 
-<!-- ══ QUIZ DÉTECTION PROFIL ══ -->
+<!-- -- QUIZ D�TECTION PROFIL -- -->
 <div id="quiz-wrap" class="quiz-wrap" style="display:none;">
   <div class="quiz-card">
     <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-prog" style="width:33%;"></div></div>
@@ -442,22 +442,22 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <!-- Q1 -->
     <div class="quiz-step on" id="qs1">
       <div class="quiz-header">
-        <div class="quiz-icon">🏐</div>
-        <div class="quiz-title">Votre expérience bénévole ?</div>
-        <div class="quiz-sub">Pour personnaliser votre expérience</div>
+        <div class="quiz-icon">??</div>
+        <div class="quiz-title">Votre exp�rience b�n�vole ?</div>
+        <div class="quiz-sub">Pour personnaliser votre exp�rience</div>
       </div>
       <div class="quiz-options">
         <div class="quiz-opt" onclick="quizSelect(1,'v')">
-          <div class="quiz-opt-icon" style="background:#EDE9FE;">🌱</div>
-          <div><div class="quiz-opt-text">Première fois</div><div class="quiz-opt-sub">Je découvre le bénévolat sportif</div></div>
+          <div class="quiz-opt-icon" style="background:#EDE9FE;">??</div>
+          <div><div class="quiz-opt-text">Premi�re fois</div><div class="quiz-opt-sub">Je d�couvre le b�n�volat sportif</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(1,'h')">
-          <div class="quiz-opt-icon" style="background:#E6F1FB;">⚡</div>
-          <div><div class="quiz-opt-text">Quelques expériences</div><div class="quiz-opt-sub">J'ai déjà participé à des événements</div></div>
+          <div class="quiz-opt-icon" style="background:#E6F1FB;">?</div>
+          <div><div class="quiz-opt-text">Quelques exp�riences</div><div class="quiz-opt-sub">J'ai d�j� particip� � des �v�nements</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(1,'j')">
-          <div class="quiz-opt-icon" style="background:#EAF3DE;">🎯</div>
-          <div><div class="quiz-opt-text">Plusieurs saisons</div><div class="quiz-opt-sub">Je suis un(e) bénévole expérimenté(e)</div></div>
+          <div class="quiz-opt-icon" style="background:#EAF3DE;">??</div>
+          <div><div class="quiz-opt-text">Plusieurs saisons</div><div class="quiz-opt-sub">Je suis un(e) b�n�vole exp�riment�(e)</div></div>
         </div>
       </div>
     </div>
@@ -465,22 +465,22 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <!-- Q2 -->
     <div class="quiz-step" id="qs2">
       <div class="quiz-header">
-        <div class="quiz-icon">💡</div>
+        <div class="quiz-icon">??</div>
         <div class="quiz-title">Ce qui vous motive le plus ?</div>
-        <div class="quiz-sub">Votre style de bénévolat</div>
+        <div class="quiz-sub">Votre style de b�n�volat</div>
       </div>
       <div class="quiz-options">
         <div class="quiz-opt" onclick="quizSelect(2,'v')">
-          <div class="quiz-opt-icon" style="background:#EDE9FE;">🤝</div>
-          <div><div class="quiz-opt-text">Découvrir et rencontrer</div><div class="quiz-opt-sub">Les nouvelles personnes et expériences</div></div>
+          <div class="quiz-opt-icon" style="background:#EDE9FE;">??</div>
+          <div><div class="quiz-opt-text">D�couvrir et rencontrer</div><div class="quiz-opt-sub">Les nouvelles personnes et exp�riences</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(2,'h')">
-          <div class="quiz-opt-icon" style="background:#E6F1FB;">🏆</div>
-          <div><div class="quiz-opt-text">Progresser et gagner</div><div class="quiz-opt-sub">Les défis, la compétition, les récompenses</div></div>
+          <div class="quiz-opt-icon" style="background:#E6F1FB;">??</div>
+          <div><div class="quiz-opt-text">Progresser et gagner</div><div class="quiz-opt-sub">Les d�fis, la comp�tition, les r�compenses</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(2,'j')">
-          <div class="quiz-opt-icon" style="background:#EAF3DE;">💪</div>
-          <div><div class="quiz-opt-text">Être utile et transmettre</div><div class="quiz-opt-sub">Mon expérience au service de l'équipe</div></div>
+          <div class="quiz-opt-icon" style="background:#EAF3DE;">??</div>
+          <div><div class="quiz-opt-text">�tre utile et transmettre</div><div class="quiz-opt-sub">Mon exp�rience au service de l'�quipe</div></div>
         </div>
       </div>
     </div>
@@ -488,36 +488,36 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <!-- Q3 -->
     <div class="quiz-step" id="qs3">
       <div class="quiz-header">
-        <div class="quiz-icon">🎯</div>
-        <div class="quiz-title">Votre façon de travailler ?</div>
-        <div class="quiz-sub">Comment vous préférez opérer</div>
+        <div class="quiz-icon">??</div>
+        <div class="quiz-title">Votre fa�on de travailler ?</div>
+        <div class="quiz-sub">Comment vous pr�f�rez op�rer</div>
       </div>
       <div class="quiz-options">
         <div class="quiz-opt" onclick="quizSelect(3,'v')">
-          <div class="quiz-opt-icon" style="background:#EDE9FE;">🗺️</div>
-          <div><div class="quiz-opt-text">J'ai besoin d'être guidé(e)</div><div class="quiz-opt-sub">Des instructions claires m'aident à être au top</div></div>
+          <div class="quiz-opt-icon" style="background:#EDE9FE;">???</div>
+          <div><div class="quiz-opt-text">J'ai besoin d'�tre guid�(e)</div><div class="quiz-opt-sub">Des instructions claires m'aident � �tre au top</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(3,'h')">
-          <div class="quiz-opt-icon" style="background:#E6F1FB;">📊</div>
-          <div><div class="quiz-opt-text">Je veux tout voir</div><div class="quiz-opt-sub">Stats, points, classement — je gère tout</div></div>
+          <div class="quiz-opt-icon" style="background:#E6F1FB;">??</div>
+          <div><div class="quiz-opt-text">Je veux tout voir</div><div class="quiz-opt-sub">Stats, points, classement � je g�re tout</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(3,'j')">
-          <div class="quiz-opt-icon" style="background:#EAF3DE;">⚡</div>
+          <div class="quiz-opt-icon" style="background:#EAF3DE;">?</div>
           <div><div class="quiz-opt-text">Je vais droit au but</div><div class="quiz-opt-sub">L'essentiel, sans fioritures</div></div>
         </div>
       </div>
     </div>
 
-    <!-- RÉSULTAT -->
+    <!-- R�SULTAT -->
     <div class="quiz-step" id="qs-result">
       <div class="profil-reveal" id="profil-reveal"></div>
-      <button class="btn btn-blue" onclick="saveProfilAndContinue()">Commencer mon expérience →</button>
-      <button class="btn btn-ghost" onclick="showQuizAgain()">← Recommencer</button>
+      <button class="btn btn-blue" onclick="saveProfilAndContinue()">Commencer mon exp�rience ?</button>
+      <button class="btn btn-ghost" onclick="showQuizAgain()">? Recommencer</button>
     </div>
   </div>
 </div>
 
-<!-- ══ APP PRINCIPALE ══ -->
+<!-- -- APP PRINCIPALE -- -->
 <div id="app" style="display:none;">
 
   <!-- TOPBAR -->
@@ -533,61 +533,61 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       </div>
     </div>
     <div class="t-right">
-      <button id="btn-pilote-view" class="btn-pilote" onclick="window.location.href='pilote.html'" style="display:none;">🎯 Vue pilote</button>
-      <button class="btn-logout" onclick="handleLogout()">✕</button>
+      <button id="btn-pilote-view" class="btn-pilote" onclick="window.location.href='pilote.html'" style="display:none;">?? Vue pilote</button>
+      <button class="btn-logout" onclick="handleLogout()">?</button>
     </div>
   </div>
 
   <!-- BOTTOM NAV -->
   <nav class="bnav" id="bnav">
-    <button class="bn on" id="bn-home"     onclick="bSwitch('home')"    ><span class="bn-icon">🏠</span><span class="bn-label">Accueil</span></button>
-    <button class="bn"   id="bn-planning" onclick="bSwitch('planning')"><span class="bn-icon">📅</span><span class="bn-label">Planning</span></button>
-    <button class="bn"   id="bn-points"   onclick="bSwitch('points')"  ><span class="bn-icon">🏆</span><span class="bn-label">Points</span></button>
-    <button class="bn"   id="bn-forum"    onclick="bSwitch('forum')"   ><span class="bn-icon">💬</span><span class="bn-label">Forum</span></button>
-    <button class="bn"   id="bn-reward"   onclick="bSwitch('reward')"  ><span class="bn-icon">🎁</span><span class="bn-label">Cadeaux</span></button>
-    <button class="bn"   id="bn-emploi"   onclick="bSwitch('emploi')"  ><span class="bn-icon">💼</span><span class="bn-label">Emploi</span></button>
-    <button class="bn"   id="bn-profil"   onclick="bSwitch('profil')"  ><span class="bn-icon">👤</span><span class="bn-label">Profil</span></button>
+    <button class="bn on" id="bn-home"     onclick="bSwitch('home')"    ><span class="bn-icon">??</span><span class="bn-label">Accueil</span></button>
+    <button class="bn"   id="bn-planning" onclick="bSwitch('planning')"><span class="bn-icon">??</span><span class="bn-label">Planning</span></button>
+    <button class="bn"   id="bn-points"   onclick="bSwitch('points')"  ><span class="bn-icon">??</span><span class="bn-label">Points</span></button>
+    <button class="bn"   id="bn-forum"    onclick="bSwitch('forum')"   ><span class="bn-icon">??</span><span class="bn-label">Forum</span></button>
+    <button class="bn"   id="bn-reward"   onclick="bSwitch('reward')"  ><span class="bn-icon">??</span><span class="bn-label">Cadeaux</span></button>
+    <button class="bn"   id="bn-emploi"   onclick="bSwitch('emploi')"  ><span class="bn-icon">??</span><span class="bn-label">Emploi</span></button>
+    <button class="bn"   id="bn-profil"   onclick="bSwitch('profil')"  ><span class="bn-icon">??</span><span class="bn-label">Profil</span></button>
   </nav>
 
-  <!-- ── HOME (adaptatif) ── -->
+  <!-- -- HOME (adaptatif) -- -->
   <div class="bscreen on" id="bs-home"></div>
 
-  <!-- ── PLANNING ── -->
+  <!-- -- PLANNING -- -->
   <div class="bscreen" id="bs-planning">
     <div id="planning-alert"></div>
-    <div class="sec">Matchs saison 2026–2027</div>
+    <div class="sec">Matchs saison 2026�2027</div>
     <div id="planning-list"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
   </div>
 
-  <!-- ── POINTS ── -->
+  <!-- -- POINTS -- -->
   <div class="bscreen" id="bs-points">
     <div class="sec">Vos points</div>
     <div id="points-content"></div>
   </div>
 
-  <!-- ── FORUM ── -->
+  <!-- -- FORUM -- -->
   <div class="bscreen" id="bs-forum">
-    <div class="sec">Forum bénévoles</div>
+    <div class="sec">Forum b�n�voles</div>
     <div style="background:white;border-radius:12px;padding:13px;margin-bottom:10px;">
-      <textarea id="post-txt" class="post-textarea" placeholder="Partagez un message avec la communauté..."></textarea>
+      <textarea id="post-txt" class="post-textarea" placeholder="Partagez un message avec la communaut�..."></textarea>
       <button class="btn btn-blue" style="width:100%;padding:10px;margin-top:8px;font-size:12px;" onclick="publishPost()">Publier</button>
     </div>
     <div id="posts-list"></div>
   </div>
 
-  <!-- ── CADEAUX (chantier 6) ── -->
+  <!-- -- CADEAUX (chantier 6) -- -->
   <div class="bscreen" id="bs-reward">
-    <div class="sec">🎁 Cadeaux & récompenses</div>
+    <div class="sec">?? Cadeaux & r�compenses</div>
     <div id="reward-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
   </div>
 
-  <!-- ── EMPLOI (chantier 8) ── -->
+  <!-- -- EMPLOI (chantier 8) -- -->
   <div class="bscreen" id="bs-emploi">
-    <div class="sec">💼 Minute emploi</div>
+    <div class="sec">?? Minute emploi</div>
 
     <!-- CTA : Proposer une annonce -->
     <button class="btn btn-blue" style="width:100%;font-size:13px;margin-bottom:12px;background:linear-gradient(135deg,#185FA5,#0C447C);" onclick="openProposerEmploi()">
-      ✍️ Proposer une annonce
+      ?? Proposer une annonce
     </button>
 
     <!-- Mes propositions (si y en a) -->
@@ -595,65 +595,65 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 
     <div style="display:flex;gap:6px;margin-bottom:12px;">
       <button class="seg-b on" data-emp-filter="tous" onclick="setEmpFilter('tous',this)">Tous</button>
-      <button class="seg-b" data-emp-filter="partenaire" onclick="setEmpFilter('partenaire',this)">🤝 Partenaires</button>
-      <button class="seg-b" data-emp-filter="benevole" onclick="setEmpFilter('benevole',this)">🏐 Bénévoles</button>
+      <button class="seg-b" data-emp-filter="partenaire" onclick="setEmpFilter('partenaire',this)">?? Partenaires</button>
+      <button class="seg-b" data-emp-filter="benevole" onclick="setEmpFilter('benevole',this)">?? B�n�voles</button>
     </div>
     <div id="emploi-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
   </div>
 
-  <!-- ── PROFIL ── -->
+  <!-- -- PROFIL -- -->
   <div class="bscreen" id="bs-profil">
     <div class="sec">Mon profil</div>
     <div id="profil-alert"></div>
 
     <!-- PHOTO DE PROFIL (chantier 4) -->
     <div class="photo-card">
-      <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:4px;">📷 Photo de profil</div>
-      <div style="font-size:11px;color:#5F5E5A;margin-bottom:14px;">Utilisée pour ton accréditation officielle.</div>
+      <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:4px;">?? Photo de profil</div>
+      <div style="font-size:11px;color:#5F5E5A;margin-bottom:14px;">Utilis�e pour ton accr�ditation officielle.</div>
       <div id="photo-card-content"></div>
       <input type="file" id="photo-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="onPhotoSelected(event)">
     </div>
 
     <div style="background:white;border-radius:16px;padding:16px;margin-bottom:10px;">
       <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:12px;">Informations personnelles</div>
-      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;display:block;">Prénom</label><input style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-prenom" type="text"></div>
+      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;display:block;">Pr�nom</label><input style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-prenom" type="text"></div>
       <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;display:block;">Nom</label><input style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-nom" type="text"></div>
-      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;display:block;">Téléphone</label><input style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-tel" type="tel"></div>
+      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;display:block;">T�l�phone</label><input style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-tel" type="tel"></div>
       <button class="btn btn-blue" style="font-size:13px;" onclick="saveProfile()">Sauvegarder</button>
     </div>
 
     <!-- CHANGER PROFIL -->
     <div style="background:white;border-radius:16px;padding:16px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:4px;">Mon profil bénévole</div>
-      <div style="font-size:11px;color:#5F5E5A;margin-bottom:12px;">Personnalise votre expérience dans l'app</div>
+      <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:4px;">Mon profil b�n�vole</div>
+      <div style="font-size:11px;color:#5F5E5A;margin-bottom:12px;">Personnalise votre exp�rience dans l'app</div>
       <div id="current-profil-display"></div>
       <button class="btn btn-blue" style="font-size:12px;margin-top:10px;" onclick="openChangeProfil()">Changer de profil</button>
     </div>
 
-    <!-- ── MON COMPTE / RGPD (livrable 4) ── -->
+    <!-- -- MON COMPTE / RGPD (livrable 4) -- -->
     <div id="account-card-wrap"></div>
   </div>
-  <!-- ── POSTES (chantier découverte) ── -->
+  <!-- -- POSTES (chantier d�couverte) -- -->
   <div class="bscreen" id="bs-postes">
-    <button class="back-btn" onclick="bSwitch('home')">← Retour</button>
-    <div class="sec">📋 Les postes bénévoles</div>
+    <button class="back-btn" onclick="bSwitch('home')">? Retour</button>
+    <div class="sec">?? Les postes b�n�voles</div>
     <div style="font-size:11px;color:rgba(181,212,244,0.6);margin-bottom:12px;line-height:1.5;">
-      Découvre les différentes missions possibles pendant un match. Clique sur un poste pour voir les détails et la vidéo de présentation.
+      D�couvre les diff�rentes missions possibles pendant un match. Clique sur un poste pour voir les d�tails et la vid�o de pr�sentation.
     </div>
     <div id="postes-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
   </div>
 
-  <!-- ── TOULOUSE (chantier découverte) ── -->
+  <!-- -- TOULOUSE (chantier d�couverte) -- -->
   <div class="bscreen" id="bs-toulouse">
-    <button class="back-btn" onclick="bSwitch('home')">← Retour</button>
-    <div class="sec">🌹 Découvrir Toulouse</div>
+    <button class="back-btn" onclick="bSwitch('home')">? Retour</button>
+    <div class="sec">?? D�couvrir Toulouse</div>
     <div style="font-size:11px;color:rgba(181,212,244,0.6);margin-bottom:12px;line-height:1.5;">
-      Bons plans, sorties et vie culturelle dans la ville rose — sélection pour les bénévoles.
+      Bons plans, sorties et vie culturelle dans la ville rose � s�lection pour les b�n�voles.
     </div>
     <div style="display:flex;gap:6px;margin-bottom:12px;">
       <button class="seg-b on" data-tlse-cat="tous" onclick="setToulouseFilter('tous',this)">Tous</button>
-      <button class="seg-b" data-tlse-cat="sortir" onclick="setToulouseFilter('sortir',this)">🌃 Sortir</button>
-      <button class="seg-b" data-tlse-cat="culture" onclick="setToulouseFilter('culture',this)">🎭 Culture</button>
+      <button class="seg-b" data-tlse-cat="sortir" onclick="setToulouseFilter('sortir',this)">?? Sortir</button>
+      <button class="seg-b" data-tlse-cat="culture" onclick="setToulouseFilter('culture',this)">?? Culture</button>
     </div>
     <div id="toulouse-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
   </div>
@@ -663,7 +663,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 <!-- TOAST FLOTTANT -->
 <div class="toast-flot" id="toast-flot"></div>
 
-<!-- MODAL CONFIRMATION UNIFIÉE -->
+<!-- MODAL CONFIRMATION UNIFI�E -->
 <div class="modal-ov" id="modal-confirm" style="display:none;">
   <div class="modal">
     <div id="modal-confirm-icon" style="text-align:center;font-size:42px;margin-bottom:6px;line-height:1;"></div>
@@ -685,16 +685,16 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <!-- Header style PDF -->
     <div class="prop-modal-header">
       <h2>MINUTE EMPLOI</h2>
-      <div class="prop-modal-header-sub">Formulaire de proposition d'annonce — Spacers Toulouse Volley</div>
+      <div class="prop-modal-header-sub">Formulaire de proposition d'annonce � Spacers Toulouse Volley</div>
       <img src="/logo-spacers.png" class="prop-modal-logo" alt="Spacers Toulouse Volley">
     </div>
 
     <div style="font-size:11px;color:#5F5E5A;line-height:1.5;text-align:center;margin-bottom:8px;">
-      Ta proposition sera examinée par un pilote avant publication.
+      Ta proposition sera examin�e par un pilote avant publication.
     </div>
 
     <!-- Section 1 : LE POSTE -->
-    <div class="prop-section-header">1. LE POSTE PROPOSÉ</div>
+    <div class="prop-section-header">1. LE POSTE PROPOS�</div>
 
     <label class="input-label">Titre du poste *</label>
     <input id="prop-titre" class="input-field" placeholder="Cherche graphiste freelance">
@@ -710,7 +710,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
           <option>Alternance</option>
           <option>Freelance</option>
           <option>Saisonnier</option>
-          <option>Bénévolat</option>
+          <option>B�n�volat</option>
         </select>
       </div>
       <div>
@@ -719,13 +719,13 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       </div>
     </div>
 
-    <label class="input-label">Description du poste, missions, profil recherché *</label>
-    <textarea id="prop-desc" class="post-textarea" style="height:100px;" placeholder="Décris l'opportunité, le profil recherché, les détails..."></textarea>
+    <label class="input-label">Description du poste, missions, profil recherch� *</label>
+    <textarea id="prop-desc" class="post-textarea" style="height:100px;" placeholder="D�cris l'opportunit�, le profil recherch�, les d�tails..."></textarea>
 
     <!-- Section 2 : CONTACT -->
     <div class="prop-section-header">2. CONTACT POUR LA CANDIDATURE</div>
 
-    <div style="font-size:10px;color:#5F5E5A;margin-bottom:8px;font-style:italic;">📞 Au moins un contact obligatoire</div>
+    <div style="font-size:10px;color:#5F5E5A;margin-bottom:8px;font-style:italic;">?? Au moins un contact obligatoire</div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
       <div>
@@ -733,7 +733,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
         <input id="prop-contact-email" class="input-field" type="email">
       </div>
       <div>
-        <label class="input-label">Téléphone</label>
+        <label class="input-label">T�l�phone</label>
         <input id="prop-contact-tel" class="input-field" type="tel">
       </div>
     </div>
@@ -742,7 +742,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 
     <!-- Boutons -->
     <div style="display:flex;gap:8px;margin-top:18px;">
-      <button class="btn btn-blue" style="flex:1;font-size:13px;" onclick="soumettreProposition()">📤 Envoyer ma proposition</button>
+      <button class="btn btn-blue" style="flex:1;font-size:13px;" onclick="soumettreProposition()">?? Envoyer ma proposition</button>
       <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="closeProposerEmp()">Annuler</button>
     </div>
 
@@ -752,35 +752,35 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   </div>
 </div>
 
-<!-- MODAL DÉTAIL POSTE -->
+<!-- MODAL D�TAIL POSTE -->
 <div class="modal-ov" id="modal-poste" style="display:none;">
   <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:520px;padding:22px;">
     <div id="modal-poste-content"></div>
   </div>
 </div>
 
-<!-- MODAL DÉTAIL TOULOUSE -->
+<!-- MODAL D�TAIL TOULOUSE -->
 <div class="modal-ov" id="modal-toulouse" style="display:none;">
   <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:520px;padding:22px;">
     <div id="modal-toulouse-content"></div>
   </div>
 </div>
 
-<!-- MODAL CHANGEMENT PROFIL (PRÉNOMS SUPPRIMÉS) -->
+<!-- MODAL CHANGEMENT PROFIL (PR�NOMS SUPPRIM�S) -->
 <div class="modal-ov" id="modal-profil" style="display:none;">
   <div class="modal">
-    <h2>🎭 Changer de profil</h2>
+    <h2>?? Changer de profil</h2>
     <div class="profil-choice" onclick="selectNewProfil('hugo')" id="pc-hugo">
-      <div class="profil-choice-icon">⚡</div>
-      <div><div style="font-size:13px;font-weight:700;color:#0C447C;">Compétiteur</div><div style="font-size:10px;color:#5F5E5A;">Gamification, points, classement</div></div>
+      <div class="profil-choice-icon">?</div>
+      <div><div style="font-size:13px;font-weight:700;color:#0C447C;">Comp�titeur</div><div style="font-size:10px;color:#5F5E5A;">Gamification, points, classement</div></div>
     </div>
     <div class="profil-choice" onclick="selectNewProfil('virginie')" id="pc-virginie">
-      <div class="profil-choice-icon">🌸</div>
-      <div><div style="font-size:13px;font-weight:700;color:#533BB7;">Découverte</div><div style="font-size:10px;color:#5F5E5A;">Accompagnement, référent, FAQ</div></div>
+      <div class="profil-choice-icon">??</div>
+      <div><div style="font-size:13px;font-weight:700;color:#533BB7;">D�couverte</div><div style="font-size:10px;color:#5F5E5A;">Accompagnement, r�f�rent, FAQ</div></div>
     </div>
     <div class="profil-choice" onclick="selectNewProfil('joel')" id="pc-joel">
-      <div class="profil-choice-icon">🎯</div>
-      <div><div style="font-size:13px;font-weight:700;color:#3B6D11;">Expérimenté</div><div style="font-size:10px;color:#5F5E5A;">Interface simple, 3 boutons, référent</div></div>
+      <div class="profil-choice-icon">??</div>
+      <div><div style="font-size:13px;font-weight:700;color:#3B6D11;">Exp�riment�</div><div style="font-size:10px;color:#5F5E5A;">Interface simple, 3 boutons, r�f�rent</div></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:12px;">
       <button class="btn btn-blue" style="flex:1;font-size:13px;" onclick="confirmChangeProfil()">Confirmer</button>
@@ -804,9 +804,9 @@ let newProfilSelected = ''
 // PHOTO state
 let pendingPhotoFile = null
 
-// ─────────────────────────────────────────────────────────────
-// SIGNED URLS — bucket privé (Chantier 11)
-// ─────────────────────────────────────────────────────────────
+// -------------------------------------------------------------
+// SIGNED URLS � bucket priv� (Chantier 11)
+// -------------------------------------------------------------
 const _signedUrlCache = new Map()
 const SIGNED_URL_TTL = 3600
 const SIGNED_URL_REFRESH_MS = 50 * 60 * 1000
@@ -867,9 +867,9 @@ async function getSignedPhotoUrls(paths) {
   return result
 }
 
-// ─────────────────────────────────────────────────
+// -------------------------------------------------
 // EMPLOI / MINUTE EMPLOI (chantier 8)
-// ─────────────────────────────────────────────────
+// -------------------------------------------------
 let empAnnonces = []
 let empFilter = 'tous'
 
@@ -894,7 +894,7 @@ async function loadEmploi() {
     .order('publiee_le', { ascending: false })
 
   if (error) {
-    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : ' + error.message + '</div>'
+    el.innerHTML = '<div class="alert alert-e">? Erreur de chargement : ' + error.message + '</div>'
     return
   }
 
@@ -910,9 +910,9 @@ function renderMesPropositions(list) {
   el.innerHTML = `<div style="font-size:9px;color:rgba(181,212,244,0.4);letter-spacing:1.5px;margin-bottom:6px;">MES PROPOSITIONS</div>` +
     list.map(p => {
       const lbl = {
-        'en_attente': '<span class="histo-statut histo-att">⏳ En attente</span>',
-        'validee': '<span class="histo-statut histo-attr">✓ Publiée</span>',
-        'refusee': '<span class="histo-statut histo-ref">✗ Refusée</span>',
+        'en_attente': '<span class="histo-statut histo-att">? En attente</span>',
+        'validee': '<span class="histo-statut histo-attr">? Publi�e</span>',
+        'refusee': '<span class="histo-statut histo-ref">? Refus�e</span>',
       }[p.statut_validation] || ''
       return `
         <div class="histo-item" style="margin-bottom:6px;">
@@ -937,7 +937,7 @@ function closeProposerEmp() {
 }
 
 async function soumettreProposition() {
-  if (!CP) return showToast('Pas connecté', 'error')
+  if (!CP) return showToast('Pas connect�', 'error')
 
   const titre = document.getElementById('prop-titre').value.trim()
   const desc = document.getElementById('prop-desc').value.trim()
@@ -950,7 +950,7 @@ async function soumettreProposition() {
     return
   }
   if (!email && !tel && !lien) {
-    showToast('Au moins un contact (email, tél ou lien) requis', 'error')
+    showToast('Au moins un contact (email, t�l ou lien) requis', 'error')
     return
   }
 
@@ -975,7 +975,7 @@ async function soumettreProposition() {
     return
   }
   closeProposerEmp()
-  showToast('🎉 Proposition envoyée au pilote !', 'success')
+  showToast('?? Proposition envoy�e au pilote !', 'success')
   loadEmploi()
 }
 
@@ -995,7 +995,7 @@ function renderEmploi() {
     el.innerHTML = `<div style="text-align:center;color:rgba(181,212,244,0.5);padding:40px 20px;font-size:12px;">
       ${empFilter === 'tous'
         ? 'Pas encore d\'annonces en ligne.<br>Reviens plus tard !'
-        : 'Pas d\'annonce dans cette catégorie.'}
+        : 'Pas d\'annonce dans cette cat�gorie.'}
     </div>`
     return
   }
@@ -1003,15 +1003,15 @@ function renderEmploi() {
   el.innerHTML = list.map(a => {
     const isPart = a.type === 'partenaire'
     const logo = isPart && a.partenaire_logo_url
-      ? `<img src="${escapeHtml(a.partenaire_logo_url)}" class="annonce-logo" onerror="this.outerHTML='<div class=\\'annonce-logo-ph\\'>🤝</div>'">`
-      : `<div class="annonce-logo-ph">${isPart ? '🤝' : '🏐'}</div>`
+      ? `<img src="${escapeHtml(a.partenaire_logo_url)}" class="annonce-logo" onerror="this.outerHTML='<div class=\\'annonce-logo-ph\\'>??</div>'">`
+      : `<div class="annonce-logo-ph">${isPart ? '??' : '??'}</div>`
 
     const contactBtns = []
-    if (a.contact_lien) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;" href="${escapeHtml(a.contact_lien)}" target="_blank" rel="noopener">🔗 Postuler</a>`)
-    if (a.contact_email) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;${contactBtns.length?'background:#3B6D11;':''}" href="mailto:${encodeURIComponent(a.contact_email)}">📧 Email</a>`)
+    if (a.contact_lien) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;" href="${escapeHtml(a.contact_lien)}" target="_blank" rel="noopener">?? Postuler</a>`)
+    if (a.contact_email) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;${contactBtns.length?'background:#3B6D11;':''}" href="mailto:${encodeURIComponent(a.contact_email)}">?? Email</a>`)
     if (a.contact_tel) {
       const cleaned = (a.contact_tel || '').replace(/[^\d+]/g, '')
-      contactBtns.push(`<a class="btn btn-ghost" style="font-size:12px;text-decoration:none;display:inline-block;" href="tel:${cleaned}">📞 ${escapeHtml(a.contact_tel)}</a>`)
+      contactBtns.push(`<a class="btn btn-ghost" style="font-size:12px;text-decoration:none;display:inline-block;" href="tel:${cleaned}">?? ${escapeHtml(a.contact_tel)}</a>`)
     }
 
     return `
@@ -1019,17 +1019,17 @@ function renderEmploi() {
         <div class="annonce-meta">
           ${logo}
           <div class="annonce-tags">
-            <span class="annonce-tag ${isPart ? 'partenaire' : 'benevole'}">${isPart ? '🤝 PARTENAIRE' : '🏐 BÉNÉVOLE'}</span>
+            <span class="annonce-tag ${isPart ? 'partenaire' : 'benevole'}">${isPart ? '?? PARTENAIRE' : '?? B�N�VOLE'}</span>
             ${a.type_contrat ? `<span class="annonce-tag contrat">${escapeHtml(a.type_contrat)}</span>` : ''}
           </div>
         </div>
         <div class="annonce-titre">${escapeHtml(a.titre)}</div>
-        ${a.partenaire_nom ? `<div class="annonce-partenaire">📌 ${escapeHtml(a.partenaire_nom)}</div>` : ''}
+        ${a.partenaire_nom ? `<div class="annonce-partenaire">?? ${escapeHtml(a.partenaire_nom)}</div>` : ''}
         <div class="annonce-desc">${escapeHtml(a.description)}</div>
         <div class="annonce-meta-bas">
-          ${a.lieu ? `<span>📍 ${escapeHtml(a.lieu)}</span>` : ''}
-          <span>🕐 ${formatRelativeDate(a.publiee_le)}</span>
-          ${a.contact_nom ? `<span>👤 ${escapeHtml(a.contact_nom)}</span>` : ''}
+          ${a.lieu ? `<span>?? ${escapeHtml(a.lieu)}</span>` : ''}
+          <span>?? ${formatRelativeDate(a.publiee_le)}</span>
+          ${a.contact_nom ? `<span>?? ${escapeHtml(a.contact_nom)}</span>` : ''}
         </div>
         ${contactBtns.length > 0 ? `<div style="display:flex;gap:6px;flex-wrap:wrap;">${contactBtns.join('')}</div>` : ''}
       </div>`
@@ -1052,16 +1052,16 @@ function formatRelativeDate(d) {
   const now = new Date()
   const diffMs = now - date
   const diffH = Math.floor(diffMs / 3600000)
-  if (diffH < 1) return 'À l\'instant'
+  if (diffH < 1) return '� l\'instant'
   if (diffH < 24) return `Il y a ${diffH}h`
   const diffJ = Math.floor(diffH / 24)
   if (diffJ < 7) return `Il y a ${diffJ}j`
   return date.toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'})
 }
 
-// ─────────────────────────────────────────────────
-// MODAL CONFIRMATION UNIFIÉE
-// ─────────────────────────────────────────────────
+// -------------------------------------------------
+// MODAL CONFIRMATION UNIFI�E
+// -------------------------------------------------
 function confirmModal(opts) {
   return new Promise((resolve) => {
     const m = document.getElementById('modal-confirm')
@@ -1133,9 +1133,9 @@ function promptModal(opts) {
   })
 }
 
-// ─────────────────────────────────────────────────
-// POSTES (fiches de poste avec vidéos)
-// ─────────────────────────────────────────────────
+// -------------------------------------------------
+// POSTES (fiches de poste avec vid�os)
+// -------------------------------------------------
 let postesData = null
 
 async function loadPostes() {
@@ -1151,7 +1151,7 @@ async function loadPostes() {
     renderPostesList()
   } catch (err) {
     console.error('[postes]', err)
-    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : '+(err.message||err)+'</div>'
+    el.innerHTML = '<div class="alert alert-e">? Erreur de chargement : '+(err.message||err)+'</div>'
   }
 }
 
@@ -1162,9 +1162,9 @@ function renderPostesList() {
     return
   }
   el.innerHTML = postesData.map(p => {
-    const icone = p.icone || p.emoji || '📋'
+    const icone = p.icone || p.emoji || '??'
     const nomClean = (p.nom || '').replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]+/u, '').trim() || p.nom
-    const diff = (p.difficulte || '').toLowerCase().replace('é','e')
+    const diff = (p.difficulte || '').toLowerCase().replace('�','e')
     const hasVideo = !!p.video_url
     return `
       <div class="poste-card" onclick="openPosteDetail('${p.id}')">
@@ -1173,13 +1173,13 @@ function renderPostesList() {
           <div class="poste-nom">${escapeHtml(nomClean)}</div>
           <div class="poste-meta">
             ${p.difficulte ? `<span class="poste-difficulte ${diff}">${escapeHtml(p.difficulte)}</span>` : ''}
-            <span class="poste-meta-info">⏱️ ~${p.heures_estimees||3}h</span>
-            ${p.benevoles_max_match ? `<span class="poste-meta-info">👥 ${p.benevoles_max_match} bénévoles</span>` : ''}
-            ${hasVideo ? '<span class="poste-video-tag">▶ Vidéo</span>' : ''}
+            <span class="poste-meta-info">?? ~${p.heures_estimees||3}h</span>
+            ${p.benevoles_max_match ? `<span class="poste-meta-info">?? ${p.benevoles_max_match} b�n�voles</span>` : ''}
+            ${hasVideo ? '<span class="poste-video-tag">? Vid�o</span>' : ''}
           </div>
           <div class="poste-desc-preview">${escapeHtml(p.description || '')}</div>
         </div>
-        <div class="poste-arrow">›</div>
+        <div class="poste-arrow">�</div>
       </div>`
   }).join('')
 }
@@ -1199,7 +1199,7 @@ function formatPosteText(text) {
     if (lines.length === 0) return ''
     let html = ''
     lines.forEach((line, i) => {
-      if (i === 0 && /^(▶|🎯|ℹ️)/.test(line)) {
+      if (i === 0 && /^(?|??|??)/.test(line)) {
         html += `<div class="poste-section-title">${escapeHtml(line)}</div>`
       } else {
         html += `<div class="poste-section-line">${escapeHtml(line)}</div>`
@@ -1213,9 +1213,9 @@ function openPosteDetail(id) {
   const p = (postesData || []).find(x => x.id === id)
   if (!p) return
   const videoId = extractYoutubeId(p.video_url)
-  const icone = p.icone || p.emoji || '📋'
+  const icone = p.icone || p.emoji || '??'
   const nomClean = (p.nom || '').replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]+/u, '').trim() || p.nom
-  const diff = (p.difficulte || '').toLowerCase().replace('é','e')
+  const diff = (p.difficulte || '').toLowerCase().replace('�','e')
 
   const html = `
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:10px;">
@@ -1224,29 +1224,29 @@ function openPosteDetail(id) {
         <div style="font-size:18px;font-weight:800;color:#0C447C;margin-top:8px;">${escapeHtml(nomClean)}</div>
         <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
           ${p.difficulte ? `<span class="poste-difficulte ${diff}">${escapeHtml(p.difficulte)}</span>` : ''}
-          <span class="poste-meta-info">⏱️ ~${p.heures_estimees||3}h</span>
-          ${p.benevoles_max_match ? `<span class="poste-meta-info">👥 ${p.benevoles_max_match} bénévoles/match</span>` : ''}
+          <span class="poste-meta-info">?? ~${p.heures_estimees||3}h</span>
+          ${p.benevoles_max_match ? `<span class="poste-meta-info">?? ${p.benevoles_max_match} b�n�voles/match</span>` : ''}
         </div>
       </div>
-      <button onclick="closePosteDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
+      <button onclick="closePosteDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">?</button>
     </div>
     ${p.description ? `<div style="font-size:12px;color:#1a1a18;line-height:1.7;margin-bottom:10px;">${escapeHtml(p.description)}</div>` : ''}
     ${videoId ? `
-      <div class="poste-section-header">▶ VIDÉO DE PRÉSENTATION</div>
+      <div class="poste-section-header">? VID�O DE PR�SENTATION</div>
       <div class="poste-video-wrap">
         <iframe id="poste-video-iframe" src="https://www.youtube.com/embed/${videoId}" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </div>
-    ` : `<div style="background:#F1EFE8;border-radius:10px;padding:12px;text-align:center;color:#5F5E5A;font-size:11px;margin:14px 0;">📹 Vidéo de présentation bientôt disponible</div>`}
+    ` : `<div style="background:#F1EFE8;border-radius:10px;padding:12px;text-align:center;color:#5F5E5A;font-size:11px;margin:14px 0;">?? Vid�o de pr�sentation bient�t disponible</div>`}
     ${p.missions ? `
-      <div class="poste-section-header">📋 MISSIONS</div>
+      <div class="poste-section-header">?? MISSIONS</div>
       <div class="poste-section-body">${formatPosteText(p.missions)}</div>
     ` : ''}
     ${p.conseils ? `
-      <div class="poste-section-header">💡 POINTS CLÉS</div>
+      <div class="poste-section-header">?? POINTS CL�S</div>
       <div class="poste-section-body">${formatPosteText(p.conseils)}</div>
     ` : ''}
     ${p.materiel ? `
-      <div class="poste-section-header">🎒 À APPORTER / PRÉVOIR</div>
+      <div class="poste-section-header">?? � APPORTER / PR�VOIR</div>
       <div class="poste-section-body">${formatPosteText(p.materiel)}</div>
     ` : ''}
     <button class="btn btn-ghost" style="font-size:13px;margin-top:18px;" onclick="closePosteDetail()">Fermer</button>
@@ -1260,9 +1260,9 @@ function closePosteDetail() {
   document.getElementById('modal-poste-content').innerHTML = ''
 }
 
-// ─────────────────────────────────────────────────
+// -------------------------------------------------
 // TOULOUSE (ressources, bons plans)
-// ─────────────────────────────────────────────────
+// -------------------------------------------------
 let toulouseData = null
 let toulouseFilter = 'tous'
 
@@ -1281,7 +1281,7 @@ async function loadToulouse() {
     renderToulouseList()
   } catch (err) {
     console.error('[toulouse]', err)
-    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : '+(err.message||err)+'</div>'
+    el.innerHTML = '<div class="alert alert-e">? Erreur de chargement : '+(err.message||err)+'</div>'
   }
 }
 
@@ -1297,12 +1297,12 @@ function renderToulouseList() {
   let list = toulouseData || []
   if (toulouseFilter !== 'tous') list = list.filter(t => t.categorie === toulouseFilter)
   if (list.length === 0) {
-    el.innerHTML = '<div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Aucune ressource dans cette catégorie pour l\'instant.</div>'
+    el.innerHTML = '<div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Aucune ressource dans cette cat�gorie pour l\'instant.</div>'
     return
   }
   el.innerHTML = list.map(t => {
     const cat = t.categorie || 'autre'
-    const catLabel = cat === 'sortir' ? '🌃 SORTIR' : cat === 'culture' ? '🎭 CULTURE' : cat.toUpperCase()
+    const catLabel = cat === 'sortir' ? '?? SORTIR' : cat === 'culture' ? '?? CULTURE' : cat.toUpperCase()
     return `
       <div class="tlse-card" onclick="openToulouseDetail('${t.id}')">
         ${t.image_url ? `<img class="tlse-img" src="${escapeHtml(t.image_url)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ''}
@@ -1310,7 +1310,7 @@ function renderToulouseList() {
           <span class="tlse-cat tlse-cat-${cat}">${catLabel}</span>
           <div class="tlse-titre">${escapeHtml(t.titre || '')}</div>
           ${t.sous_titre ? `<div class="tlse-soustitre">${escapeHtml(t.sous_titre)}</div>` : ''}
-          ${t.description ? `<div class="tlse-desc-preview">${escapeHtml(t.description.replace(/[*•\n]/g,' ').replace(/\s+/g,' ').trim())}</div>` : ''}
+          ${t.description ? `<div class="tlse-desc-preview">${escapeHtml(t.description.replace(/[*�\n]/g,' ').replace(/\s+/g,' ').trim())}</div>` : ''}
         </div>
       </div>`
   }).join('')
@@ -1322,8 +1322,8 @@ function renderMarkdownLite(text) {
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
   const paras = html.split(/\n\n+/).map(p => {
     const lines = p.split('\n').map(l => l.trim()).filter(Boolean)
-    if (lines.every(l => /^•/.test(l))) {
-      return '<ul style="margin:0;padding-left:18px;">' + lines.map(l => `<li style="margin-bottom:6px;">${l.replace(/^•\s*/,'')}</li>`).join('') + '</ul>'
+    if (lines.every(l => /^�/.test(l))) {
+      return '<ul style="margin:0;padding-left:18px;">' + lines.map(l => `<li style="margin-bottom:6px;">${l.replace(/^�\s*/,'')}</li>`).join('') + '</ul>'
     }
     if (lines.every(l => /^\d+\./.test(l))) {
       return '<ol style="margin:0;padding-left:20px;">' + lines.map(l => `<li style="margin-bottom:6px;">${l.replace(/^\d+\.\s*/,'')}</li>`).join('') + '</ol>'
@@ -1337,7 +1337,7 @@ function openToulouseDetail(id) {
   const t = (toulouseData || []).find(x => x.id === id)
   if (!t) return
   const cat = t.categorie || 'autre'
-  const catLabel = cat === 'sortir' ? '🌃 SORTIR' : cat === 'culture' ? '🎭 CULTURE' : cat.toUpperCase()
+  const catLabel = cat === 'sortir' ? '?? SORTIR' : cat === 'culture' ? '?? CULTURE' : cat.toUpperCase()
   const html = `
     ${t.image_url ? `<img src="${escapeHtml(t.image_url)}" style="width:calc(100% + 44px);margin:-22px -22px 14px -22px;height:160px;object-fit:cover;display:block;" referrerpolicy="no-referrer">` : ''}
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:10px;">
@@ -1346,10 +1346,10 @@ function openToulouseDetail(id) {
         <div style="font-size:18px;font-weight:800;color:#0C447C;margin-top:8px;line-height:1.3;">${escapeHtml(t.titre || '')}</div>
         ${t.sous_titre ? `<div style="font-size:12px;color:#5F5E5A;margin-top:4px;">${escapeHtml(t.sous_titre)}</div>` : ''}
       </div>
-      <button onclick="closeToulouseDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
+      <button onclick="closeToulouseDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">?</button>
     </div>
     <div style="font-size:12px;color:#1a1a18;line-height:1.7;">${renderMarkdownLite(t.description || '')}</div>
-    ${t.lien_externe ? `<a class="btn btn-blue" style="display:block;text-align:center;text-decoration:none;font-size:13px;margin-top:14px;" href="${escapeHtml(t.lien_externe)}" target="_blank" rel="noopener">🔗 Plus d'infos</a>` : ''}
+    ${t.lien_externe ? `<a class="btn btn-blue" style="display:block;text-align:center;text-decoration:none;font-size:13px;margin-top:14px;" href="${escapeHtml(t.lien_externe)}" target="_blank" rel="noopener">?? Plus d'infos</a>` : ''}
     <button class="btn btn-ghost" style="font-size:13px;" onclick="closeToulouseDetail()">Fermer</button>
   `
   document.getElementById('modal-toulouse-content').innerHTML = html
@@ -1360,20 +1360,20 @@ function closeToulouseDetail() {
   document.getElementById('modal-toulouse').style.display = 'none'
 }
 
-// ─────────────────────────────────────────────────
+// -------------------------------------------------
 // INSTAGRAM FEED (Actu du club)
-// ─────────────────────────────────────────────────
+// -------------------------------------------------
 const SPI_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
 const SPI_CARO = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="16" height="16" rx="2"/><path d="M22 6v14a2 2 0 0 1-2 2H6"/></svg>'
 
 function renderInstaFeed() {
   return `
-    <div class="sec">📸 Actu du club</div>
+    <div class="sec">?? Actu du club</div>
     <div class="spi-feed">
       <div class="spi-grid" id="spi-grid">
         ${'<div class="spi-tile spi-skel"></div>'.repeat(6)}
       </div>
-      <a class="spi-more" href="https://instagram.com/spacerstoulouse" target="_blank" rel="noopener">Voir plus sur @spacerstoulouse →</a>
+      <a class="spi-more" href="https://instagram.com/spacerstoulouse" target="_blank" rel="noopener">Voir plus sur @spacerstoulouse ?</a>
     </div>`
 }
 
@@ -1408,7 +1408,7 @@ async function loadInstaFeed() {
   }
 }
 
-// ── INIT ─────────────────────────────────────────────────────
+// -- INIT -----------------------------------------------------
 async function init() {
   const { data: { session } } = await sb.auth.getSession()
   if (!session) { window.location.href = 'index.html'; return }
@@ -1423,7 +1423,7 @@ async function init() {
   }
 }
 
-// ── QUIZ ─────────────────────────────────────────────────────
+// -- QUIZ -----------------------------------------------------
 function quizSelect(step, choice) {
   quizScores[choice]++
   document.querySelectorAll(`#qs${step} .quiz-opt`).forEach(o => o.classList.remove('selected'))
@@ -1455,29 +1455,29 @@ function showQuizAgain() {
   })
 }
 
-// ─── RÉSULTAT QUIZ : prénoms supprimés des libellés affichés ───
+// --- R�SULTAT QUIZ : pr�noms supprim�s des libell�s affich�s ---
 function showProfilResult() {
   const configs = {
     hugo: {
-      icon:'⚡', bg:'linear-gradient(135deg,#E6F1FB,#B5D4F4)',
-      tag:'PROFIL COMPÉTITEUR', tagBg:'#E6F1FB', tagColor:'#0C447C',
-      name:'Compétiteur', emoji:'🏆',
-      desc:'Vous adorez les défis et la compétition ! Votre dashboard met en avant vos points, votre classement et vos badges. Chaque match est une nouvelle opportunité de progresser.',
-      traits:['⚡ Gamification complète activée','🏆 Classement en temps réel','🎯 Défis et badges personnalisés','📊 Stats détaillées']
+      icon:'?', bg:'linear-gradient(135deg,#E6F1FB,#B5D4F4)',
+      tag:'PROFIL COMP�TITEUR', tagBg:'#E6F1FB', tagColor:'#0C447C',
+      name:'Comp�titeur', emoji:'??',
+      desc:'Vous adorez les d�fis et la comp�tition ! Votre dashboard met en avant vos points, votre classement et vos badges. Chaque match est une nouvelle opportunit� de progresser.',
+      traits:['? Gamification compl�te activ�e','?? Classement en temps r�el','?? D�fis et badges personnalis�s','?? Stats d�taill�es']
     },
     virginie: {
-      icon:'🌸', bg:'linear-gradient(135deg,#EDE9FE,#DDD6FE)',
-      tag:'PROFIL DÉCOUVERTE', tagBg:'#EDE9FE', tagColor:'#533BB7',
-      name:'Découverte', emoji:'🤝',
-      desc:'Bienvenue dans l\'aventure ! Un référent va vous être assigné pour vous guider à chaque étape. Votre dashboard est pensé pour vous accompagner en douceur.',
-      traits:['🤝 Référent assigné automatiquement','📖 Guide pas à pas intégré','💡 FAQ pratique accessible','💜 Interface douce et rassurante']
+      icon:'??', bg:'linear-gradient(135deg,#EDE9FE,#DDD6FE)',
+      tag:'PROFIL D�COUVERTE', tagBg:'#EDE9FE', tagColor:'#533BB7',
+      name:'D�couverte', emoji:'??',
+      desc:'Bienvenue dans l\'aventure ! Un r�f�rent va vous �tre assign� pour vous guider � chaque �tape. Votre dashboard est pens� pour vous accompagner en douceur.',
+      traits:['?? R�f�rent assign� automatiquement','?? Guide pas � pas int�gr�','?? FAQ pratique accessible','?? Interface douce et rassurante']
     },
     joel: {
-      icon:'🎯', bg:'linear-gradient(135deg,#EAF3DE,#C0DD97)',
-      tag:'PROFIL EXPÉRIMENTÉ', tagBg:'#EAF3DE', tagColor:'#3B6D11',
-      name:'Expérimenté', emoji:'💪',
-      desc:'Vous connaissez le terrain ! Votre interface est épurée avec les 3 boutons essentiels. Vous pouvez aussi partager votre savoir-faire avec les nouveaux bénévoles.',
-      traits:['⚡ Interface 3 boutons streamlinée','📋 Planning & dispos en 1 tap','📝 Section "Transmettre" activée','🏅 Rôle référent reconnu']
+      icon:'??', bg:'linear-gradient(135deg,#EAF3DE,#C0DD97)',
+      tag:'PROFIL EXP�RIMENT�', tagBg:'#EAF3DE', tagColor:'#3B6D11',
+      name:'Exp�riment�', emoji:'??',
+      desc:'Vous connaissez le terrain ! Votre interface est �pur�e avec les 3 boutons essentiels. Vous pouvez aussi partager votre savoir-faire avec les nouveaux b�n�voles.',
+      traits:['? Interface 3 boutons streamlin�e','?? Planning & dispos en 1 tap','?? Section "Transmettre" activ�e','?? R�le r�f�rent reconnu']
     }
   }
   const c = configs[detectedProfil]
@@ -1489,10 +1489,10 @@ function showProfilResult() {
     <span class="profil-tag" style="background:${c.tagBg};color:${c.tagColor};">${c.tag}</span>
     <div class="profil-name">${c.emoji} ${c.name}</div>
     <p class="profil-desc">${c.desc}</p>
-    <div class="profil-traits">${c.traits.map(t=>`<div class="trait">✓ <span>${t.substring(2)}</span></div>`).join('')}</div>`
+    <div class="profil-traits">${c.traits.map(t=>`<div class="trait">? <span>${t.substring(2)}</span></div>`).join('')}</div>`
 }
 
-// ── PATCH F04 : passe par la RPC update_my_profile ──
+// -- PATCH F04 : passe par la RPC update_my_profile --
 async function saveProfilAndContinue() {
   localStorage.setItem('quiz_done_'+CU.id, '1')
   const { error } = await sb.rpc('update_my_profile', { p_profil_type: detectedProfil })
@@ -1502,7 +1502,7 @@ async function saveProfilAndContinue() {
   showApp(CP)
 }
 
-// ── APP ───────────────────────────────────────────────────────
+// -- APP -------------------------------------------------------
 function showApp(p) {
   document.getElementById('app').style.display = 'block'
   renderTopbar(p)
@@ -1514,9 +1514,9 @@ function showApp(p) {
 function renderTopbar(p) {
   const name = ((p.prenom||'')+' '+(p.nom||'')).trim() || CU.email
   const profilCfg = {
-    hugo:    {label:'COMPÉTITEUR', bg:'#E6F1FB', color:'#0C447C'},
-    virginie:{label:'DÉCOUVERTE',  bg:'#EDE9FE', color:'#533BB7'},
-    joel:    {label:'EXPÉRIMENTÉ', bg:'#EAF3DE', color:'#3B6D11'},
+    hugo:    {label:'COMP�TITEUR', bg:'#E6F1FB', color:'#0C447C'},
+    virginie:{label:'D�COUVERTE',  bg:'#EDE9FE', color:'#533BB7'},
+    joel:    {label:'EXP�RIMENT�', bg:'#EAF3DE', color:'#3B6D11'},
   }
   const cfg = profilCfg[p.profil_type||'hugo']
   document.getElementById('t-name').textContent = name
@@ -1546,7 +1546,7 @@ function renderTopbar(p) {
   }
 }
 
-// ── HOME ADAPTATIF ────────────────────────────────────────────
+// -- HOME ADAPTATIF --------------------------------------------
 function renderHomeForProfil(p) {
   const home = document.getElementById('bs-home')
   const profil = p.profil_type || 'hugo'
@@ -1564,7 +1564,7 @@ function renderHugoHome(el, p, pts, niveau, pct) {
     <div class="hugo-hero">
       <div style="font-size:9px;color:rgba(245,200,66,0.5);letter-spacing:2px;margin-bottom:3px;">VOS POINTS SAISON</div>
       <div class="hugo-pts">${pts}</div>
-      <div class="hugo-level">${niveau==='Or'?'🥇':niveau==='Argent'?'🥈':'🥉'} Niveau ${niveau}</div>
+      <div class="hugo-level">${niveau==='Or'?'??':niveau==='Argent'?'??':'??'} Niveau ${niveau}</div>
       <div class="hugo-prog"><div class="hugo-fill" style="width:${pct}%;"></div></div>
       <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(181,212,244,0.4);">
         <span>${p.matchs_joues||0} matchs</span>
@@ -1572,9 +1572,9 @@ function renderHugoHome(el, p, pts, niveau, pct) {
       </div>
     </div>
     <div class="defi-card">
-      <div class="defi-title">🎯 Défis en cours</div>
+      <div class="defi-title">?? D�fis en cours</div>
       <div class="defi-item">
-        <div style="font-size:11px;color:white;flex:1;">5 matchs consécutifs</div>
+        <div style="font-size:11px;color:white;flex:1;">5 matchs cons�cutifs</div>
         <div class="defi-prog"><div class="defi-prog-fill" style="width:${Math.min(((p.matchs_joues||0)/5)*100,100)}%;"></div></div>
         <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-left:8px;">${p.matchs_joues||0}/5</div>
       </div>
@@ -1586,12 +1586,12 @@ function renderHugoHome(el, p, pts, niveau, pct) {
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <div style="background:white;border-radius:14px;padding:13px;cursor:pointer;" onclick="bSwitch('planning')">
-        <div style="font-size:22px;margin-bottom:5px;">📅</div>
+        <div style="font-size:22px;margin-bottom:5px;">??</div>
         <div style="font-size:12px;font-weight:700;color:#0C447C;">Planning</div>
         <div style="font-size:10px;color:#5F5E5A;">Matchs ouverts</div>
       </div>
       <div style="background:white;border-radius:14px;padding:13px;cursor:pointer;" onclick="bSwitch('points')">
-        <div style="font-size:22px;margin-bottom:5px;">🏆</div>
+        <div style="font-size:22px;margin-bottom:5px;">??</div>
         <div style="font-size:12px;font-weight:700;color:#0C447C;">Classement</div>
         <div style="font-size:10px;color:#185FA5;font-weight:600;">Voir mon rang</div>
       </div>
@@ -1603,45 +1603,45 @@ function renderHugoHome(el, p, pts, niveau, pct) {
 
 function renderVirginieHome(el, p) {
   const etapes = [
-    {done:true,            txt:'Inscription validée ✓'},
-    {done:true,            txt:'Compte créé et email reçu ✓'},
+    {done:true,            txt:'Inscription valid�e ?'},
+    {done:true,            txt:'Compte cr�� et email re�u ?'},
     {done:!!p.photo_path,  txt:'Ajouter votre photo de profil'},
-    {done:false,           txt:'Répondre au premier match'},
-    {done:false,           txt:'Découvrir votre fiche de poste'},
+    {done:false,           txt:'R�pondre au premier match'},
+    {done:false,           txt:'D�couvrir votre fiche de poste'},
   ]
 
   el.innerHTML = `
     <div class="bienvenue-card">
-      <div style="font-size:20px;margin-bottom:6px;">👋</div>
+      <div style="font-size:20px;margin-bottom:6px;">??</div>
       <div style="font-size:16px;font-weight:800;color:#533BB7;">Bonjour ${p.prenom||''} !</div>
-      <div style="font-size:12px;color:#6D5DAA;margin-top:4px;line-height:1.6;">Vous faites partie des Spacers — voici comment tout se passe ici.</div>
+      <div style="font-size:12px;color:#6D5DAA;margin-top:4px;line-height:1.6;">Vous faites partie des Spacers � voici comment tout se passe ici.</div>
     </div>
 
     <div class="referent-card">
-      <div class="ref-av">👩</div>
+      <div class="ref-av">??</div>
       <div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:3px;">VOTRE RÉFÉRENTE</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:3px;">VOTRE R�F�RENTE</div>
         <div style="font-size:15px;font-weight:800;color:white;">Marie D.</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">3 saisons · Spécialité : Scan Entrée</div>
-        <a href="https://chat.whatsapp.com/JZBB5746965BqiHlgFBPJS" target="_blank" style="display:inline-block;margin-top:8px;background:rgba(255,255,255,0.15);color:white;border-radius:50px;padding:5px 12px;font-size:10px;font-weight:700;text-decoration:none;">💬 Contacter sur WhatsApp →</a>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">3 saisons � Sp�cialit� : Scan Entr�e</div>
+        <a href="https://chat.whatsapp.com/JZBB5746965BqiHlgFBPJS" target="_blank" style="display:inline-block;margin-top:8px;background:rgba(255,255,255,0.15);color:white;border-radius:50px;padding:5px 12px;font-size:10px;font-weight:700;text-decoration:none;">?? Contacter sur WhatsApp ?</a>
       </div>
     </div>
 
-    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:10px 0 7px;">VOS PREMIÈRES ÉTAPES</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:10px 0 7px;">VOS PREMI�RES �TAPES</div>
     <div style="background:white;border-radius:14px;padding:13px;margin-bottom:10px;">
       ${etapes.map(e=>`
         <div class="etape-item">
-          <div class="etape-num ${e.done?'etape-done':''}">${e.done?'✓':'→'}</div>
+          <div class="etape-num ${e.done?'etape-done':''}">${e.done?'?':'?'}</div>
           <div style="font-size:12px;color:${e.done?'#5F5E5A':'#1a1a18'};font-weight:${e.done?'400':'600'};${e.done?'text-decoration:line-through;':''}text-decoration-color:#C0DD97;">${e.txt}</div>
         </div>`).join('')}
     </div>
 
-    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:10px 0 7px;">❓ FAQ RAPIDE</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:10px 0 7px;">? FAQ RAPIDE</div>
     ${[
-      {q:'Comment m\'inscrire à un match ?', a:'Dans l\'onglet Planning → cliquez "Je suis disponible" sur le match souhaité. Le pilote confirmera votre affectation.'},
-      {q:'Que dois-je apporter le jour J ?', a:'Rien de spécial ! Arrivez 30 min avant le match. Clément vous remettra votre accréditation à l\'entrée.'},
-      {q:'Je suis disponible mais finalement non ?', a:'Revenez dans Planning → cliquez "Indisponible". Prévenez le plus tôt possible, idéalement avant J-3.'},
-      {q:'Comment gagner des points ?', a:'50 pts par match + 20 pts ponctualité. Les points permettent de débloquer des remises boutique et des avantages exclusifs.'},
+      {q:'Comment m\'inscrire � un match ?', a:'Dans l\'onglet Planning ? cliquez "Je suis disponible" sur le match souhait�. Le pilote confirmera votre affectation.'},
+      {q:'Que dois-je apporter le jour J ?', a:'Rien de sp�cial ! Arrivez 30 min avant le match. Cl�ment vous remettra votre accr�ditation � l\'entr�e.'},
+      {q:'Je suis disponible mais finalement non ?', a:'Revenez dans Planning ? cliquez "Indisponible". Pr�venez le plus t�t possible, id�alement avant J-3.'},
+      {q:'Comment gagner des points ?', a:'50 pts par match + 20 pts ponctualit�. Les points permettent de d�bloquer des remises boutique et des avantages exclusifs.'},
     ].map(f=>`
       <div class="faq-item" onclick="toggleFaq(this)">
         <div class="faq-q">${f.q} <span>+</span></div>
@@ -1655,25 +1655,25 @@ function renderVirginieHome(el, p) {
 function renderJoelHome(el, p, pts) {
   el.innerHTML = `
     <div class="joel-hero">
-      <div style="font-size:10px;color:rgba(192,221,151,0.6);letter-spacing:2px;margin-bottom:3px;">${p.role==='referent'||p.role==='pilote'||p.role==='admin'?'🏅 RÉFÉRENT OFFICIEL':'BÉNÉVOLE EXPÉRIMENTÉ'}</div>
+      <div style="font-size:10px;color:rgba(192,221,151,0.6);letter-spacing:2px;margin-bottom:3px;">${p.role==='referent'||p.role==='pilote'||p.role==='admin'?'?? R�F�RENT OFFICIEL':'B�N�VOLE EXP�RIMENT�'}</div>
       <div style="font-size:18px;font-weight:800;color:white;margin-bottom:4px;">${p.prenom||''} ${p.nom||''}</div>
-      <div style="font-size:12px;color:rgba(192,221,151,0.7);">${p.matchs_joues||0} matchs · ${pts} pts · ${p.niveau||'Bronze'}</div>
+      <div style="font-size:12px;color:rgba(192,221,151,0.7);">${p.matchs_joues||0} matchs � ${pts} pts � ${p.niveau||'Bronze'}</div>
     </div>
 
     <div class="joel-btn" onclick="bSwitch('planning')">
-      <div class="joel-btn-icon" style="background:#E6F1FB;">📅</div>
-      <div><div class="joel-btn-title">Planning & Disponibilités</div><div class="joel-btn-sub">Consulter et répondre aux matchs</div></div>
-      <div style="font-size:18px;color:#D3D1C7;">›</div>
+      <div class="joel-btn-icon" style="background:#E6F1FB;">??</div>
+      <div><div class="joel-btn-title">Planning & Disponibilit�s</div><div class="joel-btn-sub">Consulter et r�pondre aux matchs</div></div>
+      <div style="font-size:18px;color:#D3D1C7;">�</div>
     </div>
     <div class="joel-btn" onclick="bSwitch('points')">
-      <div class="joel-btn-icon" style="background:#EAF3DE;">🏆</div>
+      <div class="joel-btn-icon" style="background:#EAF3DE;">??</div>
       <div><div class="joel-btn-title">Points & Badges</div><div class="joel-btn-sub">${pts} pts cette saison</div></div>
-      <div style="font-size:18px;color:#D3D1C7;">›</div>
+      <div style="font-size:18px;color:#D3D1C7;">�</div>
     </div>
     <div class="joel-btn" onclick="bSwitch('profil')">
-      <div class="joel-btn-icon" style="background:#F1EFE8;">👤</div>
-      <div><div class="joel-btn-title">Mon profil</div><div class="joel-btn-sub">Infos et accréditation</div></div>
-      <div style="font-size:18px;color:#D3D1C7;">›</div>
+      <div class="joel-btn-icon" style="background:#F1EFE8;">??</div>
+      <div><div class="joel-btn-title">Mon profil</div><div class="joel-btn-sub">Infos et accr�ditation</div></div>
+      <div style="font-size:18px;color:#D3D1C7;">�</div>
     </div>
 
     ${renderDecouverteSection()}
@@ -1683,17 +1683,17 @@ function renderJoelHome(el, p, pts) {
 
 function renderDecouverteSection() {
   return `
-    <div class="sec">🔍 Découverte</div>
+    <div class="sec">?? D�couverte</div>
     <div class="decouv-grid">
       <div class="decouv-card" onclick="bSwitch('postes')">
-        <div class="decouv-icon">📋</div>
+        <div class="decouv-icon">??</div>
         <div class="decouv-title">Les postes</div>
-        <div class="decouv-sub">8 fiches détaillées</div>
+        <div class="decouv-sub">8 fiches d�taill�es</div>
       </div>
       <div class="decouv-card" onclick="bSwitch('toulouse')">
-        <div class="decouv-icon">🌹</div>
+        <div class="decouv-icon">??</div>
         <div class="decouv-title">Toulouse</div>
-        <div class="decouv-sub">Bons plans bénévoles</div>
+        <div class="decouv-sub">Bons plans b�n�voles</div>
       </div>
     </div>`
 }
@@ -1707,24 +1707,24 @@ function renderSuggestionSection(profilType) {
 
   return `
     <div class="transmettre-card" style="background:${cfg.bg};">
-      <div style="font-size:13px;font-weight:700;color:white;margin-bottom:6px;">💡 Améliorer l'expérience bénévole</div>
-      <div style="font-size:11px;color:${cfg.sub};margin-bottom:10px;line-height:1.6;">Partage tes suggestions, retours, idées pour améliorer le club.</div>
+      <div style="font-size:13px;font-weight:700;color:white;margin-bottom:6px;">?? Am�liorer l'exp�rience b�n�vole</div>
+      <div style="font-size:11px;color:${cfg.sub};margin-bottom:10px;line-height:1.6;">Partage tes suggestions, retours, id�es pour am�liorer le club.</div>
       <select id="sugg-tag" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:9px 10px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:8px;cursor:pointer;">
-        <option value="jour_match" style="color:#1a1a18;">📅 Jour de match</option>
-        <option value="hors_match" style="color:#1a1a18;">🏠 Hors-match</option>
-        <option value="accueil" style="color:#1a1a18;">👋 Accueil bénévoles</option>
-        <option value="application" style="color:#1a1a18;">📱 Application</option>
-        <option value="autre" style="color:#1a1a18;">💭 Autre</option>
+        <option value="jour_match" style="color:#1a1a18;">?? Jour de match</option>
+        <option value="hors_match" style="color:#1a1a18;">?? Hors-match</option>
+        <option value="accueil" style="color:#1a1a18;">?? Accueil b�n�voles</option>
+        <option value="application" style="color:#1a1a18;">?? Application</option>
+        <option value="autre" style="color:#1a1a18;">?? Autre</option>
       </select>
-      <textarea class="note-area" id="sugg-txt" placeholder="Suggestion, retour, idée d'amélioration..."></textarea>
+      <textarea class="note-area" id="sugg-txt" placeholder="Suggestion, retour, id�e d'am�lioration..."></textarea>
       <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;">
         <label style="display:flex;align-items:center;gap:6px;color:white;font-size:11px;cursor:pointer;">
           <input type="checkbox" id="cb-forum" checked style="cursor:pointer;width:15px;height:15px;accent-color:#185FA5;">
-          💬 Visible par tous
+          ?? Visible par tous
         </label>
         <label style="display:flex;align-items:center;gap:6px;color:white;font-size:11px;cursor:pointer;">
           <input type="checkbox" id="cb-pilotes" style="cursor:pointer;width:15px;height:15px;accent-color:#185FA5;">
-          🎯 Privé pilotes
+          ?? Priv� pilotes
         </label>
       </div>
       <button class="btn btn-blue" style="font-size:12px;margin-top:10px;" onclick="saveSuggestion()">Partager</button>
@@ -1736,40 +1736,40 @@ function toggleFaq(el) {
   const icon = el.querySelector('.faq-q span')
   const isOpen = ans.classList.contains('on')
   document.querySelectorAll('.faq-a.on').forEach(a=>{a.classList.remove('on');a.closest('.faq-item').querySelector('span').textContent='+'})
-  if (!isOpen) { ans.classList.add('on'); icon.textContent = '−' }
+  if (!isOpen) { ans.classList.add('on'); icon.textContent = '-' }
 }
 
-// ── PLANNING ─────────────────────────────────────────────────
+// -- PLANNING -------------------------------------------------
 async function loadPlanning() {
   const el = document.getElementById('planning-list')
   const { data: matchs } = await sb.from('matchs').select('*').order('date_match',{ascending:true})
-  if (!matchs||matchs.length===0){el.innerHTML='<div style="text-align:center;color:rgba(181,212,244,0.4);padding:30px;font-size:12px;">Aucun match programmé pour l\'instant.</div>';return}
+  if (!matchs||matchs.length===0){el.innerHTML='<div style="text-align:center;color:rgba(181,212,244,0.4);padding:30px;font-size:12px;">Aucun match programm� pour l\'instant.</div>';return}
   const { data: ins } = await sb.from('inscriptions').select('match_id,statut').eq('benevole_id',CU.id)
   const insMap={}; if(ins) ins.forEach(i=>insMap[i.match_id]=i.statut)
   el.innerHTML = matchs.map(m=>`
     <div class="match-item">
       <div class="match-vs">Spacers vs ${m.adversaire}</div>
-      <div class="match-info">📅 ${formatDate(m.date_match)} · ${m.heure||''} · ${m.lieu||'Palais des Sports'}</div>
+      <div class="match-info">?? ${formatDate(m.date_match)} � ${m.heure||''} � ${m.lieu||'Palais des Sports'}</div>
       ${m.statut_inscriptions==='ouvert'
         ? insMap[m.id]
-          ? `<span class="s-dispo">${insMap[m.id]==='disponible'?'✓ Disponible':'✗ Indisponible'}</span>`
-          : `<span class="s-open">✅ Ouvert</span>
+          ? `<span class="s-dispo">${insMap[m.id]==='disponible'?'? Disponible':'? Indisponible'}</span>`
+          : `<span class="s-open">? Ouvert</span>
              <div class="match-actions">
-               <button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Dispo</button>
-               <button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">👎 Indispo</button>
+               <button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">?? Dispo</button>
+               <button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">?? Indispo</button>
              </div>`
-        : `<span class="s-closed">Fermé</span>`}
+        : `<span class="s-closed">Ferm�</span>`}
     </div>`).join('')
 }
 
 async function setDispo(matchId,statut,btn) {
   btn.textContent='...';btn.disabled=true
   const{error}=await sb.from('inscriptions').upsert({benevole_id:CU.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'})
-  if(!error){btn.textContent=statut==='disponible'?'✓':'✗';btn.style.background=statut==='disponible'?'#3B6D11':'#888';setTimeout(loadPlanning,800)}
+  if(!error){btn.textContent=statut==='disponible'?'?':'?';btn.style.background=statut==='disponible'?'#3B6D11':'#888';setTimeout(loadPlanning,800)}
   else{btn.textContent='Err';btn.disabled=false}
 }
 
-// ── POINTS ───────────────────────────────────────────────────
+// -- POINTS ---------------------------------------------------
 function loadPoints() {
   if (!CP) return
   const p=CP, pts=p.points_total||0, niveau=p.niveau||'Bronze'
@@ -1777,7 +1777,7 @@ function loadPoints() {
   document.getElementById('points-content').innerHTML=`
     <div style="background:linear-gradient(135deg,#1a1a18,#0C447C);border-radius:16px;padding:18px;margin-bottom:12px;">
       <div style="font-size:36px;font-weight:800;color:#F5C842;font-family:monospace;">${pts}</div>
-      <div style="font-size:13px;font-weight:700;color:white;margin-top:3px;">${niveau==='Bronze'?'🥉':niveau==='Argent'?'🥈':'🥇'} ${niveau}</div>
+      <div style="font-size:13px;font-weight:700;color:white;margin-top:3px;">${niveau==='Bronze'?'??':niveau==='Argent'?'??':'??'} ${niveau}</div>
       <div style="height:7px;background:rgba(255,255,255,0.1);border-radius:4px;margin:10px 0 4px;overflow:hidden;">
         <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#C9821A,#F5C842);border-radius:4px;"></div>
       </div>
@@ -1785,7 +1785,7 @@ function loadPoints() {
     </div>
     <div style="background:white;border-radius:12px;padding:13px;">
       <div style="font-size:12px;font-weight:700;color:#0C447C;margin-bottom:10px;">Comment gagner des points</div>
-      ${[['📅','Présence confirmée','+50'],['⏱️','Ponctualité','+20'],['🏅','Badge 5 matchs','+100'],['🎂','Anniversaire','+30'],['👥','Parrainage','+50']].map(([i,l,v])=>`
+      ${[['??','Pr�sence confirm�e','+50'],['??','Ponctualit�','+20'],['??','Badge 5 matchs','+100'],['??','Anniversaire','+30'],['??','Parrainage','+50']].map(([i,l,v])=>`
       <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #F1EFE8;font-size:12px;">
         <div style="display:flex;gap:7px;align-items:center;"><span>${i}</span><span style="color:#5F5E5A;">${l}</span></div>
         <strong style="color:#185FA5;">${v} pts</strong>
@@ -1793,8 +1793,8 @@ function loadPoints() {
     </div>`
 }
 
-// ── FORUM ────────────────────────────────────────────────────
-// PATCH F01 : embed remplacé par requête séparée sur benevoles_public
+// -- FORUM ----------------------------------------------------
+// PATCH F01 : embed remplac� par requ�te s�par�e sur benevoles_public
 async function loadPosts() {
   const el = document.getElementById('posts-list')
   const { data: posts } = await sb.from('posts')
@@ -1803,7 +1803,7 @@ async function loadPosts() {
     .limit(20)
 
   if (!posts || posts.length === 0) {
-    el.innerHTML = '<div style="text-align:center;color:#5F5E5A;padding:20px;font-size:12px;">Soyez le premier à poster !</div>'
+    el.innerHTML = '<div style="text-align:center;color:#5F5E5A;padding:20px;font-size:12px;">Soyez le premier � poster !</div>'
     return
   }
 
@@ -1830,13 +1830,13 @@ async function loadPosts() {
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
         ${photoUrl
           ? `<img src="${photoUrl}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid #B5D4F4;">`
-          : `<div style="width:28px;height:28px;border-radius:50%;background:${ptBg};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${ptC};">${((p.benevoles?.prenom||'?')[0]+(p.benevoles?.nom||'?')[0]).toUpperCase()}</div>`}
+          : `<div style="width:28px;height:28px;border-radius:50%;background:${ptBg};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${ptC};">${escapeHtml(((p.benevoles?.prenom||'?')[0]+(p.benevoles?.nom||'?')[0]).toUpperCase())}</div>`}
         <div>
-          <div style="font-size:12px;font-weight:700;color:#0C447C;">${p.benevoles?(p.benevoles.prenom||'')+' '+(p.benevoles.nom||''):'Bénévole'}</div>
+          <div style="font-size:12px;font-weight:700;color:#0C447C;">${p.benevoles ? escapeHtml((p.benevoles.prenom||'')+' '+(p.benevoles.nom||'')) : 'B�n�vole'}</div>
           <div style="font-size:9px;color:#5F5E5A;">${formatDateTime(p.created_at)}</div>
         </div>
       </div>
-      <div style="font-size:12px;color:#5F5E5A;line-height:1.7;">${p.contenu}</div>
+      <div style="font-size:12px;color:#5F5E5A;line-height:1.7;">${escapeHtml(p.contenu||'')}</div>
     </div>`
   }).join('')
 }
@@ -1851,15 +1851,15 @@ async function publishPost() {
   loadPosts()
 }
 
-// ── PROFIL FIELDS (prénoms déjà absents, libellés clean) ─────
+// -- PROFIL FIELDS (pr�noms d�j� absents, libell�s clean) -----
 function loadProfilFields(p) {
   document.getElementById('f-prenom').value=p.prenom||''
   document.getElementById('f-nom').value=p.nom||''
   document.getElementById('f-tel').value=p.telephone||''
   const cfgP={
-    hugo:    {icon:'⚡',name:'Compétiteur',desc:'Gamification et classement en avant-plan',bg:'#E6F1FB',color:'#0C447C'},
-    virginie:{icon:'🌸',name:'Découverte', desc:'Accompagnement et référent assigné',bg:'#EDE9FE',color:'#533BB7'},
-    joel:    {icon:'🎯',name:'Expérimenté',desc:'Interface simplifiée 3 boutons',bg:'#EAF3DE',color:'#3B6D11'},
+    hugo:    {icon:'?',name:'Comp�titeur',desc:'Gamification et classement en avant-plan',bg:'#E6F1FB',color:'#0C447C'},
+    virginie:{icon:'??',name:'D�couverte', desc:'Accompagnement et r�f�rent assign�',bg:'#EDE9FE',color:'#533BB7'},
+    joel:    {icon:'??',name:'Exp�riment�',desc:'Interface simplifi�e 3 boutons',bg:'#EAF3DE',color:'#3B6D11'},
   }
   const c=cfgP[p.profil_type||'hugo']
   document.getElementById('current-profil-display').innerHTML=`
@@ -1880,7 +1880,7 @@ async function saveProfile() {
     p_telephone: document.getElementById('f-tel').value.trim(),
   })
   if (error) { showToast('Erreur : '+error.message, 'error'); return }
-  showToast('Profil sauvegardé ✓', 'success')
+  showToast('Profil sauvegard� ?', 'success')
   const { data: p } = await sb.from('benevoles').select('*').eq('email', CU.email).single()
   CP = p
   renderTopbar(p)
@@ -1902,20 +1902,20 @@ async function saveSuggestion() {
   if (!profil) return
 
   const tagLabels = {
-    jour_match:'📅 Jour de match',
-    hors_match:'🏠 Hors-match',
-    accueil:'👋 Accueil',
-    application:'📱 Application',
-    autre:'💭 Autre'
+    jour_match:'?? Jour de match',
+    hors_match:'?? Hors-match',
+    accueil:'?? Accueil',
+    application:'?? Application',
+    autre:'?? Autre'
   }
-  const tagLbl = tagLabels[tag] || '💭 Autre'
+  const tagLbl = tagLabels[tag] || '?? Autre'
 
   const { error } = await sb.from('posts').insert({
     auteur_id: profil.id,
     categorie: 'suggestion',
     tag: tag,
-    titre: tagLbl + ' — ' + (CP?.prenom || 'Bénévole'),
-    contenu: '💡 ' + txt,
+    titre: tagLbl + ' � ' + (CP?.prenom || 'B�n�vole'),
+    contenu: '?? ' + txt,
     visible_forum: cbForum,
     visible_pilotes: cbPilotes,
   })
@@ -1927,17 +1927,17 @@ async function saveSuggestion() {
   document.getElementById('cb-pilotes').checked = false
   document.getElementById('sugg-tag').value = 'jour_match'
 
-  let msg = 'Suggestion partagée '
-  if (cbForum && cbPilotes) msg += 'avec la communauté et les pilotes ✓'
-  else if (cbForum) msg += 'avec la communauté ✓'
-  else msg += 'aux pilotes (privé) ✓'
+  let msg = 'Suggestion partag�e '
+  if (cbForum && cbPilotes) msg += 'avec la communaut� et les pilotes ?'
+  else if (cbForum) msg += 'avec la communaut� ?'
+  else msg += 'aux pilotes (priv�) ?'
   showToast(msg, 'success')
   if (cbForum) loadPosts()
 }
 
-// ─────────────────────────────────────────────────────────────
-// PHOTO UPLOAD (chantier 4) — adapté bucket privé (chantier 11)
-// ─────────────────────────────────────────────────────────────
+// -------------------------------------------------------------
+// PHOTO UPLOAD (chantier 4) � adapt� bucket priv� (chantier 11)
+// -------------------------------------------------------------
 async function renderPhotoCard() {
   const el = document.getElementById('photo-card-content')
   if (!el || !CP) return
@@ -1946,18 +1946,18 @@ async function renderPhotoCard() {
     const previewUrl = URL.createObjectURL(pendingPhotoFile)
     el.innerHTML = `
       <div style="text-align:center;margin-bottom:14px;">
-        <img src="${previewUrl}" class="photo-display preview" alt="Aperçu">
-        <div style="font-size:11px;color:#C9821A;margin-top:10px;font-weight:700;">⚠️ Aperçu — confirme pour envoyer aux pilotes</div>
-        <div style="font-size:10px;color:#5F5E5A;margin-top:3px;">${pendingPhotoFile.name} · ${formatFileSize(pendingPhotoFile.size)}</div>
+        <img src="${previewUrl}" class="photo-display preview" alt="Aper�u">
+        <div style="font-size:11px;color:#C9821A;margin-top:10px;font-weight:700;">?? Aper�u � confirme pour envoyer aux pilotes</div>
+        <div style="font-size:10px;color:#5F5E5A;margin-top:3px;">${pendingPhotoFile.name} � ${formatFileSize(pendingPhotoFile.size)}</div>
       </div>
       <div class="photo-tips">
-        <strong>Vérifie avant d'envoyer :</strong><br>
-        ✓ Visage bien visible &nbsp; ✓ Fond neutre &nbsp; ✓ Sans filtre<br>
-        ✗ Pas de lunettes de soleil &nbsp; ✗ Pas de photo floue
+        <strong>V�rifie avant d'envoyer :</strong><br>
+        ? Visage bien visible &nbsp; ? Fond neutre &nbsp; ? Sans filtre<br>
+        ? Pas de lunettes de soleil &nbsp; ? Pas de photo floue
       </div>
       <div style="display:flex;gap:8px;">
-        <button class="btn btn-blue" id="btn-photo-confirm" style="flex:1;font-size:13px;margin-top:0;" onclick="confirmPhotoUpload()">✓ Confirmer l'envoi</button>
-        <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="cancelPhotoUpload()">✗ Annuler</button>
+        <button class="btn btn-blue" id="btn-photo-confirm" style="flex:1;font-size:13px;margin-top:0;" onclick="confirmPhotoUpload()">? Confirmer l'envoi</button>
+        <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="cancelPhotoUpload()">? Annuler</button>
       </div>
     `
     return
@@ -1974,21 +1974,21 @@ async function renderPhotoCard() {
     : `<div class="photo-display-ph">${ini(p)}</div>`
 
   const statusBadges = {
-    'sans_photo': '<span class="photo-status sans">📷 Sans photo</span>',
-    'en_attente': '<span class="photo-status att">🟡 En attente de validation</span>',
-    'validee':    '<span class="photo-status val">🟢 Photo validée</span>',
-    'refusee':    '<span class="photo-status ref">🔴 Photo refusée</span>',
-    'generee':    '<span class="photo-status gen">✅ Accréditation prête</span>',
+    'sans_photo': '<span class="photo-status sans">?? Sans photo</span>',
+    'en_attente': '<span class="photo-status att">?? En attente de validation</span>',
+    'validee':    '<span class="photo-status val">?? Photo valid�e</span>',
+    'refusee':    '<span class="photo-status ref">?? Photo refus�e</span>',
+    'generee':    '<span class="photo-status gen">? Accr�ditation pr�te</span>',
   }
   const statusBadge = statusBadges[statut] || statusBadges['sans_photo']
 
   let contextMsg = ''
   if (statut === 'refusee') {
-    contextMsg = '<div style="background:#FBEAF0;color:#993556;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;font-weight:600;">Ta photo précédente a été refusée. Envoie une nouvelle photo plus claire.</div>'
+    contextMsg = '<div style="background:#FBEAF0;color:#993556;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;font-weight:600;">Ta photo pr�c�dente a �t� refus�e. Envoie une nouvelle photo plus claire.</div>'
   } else if (statut === 'en_attente') {
-    contextMsg = '<div style="background:#FEF3C7;color:#C9821A;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;">Un pilote va valider ta photo bientôt. Tu peux la changer si besoin.</div>'
+    contextMsg = '<div style="background:#FEF3C7;color:#C9821A;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;">Un pilote va valider ta photo bient�t. Tu peux la changer si besoin.</div>'
   } else if (statut === 'generee') {
-    contextMsg = '<div style="background:#E6F1FB;color:#0C447C;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;">Ton accréditation est prête. Si tu changes ta photo, elle devra être re-validée.</div>'
+    contextMsg = '<div style="background:#E6F1FB;color:#0C447C;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;">Ton accr�ditation est pr�te. Si tu changes ta photo, elle devra �tre re-valid�e.</div>'
   }
 
   el.innerHTML = `
@@ -1999,11 +1999,11 @@ async function renderPhotoCard() {
     ${contextMsg}
     <div class="photo-tips">
       <strong>Conseils :</strong><br>
-      ✓ Visage bien visible &nbsp; ✓ Fond neutre &nbsp; ✓ Sans filtre<br>
-      ✗ Pas de lunettes de soleil &nbsp; ✗ Pas de photo floue
+      ? Visage bien visible &nbsp; ? Fond neutre &nbsp; ? Sans filtre<br>
+      ? Pas de lunettes de soleil &nbsp; ? Pas de photo floue
     </div>
     <button class="btn btn-blue" style="font-size:13px;" onclick="document.getElementById('photo-file-input').click()">
-      📷 ${p.photo_path ? 'Changer ma photo' : 'Ajouter ma photo'}
+      ?? ${p.photo_path ? 'Changer ma photo' : 'Ajouter ma photo'}
     </button>
   `
 }
@@ -2015,7 +2015,7 @@ function onPhotoSelected(ev) {
 
   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
   if (!validTypes.includes(file.type)) {
-    showToast('Format non supporté (JPEG, PNG, WebP uniquement)', 'error')
+    showToast('Format non support� (JPEG, PNG, WebP uniquement)', 'error')
     return
   }
   const maxSize = 5 * 1024 * 1024
@@ -2034,7 +2034,7 @@ function cancelPhotoUpload() {
 }
 
 // PATCH F04 : passe par la RPC update_my_profile
-// (la RPC reset auto photo_url, statut_accreditation, photo_validee quand p_photo_path est défini)
+// (la RPC reset auto photo_url, statut_accreditation, photo_validee quand p_photo_path est d�fini)
 async function confirmPhotoUpload() {
   if (!pendingPhotoFile || !CU) return
 
@@ -2077,13 +2077,13 @@ async function confirmPhotoUpload() {
         renderHomeForProfil(refreshed)
       }
     }
-    showToast('Photo envoyée ! En attente de validation par un pilote.', 'success')
+    showToast('Photo envoy�e ! En attente de validation par un pilote.', 'success')
   } catch (err) {
     console.error('Photo upload error:', err)
-    showToast('Erreur : ' + (err.message || 'envoi échoué'), 'error')
+    showToast('Erreur : ' + (err.message || 'envoi �chou�'), 'error')
     if (btn) {
       btn.disabled = false
-      btn.textContent = '✓ Confirmer l\'envoi'
+      btn.textContent = '? Confirmer l\'envoi'
     }
   }
 }
@@ -2094,12 +2094,12 @@ function formatFileSize(bytes) {
   return (bytes/(1024*1024)).toFixed(1) + ' Mo'
 }
 
-// ─────────────────────────────────────────────────
-// CADEAUX / RÉCOMPENSES (chantier 6)
-// ─────────────────────────────────────────────────
+// -------------------------------------------------
+// CADEAUX / R�COMPENSES (chantier 6)
+// -------------------------------------------------
 
 const PALIERS = [
-  { pts: 200, valeur: 10, min: 50, label: '-10€ sur 50€', desc: 'Code de réduction Intersport · panier ≥ 50€' }
+  { pts: 200, valeur: 10, min: 50, label: '-10� sur 50�', desc: 'Code de r�duction Intersport � panier = 50�' }
 ]
 const BOUTIQUE_URL = 'https://b19.intersport-boutique-club.fr/685-SPACERSVOLLEYTOULOUSE'
 
@@ -2122,7 +2122,7 @@ async function loadReward() {
     .order('cree_le', { ascending: false })
 
   if (error) {
-    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : '+error.message+'</div>'
+    el.innerHTML = '<div class="alert alert-e">? Erreur de chargement : '+error.message+'</div>'
     return
   }
 
@@ -2137,33 +2137,33 @@ async function loadReward() {
     <div class="rew-hero">
       <div style="font-size:9px;color:rgba(245,200,66,0.5);letter-spacing:2px;margin-bottom:3px;">POINTS DISPONIBLES</div>
       <div class="rew-pts-big">${ptsDispo}</div>
-      <div class="rew-pts-sub">${ptsTotal} pts gagnés · ${ptsDep} pts dépensés</div>
+      <div class="rew-pts-sub">${ptsTotal} pts gagn�s � ${ptsDep} pts d�pens�s</div>
       ${ptsTotal > 0 ? `
         <div class="rew-prog"><div class="rew-prog-fill" style="width:${Math.min((ptsDispo/200)*100,100)}%;"></div></div>
-        <div class="rew-prog-lbl">${ptsDispo >= 200 ? '✓ Premier palier débloqué !' : (200 - ptsDispo) + ' pts pour débloquer le premier cadeau'}</div>
+        <div class="rew-prog-lbl">${ptsDispo >= 200 ? '? Premier palier d�bloqu� !' : (200 - ptsDispo) + ' pts pour d�bloquer le premier cadeau'}</div>
       ` : ''}
     </div>
   `
 
   if (codesAttribues.length > 0) {
-    html += `<div class="sec">✨ Mes codes disponibles</div>`
+    html += `<div class="sec">? Mes codes disponibles</div>`
     codesAttribues.forEach(d => {
       const c = d.recompenses_codes
       const expirat = c.expire_le ? `Expire le ${formatDate(c.expire_le)}` : 'Sans date d\'expiration'
       html += `
         <div class="code-card">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-            <span style="font-size:18px;">🎟️</span>
-            <strong style="font-size:14px;">-${c.valeur_eur}€ sur ${c.min_panier_eur}€ d'achat</strong>
+            <span style="font-size:18px;">???</span>
+            <strong style="font-size:14px;">-${c.valeur_eur}� sur ${c.min_panier_eur}� d'achat</strong>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.7);">${expirat}</div>
           <div class="code-display">${c.code}</div>
-          <button class="btn btn-blue" style="font-size:12px;width:100%;background:white;color:#3B6D11;" onclick="copyCode('${c.code}')">📋 Copier le code</button>
+          <button class="btn btn-blue" style="font-size:12px;width:100%;background:white;color:#3B6D11;" onclick="copyCode('${c.code}')">?? Copier le code</button>
         </div>`
     })
   }
 
-  html += `<div class="sec">🎁 Catalogue des cadeaux</div>`
+  html += `<div class="sec">?? Catalogue des cadeaux</div>`
   PALIERS.forEach(p => {
     const dejaEnCours = demandeEnCours && demandeEnCours.palier_pts === p.pts
     const peutDemander = ptsDispo >= p.pts && !dejaEnCours
@@ -2172,7 +2172,7 @@ async function loadReward() {
     html += `
       <div class="palier-card ${ptsDispo >= p.pts ? 'unlocked' : 'locked'}">
         <div style="display:flex;gap:12px;align-items:flex-start;">
-          <div class="palier-icon">🎟️</div>
+          <div class="palier-icon">???</div>
           <div style="flex:1;">
             <div class="palier-title">${p.label}</div>
             <div class="palier-desc">${p.desc}</div>
@@ -2181,13 +2181,13 @@ async function loadReward() {
         </div>
         ${ptsDispo < p.pts ? `
           <div class="palier-progress-mini"><div class="palier-progress-mini-fill" style="width:${progressPct}%;"></div></div>
-          <div style="font-size:10px;color:#5F5E5A;margin-top:4px;">Encore ${p.pts - ptsDispo} pts pour débloquer</div>
+          <div style="font-size:10px;color:#5F5E5A;margin-top:4px;">Encore ${p.pts - ptsDispo} pts pour d�bloquer</div>
         ` : ''}
         <button class="btn btn-blue"
           style="font-size:12px;margin-top:10px;${peutDemander ? '' : 'opacity:0.5;cursor:not-allowed;'}"
           ${peutDemander ? '' : 'disabled'}
           onclick="${peutDemander ? `requestReward(${p.pts})` : ''}">
-          ${dejaEnCours ? '⏳ Demande déjà en cours' : ptsDispo < p.pts ? `🔒 Encore ${p.pts - ptsDispo} pts` : '🎁 Demander mon cadeau'}
+          ${dejaEnCours ? '? Demande d�j� en cours' : ptsDispo < p.pts ? `?? Encore ${p.pts - ptsDispo} pts` : '?? Demander mon cadeau'}
         </button>
       </div>`
   })
@@ -2195,35 +2195,35 @@ async function loadReward() {
   if (demandeEnCours) {
     html += `
       <div class="pending-card">
-        <div class="pending-title">⏳ Ta demande est en cours</div>
+        <div class="pending-title">? Ta demande est en cours</div>
         <div class="pending-sub">
-          Demandée le ${formatDateTime(demandeEnCours.cree_le)}.<br>
-          Un pilote va te transmettre ton code dès que possible.
+          Demand�e le ${formatDateTime(demandeEnCours.cree_le)}.<br>
+          Un pilote va te transmettre ton code d�s que possible.
         </div>
         <button class="btn btn-ghost" style="font-size:11px;margin-top:10px;width:100%;" onclick="cancelRequest('${demandeEnCours.id}')">Annuler ma demande</button>
       </div>`
   }
 
   html += `
-    <div class="sec">🛍️ La boutique</div>
+    <div class="sec">??? La boutique</div>
     <a class="boutique-link" href="${BOUTIQUE_URL}" target="_blank" rel="noopener">
-      <div style="font-size:24px;">🛒</div>
+      <div style="font-size:24px;">??</div>
       <div style="flex:1;">
         <div style="font-size:13px;font-weight:700;color:white;">Boutique Spacers Intersport</div>
-        <div style="font-size:10px;color:rgba(181,212,244,0.6);margin-top:2px;">Maillots, sacs, survêtements officiels</div>
+        <div style="font-size:10px;color:rgba(181,212,244,0.6);margin-top:2px;">Maillots, sacs, surv�tements officiels</div>
       </div>
-      <div style="font-size:18px;color:rgba(181,212,244,0.5);">↗</div>
+      <div style="font-size:18px;color:rgba(181,212,244,0.5);">?</div>
     </a>
   `
 
   const histo = (demandes || []).filter(d => d.statut !== 'en_attente')
   if (histo.length > 0) {
-    html += `<div class="sec">📋 Historique de mes demandes</div>`
+    html += `<div class="sec">?? Historique de mes demandes</div>`
     histo.forEach(d => {
       const lbl = {
-        'attribuee': '<span class="histo-statut histo-attr">✓ Code reçu</span>',
-        'annulee':   '<span class="histo-statut histo-ann">↺ Annulée</span>',
-        'refusee':   '<span class="histo-statut histo-ref">✗ Refusée</span>',
+        'attribuee': '<span class="histo-statut histo-attr">? Code re�u</span>',
+        'annulee':   '<span class="histo-statut histo-ann">? Annul�e</span>',
+        'refusee':   '<span class="histo-statut histo-ref">? Refus�e</span>',
       }[d.statut] || ''
       html += `
         <div class="histo-item">
@@ -2247,9 +2247,9 @@ async function requestReward(palierPts) {
     return
   }
   const ok = await confirmModal({
-    icon: '🎁',
+    icon: '??',
     title: `Demander ce cadeau ?`,
-    message: `Palier ${palierPts} pts · -10€ sur 50€\n\nLe pilote va te transmettre ton code dès que possible.\nTes points ne seront débités qu'à la réception du code.`,
+    message: `Palier ${palierPts} pts � -10� sur 50�\n\nLe pilote va te transmettre ton code d�s que possible.\nTes points ne seront d�bit�s qu'� la r�ception du code.`,
     confirmText: 'Demander',
     confirmStyle: 'blue',
   })
@@ -2263,15 +2263,15 @@ async function requestReward(palierPts) {
     showToast('Erreur : ' + error.message, 'error')
     return
   }
-  showToast('🎁 Demande envoyée au pilote !', 'success')
+  showToast('?? Demande envoy�e au pilote !', 'success')
   loadReward()
 }
 
 async function cancelRequest(demandeId) {
   const ok = await confirmModal({
-    icon: '↺',
+    icon: '?',
     title: 'Annuler ma demande ?',
-    message: 'Tu pourras refaire une demande à tout moment.',
+    message: 'Tu pourras refaire une demande � tout moment.',
     confirmText: 'Annuler la demande',
     cancelText: 'Garder',
     confirmStyle: 'red',
@@ -2284,26 +2284,26 @@ async function cancelRequest(demandeId) {
     showToast('Erreur : ' + error.message, 'error')
     return
   }
-  showToast('Demande annulée', 'info')
+  showToast('Demande annul�e', 'info')
   loadReward()
 }
 
 function copyCode(code) {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(code)
-    showToast('📋 Code copié !', 'success')
+    showToast('?? Code copi� !', 'success')
   } else {
     const ta = document.createElement('textarea')
     ta.value = code
     document.body.appendChild(ta)
     ta.select()
-    try { document.execCommand('copy'); showToast('📋 Code copié !', 'success') }
+    try { document.execCommand('copy'); showToast('?? Code copi� !', 'success') }
     catch (e) { showToast('Impossible de copier', 'error') }
     document.body.removeChild(ta)
   }
 }
 
-// ── CHANGER PROFIL ────────────────────────────────────────────
+// -- CHANGER PROFIL --------------------------------------------
 function openChangeProfil() {
   document.getElementById('modal-profil').style.display='flex'
   newProfilSelected = CP?.profil_type||'hugo'
@@ -2335,9 +2335,9 @@ async function confirmChangeProfil() {
 
 function closeChangeProfil(){document.getElementById('modal-profil').style.display='none'}
 
-// ─────────────────────────────────────────────────────────────
+// -------------------------------------------------------------
 // MON COMPTE / RGPD (livrable 4)
-// ─────────────────────────────────────────────────────────────
+// -------------------------------------------------------------
 
 let _accountState = null
 
@@ -2374,18 +2374,18 @@ function renderAccountCard() {
     const daysLeft = Math.max(0, Math.ceil((dt - new Date()) / 86400000))
     pendingHtml = `
       <div style="background:#FBEAF0;border:1px solid #993556;border-left-width:4px;border-radius:10px;padding:14px;margin-bottom:12px;">
-        <div style="font-size:13px;font-weight:700;color:#993556;margin-bottom:4px;">⚠️ Suppression de compte planifiée</div>
+        <div style="font-size:13px;font-weight:700;color:#993556;margin-bottom:4px;">?? Suppression de compte planifi�e</div>
         <div style="font-size:11px;color:#5F5E5A;line-height:1.6;margin-bottom:10px;">
-          Ton compte sera <strong>définitivement supprimé le ${dateStr}</strong> (dans ${daysLeft} jour${daysLeft>1?'s':''}). Tu peux annuler cette demande tant que la date n'est pas passée.
+          Ton compte sera <strong>d�finitivement supprim� le ${dateStr}</strong> (dans ${daysLeft} jour${daysLeft>1?'s':''}). Tu peux annuler cette demande tant que la date n'est pas pass�e.
         </div>
-        <button class="btn btn-blue" style="font-size:12px;width:100%;" onclick="cancelDeletion()">↺ Annuler la demande de suppression</button>
+        <button class="btn btn-blue" style="font-size:12px;width:100%;" onclick="cancelDeletion()">? Annuler la demande de suppression</button>
       </div>`
   }
 
   wrap.innerHTML = `
     <div style="background:white;border-radius:16px;padding:16px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:4px;">🛡️ Mon compte & mes données</div>
-      <div style="font-size:11px;color:#5F5E5A;margin-bottom:14px;line-height:1.5;">Gère tes consentements et tes données personnelles (RGPD).</div>
+      <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:4px;">??? Mon compte & mes donn�es</div>
+      <div style="font-size:11px;color:#5F5E5A;margin-bottom:14px;line-height:1.5;">G�re tes consentements et tes donn�es personnelles (RGPD).</div>
 
       ${pendingHtml}
 
@@ -2393,23 +2393,23 @@ function renderAccountCard() {
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
           <input type="checkbox" id="acc-newsletter" ${newsletterChecked?'checked':''} ${isPendingDeletion?'disabled':''} onchange="toggleNewsletter(this)" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:#3B6D11;cursor:pointer;">
           <div>
-            <div style="font-size:12px;font-weight:600;color:#0C447C;">💌 Communications non-essentielles</div>
-            <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-top:2px;">Recevoir occasionnellement des informations sur la vie du club (newsletter, événements). Désabonnement à tout moment.</div>
+            <div style="font-size:12px;font-weight:600;color:#0C447C;">?? Communications non-essentielles</div>
+            <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-top:2px;">Recevoir occasionnellement des informations sur la vie du club (newsletter, �v�nements). D�sabonnement � tout moment.</div>
           </div>
         </label>
       </div>
 
       <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:12px;">
-        <div style="font-size:12px;font-weight:600;color:#0C447C;margin-bottom:3px;">📥 Exporter mes données</div>
-        <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-bottom:8px;">Télécharge l'intégralité des données te concernant (JSON + résumé PDF).</div>
-        <button class="btn btn-ghost" id="btn-export" style="font-size:12px;margin-top:0;" onclick="exportMyData()">Télécharger mes données</button>
+        <div style="font-size:12px;font-weight:600;color:#0C447C;margin-bottom:3px;">?? Exporter mes donn�es</div>
+        <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-bottom:8px;">T�l�charge l'int�gralit� des donn�es te concernant (JSON + r�sum� PDF).</div>
+        <button class="btn btn-ghost" id="btn-export" style="font-size:12px;margin-top:0;" onclick="exportMyData()">T�l�charger mes donn�es</button>
       </div>
 
       ${!isPendingDeletion ? `
       <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:12px;">
-        <div style="font-size:12px;font-weight:600;color:#993556;margin-bottom:3px;">🗑️ Supprimer mon compte</div>
+        <div style="font-size:12px;font-weight:600;color:#993556;margin-bottom:3px;">??? Supprimer mon compte</div>
         <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-bottom:8px;">
-          Effacement définitif après un délai de 30 jours (annulable). Tes contributions au forum et historique de bénévolat seront anonymisés mais conservés.
+          Effacement d�finitif apr�s un d�lai de 30 jours (annulable). Tes contributions au forum et historique de b�n�volat seront anonymis�s mais conserv�s.
         </div>
         <button class="btn" style="background:#FBEAF0;color:#993556;border:1.5px solid #993556;font-size:12px;width:100%;" onclick="requestDeletion()">Demander la suppression de mon compte</button>
       </div>
@@ -2417,8 +2417,8 @@ function renderAccountCard() {
 
       <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:12px;">
         <div style="font-size:10px;color:#5F5E5A;line-height:1.6;text-align:center;">
-          Référent RGPD : <strong>Didier CONJEAUD</strong><br>
-          📧 <a href="mailto:contact@spacerstoulouse.fr" style="color:#185FA5;">contact@spacerstoulouse.fr</a>
+          R�f�rent RGPD : <strong>Didier CONJEAUD</strong><br>
+          ?? <a href="mailto:contact@spacerstoulouse.fr" style="color:#185FA5;">contact@spacerstoulouse.fr</a>
         </div>
       </div>
     </div>`
@@ -2438,7 +2438,7 @@ async function toggleNewsletter(checkbox) {
   }
   if (_accountState) _accountState.newsletter_optin = newOptin
   if (CP) CP.newsletter_optin = newOptin
-  showToast(newOptin ? '✓ Newsletter activée' : '✓ Newsletter désactivée', 'success')
+  showToast(newOptin ? '? Newsletter activ�e' : '? Newsletter d�sactiv�e', 'success')
 }
 
 async function exportMyData() {
@@ -2446,12 +2446,12 @@ async function exportMyData() {
   if (!btn) return
   const orig = btn.textContent
   btn.disabled = true
-  btn.textContent = 'Préparation de l\'export...'
+  btn.textContent = 'Pr�paration de l\'export...'
 
   try {
     const { data, error } = await sb.rpc('export_account_data')
     if (error) throw new Error(error.message)
-    if (!data) throw new Error('Aucune donnée retournée')
+    if (!data) throw new Error('Aucune donn�e retourn�e')
 
     const dateTag = new Date().toISOString().slice(0, 10)
     const safePrenom = (CP?.prenom || 'benevole').toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -2462,7 +2462,7 @@ async function exportMyData() {
     await new Promise(r => setTimeout(r, 200))
     generateExportPDF(data, `spacers-mes-donnees-${safePrenom}-${dateTag}.pdf`)
 
-    showToast('✓ Export téléchargé (JSON + PDF)', 'success')
+    showToast('? Export t�l�charg� (JSON + PDF)', 'success')
   } catch (err) {
     console.error('export error', err)
     showToast('Erreur d\'export : ' + (err.message || err), 'error')
@@ -2522,43 +2522,43 @@ function generateExportPDF(data, filename) {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(16)
   doc.setTextColor(255, 255, 255)
-  doc.text('Export RGPD — Spacers Toulouse Volley', margin, 35)
+  doc.text('Export RGPD � Spacers Toulouse Volley', margin, 35)
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
   doc.setTextColor(181, 212, 244)
-  doc.text('Tes données personnelles · Article 15 et 20 du RGPD', margin, 52)
+  doc.text('Tes donn�es personnelles � Article 15 et 20 du RGPD', margin, 52)
   y = 90
 
   const meta = data.export_metadata || {}
   addLine('Date d\'export : ' + new Date(meta.export_date || Date.now()).toLocaleString('fr-FR'), { size: 9, color: [95, 94, 90] })
-  addLine('Demandé par : ' + (meta.requested_by || ''), { size: 9, color: [95, 94, 90] })
+  addLine('Demand� par : ' + (meta.requested_by || ''), { size: 9, color: [95, 94, 90] })
   addLine('Responsable du traitement : ' + (meta.data_controller || 'TOAC-TUC VOLLEY-BALL'), { size: 9, color: [95, 94, 90] })
   addLine('Contact RGPD : ' + (meta.rgpd_contact || 'contact@spacerstoulouse.fr'), { size: 9, color: [95, 94, 90], after: 12 })
 
   const p = data.profil || {}
-  addSection('Mon profil bénévole')
-  addLine('Prénom : ' + (p.prenom || '—'))
-  addLine('Nom : ' + (p.nom || '—'))
-  addLine('Email : ' + (p.email || '—'))
-  addLine('Téléphone : ' + (p.telephone || '—'))
-  addLine('Date de naissance : ' + (p.date_naissance || '—'))
-  addLine('Profil type : ' + (p.profil_type || '—'))
-  addLine('Rôle dans l\'app : ' + (p.role || 'benevole'))
-  addLine('Statut du compte : ' + (p.statut_compte || '—'))
-  addLine('Photo accréditation stockée : ' + (p.photo_path ? 'oui' : 'non'))
-  addLine('Compte créé le : ' + (p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : '—'))
+  addSection('Mon profil b�n�vole')
+  addLine('Pr�nom : ' + (p.prenom || '�'))
+  addLine('Nom : ' + (p.nom || '�'))
+  addLine('Email : ' + (p.email || '�'))
+  addLine('T�l�phone : ' + (p.telephone || '�'))
+  addLine('Date de naissance : ' + (p.date_naissance || '�'))
+  addLine('Profil type : ' + (p.profil_type || '�'))
+  addLine('R�le dans l\'app : ' + (p.role || 'benevole'))
+  addLine('Statut du compte : ' + (p.statut_compte || '�'))
+  addLine('Photo accr�ditation stock�e : ' + (p.photo_path ? 'oui' : 'non'))
+  addLine('Compte cr�� le : ' + (p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : '�'))
 
-  addSection('Mon activité bénévole')
-  addLine('Matchs joués : ' + (p.matchs_joues || 0))
+  addSection('Mon activit� b�n�vole')
+  addLine('Matchs jou�s : ' + (p.matchs_joues || 0))
   addLine('Points totaux : ' + (p.points_total || 0))
-  addLine('Points dépensés : ' + (p.points_depenses || 0))
+  addLine('Points d�pens�s : ' + (p.points_depenses || 0))
   addLine('Niveau : ' + (p.niveau || 'Bronze'))
 
   addSection('Mes consentements (' + ((data.consentements || []).length) + ' au total)')
   ;(data.consentements || []).slice(0, 30).forEach(c => {
     const dt = new Date(c.granted_at).toLocaleDateString('fr-FR')
     const status = c.granted ? '[OK]' : '[NON]'
-    addLine(`${status} ${c.consent_type} (v${c.consent_version}) — ${dt}`, { size: 9 })
+    addLine(`${status} ${c.consent_type} (v${c.consent_version}) � ${dt}`, { size: 9 })
   })
   if ((data.consentements || []).length > 30) {
     addLine('... et ' + ((data.consentements || []).length - 30) + ' de plus dans le JSON.', { size: 9, color: [95, 94, 90] })
@@ -2566,11 +2566,11 @@ function generateExportPDF(data, filename) {
 
   const ins = data.inscriptions || []
   addSection('Mes inscriptions aux matchs (' + ins.length + ')')
-  if (ins.length === 0) addLine('Aucune inscription enregistrée.', { size: 9, color: [95, 94, 90] })
+  if (ins.length === 0) addLine('Aucune inscription enregistr�e.', { size: 9, color: [95, 94, 90] })
   ins.slice(0, 30).forEach(i => {
     const dt = i.match_date ? new Date(i.match_date).toLocaleDateString('fr-FR') : '?'
-    const presence = i.statut_jour_match ? ' · ' + i.statut_jour_match : ''
-    addLine(`${dt} — vs ${i.match_adversaire || '?'} — ${i.statut}${presence}`, { size: 9 })
+    const presence = i.statut_jour_match ? ' � ' + i.statut_jour_match : ''
+    addLine(`${dt} � vs ${i.match_adversaire || '?'} � ${i.statut}${presence}`, { size: 9 })
   })
 
   const posts = data.posts || []
@@ -2578,15 +2578,15 @@ function generateExportPDF(data, filename) {
   if (posts.length === 0) addLine('Aucune publication.', { size: 9, color: [95, 94, 90] })
   posts.slice(0, 20).forEach(po => {
     const dt = new Date(po.created_at).toLocaleDateString('fr-FR')
-    addLine(`${dt} — [${po.categorie}] ${(po.titre || '(sans titre)').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}]/gu, '').trim() || '(sans titre)'}`, { size: 9 })
+    addLine(`${dt} � [${po.categorie}] ${(po.titre || '(sans titre)').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}]/gu, '').trim() || '(sans titre)'}`, { size: 9 })
   })
 
   const rec = data.recompenses || []
-  addSection('Mes demandes de récompenses (' + rec.length + ')')
+  addSection('Mes demandes de r�compenses (' + rec.length + ')')
   if (rec.length === 0) addLine('Aucune demande.', { size: 9, color: [95, 94, 90] })
   rec.forEach(r => {
     const dt = new Date(r.cree_le).toLocaleDateString('fr-FR')
-    addLine(`${dt} — palier ${r.palier_pts} pts — statut : ${r.statut}`, { size: 9 })
+    addLine(`${dt} � palier ${r.palier_pts} pts � statut : ${r.statut}`, { size: 9 })
   })
 
   const totalPages = doc.getNumberOfPages()
@@ -2596,7 +2596,7 @@ function generateExportPDF(data, filename) {
     doc.setFontSize(8)
     doc.setTextColor(154, 153, 148)
     doc.text(
-      'TOAC-TUC VOLLEY-BALL · Export RGPD · Page ' + i + ' / ' + totalPages,
+      'TOAC-TUC VOLLEY-BALL � Export RGPD � Page ' + i + ' / ' + totalPages,
       pageW / 2, 825, { align: 'center' }
     )
   }
@@ -2606,12 +2606,12 @@ function generateExportPDF(data, filename) {
 
 async function requestDeletion() {
   const ok = await confirmModal({
-    icon: '🗑️',
+    icon: '???',
     title: 'Supprimer mon compte ?',
     message:
-      'Ton compte sera désactivé immédiatement et définitivement supprimé dans 30 jours.\n\n' +
-      'Pendant ce délai, tu peux annuler à tout moment depuis cette section (mais tu ne pourras plus te connecter).\n\n' +
-      'Tes contributions au forum et ton historique de bénévolat seront anonymisés mais conservés.',
+      'Ton compte sera d�sactiv� imm�diatement et d�finitivement supprim� dans 30 jours.\n\n' +
+      'Pendant ce d�lai, tu peux annuler � tout moment depuis cette section (mais tu ne pourras plus te connecter).\n\n' +
+      'Tes contributions au forum et ton historique de b�n�volat seront anonymis�s mais conserv�s.',
     confirmText: 'Demander la suppression',
     confirmStyle: 'red',
     cancelText: 'Annuler',
@@ -2626,7 +2626,7 @@ async function requestDeletion() {
     showToast('Erreur : ' + error.message, 'error')
     return
   }
-  showToast('✓ Demande enregistrée. Tu vas être déconnecté(e).', 'info')
+  showToast('? Demande enregistr�e. Tu vas �tre d�connect�(e).', 'info')
 
   setTimeout(async () => {
     await sb.auth.signOut()
@@ -2636,9 +2636,9 @@ async function requestDeletion() {
 
 async function cancelDeletion() {
   const ok = await confirmModal({
-    icon: '↺',
+    icon: '?',
     title: 'Annuler la suppression ?',
-    message: 'Ton compte redeviendra actif immédiatement.',
+    message: 'Ton compte redeviendra actif imm�diatement.',
     confirmText: 'Annuler la suppression',
     confirmStyle: 'green',
   })
@@ -2651,12 +2651,12 @@ async function cancelDeletion() {
     showToast('Erreur : ' + error.message, 'error')
     return
   }
-  showToast('✓ Suppression annulée, compte réactivé.', 'success')
+  showToast('? Suppression annul�e, compte r�activ�.', 'success')
   await loadAccountState()
   renderAccountCard()
 }
 
-// ── NAVIGATION ────────────────────────────────────────────────
+// -- NAVIGATION ------------------------------------------------
 function bSwitch(name) {
   document.querySelectorAll('.bscreen').forEach(s=>s.classList.remove('on'))
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'))
@@ -2682,7 +2682,7 @@ function ini(b){return((b.prenom||'?')[0]+(b.nom||'?')[0]).toUpperCase()}
 function formatDate(d){if(!d)return'';return new Date(d).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long'})}
 function formatDateTime(d){if(!d)return'';return new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
 
-// ── TOAST FLOTTANT ────────────────────────────────────────────
+// -- TOAST FLOTTANT --------------------------------------------
 let _toastTimeout = null
 function showToast(msg, type = 'success') {
   const el = document.getElementById('toast-flot')
