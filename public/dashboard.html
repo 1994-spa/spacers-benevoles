@@ -766,6 +766,63 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   </div>
 </div>
 
+<!-- MODAL CANDIDATURE (Sprint C.1) — annonces Business Club -->
+<div class="modal-ov" id="modal-candidature" style="display:none;" onclick="if(event.target.id==='modal-candidature')closeCandidatureModal()">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:480px;padding:22px;">
+    <div style="background:linear-gradient(135deg,#0C447C,#185FA5);margin:-22px -22px 14px -22px;padding:18px 22px 16px;border-radius:14px 14px 0 0;">
+      <div style="font-size:9px;letter-spacing:2px;color:rgba(245,200,66,0.8);font-weight:700;margin-bottom:6px;">CANDIDATER</div>
+      <div style="font-size:17px;font-weight:800;color:white;line-height:1.3;" id="cand-offre-titre">Annonce</div>
+      <div style="font-size:11px;color:rgba(181,212,244,0.7);margin-top:4px;" id="cand-offre-partenaire"></div>
+    </div>
+
+    <div style="font-size:11px;color:#5F5E5A;line-height:1.5;margin-bottom:14px;">
+      Le partenaire reçoit ta candidature directement. Sois clair et chaleureux 👋
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Prénom *</label>
+        <input id="cand-prenom" type="text" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Nom *</label>
+        <input id="cand-nom" type="text" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+      </div>
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Email *</label>
+      <input id="cand-email" type="email" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Téléphone</label>
+      <input id="cand-tel" type="tel" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+    </div>
+
+    <div style="margin-bottom:8px;">
+      <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Message au partenaire</label>
+      <textarea id="cand-message" rows="4" placeholder="Parle de ton parcours, ta motivation..." style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;"></textarea>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Lien vers mon CV (LinkedIn, Drive, Dropbox...)</label>
+      <input id="cand-cv-url" type="url" placeholder="https://..." style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+    </div>
+
+    <div id="cand-status" style="font-size:12px;text-align:center;min-height:18px;margin-bottom:10px;line-height:1.5;"></div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-blue" style="flex:1;font-size:13px;" id="cand-submit-btn" onclick="submitCandidature()">📩 Envoyer ma candidature</button>
+      <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="closeCandidatureModal()">Annuler</button>
+    </div>
+
+    <div style="font-size:9px;color:#5F5E5A;text-align:center;margin-top:12px;font-style:italic;">
+      * Champs obligatoires
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CHANGEMENT PROFIL (PRÉNOMS SUPPRIMÉS) -->
 <div class="modal-ov" id="modal-profil" style="display:none;">
   <div class="modal">
@@ -793,6 +850,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 const SUPABASE_URL = 'https://xphuolvbamdkizydveij.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwaHVvbHZiYW1ka2l6eWR2ZWlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDQ2MDksImV4cCI6MjA5MjYyMDYwOX0.vpxV6ApwAkhlTx-LMCBZwee7LCdQGYP_5sbPMXEFFUQ'
 const PHOTOS_BUCKET = 'photos-benevoles'
+const BC_WORKER_URL = 'https://spacers-business-club.spacersytb.workers.dev'  // ← Sprint C.1
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 let CU = null, CP = null
@@ -886,19 +944,36 @@ async function loadEmploi() {
     renderMesPropositions(mesProps || [])
   }
 
-  const { data, error } = await sb.from('annonces_emploi')
-    .select('*')
-    .eq('active', true)
-    .eq('statut_validation', 'validee')
-    .or('expire_le.is.null,expire_le.gt.' + new Date().toISOString())
-    .order('publiee_le', { ascending: false })
+  // Sprint C.1 — Fetch parallèle : Supabase bénévole + worker Business Club
+  const [benevoleRes, bcRes] = await Promise.all([
+    sb.from('annonces_emploi')
+      .select('*')
+      .eq('active', true)
+      .eq('statut_validation', 'validee')
+      .or('expire_le.is.null,expire_le.gt.' + new Date().toISOString())
+      .order('publiee_le', { ascending: false }),
+    fetch(`${BC_WORKER_URL}/api/public/offres-emploi`)
+      .then(r => r.json())
+      .catch(e => ({ error: e.message, offres: [] }))
+  ])
 
-  if (error) {
-    el.innerHTML = '<div class="alert alert-e">? Erreur de chargement : ' + error.message + '</div>'
+  let benevoleList = []
+  if (!benevoleRes.error && benevoleRes.data) benevoleList = benevoleRes.data
+
+  let bcList = []
+  if (!bcRes.error && Array.isArray(bcRes.offres)) {
+    bcList = bcRes.offres.map(o => ({ ...o, is_business_club: true }))
+  }
+
+  // Merge + tri par date publication desc
+  empAnnonces = [...benevoleList, ...bcList].sort((a, b) =>
+    new Date(b.publiee_le || 0) - new Date(a.publiee_le || 0))
+
+  if (benevoleRes.error && (bcRes.error || !bcList.length)) {
+    el.innerHTML = '<div class="alert alert-e">? Erreur de chargement : ' + (benevoleRes.error?.message || bcRes.error) + '</div>'
     return
   }
 
-  empAnnonces = data || []
   renderEmploi()
 }
 
@@ -1007,11 +1082,17 @@ function renderEmploi() {
       : `<div class="annonce-logo-ph">${isPart ? '??' : '??'}</div>`
 
     const contactBtns = []
-    if (a.contact_lien) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;" href="${escapeHtml(a.contact_lien)}" target="_blank" rel="noopener">?? Postuler</a>`)
-    if (a.contact_email) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;${contactBtns.length?'background:#3B6D11;':''}" href="mailto:${encodeURIComponent(a.contact_email)}">?? Email</a>`)
-    if (a.contact_tel) {
-      const cleaned = (a.contact_tel || '').replace(/[^\d+]/g, '')
-      contactBtns.push(`<a class="btn btn-ghost" style="font-size:12px;text-decoration:none;display:inline-block;" href="tel:${cleaned}">?? ${escapeHtml(a.contact_tel)}</a>`)
+    if (a.is_business_club) {
+      // Annonce du Business Club → modale candidature dédiée (persistance BDD + email auto en C.2)
+      contactBtns.push(`<button class="btn btn-blue" style="font-size:12px;" onclick="openCandidatureModal('${a.id}')">📩 Postuler</button>`)
+    } else {
+      // Annonce bénévole native → boutons mailto/tel/lien (comportement existant)
+      if (a.contact_lien) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;" href="${escapeHtml(a.contact_lien)}" target="_blank" rel="noopener">?? Postuler</a>`)
+      if (a.contact_email) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;${contactBtns.length?'background:#3B6D11;':''}" href="mailto:${encodeURIComponent(a.contact_email)}">?? Email</a>`)
+      if (a.contact_tel) {
+        const cleaned = (a.contact_tel || '').replace(/[^\d+]/g, '')
+        contactBtns.push(`<a class="btn btn-ghost" style="font-size:12px;text-decoration:none;display:inline-block;" href="tel:${cleaned}">?? ${escapeHtml(a.contact_tel)}</a>`)
+      }
     }
 
     return `
@@ -1034,6 +1115,93 @@ function renderEmploi() {
         ${contactBtns.length > 0 ? `<div style="display:flex;gap:6px;flex-wrap:wrap;">${contactBtns.join('')}</div>` : ''}
       </div>`
   }).join('')
+}
+
+// ─────────────────────────────────────────────────
+// CANDIDATURES — Sprint C.1 (annonces Business Club)
+// ─────────────────────────────────────────────────
+let CANDIDATURE_OFFRE_ID = null
+
+function openCandidatureModal(offreId) {
+  CANDIDATURE_OFFRE_ID = offreId
+  const offre = empAnnonces.find(a => a.id === offreId)
+  if (!offre) return showToast('Annonce introuvable', 'error')
+
+  // Pré-remplir avec le profil bénévole
+  document.getElementById('cand-prenom').value = CP?.prenom || ''
+  document.getElementById('cand-nom').value = CP?.nom || ''
+  document.getElementById('cand-email').value = CU?.email || ''
+  document.getElementById('cand-tel').value = CP?.telephone || ''
+  document.getElementById('cand-message').value = ''
+  document.getElementById('cand-cv-url').value = ''
+  document.getElementById('cand-offre-titre').textContent = offre.titre || ''
+  document.getElementById('cand-offre-partenaire').textContent = offre.partenaire_nom || ''
+  document.getElementById('cand-status').textContent = ''
+
+  document.getElementById('modal-candidature').style.display = 'flex'
+}
+
+function closeCandidatureModal() {
+  document.getElementById('modal-candidature').style.display = 'none'
+  CANDIDATURE_OFFRE_ID = null
+}
+
+async function submitCandidature() {
+  if (!CANDIDATURE_OFFRE_ID) return
+  const btn = document.getElementById('cand-submit-btn')
+  const status = document.getElementById('cand-status')
+
+  const prenom = document.getElementById('cand-prenom').value.trim()
+  const nom = document.getElementById('cand-nom').value.trim()
+  const email = document.getElementById('cand-email').value.trim()
+  const tel = document.getElementById('cand-tel').value.trim()
+  const message = document.getElementById('cand-message').value.trim()
+  const cvUrl = document.getElementById('cand-cv-url').value.trim()
+
+  if (!prenom || !nom) { status.textContent = '⚠ Prénom et nom obligatoires'; status.style.color = '#993556'; return }
+  if (!email || !email.includes('@')) { status.textContent = '⚠ Email invalide'; status.style.color = '#993556'; return }
+
+  btn.disabled = true
+  btn.textContent = '⏳ Envoi en cours...'
+  status.textContent = ''
+
+  const payload = {
+    candidat_prenom: prenom,
+    candidat_nom: nom,
+    candidat_email: email,
+    candidat_telephone: tel || null,
+    message: message || null,
+    cv_url: cvUrl || null,
+    source: 'app-benevole',
+    benevole_id: CP?.id || null,
+    benevole_pseudo: (CP?.prenom || '') + ' ' + (CP?.nom || ''),
+  }
+
+  try {
+    const res = await fetch(`${BC_WORKER_URL}/api/public/offre/${encodeURIComponent(CANDIDATURE_OFFRE_ID)}/candidature`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    const json = await res.json()
+    if (!res.ok || json.error) throw new Error(json.error || `Erreur ${res.status}`)
+
+    status.innerHTML = '✅ <b>Candidature envoyée !</b> Le partenaire sera notifié.'
+    status.style.color = '#3B6D11'
+    btn.textContent = '✓ Envoyée'
+    showToast('🎉 Candidature envoyée au partenaire !', 'success')
+    setTimeout(() => {
+      closeCandidatureModal()
+      btn.disabled = false
+      btn.textContent = '📩 Envoyer ma candidature'
+    }, 1800)
+  } catch (e) {
+    console.error('submitCandidature error:', e)
+    status.textContent = '❌ Erreur : ' + e.message
+    status.style.color = '#993556'
+    btn.disabled = false
+    btn.textContent = '📩 Envoyer ma candidature'
+  }
 }
 
 function escapeHtml(str) {
