@@ -31,6 +31,15 @@
     border-radius: 4px;
   }
 </style>
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#042C53">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Spacers">
+    <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 
@@ -150,5 +159,13 @@
   <li>Par courrier : Référent RGPD — TOAC-TUC VOLLEY-BALL, Palais des Sports André Brouat, 3 rue Pierre Laplace, 31000 Toulouse</li>
 </ul>
 
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .catch(err => console.log('[SW] registration failed:', err));
+        });
+      }
+    </script>
 </body>
 </html>

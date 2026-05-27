@@ -139,6 +139,15 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 #access-denied{display:none;position:fixed;inset:0;background:#1a1a18;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
 #access-denied.show{display:flex;}
 </style>
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#042C53">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Spacers">
+    <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 
@@ -2568,5 +2577,13 @@ function formatDate(d){if(!d)return'';return new Date(d).toLocaleDateString('fr-
 
 init()
 </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .catch(err => console.log('[SW] registration failed:', err));
+        });
+      }
+    </script>
 </body>
 </html>

@@ -20,6 +20,15 @@
   .meta { color: #666; font-size: 0.85rem; margin-bottom: 2rem; }
   ul { padding-left: 1.25rem; }
 </style>
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#042C53">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Spacers">
+    <meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
 
@@ -71,5 +80,13 @@
 <h2>9. Contact</h2>
 <p>Pour toute question relative aux présentes mentions, vous pouvez écrire à : <a href="mailto:contact@spacerstoulouse.fr">contact@spacerstoulouse.fr</a></p>
 
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .catch(err => console.log('[SW] registration failed:', err));
+        });
+      }
+    </script>
 </body>
 </html>
