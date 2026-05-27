@@ -452,7 +452,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
           <div><div class="quiz-opt-text">Première fois</div><div class="quiz-opt-sub">Je découvre le bénévolat sportif</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(1,'h')">
-          <div class="quiz-opt-icon" style="background:#E6F1FB;">?</div>
+          <div class="quiz-opt-icon" style="background:#E6F1FB;">⚡</div>
           <div><div class="quiz-opt-text">Quelques expériences</div><div class="quiz-opt-sub">J'ai déjà participé à des événements</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(1,'j')">
@@ -502,7 +502,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
           <div><div class="quiz-opt-text">Je veux tout voir</div><div class="quiz-opt-sub">Stats, points, classement — je gère tout</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(3,'j')">
-          <div class="quiz-opt-icon" style="background:#EAF3DE;">?</div>
+          <div class="quiz-opt-icon" style="background:#EAF3DE;">⚡</div>
           <div><div class="quiz-opt-text">Je vais droit au but</div><div class="quiz-opt-sub">L'essentiel, sans fioritures</div></div>
         </div>
       </div>
@@ -511,8 +511,8 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <!-- RÉSULTAT -->
     <div class="quiz-step" id="qs-result">
       <div class="profil-reveal" id="profil-reveal"></div>
-      <button class="btn btn-blue" onclick="saveProfilAndContinue()">Commencer mon expérience ?</button>
-      <button class="btn btn-ghost" onclick="showQuizAgain()">? Recommencer</button>
+      <button class="btn btn-blue" onclick="saveProfilAndContinue()">Commencer mon expérience →</button>
+      <button class="btn btn-ghost" onclick="showQuizAgain()">← Recommencer</button>
     </div>
   </div>
 </div>
@@ -534,7 +534,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     </div>
     <div class="t-right">
       <button id="btn-pilote-view" class="btn-pilote" onclick="window.location.href='pilote.html'" style="display:none;">🎯 Vue pilote</button>
-      <button class="btn-logout" onclick="handleLogout()">?</button>
+      <button class="btn-logout" onclick="handleLogout()">✕</button>
     </div>
   </div>
 
@@ -635,7 +635,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   </div>
   <!-- -- POSTES (chantier découverte) -- -->
   <div class="bscreen" id="bs-postes">
-    <button class="back-btn" onclick="bSwitch('home')">? Retour</button>
+    <button class="back-btn" onclick="bSwitch('home')">← Retour</button>
     <div class="sec">📋 Les postes bénévoles</div>
     <div style="font-size:11px;color:rgba(181,212,244,0.6);margin-bottom:12px;line-height:1.5;">
       Découvre les différentes missions possibles pendant un match. Clique sur un poste pour voir les détails et la vidéo de présentation.
@@ -645,7 +645,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 
   <!-- -- TOULOUSE (chantier découverte) -- -->
   <div class="bscreen" id="bs-toulouse">
-    <button class="back-btn" onclick="bSwitch('home')">? Retour</button>
+    <button class="back-btn" onclick="bSwitch('home')">← Retour</button>
     <div class="sec">🌹 Découvrir Toulouse</div>
     <div style="font-size:11px;color:rgba(181,212,244,0.6);margin-bottom:12px;line-height:1.5;">
       Bons plans, sorties et vie culturelle dans la ville rose — sélection pour les bénévoles.
@@ -828,7 +828,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   <div class="modal">
     <h2>🎭 Changer de profil</h2>
     <div class="profil-choice" onclick="selectNewProfil('hugo')" id="pc-hugo">
-      <div class="profil-choice-icon">?</div>
+      <div class="profil-choice-icon">🎯</div>
       <div><div style="font-size:13px;font-weight:700;color:#0C447C;">Compétiteur</div><div style="font-size:10px;color:#5F5E5A;">Gamification, points, classement</div></div>
     </div>
     <div class="profil-choice" onclick="selectNewProfil('virginie')" id="pc-virginie">
@@ -970,7 +970,7 @@ async function loadEmploi() {
     new Date(b.publiee_le || 0) - new Date(a.publiee_le || 0))
 
   if (benevoleRes.error && (bcRes.error || !bcList.length)) {
-    el.innerHTML = '<div class="alert alert-e">? Erreur de chargement : ' + (benevoleRes.error?.message || bcRes.error) + '</div>'
+    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : ' + (benevoleRes.error?.message || bcRes.error) + '</div>'
     return
   }
 
@@ -985,9 +985,9 @@ function renderMesPropositions(list) {
   el.innerHTML = `<div style="font-size:9px;color:rgba(181,212,244,0.4);letter-spacing:1.5px;margin-bottom:6px;">MES PROPOSITIONS</div>` +
     list.map(p => {
       const lbl = {
-        'en_attente': '<span class="histo-statut histo-att">? En attente</span>',
-        'validee': '<span class="histo-statut histo-attr">? Publiée</span>',
-        'refusee': '<span class="histo-statut histo-ref">? Refusée</span>',
+        'en_attente': '<span class="histo-statut histo-att">⏳ En attente</span>',
+        'validee': '<span class="histo-statut histo-attr">✓ Publiée</span>',
+        'refusee': '<span class="histo-statut histo-ref">✗ Refusée</span>',
       }[p.statut_validation] || ''
       return `
         <div class="histo-item" style="margin-bottom:6px;">
@@ -1319,7 +1319,7 @@ async function loadPostes() {
     renderPostesList()
   } catch (err) {
     console.error('[postes]', err)
-    el.innerHTML = '<div class="alert alert-e">? Erreur de chargement : '+(err.message||err)+'</div>'
+    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : '+(err.message||err)+'</div>'
   }
 }
 
@@ -1343,7 +1343,7 @@ function renderPostesList() {
             ${p.difficulte ? `<span class="poste-difficulte ${diff}">${escapeHtml(p.difficulte)}</span>` : ''}
             <span class="poste-meta-info">⏱️ ~${p.heures_estimees||3}h</span>
             ${p.benevoles_max_match ? `<span class="poste-meta-info">👥 ${p.benevoles_max_match} bénévoles</span>` : ''}
-            ${hasVideo ? '<span class="poste-video-tag">? Vidéo</span>' : ''}
+            ${hasVideo ? '<span class="poste-video-tag">▶ Vidéo</span>' : ''}
           </div>
           <div class="poste-desc-preview">${escapeHtml(p.description || '')}</div>
         </div>
@@ -1396,11 +1396,11 @@ function openPosteDetail(id) {
           ${p.benevoles_max_match ? `<span class="poste-meta-info">👥 ${p.benevoles_max_match} bénévoles/match</span>` : ''}
         </div>
       </div>
-      <button onclick="closePosteDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">?</button>
+      <button onclick="closePosteDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
     </div>
     ${p.description ? `<div style="font-size:12px;color:#1a1a18;line-height:1.7;margin-bottom:10px;">${escapeHtml(p.description)}</div>` : ''}
     ${videoId ? `
-      <div class="poste-section-header">? VIDÉO DE PRÉSENTATION</div>
+      <div class="poste-section-header">▶ VIDÉO DE PRÉSENTATION</div>
       <div class="poste-video-wrap">
         <iframe id="poste-video-iframe" src="https://www.youtube.com/embed/${videoId}" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </div>
@@ -1449,7 +1449,7 @@ async function loadToulouse() {
     renderToulouseList()
   } catch (err) {
     console.error('[toulouse]', err)
-    el.innerHTML = '<div class="alert alert-e">? Erreur de chargement : '+(err.message||err)+'</div>'
+    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : '+(err.message||err)+'</div>'
   }
 }
 
@@ -1514,7 +1514,7 @@ function openToulouseDetail(id) {
         <div style="font-size:18px;font-weight:800;color:#0C447C;margin-top:8px;line-height:1.3;">${escapeHtml(t.titre || '')}</div>
         ${t.sous_titre ? `<div style="font-size:12px;color:#5F5E5A;margin-top:4px;">${escapeHtml(t.sous_titre)}</div>` : ''}
       </div>
-      <button onclick="closeToulouseDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">?</button>
+      <button onclick="closeToulouseDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
     </div>
     <div style="font-size:12px;color:#1a1a18;line-height:1.7;">${renderMarkdownLite(t.description || '')}</div>
     ${t.lien_externe ? `<a class="btn btn-blue" style="display:block;text-align:center;text-decoration:none;font-size:13px;margin-top:14px;" href="${escapeHtml(t.lien_externe)}" target="_blank" rel="noopener">🔗 Plus d'infos</a>` : ''}
@@ -1541,7 +1541,7 @@ function renderInstaFeed() {
       <div class="spi-grid" id="spi-grid">
         ${'<div class="spi-tile spi-skel"></div>'.repeat(6)}
       </div>
-      <a class="spi-more" href="https://instagram.com/spacerstoulouse" target="_blank" rel="noopener">Voir plus sur @spacerstoulouse ?</a>
+      <a class="spi-more" href="https://instagram.com/spacerstoulouse" target="_blank" rel="noopener">Voir plus sur @spacerstoulouse →</a>
     </div>`
 }
 
@@ -1627,7 +1627,7 @@ function showQuizAgain() {
 function showProfilResult() {
   const configs = {
     hugo: {
-      icon:'?', bg:'linear-gradient(135deg,#E6F1FB,#B5D4F4)',
+      icon:'⚡', bg:'linear-gradient(135deg,#E6F1FB,#B5D4F4)',
       tag:'PROFIL COMPÉTITEUR', tagBg:'#E6F1FB', tagColor:'#0C447C',
       name:'Compétiteur', emoji:'🏆',
       desc:'Vous adorez les défis et la compétition ! Votre dashboard met en avant vos points, votre classement et vos badges. Chaque match est une nouvelle opportunité de progresser.',
@@ -1657,7 +1657,7 @@ function showProfilResult() {
     <span class="profil-tag" style="background:${c.tagBg};color:${c.tagColor};">${c.tag}</span>
     <div class="profil-name">${c.emoji} ${c.name}</div>
     <p class="profil-desc">${c.desc}</p>
-    <div class="profil-traits">${c.traits.map(t=>`<div class="trait">? <span>${t.substring(2)}</span></div>`).join('')}</div>`
+    <div class="profil-traits">${c.traits.map(t=>`<div class="trait">✓ <span>${t.substring(2)}</span></div>`).join('')}</div>`
 }
 
 // -- PATCH F04 : passe par la RPC update_my_profile --
@@ -1771,8 +1771,8 @@ function renderHugoHome(el, p, pts, niveau, pct) {
 
 function renderVirginieHome(el, p) {
   const etapes = [
-    {done:true,            txt:'Inscription validée ?'},
-    {done:true,            txt:'Compte créé et email reçu ?'},
+    {done:true,            txt:'Inscription validée ✓'},
+    {done:true,            txt:'Compte créé et email reçu ✓'},
     {done:!!p.photo_path,  txt:'Ajouter votre photo de profil'},
     {done:false,           txt:'Répondre au premier match'},
     {done:false,           txt:'Découvrir votre fiche de poste'},
@@ -1799,16 +1799,16 @@ function renderVirginieHome(el, p) {
     <div style="background:white;border-radius:14px;padding:13px;margin-bottom:10px;">
       ${etapes.map(e=>`
         <div class="etape-item">
-          <div class="etape-num ${e.done?'etape-done':''}">${e.done?'?':'?'}</div>
+          <div class="etape-num ${e.done?'etape-done':''}">${e.done?'✓':'→'}</div>
           <div style="font-size:12px;color:${e.done?'#5F5E5A':'#1a1a18'};font-weight:${e.done?'400':'600'};${e.done?'text-decoration:line-through;':''}text-decoration-color:#C0DD97;">${e.txt}</div>
         </div>`).join('')}
     </div>
 
-    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:10px 0 7px;">? FAQ RAPIDE</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:10px 0 7px;">❓ FAQ RAPIDE</div>
     ${[
-      {q:'Comment m\'inscrire à un match ?', a:'Dans l\'onglet Planning ? cliquez "Je suis disponible" sur le match souhaité. Le pilote confirmera votre affectation.'},
+      {q:'Comment m\'inscrire à un match ?', a:'Dans l\'onglet Planning → cliquez "Je suis disponible" sur le match souhaité. Le pilote confirmera votre affectation.'},
       {q:'Que dois-je apporter le jour J ?', a:'Rien de spécial ! Arrivez 30 min avant le match. Clément vous remettra votre accréditation à l\'entrée.'},
-      {q:'Je suis disponible mais finalement non ?', a:'Revenez dans Planning ? cliquez "Indisponible". Prévenez le plus tôt possible, idéalement avant J-3.'},
+      {q:'Je suis disponible mais finalement non ?', a:'Revenez dans Planning → cliquez "Indisponible". Prévenez le plus tôt possible, idéalement avant J-3.'},
       {q:'Comment gagner des points ?', a:'50 pts par match + 20 pts ponctualité. Les points permettent de débloquer des remises boutique et des avantages exclusifs.'},
     ].map(f=>`
       <div class="faq-item" onclick="toggleFaq(this)">
@@ -1920,8 +1920,8 @@ async function loadPlanning() {
       <div class="match-info">📅 ${formatDate(m.date_match)} · ${m.heure||''} · ${m.lieu||'Palais des Sports'}</div>
       ${m.statut_inscriptions==='ouvert'
         ? insMap[m.id]
-          ? `<span class="s-dispo">${insMap[m.id]==='disponible'?'? Disponible':'? Indisponible'}</span>`
-          : `<span class="s-open">? Ouvert</span>
+          ? `<span class="s-dispo">${insMap[m.id]==='disponible'?'✓ Disponible':'✗ Indisponible'}</span>`
+          : `<span class="s-open">✅ Ouvert</span>
              <div class="match-actions">
                <button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Dispo</button>
                <button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">👎 Indispo</button>
@@ -1933,7 +1933,7 @@ async function loadPlanning() {
 async function setDispo(matchId,statut,btn) {
   btn.textContent='...';btn.disabled=true
   const{error}=await sb.from('inscriptions').upsert({benevole_id:CU.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'})
-  if(!error){btn.textContent=statut==='disponible'?'?':'?';btn.style.background=statut==='disponible'?'#3B6D11':'#888';setTimeout(loadPlanning,800)}
+  if(!error){btn.textContent=statut==='disponible'?'✓':'✗';btn.style.background=statut==='disponible'?'#3B6D11':'#888';setTimeout(loadPlanning,800)}
   else{btn.textContent='Err';btn.disabled=false}
 }
 
@@ -2025,7 +2025,7 @@ function loadProfilFields(p) {
   document.getElementById('f-nom').value=p.nom||''
   document.getElementById('f-tel').value=p.telephone||''
   const cfgP={
-    hugo:    {icon:'?',name:'Compétiteur',desc:'Gamification et classement en avant-plan',bg:'#E6F1FB',color:'#0C447C'},
+    hugo:    {icon:'⚡',name:'Compétiteur',desc:'Gamification et classement en avant-plan',bg:'#E6F1FB',color:'#0C447C'},
     virginie:{icon:'🌸',name:'Découverte', desc:'Accompagnement et référent assigné',bg:'#EDE9FE',color:'#533BB7'},
     joel:    {icon:'🎯',name:'Expérimenté',desc:'Interface simplifiée 3 boutons',bg:'#EAF3DE',color:'#3B6D11'},
   }
@@ -2096,9 +2096,9 @@ async function saveSuggestion() {
   document.getElementById('sugg-tag').value = 'jour_match'
 
   let msg = 'Suggestion partagée '
-  if (cbForum && cbPilotes) msg += 'avec la communauté et les pilotes ?'
-  else if (cbForum) msg += 'avec la communauté ?'
-  else msg += 'aux pilotes (privé) ?'
+  if (cbForum && cbPilotes) msg += 'avec la communauté et les pilotes ✓'
+  else if (cbForum) msg += 'avec la communauté ✓'
+  else msg += 'aux pilotes (privé) ✓'
   showToast(msg, 'success')
   if (cbForum) loadPosts()
 }
@@ -2120,12 +2120,12 @@ async function renderPhotoCard() {
       </div>
       <div class="photo-tips">
         <strong>Vérifie avant d'envoyer :</strong><br>
-        ? Visage bien visible &nbsp; ? Fond neutre &nbsp; ? Sans filtre<br>
-        ? Pas de lunettes de soleil &nbsp; ? Pas de photo floue
+        ✓ Visage bien visible &nbsp; ✓ Fond neutre &nbsp; ✓ Sans filtre<br>
+        ✗ Pas de lunettes de soleil &nbsp; ✗ Pas de photo floue
       </div>
       <div style="display:flex;gap:8px;">
-        <button class="btn btn-blue" id="btn-photo-confirm" style="flex:1;font-size:13px;margin-top:0;" onclick="confirmPhotoUpload()">? Confirmer l'envoi</button>
-        <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="cancelPhotoUpload()">? Annuler</button>
+        <button class="btn btn-blue" id="btn-photo-confirm" style="flex:1;font-size:13px;margin-top:0;" onclick="confirmPhotoUpload()">✓ Confirmer l'envoi</button>
+        <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="cancelPhotoUpload()">✗ Annuler</button>
       </div>
     `
     return
@@ -2146,7 +2146,7 @@ async function renderPhotoCard() {
     'en_attente': '<span class="photo-status att">🟡 En attente de validation</span>',
     'validee':    '<span class="photo-status val">🟢 Photo validée</span>',
     'refusee':    '<span class="photo-status ref">🔴 Photo refusée</span>',
-    'generee':    '<span class="photo-status gen">? Accréditation prête</span>',
+    'generee':    '<span class="photo-status gen">✅ Accréditation prête</span>',
   }
   const statusBadge = statusBadges[statut] || statusBadges['sans_photo']
 
@@ -2167,8 +2167,8 @@ async function renderPhotoCard() {
     ${contextMsg}
     <div class="photo-tips">
       <strong>Conseils :</strong><br>
-      ? Visage bien visible &nbsp; ? Fond neutre &nbsp; ? Sans filtre<br>
-      ? Pas de lunettes de soleil &nbsp; ? Pas de photo floue
+      ✓ Visage bien visible &nbsp; ✓ Fond neutre &nbsp; ✓ Sans filtre<br>
+      ✗ Pas de lunettes de soleil &nbsp; ✗ Pas de photo floue
     </div>
     <button class="btn btn-blue" style="font-size:13px;" onclick="document.getElementById('photo-file-input').click()">
       📷 ${p.photo_path ? 'Changer ma photo' : 'Ajouter ma photo'}
@@ -2251,7 +2251,7 @@ async function confirmPhotoUpload() {
     showToast('Erreur : ' + (err.message || 'envoi échoué'), 'error')
     if (btn) {
       btn.disabled = false
-      btn.textContent = '? Confirmer l\'envoi'
+      btn.textContent = '✓ Confirmer l\'envoi'
     }
   }
 }
@@ -2290,7 +2290,7 @@ async function loadReward() {
     .order('cree_le', { ascending: false })
 
   if (error) {
-    el.innerHTML = '<div class="alert alert-e">? Erreur de chargement : '+error.message+'</div>'
+    el.innerHTML = '<div class="alert alert-e">❌ Erreur de chargement : '+error.message+'</div>'
     return
   }
 
@@ -2308,13 +2308,13 @@ async function loadReward() {
       <div class="rew-pts-sub">${ptsTotal} pts gagnés · ${ptsDep} pts dépensés</div>
       ${ptsTotal > 0 ? `
         <div class="rew-prog"><div class="rew-prog-fill" style="width:${Math.min((ptsDispo/200)*100,100)}%;"></div></div>
-        <div class="rew-prog-lbl">${ptsDispo >= 200 ? '? Premier palier débloqué !' : (200 - ptsDispo) + ' pts pour débloquer le premier cadeau'}</div>
+        <div class="rew-prog-lbl">${ptsDispo >= 200 ? '✓ Premier palier débloqué !' : (200 - ptsDispo) + ' pts pour débloquer le premier cadeau'}</div>
       ` : ''}
     </div>
   `
 
   if (codesAttribues.length > 0) {
-    html += `<div class="sec">? Mes codes disponibles</div>`
+    html += `<div class="sec">✨ Mes codes disponibles</div>`
     codesAttribues.forEach(d => {
       const c = d.recompenses_codes
       const expirat = c.expire_le ? `Expire le ${formatDate(c.expire_le)}` : 'Sans date d\'expiration'
@@ -2363,7 +2363,7 @@ async function loadReward() {
   if (demandeEnCours) {
     html += `
       <div class="pending-card">
-        <div class="pending-title">? Ta demande est en cours</div>
+        <div class="pending-title">⏳ Ta demande est en cours</div>
         <div class="pending-sub">
           Demandée le ${formatDateTime(demandeEnCours.cree_le)}.<br>
           Un pilote va te transmettre ton code dès que possible.
@@ -2380,7 +2380,7 @@ async function loadReward() {
         <div style="font-size:13px;font-weight:700;color:white;">Boutique Spacers Intersport</div>
         <div style="font-size:10px;color:rgba(181,212,244,0.6);margin-top:2px;">Maillots, sacs, survêtements officiels</div>
       </div>
-      <div style="font-size:18px;color:rgba(181,212,244,0.5);">?</div>
+      <div style="font-size:18px;color:rgba(181,212,244,0.5);">↗</div>
     </a>
   `
 
@@ -2389,9 +2389,9 @@ async function loadReward() {
     html += `<div class="sec">📋 Historique de mes demandes</div>`
     histo.forEach(d => {
       const lbl = {
-        'attribuee': '<span class="histo-statut histo-attr">? Code reçu</span>',
-        'annulee':   '<span class="histo-statut histo-ann">? Annulée</span>',
-        'refusee':   '<span class="histo-statut histo-ref">? Refusée</span>',
+        'attribuee': '<span class="histo-statut histo-attr">✓ Code reçu</span>',
+        'annulee':   '<span class="histo-statut histo-ann">↺ Annulée</span>',
+        'refusee':   '<span class="histo-statut histo-ref">✗ Refusée</span>',
       }[d.statut] || ''
       html += `
         <div class="histo-item">
@@ -2437,7 +2437,7 @@ async function requestReward(palierPts) {
 
 async function cancelRequest(demandeId) {
   const ok = await confirmModal({
-    icon: '?',
+    icon: '🗑️',
     title: 'Annuler ma demande ?',
     message: 'Tu pourras refaire une demande à tout moment.',
     confirmText: 'Annuler la demande',
@@ -2546,7 +2546,7 @@ function renderAccountCard() {
         <div style="font-size:11px;color:#5F5E5A;line-height:1.6;margin-bottom:10px;">
           Ton compte sera <strong>définitivement supprimé le ${dateStr}</strong> (dans ${daysLeft} jour${daysLeft>1?'s':''}). Tu peux annuler cette demande tant que la date n'est pas passée.
         </div>
-        <button class="btn btn-blue" style="font-size:12px;width:100%;" onclick="cancelDeletion()">? Annuler la demande de suppression</button>
+        <button class="btn btn-blue" style="font-size:12px;width:100%;" onclick="cancelDeletion()">↺ Annuler la demande de suppression</button>
       </div>`
   }
 
@@ -2606,7 +2606,7 @@ async function toggleNewsletter(checkbox) {
   }
   if (_accountState) _accountState.newsletter_optin = newOptin
   if (CP) CP.newsletter_optin = newOptin
-  showToast(newOptin ? '? Newsletter activée' : '? Newsletter désactivée', 'success')
+  showToast(newOptin ? '✓ Newsletter activée' : '✓ Newsletter désactivée', 'success')
 }
 
 async function exportMyData() {
@@ -2630,7 +2630,7 @@ async function exportMyData() {
     await new Promise(r => setTimeout(r, 200))
     generateExportPDF(data, `spacers-mes-donnees-${safePrenom}-${dateTag}.pdf`)
 
-    showToast('? Export téléchargé (JSON + PDF)', 'success')
+    showToast('✓ Export téléchargé (JSON + PDF)', 'success')
   } catch (err) {
     console.error('export error', err)
     showToast('Erreur d\'export : ' + (err.message || err), 'error')
@@ -2794,7 +2794,7 @@ async function requestDeletion() {
     showToast('Erreur : ' + error.message, 'error')
     return
   }
-  showToast('? Demande enregistrée. Tu vas être déconnecté(e).', 'info')
+  showToast('✓ Demande enregistrée. Tu vas être déconnecté(e).', 'info')
 
   setTimeout(async () => {
     await sb.auth.signOut()
@@ -2804,7 +2804,7 @@ async function requestDeletion() {
 
 async function cancelDeletion() {
   const ok = await confirmModal({
-    icon: '?',
+    icon: '↺',
     title: 'Annuler la suppression ?',
     message: 'Ton compte redeviendra actif immédiatement.',
     confirmText: 'Annuler la suppression',
@@ -2819,7 +2819,7 @@ async function cancelDeletion() {
     showToast('Erreur : ' + error.message, 'error')
     return
   }
-  showToast('? Suppression annulée, compte réactivé.', 'success')
+  showToast('✓ Suppression annulée, compte réactivé.', 'success')
   await loadAccountState()
   renderAccountCard()
 }
