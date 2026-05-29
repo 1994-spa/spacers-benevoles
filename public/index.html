@@ -483,11 +483,18 @@ sb.auth.getSession().then(async ({data}) => {
   if (!data.session) return
   // Vérifie qu'on n'est pas en pending_deletion
   const { data: profil } = await sb.from('benevoles')
-    .select('prenom, nom, statut_compte, deletion_requested_at, deletion_scheduled_for')
+    .select('prenom, nom, statut_compte, deletion_requested_at, deletion_scheduled_for, consent_version, onboarding_done')
     .eq('email', data.session.user.email)
     .single()
   if (profil && (profil.statut_compte === 'pending_deletion' || profil.deletion_requested_at)) {
     showRecoveryScreen(profil)
+    return
+  }
+  // Garde RGPD : session active mais consentement absent/obsolete -> on repasse par l'onboarding
+  if (profil && profil.consent_version !== CONSENT_VERSION) {
+    const prenom = profil.prenom || ''
+    document.getElementById('ob-prenom').textContent = prenom ? 'Bienvenue ' + prenom + ' !' : '!'
+    showOb(profil.onboarding_done ? 'consent' : 1)
     return
   }
   window.location.href = 'dashboard.html'
