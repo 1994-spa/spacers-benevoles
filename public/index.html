@@ -645,10 +645,8 @@ function goConsent() { showOb('consent') }
 function showAllSet() { showOb(5) }
 
 async function finishOb() {
-  const { data: { session } } = await sb.auth.getSession()
-  if (session) {
-    await sb.from('benevoles').update({ onboarding_done: true }).eq('email', session.user.email)
-  }
+  // onboarding_done est deja set par le RPC finalize_onboarding lors de la
+  // validation des consentements. Plus rien a faire ici qu'a rediriger.
   window.location.href = 'dashboard.html'
 }
 
@@ -715,13 +713,16 @@ async function validateConsents() {
     return
   }
 
-  // Dénormalisation sur benevoles (best-effort)
-  const { error: updateErr } = await sb.from('benevoles').update({
-    consent_version:      CONSENT_VERSION,
-    consent_completed_at: new Date().toISOString(),
-    newsletter_optin:     newsletter
-  }).eq('email', email)
-  if (updateErr) console.warn('Update benevoles consent fields failed:', updateErr)
+  // Denormalisation sur benevoles via RPC finalize_onboarding
+  // (SECURITY DEFINER cote SQL pour contourner la policy RLS restrictive,
+  //  set aussi consent_completed_at + onboarding_done en une fois)
+  const { error: rpcErr } = await sb.rpc('finalize_onboarding', { p_newsletter: newsletter })
+  if (rpcErr) {
+    btn.disabled = false
+    btn.textContent = originalLabel
+    showErr('Erreur enregistrement profil : ' + rpcErr.message)
+    return
+  }
 
   // OK → écran de succès
   showAllSet()
