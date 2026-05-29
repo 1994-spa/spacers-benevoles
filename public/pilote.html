@@ -177,6 +177,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <button class="tab"    id="tab-suggestions" onclick="switchTab('suggestions')">💡 Suggestions<span class="bdg-num" id="bdg-suggestions" style="display:none;"></span></button>
   <button class="tab"    id="tab-reward"      onclick="switchTab('reward')">🎁 Cadeaux<span class="bdg-num" id="bdg-reward" style="display:none;"></span></button>
   <button class="tab"    id="tab-emploi"      onclick="switchTab('emploi')">💼 Emploi<span class="bdg-num" id="bdg-emploi" style="display:none;"></span></button>
+  <button class="tab"    id="tab-evenements"  onclick="switchTab('evenements')">🎉 Events<span class="bdg-num" id="bdg-evenements" style="display:none;"></span></button>
   <button class="tab"    id="tab-notes"       onclick="switchTab('notes')">📖 Mémoire</button>
 </div>
 
@@ -467,6 +468,30 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <div id="emp-list"></div>
 </div>
 
+<!-- ÉVÉNEMENTS BÉNÉVOLES (modération pilote) -->
+<div class="screen" id="screen-evenements">
+  <div id="alert-evenements"></div>
+
+  <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="kpi"><div class="kpi-val a" id="ev-kpi-att">—</div><div class="kpi-lbl">En attente</div></div>
+    <div class="kpi"><div class="kpi-val g" id="ev-kpi-pub">—</div><div class="kpi-lbl">Publiés à venir</div></div>
+    <div class="kpi"><div class="kpi-val" id="ev-kpi-tot">—</div><div class="kpi-lbl">Total</div></div>
+  </div>
+
+  <div class="sec">📨 Propositions en attente</div>
+  <div id="ev-pilote-att"></div>
+
+  <div class="sec">📋 Événements publiés</div>
+  <div style="margin-bottom:8px;">
+    <div class="seg-group" id="ev-list-filter">
+      <button class="seg on" data-ev-list-filter="avenir" onclick="setEvListFilter('avenir',this)">À venir</button>
+      <button class="seg" data-ev-list-filter="passes" onclick="setEvListFilter('passes',this)">Passés</button>
+      <button class="seg" data-ev-list-filter="masques" onclick="setEvListFilter('masques',this)">Masqués</button>
+    </div>
+  </div>
+  <div id="ev-pilote-list"></div>
+</div>
+
 <!-- MÉMOIRE -->
 <div class="screen" id="screen-notes">
   <div class="sec">Historique des notes pilote</div>
@@ -590,6 +615,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 const SUPABASE_URL = 'https://xphuolvbamdkizydveij.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwaHVvbHZiYW1ka2l6eWR2ZWlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDQ2MDksImV4cCI6MjA5MjYyMDYwOX0.vpxV6ApwAkhlTx-LMCBZwee7LCdQGYP_5sbPMXEFFUQ'
 const PHOTOS_BUCKET = 'photos-benevoles'
+const CONSENT_VERSION = '1.0'  // doit rester synchro avec index.html
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
 
 let allBenv = []
@@ -767,13 +793,21 @@ async function init() {
 
   const { data: profil } = await sb
     .from('benevoles')
-    .select('id, role, prenom, nom')
+    .select('id, role, prenom, nom, consent_version, statut_compte, deletion_requested_at')
     .eq('email', session.user.email)
     .single()
 
   if (!profil || (profil.role !== 'admin' && profil.role !== 'pilote')) {
     document.getElementById('access-denied').classList.add('show')
     return
+  }
+
+  // Garde RGPD : meme un pilote doit avoir consenti (et ne pas etre en suppression)
+  if (profil.statut_compte === 'pending_deletion' || profil.deletion_requested_at) {
+    window.location.href = 'index.html'; return
+  }
+  if (profil.consent_version !== CONSENT_VERSION) {
+    window.location.href = 'index.html'; return
   }
 
   curPiloteId = profil.id
@@ -818,6 +852,7 @@ async function loadAll() {
   await loadSuggestions()
   await loadReward()
   await loadEmploi()
+  await loadEvenementsPilote()
 }
 
 function renderPhotosAtt(list) {
@@ -2152,6 +2187,235 @@ function escapeHtmlPilote(str) {
 }
 
 // ─────────────────────────────────────────────────
+// ÉVÉNEMENTS BÉNÉVOLES (modération pilote)
+// ─────────────────────────────────────────────────
+let evPiloteData = []
+let evPiloteListFilter = 'avenir'
+
+const EV_CATLBL_PILOTE = {
+  convivial:'😄 Convivial', sportif:'🏐 Sportif',
+  formation:'🎓 Formation', sortie:'🌳 Sortie'
+}
+
+async function loadEvenementsPilote() {
+  const { data, error } = await sb.from('events_benevoles')
+    .select(`*, benevoles!events_benevoles_organisateur_id_fkey(prenom, nom, photo_path)`)
+    .order('date_event', { ascending: true })
+  if (error) {
+    showAlert('alert-evenements', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+  evPiloteData = data || []
+  await resolvePhotosInList(evPiloteData, e => e.benevoles)
+  updateEvPiloteKPIs()
+  renderEvPiloteAtt()
+  renderEvPiloteList()
+}
+
+function updateEvPiloteKPIs() {
+  const now = new Date()
+  const att = evPiloteData.filter(e => e.statut === 'draft').length
+  const pub = evPiloteData.filter(e => e.statut === 'published' && new Date(e.date_event) >= now).length
+  const tot = evPiloteData.length
+  const elAtt = document.getElementById('ev-kpi-att')
+  const elPub = document.getElementById('ev-kpi-pub')
+  const elTot = document.getElementById('ev-kpi-tot')
+  if (elAtt) elAtt.textContent = att
+  if (elPub) elPub.textContent = pub
+  if (elTot) elTot.textContent = tot
+
+  const bdg = document.getElementById('bdg-evenements')
+  if (bdg) {
+    if (att > 0) {
+      bdg.textContent = att > 99 ? '99+' : String(att)
+      bdg.style.display = 'flex'
+    } else {
+      bdg.style.display = 'none'
+    }
+  }
+}
+
+function renderEvPiloteAtt() {
+  const att = evPiloteData.filter(e => e.statut === 'draft')
+  const el = document.getElementById('ev-pilote-att')
+  if (!el) return
+  if (att.length === 0) {
+    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucune proposition en attente</div>'
+    return
+  }
+  el.innerHTML = att.map(e => {
+    const b = e.benevoles || {}
+    return `
+      <div class="demande-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          ${b._signedUrl ? `<img src="${b._signedUrl}" class="bav">` : `<div class="bav-ph">${ini(b)}</div>`}
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:700;color:white;">${escapeHtmlPilote((b.prenom||'') + ' ' + (b.nom||''))}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.5);">Proposé ${formatRelativeDate(e.created_at)}</div>
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;margin-bottom:10px;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+            <span class="s-badge" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">${EV_CATLBL_PILOTE[e.categorie] || escapeHtmlPilote(e.categorie)}</span>
+            <span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);">📅 ${formatDate(e.date_event)}</span>
+            ${e.lieu ? `<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);">📍 ${escapeHtmlPilote(e.lieu)}</span>` : ''}
+          </div>
+          <div style="font-size:13px;font-weight:700;color:white;margin-bottom:4px;">${escapeHtmlPilote(e.titre)}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.5;white-space:pre-line;">${escapeHtmlPilote(e.description||'')}</div>
+          ${e.google_form_url ? `<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:6px;">🔗 ${escapeHtmlPilote(e.google_form_url)}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-green btn-sm" style="flex:1;" onclick="validerEvenement('${e.id}')">✓ Valider et publier</button>
+          <button class="btn btn-red btn-sm" onclick="refuserEvenement('${e.id}')">✗ Refuser</button>
+        </div>
+      </div>`
+  }).join('')
+}
+
+function renderEvPiloteList() {
+  const now = new Date()
+  let list = evPiloteData.filter(e => e.statut !== 'draft')
+  if (evPiloteListFilter === 'avenir') {
+    list = list.filter(e => e.statut === 'published' && new Date(e.date_event) >= now)
+  } else if (evPiloteListFilter === 'passes') {
+    list = list.filter(e => (e.statut === 'published' || e.statut === 'past') && new Date(e.date_event) < now)
+  } else if (evPiloteListFilter === 'masques') {
+    list = list.filter(e => e.statut === 'hidden')
+  }
+
+  const el = document.getElementById('ev-pilote-list')
+  if (!el) return
+  if (list.length === 0) {
+    el.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:10px 0;font-style:italic;">Aucun événement dans cette catégorie.</div>'
+    return
+  }
+
+  el.innerHTML = list.map(e => {
+    const b = e.benevoles || {}
+    const isHidden = e.statut === 'hidden'
+    const isPast = new Date(e.date_event) < now
+    let statut
+    if (isHidden) statut = '<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);">⏸ Masqué</span>'
+    else if (isPast) statut = '<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);">Passé</span>'
+    else statut = '<span class="s-badge" style="background:rgba(59,109,17,0.15);color:#C0DD97;">● Publié</span>'
+
+    const opacity = (isHidden || isPast) ? '0.6' : '1'
+
+    return `
+      <div class="card" style="opacity:${opacity};">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <span class="s-badge" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">${EV_CATLBL_PILOTE[e.categorie] || escapeHtmlPilote(e.categorie)}</span>
+          ${statut}
+        </div>
+        <div style="font-size:13px;font-weight:700;color:white;margin-bottom:3px;">${escapeHtmlPilote(e.titre)}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px;">
+          📅 ${formatDate(e.date_event)}${e.lieu ? ' · 📍 ' + escapeHtmlPilote(e.lieu) : ''} · 👤 ${escapeHtmlPilote(((b.prenom||'') + ' ' + (b.nom||'')).trim() || 'Bénévole')}
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5;margin-bottom:10px;white-space:pre-line;">${escapeHtmlPilote(e.description||'')}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${!isHidden
+            ? `<button class="btn btn-ghost btn-sm" onclick="masquerEvenement('${e.id}')">⏸ Masquer</button>`
+            : `<button class="btn btn-ghost btn-sm" onclick="republierEvenement('${e.id}')">▶ Republier</button>`}
+          <button class="btn btn-red btn-sm" onclick="supprimerEvenement('${e.id}')">🗑 Supprimer</button>
+        </div>
+      </div>`
+  }).join('')
+}
+
+function setEvListFilter(f, btn) {
+  evPiloteListFilter = f
+  document.querySelectorAll('#ev-list-filter .seg').forEach(s => s.classList.remove('on'))
+  btn.classList.add('on')
+  renderEvPiloteList()
+}
+
+async function validerEvenement(id) {
+  const ok = await confirmModal({
+    icon: '✓',
+    title: 'Valider et publier ?',
+    message: 'L\'événement sera visible par tous les bénévoles.',
+    confirmText: 'Publier',
+    confirmStyle: 'green',
+  })
+  if (!ok) return
+  const { error } = await sb.from('events_benevoles').update({
+    statut: 'published',
+    pilote_modere_par: curPiloteId,
+    pilote_modere_le: new Date().toISOString(),
+    pilote_message: null,
+  }).eq('id', id)
+  if (error) return showAlert('alert-evenements', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-evenements', '✓ Événement publié', 's')
+  loadEvenementsPilote()
+}
+
+async function refuserEvenement(id) {
+  const msg = await promptModal({
+    icon: '✗',
+    title: 'Refuser cette proposition',
+    message: 'Indique une raison (visible par le bénévole).',
+    placeholder: 'Événement déjà existant, date non dispo, hors-sujet…',
+    confirmText: 'Refuser',
+    confirmStyle: 'red',
+  })
+  if (msg === null) return
+  const { error } = await sb.from('events_benevoles').update({
+    statut: 'hidden',
+    pilote_modere_par: curPiloteId,
+    pilote_modere_le: new Date().toISOString(),
+    pilote_message: msg || null,
+  }).eq('id', id)
+  if (error) return showAlert('alert-evenements', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-evenements', '✗ Proposition refusée', 's')
+  loadEvenementsPilote()
+}
+
+async function masquerEvenement(id) {
+  const ok = await confirmModal({
+    icon: '⏸',
+    title: 'Masquer cet événement ?',
+    message: 'Il ne sera plus visible par les bénévoles. Tu pourras le republier plus tard.',
+    confirmText: 'Masquer',
+    confirmStyle: 'blue',
+  })
+  if (!ok) return
+  const { error } = await sb.from('events_benevoles').update({
+    statut: 'hidden',
+    pilote_modere_par: curPiloteId,
+    pilote_modere_le: new Date().toISOString(),
+  }).eq('id', id)
+  if (error) return showAlert('alert-evenements', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-evenements', '⏸ Événement masqué', 's')
+  loadEvenementsPilote()
+}
+
+async function republierEvenement(id) {
+  const { error } = await sb.from('events_benevoles').update({
+    statut: 'published',
+    pilote_modere_par: curPiloteId,
+    pilote_modere_le: new Date().toISOString(),
+  }).eq('id', id)
+  if (error) return showAlert('alert-evenements', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-evenements', '▶ Événement republié', 's')
+  loadEvenementsPilote()
+}
+
+async function supprimerEvenement(id) {
+  const ok = await confirmModal({
+    icon: '🗑',
+    title: 'Supprimer cet événement ?',
+    message: 'Action irréversible. Les marques d\'intérêt seront aussi supprimées.',
+    confirmText: 'Supprimer',
+    confirmStyle: 'red',
+  })
+  if (!ok) return
+  const { error } = await sb.from('events_benevoles').delete().eq('id', id)
+  if (error) return showAlert('alert-evenements', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-evenements', '🗑 Événement supprimé', 's')
+  loadEvenementsPilote()
+}
+
+// ─────────────────────────────────────────────────
 // TABS + UTILS
 // ─────────────────────────────────────────────────
 function switchTab(n) {
@@ -2163,6 +2427,7 @@ function switchTab(n) {
   if (n === 'suggestions') loadSuggestions()
   if (n === 'reward') loadReward()
   if (n === 'emploi') loadEmploi()
+  if (n === 'evenements') loadEvenementsPilote()
 }
 
 function showAlert(id,msg,type){
