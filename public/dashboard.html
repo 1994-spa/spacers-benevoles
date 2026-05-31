@@ -737,6 +737,26 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     </div>
   </div>
 
+<!-- -- BOÎTE À IDÉES -- -->
+<div class="bscreen" id="bs-idees">
+  <button class="back-btn" onclick="bSwitch('home')">← Retour</button>
+  <div class="sec">💡 Boîte à idées</div>
+  <div style="font-size:11px;color:rgba(181,212,244,0.6);margin-bottom:12px;line-height:1.5;">
+    Partage tes suggestions et idées pour améliorer le club, l'app ou les jours de match.
+  </div>
+
+  <button class="btn btn-blue" style="width:100%;font-size:13px;margin-bottom:12px;background:linear-gradient(135deg,#185FA5,#0C447C);" onclick="openCreateIdee()">
+    ✍️ Proposer une idée
+  </button>
+
+  <div style="display:flex;gap:6px;margin-bottom:12px;">
+    <button class="seg-b on" data-idees-view="mes" onclick="setIdeesView(this)">Mes idées</button>
+    <button class="seg-b" data-idees-view="forum" onclick="setIdeesView(this)">💬 Forum</button>
+  </div>
+
+  <div id="idees-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
+</div>
+
 </div><!-- /app -->
 
 <!-- TOAST FLOTTANT -->
@@ -952,6 +972,44 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 <div class="modal-ov" id="modal-ev-detail" style="display:none;" onclick="if(event.target.id==='modal-ev-detail')closeEvDetail()">
   <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:480px;">
     <div id="modal-ev-detail-content"></div>
+  </div>
+</div>
+
+<!-- MODAL CRÉATION IDÉE (Boîte à idées) -->
+<div class="modal-ov" id="modal-idee-create" style="display:none;" onclick="if(event.target.id==='modal-idee-create')closeCreateIdee()">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:480px;">
+    <h2 style="font-size:16px;font-weight:800;color:#0C447C;margin-bottom:4px;">💡 Proposer une idée</h2>
+    <div style="font-size:11px;color:#5F5E5A;margin-bottom:14px;line-height:1.5;">Ton idée pour améliorer le club, l'app ou un jour de match.</div>
+
+    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Catégorie</label>
+    <select id="idee-tag" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
+      <option value="jour_match">📅 Jour de match</option>
+      <option value="hors_match">🏠 Hors-match</option>
+      <option value="accueil">👋 Accueil bénévoles</option>
+      <option value="application">📱 Application</option>
+      <option value="autre">💭 Autre</option>
+    </select>
+
+    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Ton idée *</label>
+    <textarea id="idee-txt" rows="4" placeholder="Décris ton idée en quelques lignes..." style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;margin-bottom:10px;"></textarea>
+
+    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:6px;">Visibilité</label>
+    <div style="display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;color:#1a1a18;">
+        <input type="checkbox" id="idee-cb-forum" checked style="cursor:pointer;width:15px;height:15px;accent-color:#185FA5;">
+        💬 Visible par tous
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;color:#1a1a18;">
+        <input type="checkbox" id="idee-cb-pilotes" style="cursor:pointer;width:15px;height:15px;accent-color:#185FA5;">
+        🎯 Privé pilotes
+      </label>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-blue" style="flex:1;font-size:13px;" onclick="soumettreIdee()">📤 Partager</button>
+      <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="closeCreateIdee()">Annuler</button>
+    </div>
+    <div style="font-size:9px;color:#5F5E5A;text-align:center;margin-top:12px;font-style:italic;">* Champ obligatoire</div>
   </div>
 </div>
 
@@ -1861,6 +1919,178 @@ async function soumettreEvenement() {
 }
 
 // -------------------------------------------------
+// BOÎTE À IDÉES (suggestions côté bénévole)
+// -------------------------------------------------
+let ideesView = 'mes'
+let ideesData = { mes: [], forum: [] }
+
+const IDEE_TAGLBL = {
+  jour_match:'📅 Jour de match',
+  hors_match:'🏠 Hors-match',
+  accueil:'👋 Accueil',
+  application:'📱 Application',
+  autre:'💭 Autre'
+}
+
+async function loadIdees() {
+  if (!CP) return
+  const el = document.getElementById('idees-content')
+  if (!el) return
+
+  const [mesRes, forumRes] = await Promise.all([
+    sb.from('posts')
+      .select('id, tag, titre, contenu, visible_forum, visible_pilotes, lu_par_pilote, created_at')
+      .eq('auteur_id', CP.id)
+      .eq('categorie', 'suggestion')
+      .order('created_at', { ascending: false })
+      .limit(50),
+    sb.from('posts')
+      .select('id, tag, titre, contenu, created_at, auteur_id')
+      .eq('categorie', 'suggestion')
+      .eq('visible_forum', true)
+      .neq('auteur_id', CP.id)
+      .order('created_at', { ascending: false })
+      .limit(50),
+  ])
+
+  if (mesRes.error) {
+    el.innerHTML = '<div class="alert alert-e">❌ Erreur : ' + mesRes.error.message + '</div>'
+    return
+  }
+
+  ideesData.mes = mesRes.data || []
+  ideesData.forum = forumRes.data || []
+
+  if (ideesData.forum.length > 0) {
+    const auteurIds = [...new Set(ideesData.forum.map(p => p.auteur_id).filter(Boolean))]
+    if (auteurIds.length) {
+      const { data: auteurs } = await sb.from('benevoles_public')
+        .select('id, prenom, nom')
+        .in('id', auteurIds)
+      const map = {}
+      ;(auteurs || []).forEach(a => { map[a.id] = a })
+      ideesData.forum.forEach(p => { p.auteur = map[p.auteur_id] })
+    }
+  }
+
+  renderIdees()
+}
+
+function renderIdees() {
+  const el = document.getElementById('idees-content')
+  if (!el) return
+
+  const list = ideesData[ideesView] || []
+  if (list.length === 0) {
+    el.innerHTML = `<div style="text-align:center;color:rgba(181,212,244,0.5);padding:36px 20px;font-size:12px;">
+      ${ideesView === 'mes'
+        ? 'Tu n\'as encore proposé aucune idée.<br>Clique sur "Proposer une idée" pour démarrer !'
+        : 'Aucune idée publique pour le moment.<br>Sois le premier à partager la tienne !'}
+    </div>`
+    return
+  }
+
+  el.innerHTML = list.map(p => {
+    // Le titre contient typiquement "📅 Jour de match — Prénom" ; on en extrait le label
+    const tagLbl = p.titre ? p.titre.split(' — ')[0] : (IDEE_TAGLBL[p.tag] || '💭 Autre')
+    const contenu = (p.contenu || '').replace(/^💡 ?/, '').trim()
+    const date = formatRelativeDate(p.created_at)
+
+    let badges = ''
+    if (ideesView === 'mes') {
+      if (p.visible_forum && p.visible_pilotes) {
+        badges += '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#EDE9FE;color:#533BB7;">🎯 Pilotes + 💬 Public</span>'
+      } else if (p.visible_pilotes) {
+        badges += '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#FEF3C7;color:#C9821A;">🎯 Privé pilotes</span>'
+      } else if (p.visible_forum) {
+        badges += '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#E6F1FB;color:#185FA5;">💬 Public</span>'
+      }
+      if (p.visible_pilotes) {
+        badges += p.lu_par_pilote
+          ? '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#EAF3DE;color:#3B6D11;">✓ Lu par pilote</span>'
+          : '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#F1EFE8;color:#5F5E5A;">⏳ En attente</span>'
+      }
+    }
+
+    const author = (ideesView === 'forum' && p.auteur)
+      ? `<div style="font-size:10px;color:#5F5E5A;margin-top:4px;">👤 ${escapeHtml(((p.auteur.prenom||'') + ' ' + ((p.auteur.nom||'')[0] || '') + '.').trim())}</div>`
+      : ''
+
+    return `
+      <div style="background:white;border-radius:14px;padding:13px;margin-bottom:8px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+          <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#F1EFE8;color:#0C447C;">${escapeHtml(tagLbl)}</span>
+          ${badges}
+        </div>
+        <div style="font-size:12.5px;color:#1a1a18;line-height:1.6;white-space:pre-wrap;">${escapeHtml(contenu)}</div>
+        <div style="font-size:10px;color:#5F5E5A;margin-top:6px;">🕐 ${date}</div>
+        ${author}
+      </div>`
+  }).join('')
+}
+
+function setIdeesView(btn) {
+  document.querySelectorAll('[data-idees-view]').forEach(b => b.classList.remove('on'))
+  btn.classList.add('on')
+  ideesView = btn.dataset.ideesView
+  renderIdees()
+}
+
+function openCreateIdee() {
+  document.getElementById('idee-tag').value = 'jour_match'
+  document.getElementById('idee-txt').value = ''
+  document.getElementById('idee-cb-forum').checked = true
+  document.getElementById('idee-cb-pilotes').checked = false
+  document.getElementById('modal-idee-create').style.display = 'flex'
+}
+
+function closeCreateIdee() {
+  document.getElementById('modal-idee-create').style.display = 'none'
+}
+
+async function soumettreIdee() {
+  if (!CP) return showToast('Pas connecté', 'error')
+
+  const txt = document.getElementById('idee-txt').value.trim()
+  if (!txt) return showToast('Décris ton idée avant de partager', 'error')
+
+  const tag = document.getElementById('idee-tag').value || 'autre'
+  const cbForum = document.getElementById('idee-cb-forum').checked
+  const cbPilotes = document.getElementById('idee-cb-pilotes').checked
+
+  if (!cbForum && !cbPilotes) {
+    return showToast('Choisis au moins une audience (public ou pilotes)', 'error')
+  }
+
+  const tagLbl = IDEE_TAGLBL[tag] || '💭 Autre'
+
+  const { error } = await sb.from('posts').insert({
+    auteur_id: CP.id,
+    categorie: 'suggestion',
+    tag: tag,
+    titre: tagLbl + ' — ' + (CP.prenom || 'Bénévole'),
+    contenu: '💡 ' + txt,
+    visible_forum: cbForum,
+    visible_pilotes: cbPilotes,
+  })
+
+  if (error) return showToast('Erreur : ' + error.message, 'error')
+
+  closeCreateIdee()
+
+  let msg = 'Idée partagée '
+  if (cbForum && cbPilotes) msg += 'avec la communauté et les pilotes ✓'
+  else if (cbForum) msg += 'avec la communauté ✓'
+  else msg += 'aux pilotes (privé) ✓'
+  showToast(msg, 'success')
+
+  // Repasse sur "Mes idées" pour que le bénévole voie sa proposition fraîche
+  document.querySelectorAll('[data-idees-view]').forEach(b => b.classList.toggle('on', b.dataset.ideesView === 'mes'))
+  ideesView = 'mes'
+  loadIdees()
+}
+
+// -------------------------------------------------
 // INSTAGRAM FEED (Actu du club)
 // -------------------------------------------------
 const SPI_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
@@ -2206,6 +2436,11 @@ function renderDecouverteSection() {
         <div class="decouv-icon">🎉</div>
         <div class="decouv-title">Événements</div>
         <div class="decouv-sub">Sorties & afterworks</div>
+      </div>
+      <div class="decouv-card" onclick="bSwitch('idees')">
+        <div class="decouv-icon">💡</div>
+        <div class="decouv-title">Boîte à idées</div>
+        <div class="decouv-sub">Suggestions club & app</div>
       </div>
     </div>`
 }
@@ -3183,6 +3418,7 @@ function bSwitch(name) {
   if(name==='postes')loadPostes()
   if(name==='toulouse')loadToulouse()
   if(name==='evenements')loadEvenements()
+  if(name==='idees')loadIdees()
   if(name==='profil'){
     renderPhotoCard()
     loadAccountState().then(() => renderAccountCard())
