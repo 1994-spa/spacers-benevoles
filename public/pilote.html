@@ -2235,6 +2235,19 @@ function updateEvPiloteKPIs() {
   }
 }
 
+const EV_COVERS_BUCKET = 'events-covers'
+
+function getEventCoverUrl(coverPath) {
+  if (!coverPath) return null
+  try {
+    const { data } = sb.storage.from(EV_COVERS_BUCKET).getPublicUrl(coverPath)
+    return data?.publicUrl || null
+  } catch (e) {
+    console.warn('cover URL failed', e)
+    return null
+  }
+}
+
 function renderEvPiloteAtt() {
   const att = evPiloteData.filter(e => e.statut === 'draft')
   const el = document.getElementById('ev-pilote-att')
@@ -2245,6 +2258,10 @@ function renderEvPiloteAtt() {
   }
   el.innerHTML = att.map(e => {
     const b = e.benevoles || {}
+    const coverUrl = getEventCoverUrl(e.cover_path)
+    const coverHtml = coverUrl
+      ? `<img src="${coverUrl}" style="width:100%;height:140px;object-fit:cover;display:block;border-radius:8px;margin-bottom:10px;">`
+      : ''
     return `
       <div class="demande-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
@@ -2254,6 +2271,7 @@ function renderEvPiloteAtt() {
             <div style="font-size:10px;color:rgba(255,255,255,0.5);">Proposé ${formatRelativeDate(e.created_at)}</div>
           </div>
         </div>
+        ${coverHtml}
         <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;margin-bottom:10px;">
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
             <span class="s-badge" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">${EV_CATLBL_PILOTE[e.categorie] || escapeHtmlPilote(e.categorie)}</span>
@@ -2300,9 +2318,14 @@ function renderEvPiloteList() {
     else statut = '<span class="s-badge" style="background:rgba(59,109,17,0.15);color:#C0DD97;">● Publié</span>'
 
     const opacity = (isHidden || isPast) ? '0.6' : '1'
+    const coverUrl = getEventCoverUrl(e.cover_path)
+    const coverHtml = coverUrl
+      ? `<img src="${coverUrl}" style="width:100%;height:110px;object-fit:cover;display:block;border-radius:8px;margin-bottom:8px;">`
+      : ''
 
     return `
       <div class="card" style="opacity:${opacity};">
+        ${coverHtml}
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
           <span class="s-badge" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">${EV_CATLBL_PILOTE[e.categorie] || escapeHtmlPilote(e.categorie)}</span>
           ${statut}
