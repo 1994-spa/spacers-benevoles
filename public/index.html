@@ -493,7 +493,7 @@ sb.auth.getSession().then(async ({data}) => {
   // Garde RGPD : session active mais consentement absent/obsolete -> on repasse par l'onboarding
   if (profil && profil.consent_version !== CONSENT_VERSION) {
     const prenom = profil.prenom || ''
-    document.getElementById('ob-prenom').textContent = prenom ? 'Bienvenue ' + prenom + ' !' : '!'
+    document.getElementById('ob-prenom').textContent = prenom ? prenom + ' !' : '!'
     showOb(profil.onboarding_done ? 'consent' : 1)
     return
   }
@@ -554,7 +554,7 @@ async function login() {
 
   if (needsTutorial || needsConsent) {
     const prenom = profil.prenom || ''
-    document.getElementById('ob-prenom').textContent = prenom ? 'Bienvenue ' + prenom + ' !' : '!'
+    document.getElementById('ob-prenom').textContent = prenom ? prenom + ' !' : '!'
     showOb(1)
   } else {
     window.location.href = 'dashboard.html'
