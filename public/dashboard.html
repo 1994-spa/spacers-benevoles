@@ -2582,9 +2582,74 @@ async function saveProfilAndContinue() {
 }
 
 // -- APP -------------------------------------------------------
-function showApp(p) {
+// ============================================================
+// RÉFÉRENT (helpers)
+// ============================================================
+async function loadMyReferent() {
+  if (!CP) return
+  CP._referent = null
+  if (!CP.referent_id) return
+  try {
+    const { data, error } = await sb.rpc('get_my_referent')
+    if (error) { console.warn('loadMyReferent error', error); return }
+    if (data) {
+      CP._referent = data
+      if (data.photo_path) {
+        CP._referent._signedUrl = await getSignedPhotoUrl(data.photo_path)
+      }
+    }
+  } catch (e) {
+    console.warn('loadMyReferent exception', e)
+  }
+}
+
+function renderReferentCard() {
+  if (!CP || !CP._referent) {
+    return `
+      <div class="referent-card" style="opacity:0.85;">
+        <div class="ref-av">⏳</div>
+        <div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:3px;">VOTRE RÉFÉRENT(E)</div>
+          <div style="font-size:15px;font-weight:800;color:white;">En cours d'attribution</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;line-height:1.5;">Un pilote va t'assigner un référent prochainement. En attendant, écris à <a href="mailto:contact@spacerstoulouse.fr" style="color:white;text-decoration:underline;">contact@spacerstoulouse.fr</a> pour toute question.</div>
+        </div>
+      </div>`
+  }
+  const r = CP._referent
+  const fullName = ((r.prenom||'') + ' ' + (r.nom||'')).trim()
+  const initials = (((r.prenom||'?')[0]||'') + ((r.nom||'?')[0]||'')).toUpperCase()
+  const avatar = r._signedUrl
+    ? `<img src="${escapeHtml(r._signedUrl)}" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);flex-shrink:0;">`
+    : `<div class="ref-av">${escapeHtml(initials)}</div>`
+  const cleanPhone = (r.telephone || '').replace(/[^\d+]/g, '')
+  let waUrl = null
+  if (cleanPhone) {
+    let p = cleanPhone
+    if (p.startsWith('+')) p = p.substring(1)
+    if (p.startsWith('0') && p.length === 10) p = '33' + p.substring(1)
+    if (p.startsWith('33') && p.length === 11) {
+      const msg = `Salut ${r.prenom || ''} ! Je suis ${CP.prenom || ''}, tu es mon référent Spacers. J'aurais besoin de toi...`
+      waUrl = `https://wa.me/${p}?text=${encodeURIComponent(msg)}`
+    }
+  }
+  return `
+    <div class="referent-card">
+      ${avatar}
+      <div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:3px;">VOTRE RÉFÉRENT(E)</div>
+        <div style="font-size:15px;font-weight:800;color:white;">${escapeHtml(fullName)}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">${r.matchs_joues || 0} match${(r.matchs_joues||0)>1?'s':''} d'expérience</div>
+        ${waUrl
+          ? `<a href="${waUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;background:rgba(255,255,255,0.15);color:white;border-radius:50px;padding:5px 12px;font-size:10px;font-weight:700;text-decoration:none;">💬 Contacter sur WhatsApp →</a>`
+          : `<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:6px;font-style:italic;">Numéro WhatsApp non disponible</div>`
+        }
+      </div>
+    </div>`
+}
+async function showApp(p) {
   document.getElementById('app').style.display = 'block'
   renderTopbar(p)
+  await loadMyReferent()
   renderHomeForProfil(p)
   loadProfilFields(p)
   loadInstaFeed()
@@ -2696,15 +2761,7 @@ function renderVirginieHome(el, p) {
       <div style="font-size:12px;color:#6D5DAA;margin-top:4px;line-height:1.6;">Vous faites partie des Spacers — voici comment tout se passe ici.</div>
     </div>
 
-    <div class="referent-card">
-      <div class="ref-av">👩</div>
-      <div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-bottom:3px;">VOTRE RÉFÉRENTE</div>
-        <div style="font-size:15px;font-weight:800;color:white;">Marie D.</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">3 saisons · Spécialité : Scan Entrée</div>
-        <a href="https://chat.whatsapp.com/JZBB5746965BqiHlgFBPJS" target="_blank" style="display:inline-block;margin-top:8px;background:rgba(255,255,255,0.15);color:white;border-radius:50px;padding:5px 12px;font-size:10px;font-weight:700;text-decoration:none;">💬 Contacter sur WhatsApp →</a>
-      </div>
-    </div>
+    ${renderReferentCard()}
 
     <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:10px 0 7px;">VOS PREMIÈRES ÉTAPES</div>
     <div style="background:white;border-radius:14px;padding:13px;margin-bottom:10px;">
