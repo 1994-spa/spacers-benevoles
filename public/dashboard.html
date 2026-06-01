@@ -1022,6 +1022,32 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   </div>
 </div>
 
+<!-- MODAL SIGNALEMENT PHOTO (Bloc C / 3b) -->
+<div class="modal-ov" id="modal-report-photo" style="display:none;" onclick="if(event.target.id==='modal-report-photo')closeReportPhotoModal()">
+  <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:460px;">
+    <h2 style="font-size:16px;font-weight:800;color:#0C447C;margin-bottom:4px;">🚩 Signaler cette photo</h2>
+    <div style="font-size:11px;color:#5F5E5A;margin-bottom:14px;line-height:1.5;">
+      Aide-nous à modérer en signalant ce qui te gêne. Un pilote examinera ton signalement. La photo sera masquée le temps de la review.
+    </div>
+
+    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Raison du signalement *</label>
+    <select id="report-reason" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
+      <option value="visage_non_consentement">👤 Personne / visage non-consentant</option>
+      <option value="contenu_inapproprie">⚠️ Contenu inapproprié</option>
+      <option value="enfant_visible">🧒 Enfant identifiable</option>
+      <option value="autre">💭 Autre</option>
+    </select>
+
+    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Précisions (optionnel)</label>
+    <textarea id="report-message" rows="3" placeholder="Détaille ton signalement si nécessaire..." style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;margin-bottom:14px;"></textarea>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-red" style="flex:1;font-size:13px;background:#993556;" id="report-submit-btn" onclick="submitPhotoReport()">🚩 Envoyer le signalement</button>
+      <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="closeReportPhotoModal()">Annuler</button>
+    </div>
+    <div style="font-size:9px;color:#5F5E5A;text-align:center;margin-top:10px;font-style:italic;">* Raison obligatoire</div>
+  </div>
+</div>
 <!-- MODAL CHANGEMENT PROFIL (PRÉNOMS SUPPRIMÉS) -->
 <div class="modal-ov" id="modal-profil" style="display:none;">
   <div class="modal">
@@ -1967,6 +1993,7 @@ async function renderEventPhotosSection(eventId) {
         if (!p._signedUrl) return
         html += `<div style="position:relative;aspect-ratio:1/1;border-radius:8px;overflow:hidden;background:#E6F1FB;cursor:pointer;" onclick="openEventPhotoLightbox('${p.id}')">
           <img src="${p._signedUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+          <button onclick="event.stopPropagation();openReportPhotoModal('${p.id}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.55);color:white;border:none;border-radius:50%;width:26px;height:26px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;" title="Signaler cette photo">🚩</button>
         </div>`
       })
       html += `</div>`
@@ -2072,6 +2099,73 @@ function openEventPhotoLightbox(photoId) {
     <img src="${photo._signedUrl}" style="max-width:100%;max-height:90vh;object-fit:contain;border-radius:8px;">
   `
   document.body.appendChild(ov)
+}
+// ============================================================
+// SIGNALEMENT PHOTO (Bloc C / 3b)
+// ============================================================
+let _reportTargetPhotoId = null
+
+function openReportPhotoModal(photoId) {
+  _reportTargetPhotoId = photoId
+  document.getElementById('report-reason').value = 'visage_non_consentement'
+  document.getElementById('report-message').value = ''
+  document.getElementById('report-submit-btn').disabled = false
+  document.getElementById('report-submit-btn').textContent = '🚩 Envoyer le signalement'
+  document.getElementById('modal-report-photo').style.display = 'flex'
+}
+
+function closeReportPhotoModal() {
+  document.getElementById('modal-report-photo').style.display = 'none'
+  _reportTargetPhotoId = null
+}
+
+async function submitPhotoReport() {
+  if (!_reportTargetPhotoId) return
+  const reason = document.getElementById('report-reason').value
+  const message = document.getElementById('report-message').value.trim()
+  if (!reason) return showToast('Choisis une raison', 'error')
+
+  const btn = document.getElementById('report-submit-btn')
+  btn.disabled = true
+  btn.textContent = '⏳ Envoi...'
+
+  try {
+    // 1) INSERT signalement
+    const { error: insErr } = await sb.from('events_photos_reports').insert({
+      photo_id: _reportTargetPhotoId,
+      reporter_email: CU.email,
+      reason: reason,
+      message: message || null,
+      status: 'pending',
+    })
+    if (insErr) throw insErr
+
+    // 2) Masquer la photo immediatement (visibilite 0 le temps de la review)
+    const { error: updErr } = await sb.from('events_photos').update({
+      statut: 'hidden',
+    }).eq('id', _reportTargetPhotoId)
+    if (updErr) throw updErr
+
+    closeReportPhotoModal()
+    showToast('🚩 Signalement envoyé. La photo a été masquée le temps de la review.', 'success')
+
+    // Refresh la galerie de l'event en cours (si modale event ouverte)
+    const modal = document.getElementById('modal-ev-detail')
+    if (modal && modal.style.display === 'flex') {
+      // On retrouve l'eventId via le cache
+      for (const [eventId, photos] of Object.entries(_evPhotosCache)) {
+        if ((photos || []).some(p => p.id === _reportTargetPhotoId)) {
+          renderEventPhotosSection(eventId)
+          break
+        }
+      }
+    }
+  } catch (err) {
+    console.error('submitPhotoReport error', err)
+    btn.disabled = false
+    btn.textContent = '🚩 Envoyer le signalement'
+    showToast('Erreur : ' + (err.message || err), 'error')
+  }
 }
 function closeEvDetail() { document.getElementById('modal-ev-detail').style.display = 'none' }
 
