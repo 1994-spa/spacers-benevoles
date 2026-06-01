@@ -484,6 +484,9 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <div class="sec">📸 Photos en attente</div>
   <div id="ev-photos-att"></div>
 
+  <div class="sec">🚩 Signalements en attente</div>
+  <div id="ev-reports-att"></div>
+
   <div class="sec">📋 Événements publiés</div>
   <div style="margin-bottom:8px;">
     <div class="seg-group" id="ev-list-filter">
@@ -2214,6 +2217,7 @@ async function loadEvenementsPilote() {
   renderEvPiloteAtt()
   renderEvPiloteList()
   await loadPhotosPending()
+  await loadReportsPending()
 }
 
 function updateEvPiloteKPIs() {
@@ -2485,6 +2489,182 @@ function openPilotePhotoLightbox(photoId) {
     <img src="${photo._signedUrl}" style="max-width:100%;max-height:90vh;object-fit:contain;border-radius:8px;">
   `
   document.body.appendChild(ov)
+}
+// ============================================================
+// SIGNALEMENTS PHOTOS (Bloc C / 5) - review pilote
+// ============================================================
+let _piloteAllReportsPending = []
+
+const REPORT_REASON_LBL = {
+  visage_non_consentement: '👤 Personne / visage non-consentant',
+  contenu_inapproprie: '⚠️ Contenu inapproprié',
+  enfant_visible: '🧒 Enfant identifiable',
+  autre: '💭 Autre',
+}
+
+async function loadReportsPending() {
+  const { data: reports, error } = await sb.from('events_photos_reports')
+    .select('id, photo_id, reporter_email, reason, message, status, created_at')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    showAlert('alert-evenements', '❌ Erreur signalements : ' + error.message, 'e')
+    return
+  }
+
+  const reportList = reports || []
+  if (reportList.length === 0) {
+    _piloteAllReportsPending = []
+    renderReportsPending()
+    return
+  }
+
+  // Fetch photos
+  const photoIds = [...new Set(reportList.map(r => r.photo_id).filter(Boolean))]
+  const { data: photos } = await sb.from('events_photos')
+    .select('id, event_id, uploader_id, uploader_email, storage_path, statut')
+    .in('id', photoIds)
+
+  const photoMap = {}
+  ;(photos || []).forEach(p => { photoMap[p.id] = p })
+
+  // Fetch uploaders + events
+  const uploaderIds = [...new Set((photos || []).map(p => p.uploader_id).filter(Boolean))]
+  const eventIds = [...new Set((photos || []).map(p => p.event_id).filter(Boolean))]
+
+  const [upRes, evRes] = await Promise.all([
+    uploaderIds.length > 0 ? sb.from('benevoles').select('id, prenom, nom').in('id', uploaderIds) : Promise.resolve({ data: [] }),
+    eventIds.length > 0 ? sb.from('events_benevoles').select('id, titre, date_event').in('id', eventIds) : Promise.resolve({ data: [] })
+  ])
+
+  const upMap = {}
+  ;(upRes.data || []).forEach(u => { upMap[u.id] = u })
+  const evMap = {}
+  ;(evRes.data || []).forEach(e => { evMap[e.id] = e })
+
+  // Signed URLs
+  const paths = (photos || []).map(p => p.storage_path).filter(Boolean)
+  const urlMap = {}
+  if (paths.length > 0) {
+    try {
+      const { data: signed } = await sb.storage.from(EVENTS_PHOTOS_BUCKET).createSignedUrls(paths, 600)
+      if (signed) signed.forEach(s => { if (s.signedUrl && s.path) urlMap[s.path] = s.signedUrl })
+    } catch (e) { console.warn('signed urls failed', e) }
+  }
+
+  reportList.forEach(r => {
+    const photo = photoMap[r.photo_id]
+    if (photo) {
+      r._photo = photo
+      r._signedUrl = urlMap[photo.storage_path]
+      r._uploader = upMap[photo.uploader_id]
+      r._event = evMap[photo.event_id]
+    }
+  })
+
+  _piloteAllReportsPending = reportList
+  renderReportsPending()
+}
+
+function renderReportsPending() {
+  const el = document.getElementById('ev-reports-att')
+  if (!el) return
+  const list = _piloteAllReportsPending || []
+  if (list.length === 0) {
+    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucun signalement en attente</div>'
+    return
+  }
+  el.innerHTML = list.map(r => {
+    const uploader = r._uploader || {}
+    const event = r._event || {}
+    const uploaderName = ((uploader.prenom||'') + ' ' + (uploader.nom||'')).trim() || 'Inconnu'
+    const reasonLbl = REPORT_REASON_LBL[r.reason] || r.reason
+
+    const thumb = r._signedUrl
+      ? `<img src="${r._signedUrl}" style="width:120px;height:120px;border-radius:10px;object-fit:cover;cursor:pointer;flex-shrink:0;" onclick="openReportPhotoLightbox('${r.id}')">`
+      : `<div style="width:120px;height:120px;border-radius:10px;background:#444441;display:flex;align-items:center;justify-content:center;font-size:24px;color:#888;flex-shrink:0;">🖼️</div>`
+
+    return `
+      <div class="demande-card" style="border-left-color:#993556;">
+        <div style="display:flex;gap:12px;margin-bottom:10px;">
+          ${thumb}
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+              <span class="s-badge" style="background:rgba(153,53,86,0.25);color:#F4B8CE;">🚩 ${escapeHtmlPilote(reasonLbl)}</span>
+            </div>
+            <div style="font-size:12px;font-weight:700;color:white;margin-bottom:2px;">${escapeHtmlPilote(event.titre || 'Event inconnu')}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:6px;">📅 ${event.date_event ? formatDate(event.date_event) : '?'}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.7);">👤 Photo de ${escapeHtmlPilote(uploaderName)}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);">Signalé par : ${escapeHtmlPilote(r.reporter_email || '')}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;">⏰ ${formatRelativeDate(r.created_at)}</div>
+          </div>
+        </div>
+        ${r.message ? `<div style="background:rgba(0,0,0,0.2);border-radius:6px;padding:8px;margin-bottom:10px;font-size:11px;color:rgba(255,255,255,0.7);line-height:1.5;white-space:pre-line;">"${escapeHtmlPilote(r.message)}"</div>` : ''}
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-red btn-sm" style="flex:1;" onclick="garderPhotoHidden('${r.id}')">✗ Garder cachée</button>
+          <button class="btn btn-green btn-sm" style="flex:1;" onclick="republierPhotoSignalee('${r.id}','${r.photo_id}')">↺ Republier</button>
+        </div>
+      </div>`
+  }).join('')
+}
+
+function openReportPhotoLightbox(reportId) {
+  const report = (_piloteAllReportsPending || []).find(r => r.id === reportId)
+  if (!report || !report._signedUrl) return
+  const ov = document.createElement('div')
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer;'
+  ov.onclick = (e) => { if (e.target === ov || e.target.tagName === 'IMG') ov.remove() }
+  ov.innerHTML = `
+    <button onclick="this.parentElement.remove()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.15);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;">✕</button>
+    <img src="${report._signedUrl}" style="max-width:100%;max-height:90vh;object-fit:contain;border-radius:8px;">
+  `
+  document.body.appendChild(ov)
+}
+
+async function garderPhotoHidden(reportId) {
+  const ok = await confirmModal({
+    icon: '✗',
+    title: 'Garder la photo cachée ?',
+    message: 'Le signalement sera marqué comme traité. La photo reste invisible aux bénévoles.',
+    confirmText: 'Confirmer',
+    confirmStyle: 'red',
+  })
+  if (!ok) return
+  const { error } = await sb.from('events_photos_reports').update({
+    status: 'reviewed_hidden',
+    reviewed_by: curPiloteId,
+    reviewed_at: new Date().toISOString(),
+  }).eq('id', reportId)
+  if (error) return showAlert('alert-evenements', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-evenements', '✗ Photo gardée cachée', 's')
+  loadReportsPending()
+}
+
+async function republierPhotoSignalee(reportId, photoId) {
+  const ok = await confirmModal({
+    icon: '↺',
+    title: 'Republier la photo ?',
+    message: 'Le signalement sera marqué comme non-justifié. La photo redeviendra visible aux bénévoles.',
+    confirmText: 'Republier',
+    confirmStyle: 'green',
+  })
+  if (!ok) return
+
+  const { error: rErr } = await sb.from('events_photos_reports').update({
+    status: 'reviewed_kept',
+    reviewed_by: curPiloteId,
+    reviewed_at: new Date().toISOString(),
+  }).eq('id', reportId)
+  if (rErr) return showAlert('alert-evenements', '❌ Erreur : ' + rErr.message, 'e')
+
+  const { error: pErr } = await sb.from('events_photos').update({
+    statut: 'published',
+  }).eq('id', photoId)
+  if (pErr) return showAlert('alert-evenements', '❌ Erreur : ' + pErr.message, 'e')
+
+  showAlert('alert-evenements', '↺ Photo republiée', 's')
+  loadReportsPending()
 }
 function setEvListFilter(f, btn) {
   evPiloteListFilter = f
