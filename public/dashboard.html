@@ -3191,7 +3191,96 @@ async function loadAccountState() {
     return null
   }
   _accountState = data
+
+  // Charge aussi l'historique des consentements pour l'affichage
+  try {
+    const { data: consents, error: cErr } = await sb.from('consents')
+      .select('consent_type, consent_version, granted, granted_at, metadata')
+      .eq('benevole_email', data.email)
+      .order('granted_at', { ascending: false })
+    if (cErr) {
+      console.warn('loadConsents error', cErr)
+      _accountState._consents = []
+    } else {
+      _accountState._consents = consents || []
+    }
+  } catch (e) {
+    console.warn('loadConsents exception', e)
+    _accountState._consents = []
+  }
+
   return data
+}
+
+function renderConsentsSnapshot(consents) {
+  const TYPE_META = {
+    rgpd:               { icon: '📋', label: 'Traitement des données personnelles' },
+    reglement:          { icon: '📜', label: 'Règlement intérieur' },
+    photo:              { icon: '📷', label: "Photo d'accréditation" },
+    newsletter:         { icon: '💌', label: 'Newsletter du club' },
+    data_export:        { icon: '📤', label: 'Export de mes données' },
+    deletion_request:   { icon: '🗑️', label: 'Demande de suppression' },
+    deletion_cancelled: { icon: '↺', label: 'Annulation de suppression' },
+  }
+  const PRIMARY = ['rgpd', 'reglement', 'photo', 'newsletter']
+
+  // Dernière entrée pour chaque type (la liste est déjà triée DESC par granted_at)
+  const latest = {}
+  for (const c of consents) {
+    if (!latest[c.consent_type]) latest[c.consent_type] = c
+  }
+
+  const snapshotItems = PRIMARY.map(type => {
+    const c = latest[type]
+    const meta = TYPE_META[type]
+    if (!c) {
+      return `
+        <div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11px;color:#999;">
+          <span style="width:14px;text-align:center;">—</span>
+          <span>${meta.icon}</span>
+          <span style="flex:1;min-width:0;">${meta.label}</span>
+          <span style="font-size:10px;">Non enregistré</span>
+        </div>`
+    }
+    const date = new Date(c.granted_at).toLocaleDateString('fr-FR')
+    const ok = c.granted
+    return `
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11px;color:#5F5E5A;">
+        <span style="color:${ok?'#3B6D11':'#993556'};font-weight:700;width:14px;text-align:center;">${ok?'✓':'✗'}</span>
+        <span>${meta.icon}</span>
+        <span style="flex:1;min-width:0;">${meta.label}</span>
+        <span style="font-size:10px;color:#7A7670;white-space:nowrap;">v${c.consent_version} · ${date}</span>
+      </div>`
+  }).join('')
+
+  const historyItems = consents.map(c => {
+    const meta = TYPE_META[c.consent_type] || { icon: '•', label: c.consent_type }
+    const dt = new Date(c.granted_at).toLocaleString('fr-FR', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'})
+    return `
+      <div style="padding:6px 10px;border-bottom:1px solid #E9E6DC;font-size:10px;color:#5F5E5A;display:flex;align-items:center;gap:6px;">
+        <span style="color:${c.granted?'#3B6D11':'#993556'};font-weight:700;width:12px;">${c.granted?'✓':'✗'}</span>
+        <span>${meta.icon}</span>
+        <span style="flex:1;min-width:0;font-weight:600;">${meta.label}</span>
+        <span style="font-size:9px;color:#7A7670;white-space:nowrap;">v${c.consent_version} · ${dt}</span>
+      </div>`
+  }).join('') || `<div style="padding:10px;text-align:center;font-size:10px;color:#999;">Aucune entrée</div>`
+
+  const nbHistory = consents.length
+  const historyLabel = nbHistory > 1 ? `${nbHistory} actions` : `${nbHistory} action`
+
+  return `
+    <div style="background:#F8F7F2;border-radius:8px;padding:6px 10px;">
+      ${snapshotItems}
+    </div>
+    <details style="margin-top:8px;">
+      <summary style="font-size:11px;color:#185FA5;cursor:pointer;padding:4px 0;font-weight:600;">📜 Voir l'historique complet (${historyLabel})</summary>
+      <div style="margin-top:6px;max-height:220px;overflow-y:auto;background:#FAFAF7;border-radius:8px;border:1px solid #E9E6DC;">
+        ${historyItems}
+      </div>
+    </details>
+    <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-top:10px;background:#FFF8E1;border-left:3px solid #F4B400;border-radius:4px;padding:8px 10px;">
+      <strong style="color:#7A5500;">ℹ Bon à savoir</strong> — Les consentements traitement, règlement et photo sont nécessaires pour utiliser l'application. Pour les révoquer, demande la suppression de ton compte ci-dessous. Seule la newsletter peut être réactivée/désactivée à tout moment via la case ci-dessus.
+    </div>`
 }
 
 function renderAccountCard() {
@@ -3237,6 +3326,11 @@ function renderAccountCard() {
             <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-top:2px;">Recevoir occasionnellement des informations sur la vie du club (newsletter, événements). Désabonnement à tout moment.</div>
           </div>
         </label>
+      </div>
+
+      <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:12px;">
+        <div style="font-size:12px;font-weight:600;color:#0C447C;margin-bottom:8px;">🔐 Mes consentements</div>
+        ${renderConsentsSnapshot(a._consents || [])}
       </div>
 
       <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:12px;">
