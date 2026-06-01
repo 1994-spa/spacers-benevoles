@@ -4,7 +4,7 @@
 // Pas de cache aggressif (l'app est dynamique : Supabase, données live)
 // ============================================================
 
-const VERSION = 'v1.0.0';
+const VERSION = 'v1.0.1';
 const OFFLINE_CACHE = `spacers-offline-${VERSION}`;
 
 // Assets minimaux à pré-cacher pour l'écran offline
@@ -44,6 +44,10 @@ self.addEventListener('fetch', event => {
   // Ne pas intercepter les requêtes non-GET ou les requêtes vers Supabase/Mailjet/etc.
   if (req.method !== 'GET') return;
   
+  // Skip non-http(s) schemes (chrome-extension://, data:, blob:, ws://, etc.)
+  // car la Cache API ne supporte que http/https
+  if (!req.url.startsWith('http')) return;
+
   const url = new URL(req.url);
   
   // Ne pas cacher les requêtes vers les APIs (toujours live)
