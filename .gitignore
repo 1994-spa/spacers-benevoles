@@ -16,3 +16,6 @@ restore-emojis*.ps1
 remove-iphone-mockup.ps1
 setup-pwa*.ps1
 add-screenshots.ps1
+# Scripts PowerShell de travail (locaux uniquement)
+patch-*.ps1
+*.bak
