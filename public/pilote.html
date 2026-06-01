@@ -481,7 +481,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <div class="sec">📨 Propositions en attente</div>
   <div id="ev-pilote-att"></div>
 
-  <div class="sec">ðŸ“¸ Photos en attente</div>
+  <div class="sec">📸 Photos en attente</div>
   <div id="ev-photos-att"></div>
 
   <div class="sec">📋 Événements publiés</div>
@@ -2362,7 +2362,7 @@ async function loadPhotosPending() {
     .order('created_at', { ascending: true })
 
   if (error) {
-    showAlert('alert-evenements', 'âŒ Erreur photos : ' + error.message, 'e')
+    showAlert('alert-evenements', '❌ Erreur photos : ' + error.message, 'e')
     return
   }
 
@@ -2404,7 +2404,7 @@ function renderPhotosPending() {
   if (!el) return
   const list = _piloteAllPhotosPending || []
   if (list.length === 0) {
-    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">âœ“ Aucune photo en attente de modÃ©ration</div>'
+    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucune photo en attente de modération</div>'
     return
   }
   el.innerHTML = list.map(p => {
@@ -2413,22 +2413,22 @@ function renderPhotosPending() {
     const uploaderName = ((uploader.prenom||'') + ' ' + (uploader.nom||'')).trim() || 'Inconnu'
     const thumb = p._signedUrl
       ? `<img src="${p._signedUrl}" style="width:120px;height:120px;border-radius:10px;object-fit:cover;cursor:pointer;flex-shrink:0;" onclick="openPilotePhotoLightbox('${p.id}')">`
-      : `<div style="width:120px;height:120px;border-radius:10px;background:#444441;display:flex;align-items:center;justify-content:center;font-size:24px;color:#888;flex-shrink:0;">â³</div>`
+      : `<div style="width:120px;height:120px;border-radius:10px;background:#444441;display:flex;align-items:center;justify-content:center;font-size:24px;color:#888;flex-shrink:0;">⏳</div>`
     return `
       <div class="demande-card">
         <div style="display:flex;gap:12px;margin-bottom:10px;">
           ${thumb}
           <div style="flex:1;min-width:0;">
             <div style="font-size:12px;font-weight:700;color:white;margin-bottom:4px;">${escapeHtmlPilote(event.titre || 'Event inconnu')}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:8px;">ðŸ“… ${event.date_event ? formatDate(event.date_event) : '?'}</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.7);">ðŸ‘¤ ${escapeHtmlPilote(uploaderName)}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:8px;">📅 ${event.date_event ? formatDate(event.date_event) : '?'}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.7);">👤 ${escapeHtmlPilote(uploaderName)}</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.4);">${escapeHtmlPilote(p.uploader_email || '')}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:6px;">â° ${formatRelativeDate(p.created_at)}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:6px;">⏰ ${formatRelativeDate(p.created_at)}</div>
           </div>
         </div>
         <div style="display:flex;gap:6px;">
-          <button class="btn btn-green btn-sm" style="flex:1;" onclick="publierPhoto('${p.id}')">âœ“ Publier</button>
-          <button class="btn btn-red btn-sm" style="flex:1;" onclick="refuserPhoto('${p.id}')">âœ— Refuser</button>
+          <button class="btn btn-green btn-sm" style="flex:1;" onclick="publierPhoto('${p.id}')">✓ Publier</button>
+          <button class="btn btn-red btn-sm" style="flex:1;" onclick="refuserPhoto('${p.id}')">✗ Refuser</button>
         </div>
       </div>`
   }).join('')
@@ -2436,9 +2436,9 @@ function renderPhotosPending() {
 
 async function publierPhoto(photoId) {
   const ok = await confirmModal({
-    icon: 'âœ“',
+    icon: '✓',
     title: 'Publier cette photo ?',
-    message: 'Elle sera visible par tous les bÃ©nÃ©voles dans la galerie de l\'Ã©vÃ©nement.',
+    message: 'Elle sera visible par tous les bénévoles dans la galerie de l\'événement.',
     confirmText: 'Publier',
     confirmStyle: 'green',
   })
@@ -2448,17 +2448,17 @@ async function publierPhoto(photoId) {
     moderated_by: curPiloteId,
     moderated_at: new Date().toISOString(),
   }).eq('id', photoId)
-  if (error) return showAlert('alert-evenements', 'âŒ Erreur : ' + error.message, 'e')
-  showAlert('alert-evenements', 'âœ“ Photo publiÃ©e', 's')
+  if (error) return showAlert('alert-evenements', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-evenements', '✓ Photo publiée', 's')
   loadPhotosPending()
 }
 
 async function refuserPhoto(photoId) {
   const msg = await promptModal({
-    icon: 'âœ—',
+    icon: '✗',
     title: 'Refuser cette photo',
-    message: 'Raison (optionnel, conservÃ©e en audit) :',
-    placeholder: 'Visage non-consentant, contenu inappropriÃ©...',
+    message: 'Raison (optionnel, conservée en audit) :',
+    placeholder: 'Visage non-consentant, contenu inapproprié...',
     confirmText: 'Refuser',
     confirmStyle: 'red',
   })
@@ -2469,8 +2469,8 @@ async function refuserPhoto(photoId) {
     moderated_at: new Date().toISOString(),
     moderation_message: msg || null,
   }).eq('id', photoId)
-  if (error) return showAlert('alert-evenements', 'âŒ Erreur : ' + error.message, 'e')
-  showAlert('alert-evenements', 'âœ— Photo refusÃ©e', 's')
+  if (error) return showAlert('alert-evenements', '❌ Erreur : ' + error.message, 'e')
+  showAlert('alert-evenements', '✗ Photo refusée', 's')
   loadPhotosPending()
 }
 
@@ -2481,7 +2481,7 @@ function openPilotePhotoLightbox(photoId) {
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer;'
   ov.onclick = (e) => { if (e.target === ov || e.target.tagName === 'IMG') ov.remove() }
   ov.innerHTML = `
-    <button onclick="this.parentElement.remove()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.15);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;">âœ•</button>
+    <button onclick="this.parentElement.remove()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.15);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;">✕</button>
     <img src="${photo._signedUrl}" style="max-width:100%;max-height:90vh;object-fit:contain;border-radius:8px;">
   `
   document.body.appendChild(ov)
