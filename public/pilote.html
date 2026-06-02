@@ -594,6 +594,38 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   </div>
 </div>
 
+<!-- MODAL GESTION REFERENT (Reférents / C) -->
+<div class="modal-overlay" id="modal-referent" style="display:none;">
+  <div class="modal" style="max-width:480px;max-height:90vh;overflow-y:auto;">
+    <h2>👥 Gestion du parrainage</h2>
+    <div id="modal-referent-header" style="text-align:center;font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:16px;line-height:1.6;"></div>
+
+    <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:white;margin-bottom:8px;">⭐ Statut référent</div>
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+        <input type="checkbox" id="referent-is-checkbox" style="width:18px;height:18px;cursor:pointer;accent-color:#185FA5;margin-top:2px;flex-shrink:0;" onchange="toggleReferentStatus()">
+        <div>
+          <div style="font-size:12px;color:white;">Marquer comme référent</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.5);">Pourra être assigné à de nouveaux bénévoles. Si décoché, les filleuls actuels seront automatiquement désaffectés.</div>
+        </div>
+      </label>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:white;margin-bottom:8px;">👤 Référent assigné à ce bénévole</div>
+      <div id="referent-assigned-display"></div>
+    </div>
+
+    <div id="referent-filleuls-section" style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;margin-bottom:12px;display:none;">
+      <div style="font-size:12px;font-weight:700;color:white;margin-bottom:8px;">🤝 Ses filleuls</div>
+      <div id="referent-filleuls-list"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeReferentModal()">Fermer</button>
+    </div>
+  </div>
+</div>
 <!-- MODAL NOTIFICATION -->
 <div class="modal-overlay" id="modal-notif" style="display:none;">
   <div class="modal">
@@ -907,6 +939,7 @@ function renderBenv(list) {
       </div>
       <button class="btn btn-green btn-sm" title="WhatsApp" style="flex-shrink:0;" onclick="whatsAppLibre('${b.id}')" ${b.statut_compte==='supprime'?'disabled style="opacity:0.3;cursor:not-allowed;flex-shrink:0;"':''}>📱</button>
       <button class="btn btn-sm" title="RGPD" style="flex-shrink:0;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" onclick="openRgpdMenu('${b.id}')" ${b.statut_compte==='supprime'?'disabled':''}>🛡️</button>
+      <button class="btn btn-sm" title="Parrainage" style="flex-shrink:0;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" onclick="openReferentModal('${b.id}')" ${b.statut_compte==='supprime'?'disabled':''}>👥</button>
     </div>`).join('')
 }
 
@@ -3181,6 +3214,166 @@ async function rgpdActionCancel() {
   await loadAll()
 }
 
+// ============================================================
+// GESTION RÉFÉRENT (Référents / C)
+// ============================================================
+let _referentModalTargetId = null
+
+async function openReferentModal(benevoleId) {
+  const b = allBenv.find(x => x.id === benevoleId)
+  if (!b) return
+  _referentModalTargetId = benevoleId
+
+  const fullName = ((b.prenom||'') + ' ' + (b.nom||'')).trim()
+  document.getElementById('modal-referent-header').innerHTML =
+    `<div style="font-size:14px;font-weight:700;color:white;margin-bottom:3px;">${escapeHtmlPilote(fullName)}</div>` +
+    `<div style="font-size:11px;color:rgba(255,255,255,0.5);">${escapeHtmlPilote(b.email||'')}</div>`
+
+  document.getElementById('referent-is-checkbox').checked = !!b.is_referent
+
+  renderReferentAssignment()
+  renderFilleuls()
+
+  document.getElementById('modal-referent').style.display = 'flex'
+}
+
+function closeReferentModal() {
+  document.getElementById('modal-referent').style.display = 'none'
+  _referentModalTargetId = null
+}
+
+function renderReferentAssignment() {
+  const el = document.getElementById('referent-assigned-display')
+  if (!el) return
+  const b = allBenv.find(x => x.id === _referentModalTargetId)
+  if (!b) { el.innerHTML = ''; return }
+
+  const referents = allBenv.filter(x => x.is_referent && x.id !== _referentModalTargetId && x.statut_compte === 'actif')
+
+  let html = ''
+  if (b.referent_id) {
+    const currentRef = allBenv.find(x => x.id === b.referent_id)
+    const refName = currentRef ? ((currentRef.prenom||'') + ' ' + (currentRef.nom||'')).trim() : 'Inconnu'
+    const refAvatar = currentRef && currentRef._signedUrl
+      ? `<img src="${currentRef._signedUrl}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+      : `<div class="bav-ph">${currentRef ? ini(currentRef) : '?'}</div>`
+    html += `
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(59,109,17,0.15);border-radius:8px;padding:10px;margin-bottom:8px;">
+        ${refAvatar}
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;color:white;font-weight:600;">${escapeHtmlPilote(refName)}</div>
+          ${b.referent_assigned_at ? `<div style="font-size:10px;color:rgba(255,255,255,0.5);">Assigné le ${new Date(b.referent_assigned_at).toLocaleDateString('fr-FR')}</div>` : ''}
+        </div>
+        <button class="btn btn-red btn-sm" onclick="unassignReferent()">Retirer</button>
+      </div>
+    `
+  } else {
+    html += '<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:10px;font-style:italic;">Aucun référent assigné pour le moment</div>'
+  }
+
+  if (referents.length > 0) {
+    html += `
+      <select id="referent-assign-select" class="input-field" style="margin-bottom:8px;">
+        <option value="">-- Choisir un référent --</option>
+        ${referents.map(r => `<option value="${r.id}">${escapeHtmlPilote(((r.prenom||'')+' '+(r.nom||'')).trim() || r.email)}</option>`).join('')}
+      </select>
+      <button class="btn btn-blue btn-sm" style="width:100%;" onclick="doAssignReferent()">Assigner ce référent</button>
+    `
+  } else {
+    html += '<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:8px;font-style:italic;">Aucun bénévole disponible. Marque d\'abord quelqu\'un comme référent.</div>'
+  }
+
+  el.innerHTML = html
+}
+
+function renderFilleuls() {
+  const sectionEl = document.getElementById('referent-filleuls-section')
+  const listEl = document.getElementById('referent-filleuls-list')
+  if (!sectionEl || !listEl) return
+
+  const b = allBenv.find(x => x.id === _referentModalTargetId)
+  if (!b || !b.is_referent) {
+    sectionEl.style.display = 'none'
+    return
+  }
+
+  const filleuls = allBenv.filter(x => x.referent_id === _referentModalTargetId)
+  sectionEl.style.display = 'block'
+
+  if (filleuls.length === 0) {
+    listEl.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.5);font-style:italic;">Aucun filleul pour le moment.</div>'
+    return
+  }
+
+  listEl.innerHTML = filleuls.map(f => {
+    const fName = ((f.prenom||'') + ' ' + (f.nom||'')).trim()
+    return `
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
+        ${f._signedUrl ? `<img src="${f._signedUrl}" class="bav">` : `<div class="bav-ph">${ini(f)}</div>`}
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtmlPilote(fName)}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);">${escapeHtmlPilote(f.email||'')}</div>
+        </div>
+      </div>
+    `
+  }).join('')
+}
+
+async function toggleReferentStatus() {
+  const checked = document.getElementById('referent-is-checkbox').checked
+  if (!_referentModalTargetId) return
+
+  const { error } = await sb.rpc('toggle_referent_status', {
+    p_benevole_id: _referentModalTargetId,
+    p_is_referent: checked,
+  })
+  if (error) {
+    document.getElementById('referent-is-checkbox').checked = !checked
+    showAlert('alert-bnv', '❌ Erreur : ' + error.message, 'e')
+    return
+  }
+  showAlert('alert-bnv', checked ? '⭐ Marqué comme référent' : 'Statut référent retiré', 's')
+  await loadAll()
+  renderReferentAssignment()
+  renderFilleuls()
+}
+
+async function doAssignReferent() {
+  const sel = document.getElementById('referent-assign-select')
+  const refId = sel ? sel.value : ''
+  if (!refId) { showAlert('alert-bnv', 'Choisis un référent', 'e'); return }
+  if (!_referentModalTargetId) return
+
+  const { error } = await sb.rpc('assign_referent', {
+    p_benevole_id: _referentModalTargetId,
+    p_referent_id: refId,
+  })
+  if (error) { showAlert('alert-bnv', '❌ Erreur : ' + error.message, 'e'); return }
+  showAlert('alert-bnv', '✓ Référent assigné', 's')
+  await loadAll()
+  renderReferentAssignment()
+}
+
+async function unassignReferent() {
+  if (!_referentModalTargetId) return
+  const ok = await confirmModal({
+    icon: '↺',
+    title: 'Retirer le référent ?',
+    message: 'Le bénévole n\'aura plus de référent assigné. Tu pourras lui en réassigner un.',
+    confirmText: 'Retirer',
+    confirmStyle: 'red',
+  })
+  if (!ok) return
+
+  const { error } = await sb.rpc('assign_referent', {
+    p_benevole_id: _referentModalTargetId,
+    p_referent_id: null,
+  })
+  if (error) { showAlert('alert-bnv', '❌ Erreur : ' + error.message, 'e'); return }
+  showAlert('alert-bnv', '✓ Référent retiré', 's')
+  await loadAll()
+  renderReferentAssignment()
+}
 function ini(b){return((b.prenom||'?')[0]+(b.nom||'?')[0]).toUpperCase()}
 function formatDate(d){if(!d)return'';return new Date(d).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long'})}
 
