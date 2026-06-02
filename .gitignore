@@ -19,3 +19,24 @@ add-screenshots.ps1
 # Scripts PowerShell de travail (locaux uniquement)
 patch-*.ps1
 *.bak
+
+# Backups generes par scripts (file.html.bak-foo etc.)
+*.bak-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Env / secrets
+.env
+.env.local
+.dev.vars
+.wrangler/
+
+# Logs
+*.log
+npm-debug.log*
