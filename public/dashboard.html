@@ -2862,6 +2862,7 @@ function renderHugoHome(el, p, pts, niveau, pct) {
         <span>${niveau==='Or'?'Max !':niveau==='Argent'?(1000-pts)+' pts avant Or':(600-pts)+' pts avant Argent'}</span>
       </div>
     </div>
+    ${renderNextMatchSection()}
     <div class="defi-card">
       <div class="defi-title">🎯 Défis en cours</div>
       <div class="defi-item">
@@ -2928,6 +2929,8 @@ function renderJoelHome(el, p, pts) {
       <div style="font-size:18px;font-weight:800;color:white;margin-bottom:4px;">${p.prenom||''} ${p.nom||''}</div>
       <div style="font-size:12px;color:rgba(192,221,151,0.7);">${p.matchs_joues||0} matchs · ${pts} pts · ${p.niveau||'Bronze'}</div>
     </div>
+
+    ${renderNextMatchSection()}
 
     <div class="joel-btn" onclick="bSwitch('planning')">
       <div class="joel-btn-icon" style="background:#E6F1FB;">📅</div>
