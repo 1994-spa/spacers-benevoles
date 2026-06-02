@@ -2588,6 +2588,89 @@ async function saveProfilAndContinue() {
 // ============================================================
 // PREMIÈRES ÉTAPES (Découverte) - dynamique avec actions
 // ============================================================
+// ============================================================
+// PROCHAIN MATCH (Découverte) - CTA dispo/indispo sur la home
+// ============================================================
+async function loadNextMatch() {
+  if (!CP) return
+  CP._nextMatch = null
+  CP._nextMatchInscription = null
+  try {
+    const { data: matchs } = await sb.from('matchs')
+      .select('id, adversaire, date_match, heure, lieu, statut_inscriptions')
+      .eq('statut_inscriptions', 'ouvert')
+      .order('date_match', { ascending: true })
+      .limit(1)
+    if (!matchs || matchs.length === 0) return
+    CP._nextMatch = matchs[0]
+
+    const { data: insc } = await sb.from('inscriptions')
+      .select('id, statut')
+      .eq('benevole_id', CP.id)
+      .eq('match_id', CP._nextMatch.id)
+      .maybeSingle()
+    CP._nextMatchInscription = insc || null
+  } catch (e) {
+    console.warn('loadNextMatch failed', e)
+  }
+}
+
+function renderNextMatchSection() {
+  if (!CP || !CP._nextMatch) return ''
+  const m = CP._nextMatch
+  const insc = CP._nextMatchInscription
+  const dateStr = formatDate(m.date_match)
+  const heureStr = m.heure || ''
+  const lieuStr = m.lieu || 'Palais des Sports'
+
+  if (insc) {
+    const isDispo = insc.statut === 'disponible'
+    const bg = isDispo ? 'linear-gradient(135deg,#EAF3DE,#C0DD97)' : 'linear-gradient(135deg,#F1EFE8,#D3D1C7)'
+    const fg = isDispo ? '#3B6D11' : '#5F5E5A'
+    const icon = isDispo ? '✓' : '✗'
+    const label = isDispo ? 'Tu as répondu : Disponible' : 'Tu as répondu : Indisponible'
+    return `
+    <div style="background:${bg};border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;" onclick="bSwitch('planning')">
+      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${fg};opacity:0.7;margin-bottom:3px;">PROCHAIN MATCH</div>
+      <div style="font-size:14px;font-weight:800;color:${fg};margin-bottom:4px;">Spacers vs ${escapeHtml(m.adversaire)}</div>
+      <div style="font-size:11px;color:${fg};opacity:0.85;margin-bottom:8px;">📅 ${escapeHtml(dateStr)}${heureStr ? ' · ' + escapeHtml(heureStr) : ''} · ${escapeHtml(lieuStr)}</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:${fg};">
+        <span>${icon} ${escapeHtml(label)}</span>
+        <span style="margin-left:auto;font-size:10px;opacity:0.7;">Modifier ›</span>
+      </div>
+    </div>`
+  }
+
+  return `
+    <div style="background:linear-gradient(135deg,#0C447C,#185FA5);border-radius:14px;padding:14px;margin-bottom:10px;color:white;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#F5C842;margin-bottom:3px;">🏐 PROCHAIN MATCH — Es-tu dispo ?</div>
+      <div style="font-size:16px;font-weight:800;margin-bottom:4px;">Spacers vs ${escapeHtml(m.adversaire)}</div>
+      <div style="font-size:11px;color:rgba(181,212,244,0.85);margin-bottom:12px;">📅 ${escapeHtml(dateStr)}${heureStr ? ' · ' + escapeHtml(heureStr) : ''} · ${escapeHtml(lieuStr)}</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="flex:1;background:#3B6D11;color:white;font-size:13px;padding:10px;border-radius:50px;border:none;font-family:'Sora',sans-serif;font-weight:700;cursor:pointer;" onclick="setDispoFromHome('${m.id}','disponible')">👍 Je suis dispo</button>
+        <button class="btn" style="flex:1;background:rgba(255,255,255,0.15);color:white;font-size:13px;padding:10px;border-radius:50px;border:none;font-family:'Sora',sans-serif;font-weight:700;cursor:pointer;" onclick="setDispoFromHome('${m.id}','indisponible')">👎 Indispo</button>
+      </div>
+    </div>`
+}
+
+async function setDispoFromHome(matchId, statut) {
+  if (!CU || !CP) return
+  const { error } = await sb.from('inscriptions').upsert({
+    benevole_id: CP.id,
+    match_id: matchId,
+    statut: statut
+  }, { onConflict: 'benevole_id,match_id' })
+
+  if (error) {
+    showToast('Erreur : ' + error.message, 'error')
+    return
+  }
+
+  showToast(statut === 'disponible' ? '👍 Noté(e) dispo, merci !' : '👎 Indisponibilité enregistrée', 'success')
+  await loadNextMatch()
+  await loadEtapesData()
+  renderHomeForProfil(CP)
+}
 async function loadEtapesData() {
   if (!CP) return
   try {
@@ -2713,6 +2796,7 @@ async function showApp(p) {
   renderTopbar(p)
   await loadMyReferent()
   await loadEtapesData()
+  await loadNextMatch()
   renderHomeForProfil(p)
   loadProfilFields(p)
   loadInstaFeed()
@@ -2816,6 +2900,7 @@ function renderVirginieHome(el, p) {
       <div style="font-size:12px;color:#6D5DAA;margin-top:4px;line-height:1.6;">Vous faites partie des Spacers — voici comment tout se passe ici.</div>
     </div>
 
+    ${renderNextMatchSection()}
     ${renderReferentCard()}
 
     ${renderEtapesSection()}
