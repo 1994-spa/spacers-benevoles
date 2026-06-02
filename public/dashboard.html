@@ -2831,6 +2831,57 @@ function renderFilleulsCard() {
       ${lignes}
     </div>`;
 }
+let eventsAVenirData = null;
+
+async function loadEventsAVenir() {
+  eventsAVenirData = null;
+  try {
+    const { data, error } = await sb
+      .from('events_benevoles')
+      .select('id, titre, date_event, lieu, categorie, cover_path')
+      .eq('statut', 'published')
+      .gte('date_event', new Date().toISOString())
+      .order('date_event', { ascending: true })
+      .limit(3);
+    if (error) { console.warn('loadEventsAVenir error', error); return; }
+    if (!data || data.length === 0) return;
+    eventsAVenirData = data;
+  } catch (e) {
+    console.warn('loadEventsAVenir exception', e);
+  }
+}
+
+function renderEventsAVenirSection() {
+  if (!eventsAVenirData || eventsAVenirData.length === 0) return '';
+  const cards = eventsAVenirData.map(ev => {
+    const coverUrl = (typeof getEventCoverUrl === 'function') ? getEventCoverUrl(ev.cover_path) : null;
+    const d = new Date(ev.date_event);
+    const dateStr = d.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' });
+    const heureStr = d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    const lieuStr = ev.lieu ? ' · ' + ev.lieu : '';
+    const cover = coverUrl
+      ? `<div style="height:90px;background-image:url('${coverUrl}');background-size:cover;background-position:center;border-radius:8px 8px 0 0;"></div>`
+      : `<div style="height:90px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:8px 8px 0 0;display:flex;align-items:center;justify-content:center;font-size:32px;">🎉</div>`;
+    return `
+      <div onclick="bSwitch('evenements')" style="cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;overflow:hidden;transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        ${cover}
+        <div style="padding:10px 12px;">
+          <div style="font-weight:600;font-size:13px;color:#fff;margin-bottom:4px;line-height:1.3;">${ev.titre || 'Sans titre'}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);">${dateStr} · ${heureStr}${lieuStr}</div>
+        </div>
+      </div>`;
+  }).join('');
+  return `
+    <div style="margin-bottom:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 4px;">
+        <div style="font-weight:700;font-size:14px;color:rgba(255,255,255,0.85);">📅 Prochains événements</div>
+        <a onclick="bSwitch('evenements')" style="font-size:12px;color:#60a5fa;cursor:pointer;text-decoration:none;">Voir tous →</a>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr;gap:10px;">
+        ${cards}
+      </div>
+    </div>`;
+}
 async function loadMyReferent() {
   if (!CP) return
   CP._referent = null
@@ -2897,6 +2948,7 @@ async function showApp(p) {
   renderTopbar(p)
   await loadMyReferent()
   await loadMyFilleuls()
+  await loadEventsAVenir()
   await loadEtapesData()
   await loadNextMatch()
   await loadFaqData()
@@ -2967,6 +3019,7 @@ function renderHugoHome(el, p, pts, niveau, pct) {
     </div>
     ${renderNextMatchSection()}
     ${renderFilleulsCard()}
+    ${renderEventsAVenirSection()}
     <div class="defi-card">
       <div class="defi-title">🎯 Défis en cours</div>
       <div class="defi-item">
@@ -3008,6 +3061,7 @@ function renderVirginieHome(el, p) {
     ${renderNextMatchSection()}
     ${renderFilleulsCard()}
     ${renderReferentCard()}
+    ${renderEventsAVenirSection()}
 
     ${renderEtapesSection()}
 
@@ -3027,6 +3081,7 @@ function renderJoelHome(el, p, pts) {
 
     ${renderNextMatchSection()}
     ${renderFilleulsCard()}
+    ${renderEventsAVenirSection()}
 
     <div class="joel-btn" onclick="bSwitch('planning')">
       <div class="joel-btn-icon" style="background:#E6F1FB;">📅</div>
