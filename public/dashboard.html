@@ -2764,6 +2764,73 @@ async function markPostesVisited() {
     console.warn('mark_postes_visited exception', e)
   }
 }
+let myFilleulsData = null;
+
+async function loadMyFilleuls() {
+  if (!CP) return;
+  myFilleulsData = null;
+  try {
+    const { data, error } = await sb.rpc('get_my_filleuls');
+    if (error) { console.warn('loadMyFilleuls error', error); return; }
+    if (!data) return;
+    if (data.filleuls && Array.isArray(data.filleuls)) {
+      for (const f of data.filleuls) {
+        if (f.photo_path) {
+          try { f.photo_url = await getSignedPhotoUrl(f.photo_path); } catch (_) {}
+        }
+      }
+    }
+    myFilleulsData = data;
+  } catch (e) {
+    console.warn('loadMyFilleuls exception', e);
+  }
+}
+
+function renderFilleulsCard() {
+  if (!myFilleulsData) return '';
+  const filleuls = myFilleulsData.filleuls || [];
+  if (filleuls.length === 0) return '';
+  const nm = myFilleulsData.next_match;
+  const lignes = filleuls.map(f => {
+    const photo = f.photo_url 
+      ? `<img src="${f.photo_url}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="" />`
+      : `<div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:rgba(255,255,255,0.6);flex-shrink:0;">${(f.prenom||'?').charAt(0)}${(f.nom||'').charAt(0)}</div>`;
+    let badge, action = '';
+    if (!nm) {
+      badge = '<span style="color:rgba(255,255,255,0.4);font-size:12px;">Pas de match prévu</span>';
+    } else if (f.next_match_statut === 'disponible') {
+      badge = '<span style="color:#34d399;font-size:12px;font-weight:600;">✓ Dispo</span>';
+    } else if (f.next_match_statut === 'indisponible') {
+      badge = '<span style="color:#f87171;font-size:12px;font-weight:600;">✗ Indispo</span>';
+    } else {
+      badge = '<span style="color:#fbbf24;font-size:12px;font-weight:600;">— Pas répondu</span>';
+      if (f.telephone) {
+        const tel = String(f.telephone||'').replace(/\D/g, '').replace(/^0/, '33');
+        const dateStr = new Date(nm.date_match).toLocaleDateString('fr-FR', {weekday:'long', day:'numeric', month:'long'});
+        const msg = encodeURIComponent(`Salut ${f.prenom} ! Tu peux nous dire si tu es dispo pour le match contre ${nm.adversaire} le ${dateStr} ? 🏐`);
+        action = `<a href="https://wa.me/${tel}?text=${msg}" target="_blank" style="display:inline-block;padding:6px 12px;background:#25D366;color:#fff;border-radius:6px;font-size:12px;text-decoration:none;font-weight:600;">📱 Relancer</a>`;
+      }
+    }
+    return `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);">
+        ${photo}
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:2px;">${f.prenom||''} ${f.nom||''}</div>
+          ${badge}
+          ${action ? '<div style="margin-top:6px;">' + action + '</div>' : ''}
+        </div>
+      </div>`;
+  }).join('');
+  const matchTitle = nm 
+    ? `<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:8px;">Pour le match vs ${nm.adversaire}</div>`
+    : '';
+  return `
+    <div style="margin-bottom:16px;background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(139,92,246,0.05));border:1px solid rgba(139,92,246,0.3);padding:16px;border-radius:12px;">
+      <div style="font-weight:700;font-size:16px;margin-bottom:4px;color:#fff;">👥 Mes filleuls (${filleuls.length})</div>
+      ${matchTitle}
+      ${lignes}
+    </div>`;
+}
 async function loadMyReferent() {
   if (!CP) return
   CP._referent = null
@@ -2829,6 +2896,7 @@ async function showApp(p) {
   document.getElementById('app').style.display = 'block'
   renderTopbar(p)
   await loadMyReferent()
+  await loadMyFilleuls()
   await loadEtapesData()
   await loadNextMatch()
   await loadFaqData()
@@ -2898,6 +2966,7 @@ function renderHugoHome(el, p, pts, niveau, pct) {
       </div>
     </div>
     ${renderNextMatchSection()}
+    ${renderFilleulsCard()}
     <div class="defi-card">
       <div class="defi-title">🎯 Défis en cours</div>
       <div class="defi-item">
@@ -2937,6 +3006,7 @@ function renderVirginieHome(el, p) {
     </div>
 
     ${renderNextMatchSection()}
+    ${renderFilleulsCard()}
     ${renderReferentCard()}
 
     ${renderEtapesSection()}
@@ -2956,6 +3026,7 @@ function renderJoelHome(el, p, pts) {
     </div>
 
     ${renderNextMatchSection()}
+    ${renderFilleulsCard()}
 
     <div class="joel-btn" onclick="bSwitch('planning')">
       <div class="joel-btn-icon" style="background:#E6F1FB;">📅</div>
