@@ -2620,7 +2620,7 @@ function renderNextMatchSection() {
   const m = CP._nextMatch
   const insc = CP._nextMatchInscription
   const dateStr = formatDate(m.date_match)
-  const heureStr = m.heure || ''
+  const heureStr = (m.heure || '').replace(/:\d{2}$/, '')
   const lieuStr = m.lieu || 'Palais des Sports'
 
   if (insc) {
