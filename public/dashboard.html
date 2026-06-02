@@ -2591,6 +2591,40 @@ async function saveProfilAndContinue() {
 // ============================================================
 // PROCHAIN MATCH (Découverte) - CTA dispo/indispo sur la home
 // ============================================================
+// ============================================================
+// FAQ (Bloc A) - chargée depuis la BDD, filtrée par profil
+// ============================================================
+let _faqItems = []
+
+async function loadFaqData() {
+  try {
+    const { data, error } = await sb.from('faq_items')
+      .select('id, question, reponse, ordre, public_cible, actif')
+      .eq('actif', true)
+      .order('ordre', { ascending: true })
+    if (error) { console.warn('loadFaqData error', error); _faqItems = []; return }
+    _faqItems = data || []
+  } catch (e) {
+    console.warn('loadFaqData exception', e)
+    _faqItems = []
+  }
+}
+
+function renderFaqSection() {
+  if (!CP || !_faqItems || _faqItems.length === 0) return ''
+  const profil = CP.profil_type || 'virginie'
+  const items = _faqItems.filter(f => f.public_cible === 'tous' || f.public_cible === profil)
+  if (items.length === 0) return ''
+
+  return `
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:10px 0 7px;">❓ FAQ RAPIDE</div>
+    ${items.map(f => `
+      <div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">${escapeHtml(f.question)} <span>+</span></div>
+        <div class="faq-a">${escapeHtml(f.reponse)}</div>
+      </div>`).join('')}
+  `
+}
 async function loadNextMatch() {
   if (!CP) return
   CP._nextMatch = null
@@ -2797,6 +2831,7 @@ async function showApp(p) {
   await loadMyReferent()
   await loadEtapesData()
   await loadNextMatch()
+  await loadFaqData()
   renderHomeForProfil(p)
   loadProfilFields(p)
   loadInstaFeed()
@@ -2906,17 +2941,7 @@ function renderVirginieHome(el, p) {
 
     ${renderEtapesSection()}
 
-    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:10px 0 7px;">❓ FAQ RAPIDE</div>
-    ${[
-      {q:'Comment m\'inscrire à un match ?', a:'Dans l\'onglet Planning → cliquez "Je suis disponible" sur le match souhaité. Le pilote confirmera votre affectation.'},
-      {q:'Que dois-je apporter le jour J ?', a:'Rien de spécial ! Arrivez 30 min avant le match. Clément vous remettra votre accréditation à l\'entrée.'},
-      {q:'Je suis disponible mais finalement non ?', a:'Revenez dans Planning → cliquez "Indisponible". Prévenez le plus tôt possible, idéalement avant J-3.'},
-      {q:'Comment gagner des points ?', a:'50 pts par match + 20 pts ponctualité. Les points permettent de débloquer des remises boutique et des avantages exclusifs.'},
-    ].map(f=>`
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-q">${f.q} <span>+</span></div>
-        <div class="faq-a">${f.a}</div>
-      </div>`).join('')}
+    ${renderFaqSection()}
     ${renderDecouverteSection()}
     ${renderInstaFeed()}
     ${renderSuggestionSection('virginie')}`
