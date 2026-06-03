@@ -3173,19 +3173,41 @@ function toggleFaq(el) {
 }
 
 // -- PLANNING -------------------------------------------------
+function _crCol(c){ return ({arrivee:'#3B82F6',mise_en_place:'#8B5CF6',en_position:'#22C55E',match:'#042C53',repas:'#F5C842',desinstallation:'#F97316'})[c]||'#9CA3AF'; }
+function _crLab(c){ return ({arrivee:'Arriv&eacute;e / accueil',mise_en_place:'Mise en place',en_position:'En position',match:'Match',repas:'Repas',desinstallation:'D&eacute;sinstallation'})[c]||'Autre'; }
+function friseHtml(creneaux, monPoste){
+  if(!creneaux || creneaux.length===0) return '';
+  const list = creneaux.filter(c => !c.poste_id || c.poste_id===monPoste);
+  if(list.length===0) return '';
+  const rows = list.map(c=>{
+    const h = (c.heure_debut||'').slice(0,5).replace(':','h') + (c.heure_fin?(' &ndash; '+c.heure_fin.slice(0,5).replace(':','h')):'');
+    const lab = c.libelle ? escapeHtml(c.libelle) : _crLab(c.categorie);
+    return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">'+
+      '<span style="width:10px;height:10px;border-radius:3px;flex-shrink:0;background:'+_crCol(c.categorie)+';"></span>'+
+      '<span style="font-size:12px;font-weight:700;color:#0C447C;min-width:96px;">'+h+'</span>'+
+      '<span style="font-size:12px;color:#5F5E5A;">'+lab+'</span>'+
+      '</div>';
+  }).join('');
+  return '<div style="background:#F4F7FB;border-radius:10px;padding:10px 12px;margin-top:8px;">'+
+    '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8A9BAD;margin-bottom:6px;">&#128336; Ton planning</div>'+
+    rows+'</div>';
+}
 async function loadPlanning() {
   const el = document.getElementById('planning-list')
   const { data: matchs } = await sb.from('matchs').select('*').order('date_match',{ascending:true})
   if (!matchs||matchs.length===0){el.innerHTML='<div style="text-align:center;color:rgba(181,212,244,0.4);padding:30px;font-size:12px;">Aucun match programmé pour l\'instant.</div>';return}
-  const { data: ins } = await sb.from('inscriptions').select('match_id,statut').eq('benevole_id',CU.id)
-  const insMap={}; if(ins) ins.forEach(i=>insMap[i.match_id]=i.statut)
+  const { data: ins } = await sb.from('inscriptions').select('match_id,statut,poste_id').eq('benevole_id',CU.id)
+  const insMap={}; if(ins) ins.forEach(i=>insMap[i.match_id]=i)
+  const _mids = matchs.map(m=>m.id)
+  const { data: _cre } = await sb.from('match_creneaux').select('*').in('match_id', _mids).order('ordre').order('heure_debut')
+  const creMap={}; (_cre||[]).forEach(c=>{ (creMap[c.match_id]=creMap[c.match_id]||[]).push(c) })
   el.innerHTML = matchs.map(m=>`
     <div class="match-item">
       <div class="match-vs">Spacers vs ${m.adversaire}</div>
       <div class="match-info">📅 ${formatDate(m.date_match)} · ${m.heure||''} · ${m.lieu||'Palais des Sports'}</div>
       ${m.statut_inscriptions==='ouvert'
         ? insMap[m.id]
-          ? `<span class="s-dispo">${insMap[m.id]==='disponible'?'✓ Disponible':'✗ Indisponible'}</span>`
+          ? `<span class="s-dispo">${insMap[m.id].statut==='disponible'?'✓ Disponible':'✗ Indisponible'}</span>${insMap[m.id].statut==='disponible'?friseHtml(creMap[m.id],insMap[m.id].poste_id):''}`
           : `<span class="s-open">✅ Ouvert</span>
              <div class="match-actions">
                <button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Dispo</button>
