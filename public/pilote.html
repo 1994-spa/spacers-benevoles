@@ -236,6 +236,30 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
     <div id="validation-list"></div>
   </div>
 
+  <div class="sec">&#128336; Planning du match</div>
+  <div class="card">
+    <div id="creneaux-list" style="margin-bottom:12px;"></div>
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      <select id="cr-cat" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+        <option value="arrivee">Arriv&eacute;e / accueil</option>
+        <option value="mise_en_place">Mise en place / briefing</option>
+        <option value="en_position">En position &ndash; ouverture</option>
+        <option value="match">Match</option>
+        <option value="repas">Repas</option>
+        <option value="desinstallation">D&eacute;sinstallation</option>
+        <option value="autre">Autre</option>
+      </select>
+      <input id="cr-lib" placeholder="Libell&eacute; (optionnel, ex. Mise en place buvette)" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+      <div style="font-size:10px;color:rgba(255,255,255,0.4);">Heure de d&eacute;but / fin (fin optionnelle)</div>
+      <div style="display:flex;gap:7px;">
+        <input id="cr-deb" type="time" style="flex:1;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+        <input id="cr-fin" type="time" style="flex:1;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+      </div>
+      <select id="cr-poste" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;"><option value="">Tous les postes</option></select>
+      <button class="btn btn-blue btn-full" onclick="addCreneau()">+ Ajouter le cr&eacute;neau</button>
+    </div>
+  </div>
+
   <div class="sec">Note pilote sur ce match</div>
   <div class="card">
     <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:8px;">Visible uniquement par les pilotes / admins. Sauvegardée dans la base.</div>
@@ -1082,6 +1106,7 @@ async function loadMatch() {
     curMatch = null
     curInscriptionsAffectes = []
     renderValidation([])
+    loadCreneaux()
     return
   }
   const m = matchs[0]
@@ -1093,6 +1118,7 @@ async function loadMatch() {
   // Postes
   const { data: postes } = await sb.from('postes').select('*').order('nom')
   curPostes = postes || []
+  loadCreneaux()
 
   // Inscriptions disponibles (CHANTIER 11 : on récupère photo_path au lieu de photo_url)
   const { data: insc } = await sb.from('inscriptions')
@@ -1180,6 +1206,54 @@ async function loadMatch() {
   renderValidation(curInscriptionsAffectes)
 }
 
+const CR_CATS = [
+  ['arrivee','Arriv&eacute;e / accueil','#3B82F6'],
+  ['mise_en_place','Mise en place / briefing','#8B5CF6'],
+  ['en_position','En position','#22C55E'],
+  ['match','Match','#042C53'],
+  ['repas','Repas','#F5C842'],
+  ['desinstallation','D&eacute;sinstallation','#F97316'],
+  ['autre','Autre','#9CA3AF']
+];
+function crColor(c){ var f=CR_CATS.find(x=>x[0]===c); return f?f[2]:'#9CA3AF'; }
+function crLabel(c){ var f=CR_CATS.find(x=>x[0]===c); return f?f[1]:'Autre'; }
+async function loadCreneaux(){
+  var listEl=document.getElementById('creneaux-list');
+  if(!listEl) return;
+  var posteSel=document.getElementById('cr-poste');
+  if(!curMatch){ listEl.innerHTML=''; return; }
+  if(posteSel) posteSel.innerHTML='<option value="">Tous les postes</option>'+(curPostes||[]).map(p=>'<option value="'+p.id+'">'+p.nom+'</option>').join('');
+  var r=await sb.from('match_creneaux').select('*').eq('match_id',curMatch.id).order('ordre').order('heure_debut');
+  var list=r.data||[];
+  if(list.length===0){ listEl.innerHTML='<div style="color:rgba(255,255,255,0.3);font-size:12px;">Aucun cr&eacute;neau pour ce match.</div>'; return; }
+  listEl.innerHTML=list.map(c=>{
+    var pn=c.poste_id?(((curPostes||[]).find(p=>p.id===c.poste_id)||{}).nom||'Poste'):'Tous';
+    var h=(c.heure_debut||'').slice(0,5)+(c.heure_fin?(' &ndash; '+c.heure_fin.slice(0,5)):'');
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #333;">'+
+      '<span style="width:11px;height:11px;border-radius:3px;flex-shrink:0;background:'+crColor(c.categorie)+';"></span>'+
+      '<div style="flex:1;font-size:12px;color:white;">'+h+' &middot; '+(c.libelle||crLabel(c.categorie))+' <span style="color:rgba(255,255,255,0.4);">('+pn+')</span></div>'+
+      '<button class="btn btn-sm" style="background:#7a2525;color:white;" onclick="delCreneau(\''+c.id+'\')">&#10005;</button>'+
+      '</div>';
+  }).join('');
+}
+async function addCreneau(){
+  if(!curMatch){ showAlert('alert-match','Aucun match ouvert','e'); return; }
+  var cat=document.getElementById('cr-cat').value;
+  var lib=document.getElementById('cr-lib').value.trim();
+  var deb=document.getElementById('cr-deb').value;
+  var fin=document.getElementById('cr-fin').value;
+  var poste=document.getElementById('cr-poste').value||null;
+  if(!deb){ showAlert('alert-match','Indique une heure de debut','e'); return; }
+  var r=await sb.from('match_creneaux').insert({ match_id:curMatch.id, poste_id:poste, categorie:cat, libelle:lib||null, heure_debut:deb, heure_fin:fin||null });
+  if(r.error){ showAlert('alert-match','Erreur: '+r.error.message,'e'); return; }
+  document.getElementById('cr-lib').value=''; document.getElementById('cr-deb').value=''; document.getElementById('cr-fin').value='';
+  showAlert('alert-match','Creneau ajoute','s');
+  loadCreneaux();
+}
+async function delCreneau(id){
+  var r=await sb.from('match_creneaux').delete().eq('id',id);
+  if(!r.error) loadCreneaux();
+}
 async function affecterPoste(inscriptionId, posteId, selectEl) {
   selectEl.disabled = true
   const updates = { poste_id: posteId || null }
