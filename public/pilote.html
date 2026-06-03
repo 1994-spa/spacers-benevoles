@@ -896,52 +896,88 @@ function promptModal(opts) {
 // GUIDE PILOTE (onboarding pedagogique)
 // ============================================================
 const GUIDE_STEPS = [
-  { ic:'&#127916;', tt:'Bienvenue dans l\'espace pilote !', quoi:'C\'est ici que tu fais vivre l\'équipe de bénévoles. En 5 étapes, voici comment tout s\'enchaîne &mdash; de l\'ouverture d\'un match jusqu\'à la reconnaissance de tes bénévoles.', pourquoi:'', onglet:'' },
-  { ic:'&#127952;', tt:'1. Gérer le match', quoi:'Dans l\'onglet Match, tu vois les postes à pourvoir, qui est disponible, et tu affectes chaque bénévole. Un tap sur &laquo; Notifier &raquo; les prévient.', pourquoi:'Tant qu\'un match n\'est pas géré, les bénévoles n\'ont rien à réserver : c\'est ton point de départ.', onglet:'&#127952; Onglet Match' },
-  { ic:'&#128336;', tt:'2. Le planning du match', quoi:'Ajoute les créneaux (arrivée, mise en place, match, repas, rangement&hellip;) avec leurs horaires. Chaque bénévole verra SA frise personnalisée selon son poste.', pourquoi:'Un bénévole qui sait quand venir et quoi faire est serein &mdash; et un bénévole serein, ça revient.', onglet:'&#127952; Onglet Match' },
-  { ic:'&#9989;', tt:'3. Valider les présences', quoi:'Le jour J, coche qui était présent dans la section Validation. C\'est ce geste qui attribue les points et fait monter les niveaux (Bronze, Argent, Or).', pourquoi:'La reconnaissance, c\'est le carburant : des points qui montent, c\'est l\'envie de revenir.', onglet:'&#127952; Onglet Match' },
-  { ic:'&#128588;', tt:'4. Lancer un appel ciblé', quoi:'Besoin de bras hors-match (montage, événement, régie) ? Crée un appel et notifie. Tu peux le réserver à une compétence (ex. Régie Vidéo) : seuls les bénévoles formés le verront.', pourquoi:'Tu mobilises les bonnes personnes sans spammer tout le monde &mdash; et on répond plus volontiers quand c\'est pertinent.', onglet:'&#128588; Onglet Appels' },
-  { ic:'&#10024;', tt:'5. Valoriser & écouter', quoi:'Valide les photos (onglet Accréds) pour générer les accréditations, et garde un œil sur les Suggestions des bénévoles : ce sont tes meilleures idées d\'amélioration. Tu pourras rouvrir ce guide à tout moment depuis l\'Accueil.', pourquoi:'', onglet:'' }
+  { center:true, ic:'&#127916;', tt:'Bienvenue dans l\'espace pilote !', quoi:'C\'est ici que tu fais vivre l\'équipe de bénévoles. En quelques étapes, je te montre &agrave; l\'écran où se trouve chaque chose &mdash; et pourquoi elle compte.', pourquoi:'' },
+  { tab:'match', sel:'#aff-table', ic:'&#127952;', tt:'Gérer le match', quoi:'Les postes &agrave; pourvoir et les bénévoles disponibles s\'affichent ici. Tu affectes chacun &agrave; son poste, puis tu les préviens avec le bouton &laquo; Notifier &raquo; juste en dessous.', pourquoi:'Tant qu\'un match n\'est pas géré, les bénévoles n\'ont rien &agrave; réserver : c\'est ton point de départ.' },
+  { tab:'match', sel:'#validation-section', ic:'&#9989;', tt:'Valider les présences', quoi:'Le jour du match, coche ici qui était bien présent. C\'est ce geste qui attribue les points et fait monter les niveaux (Bronze, Argent, Or).', pourquoi:'La reconnaissance, c\'est le carburant : des points qui montent, c\'est l\'envie de revenir.' },
+  { tab:'appels', sel:'#ap-competence', ic:'&#128588;', tt:'Lancer un appel ciblé', quoi:'Crée un appel hors-match (montage, événement, régie&hellip;). Avec &laquo; Réservé &agrave; &raquo;, tu peux le limiter &agrave; une compétence : seuls les bénévoles formés le verront et seront notifiés.', pourquoi:'Tu mobilises les bonnes personnes sans solliciter tout le monde &mdash; on répond plus volontiers quand c\'est pertinent.' },
+  { tab:'appels', sel:'#comp-select', ic:'&#127891;', tt:'Gérer les compétences', quoi:'Choisis une compétence ici, puis coche les bénévoles formés. C\'est ce qui rend possible le ciblage des appels juste au-dessus.', pourquoi:'Tu le fais une fois, et tous les futurs appels concernés cibleront automatiquement les bonnes personnes.' },
+  { sel:'#tab-accreds', ic:'&#129534;', tt:'Accréditations & écoute', quoi:'Dans l\'onglet Accréds, valide les photos des bénévoles pour générer leurs accréditations. Et garde un œil sur l\'onglet Suggestions : leurs idées y atterrissent.', pourquoi:'Des bénévoles écoutés et bien accrédités, c\'est une équipe qui se sent reconnue.' },
+  { center:true, ic:'&#128640;', tt:'C\'est parti !', quoi:'Tu peux rouvrir ce guide quand tu veux avec le bouton &laquo; Comment ça marche ? &raquo; en haut de l\'Accueil. Bon match !', pourquoi:'' }
 ];
 let _guideIdx = 0;
+
 function openGuide(){
   _guideIdx = 0;
-  let ov = document.getElementById('guide-ov');
-  if(!ov){
-    ov = document.createElement('div');
+  if(!document.getElementById('guide-ov')){
+    var ov = document.createElement('div');
     ov.id = 'guide-ov';
-    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9998;display:flex;align-items:center;justify-content:center;padding:16px;';
-    ov.innerHTML = '<div style="background:#2a2a28;border-radius:20px;width:100%;max-width:420px;padding:22px;box-shadow:0 10px 40px rgba(0,0,0,0.6);">'
-      + '<div id="guide-dots" style="display:flex;gap:6px;justify-content:center;margin-bottom:14px;"></div>'
-      + '<div id="guide-body"></div>'
-      + '<div style="display:flex;gap:8px;margin-top:18px;">'
-      +   '<button id="guide-prev" class="btn btn-ghost" style="flex:1;" onclick="guidePrev()">Précédent</button>'
-      +   '<button id="guide-next" class="btn btn-blue" style="flex:2;" onclick="guideNext()">Suivant</button>'
-      + '</div>'
-      + '<div style="text-align:center;margin-top:10px;"><span onclick="closeGuide()" style="font-size:11px;color:rgba(255,255,255,0.4);cursor:pointer;text-decoration:underline;">Passer le guide</span></div>'
-      + '</div>';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:9997;pointer-events:none;';
+    ov.innerHTML =
+      '<div id="guide-hole" style="position:fixed;left:50%;top:50%;width:0;height:0;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.8);transition:all .3s ease;pointer-events:none;"></div>'
+      + '<div id="guide-tip" style="position:fixed;left:16px;bottom:16px;width:calc(100% - 32px);max-width:380px;background:#2a2a28;border-radius:18px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,0.6);pointer-events:auto;z-index:9999;"></div>';
     document.body.appendChild(ov);
+    window.addEventListener('resize', _guideReposition);
   }
-  ov.style.display = 'flex';
-  renderGuide();
+  document.getElementById('guide-ov').style.display = 'block';
+  showGuideStep();
 }
-function renderGuide(){
+
+function showGuideStep(){
   var s = GUIDE_STEPS[_guideIdx];
-  var dots = GUIDE_STEPS.map(function(_, i){ return '<div style="width:'+(i===_guideIdx?'22px':'7px')+';height:7px;border-radius:50px;background:'+(i===_guideIdx?'#F5C842':'rgba(255,255,255,0.2)')+';transition:all .2s;"></div>'; }).join('');
-  document.getElementById('guide-dots').innerHTML = dots;
-  var html = '<div style="text-align:center;font-size:46px;line-height:1;margin-bottom:10px;">'+s.ic+'</div>'
-    + '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,200,66,0.7);text-align:center;margin-bottom:6px;">&Eacute;tape '+(_guideIdx+1)+' / '+GUIDE_STEPS.length+'</div>'
-    + '<div style="font-size:18px;font-weight:800;color:white;text-align:center;margin-bottom:12px;">'+s.tt+'</div>'
-    + '<div style="font-size:13px;line-height:1.55;color:rgba(255,255,255,0.78);text-align:center;">'+s.quoi+'</div>';
-  if(s.onglet){ html += '<div style="text-align:center;margin-top:12px;"><span style="display:inline-block;background:rgba(24,95,165,0.25);color:#9DC0E6;border-radius:50px;padding:4px 12px;font-size:11px;font-weight:700;">'+s.onglet+'</span></div>'; }
-  if(s.pourquoi){ html += '<div style="margin-top:14px;background:rgba(245,200,66,0.1);border-left:3px solid #F5C842;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#F5C842;margin-bottom:3px;">&#128161; Pourquoi</div><div style="font-size:12px;line-height:1.5;color:rgba(255,255,255,0.75);">'+s.pourquoi+'</div></div>'; }
-  document.getElementById('guide-body').innerHTML = html;
-  document.getElementById('guide-prev').style.visibility = (_guideIdx===0 ? 'hidden' : 'visible');
-  document.getElementById('guide-next').textContent = (_guideIdx===GUIDE_STEPS.length-1 ? 'C\'est parti !' : 'Suivant');
+  var tip = document.getElementById('guide-tip');
+  var dots = GUIDE_STEPS.map(function(_, i){ return '<div style="width:'+(i===_guideIdx?'20px':'6px')+';height:6px;border-radius:50px;background:'+(i===_guideIdx?'#F5C842':'rgba(255,255,255,0.22)')+';transition:all .2s;"></div>'; }).join('');
+  var html = '<div style="display:flex;gap:5px;margin-bottom:12px;">'+dots+'</div>'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><div style="font-size:30px;line-height:1;">'+s.ic+'</div>'
+    + '<div><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,200,66,0.7);">&Eacute;tape '+(_guideIdx+1)+' / '+GUIDE_STEPS.length+'</div>'
+    + '<div style="font-size:16px;font-weight:800;color:white;">'+s.tt+'</div></div></div>'
+    + '<div style="font-size:13px;line-height:1.55;color:rgba(255,255,255,0.8);">'+s.quoi+'</div>';
+  if(s.pourquoi){ html += '<div style="margin-top:12px;background:rgba(245,200,66,0.1);border-left:3px solid #F5C842;border-radius:8px;padding:9px 11px;"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#F5C842;margin-bottom:2px;">&#128161; Pourquoi</div><div style="font-size:12px;line-height:1.5;color:rgba(255,255,255,0.72);">'+s.pourquoi+'</div></div>'; }
+  html += '<div style="display:flex;gap:8px;margin-top:16px;">'
+    + '<button class="btn btn-ghost" style="flex:1;'+(_guideIdx===0?'visibility:hidden;':'')+'" onclick="guidePrev()">Précédent</button>'
+    + '<button class="btn btn-blue" style="flex:2;" onclick="guideNext()">'+(_guideIdx===GUIDE_STEPS.length-1?'C\'est parti !':'Suivant')+'</button>'
+    + '</div>'
+    + '<div style="text-align:center;margin-top:9px;"><span onclick="closeGuide()" style="font-size:11px;color:rgba(255,255,255,0.4);cursor:pointer;text-decoration:underline;">Passer le guide</span></div>';
+  tip.innerHTML = html;
+  if(s.tab){ try{ switchTab(s.tab); }catch(e){} }
+  setTimeout(_guideReposition, s.tab?260:40);
 }
-function guideNext(){ if(_guideIdx < GUIDE_STEPS.length-1){ _guideIdx++; renderGuide(); } else { closeGuide(); } }
-function guidePrev(){ if(_guideIdx > 0){ _guideIdx--; renderGuide(); } }
-function closeGuide(){ var ov=document.getElementById('guide-ov'); if(ov) ov.style.display='none'; try{ localStorage.setItem('pilote_guide_v1','1'); }catch(e){} }
+
+function _guideReposition(){
+  var s = GUIDE_STEPS[_guideIdx];
+  var hole = document.getElementById('guide-hole');
+  var tip = document.getElementById('guide-tip');
+  if(!hole || !tip) return;
+  var el = (s.center || !s.sel) ? null : document.querySelector(s.sel);
+  if(!el){
+    hole.style.width='0'; hole.style.height='0'; hole.style.border='none';
+    hole.style.left='50%'; hole.style.top='50%';
+    tip.style.left='50%'; tip.style.top='50%'; tip.style.bottom='auto';
+    tip.style.transform='translate(-50%,-50%)';
+    return;
+  }
+  el.scrollIntoView({ block:'center', behavior:'smooth' });
+  setTimeout(function(){
+    var r = el.getBoundingClientRect();
+    var pad = 6;
+    hole.style.border='2px solid #F5C842';
+    hole.style.left=(r.left-pad)+'px';
+    hole.style.top=(r.top-pad)+'px';
+    hole.style.width=(r.width+pad*2)+'px';
+    hole.style.height=(r.height+pad*2)+'px';
+    tip.style.transform='none';
+    var th = tip.offsetHeight, tw = tip.offsetWidth;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var left = Math.min(Math.max(12, r.left), vw - tw - 12);
+    tip.style.left = left+'px';
+    if(r.bottom + th + 14 < vh){ tip.style.top=(r.bottom+12)+'px'; tip.style.bottom='auto'; }
+    else if(r.top - th - 14 > 0){ tip.style.top=(r.top - th - 12)+'px'; tip.style.bottom='auto'; }
+    else { tip.style.top='auto'; tip.style.bottom='12px'; }
+  }, 320);
+}
+
+function guideNext(){ if(_guideIdx < GUIDE_STEPS.length-1){ _guideIdx++; showGuideStep(); } else { closeGuide(); } }
+function guidePrev(){ if(_guideIdx > 0){ _guideIdx--; showGuideStep(); } }
+function closeGuide(){ var ov=document.getElementById('guide-ov'); if(ov) ov.style.display='none'; try{ switchTab('accueil'); }catch(e){} try{ localStorage.setItem('pilote_guide_v1','1'); }catch(e){} }
 function maybeOpenGuide(){ try{ if(!localStorage.getItem('pilote_guide_v1')){ setTimeout(openGuide, 600); } }catch(e){} }
 
 async function init() {
