@@ -2946,12 +2946,65 @@ function renderReferentCard() {
       </div>
     </div>`
 }
+let appelsData = null;
+let myAppelsIds = [];
+async function loadAppels(){
+  appelsData = null; myAppelsIds = [];
+  try {
+    const { data, error } = await sb.from('missions')
+      .select('id, titre, description, date_mission, heure_rdv, lieu, objectifs, places_max')
+      .eq('statut','ouverte')
+      .order('date_mission',{ascending:true,nullsFirst:false});
+    if (error){ console.warn('loadAppels', error); return; }
+    appelsData = data||[];
+    if (appelsData.length){
+      const { data: mine } = await sb.from('mission_participations').select('mission_id').eq('benevole_id', CP.id);
+      myAppelsIds = (mine||[]).map(x=>x.mission_id);
+    }
+  } catch(e){ console.warn('loadAppels exc', e); }
+}
+function renderAppelsSection(){
+  if (!appelsData || appelsData.length===0) return '';
+  const cards = appelsData.map(function(m){
+    const joined = myAppelsIds.indexOf(m.id)>=0;
+    const dateStr = m.date_mission ? new Date(m.date_mission+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}) : 'Date &agrave; d&eacute;finir';
+    const heureStr = m.heure_rdv ? (' &middot; RDV ' + m.heure_rdv.slice(0,5)) : '';
+    const lieuStr = m.lieu ? (' &middot; ' + escapeHtml(m.lieu)) : '';
+    const objs = (m.objectifs||[]).slice(0,5).map(function(o){ return '<span style="display:inline-block;background:#EEF3F9;color:#0C447C;border-radius:6px;padding:2px 8px;font-size:10px;margin:3px 3px 0 0;">'+escapeHtml(o)+'</span>'; }).join('');
+    const btn = joined
+      ? '<button onclick="toggleAppel(\''+m.id+'\',true)" style="width:100%;margin-top:10px;background:#EAF3DE;color:#3B6D11;border:none;border-radius:50px;padding:9px;font-family:\'Sora\',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">&#10003; Inscrit &middot; me d&eacute;sister</button>'
+      : '<button onclick="toggleAppel(\''+m.id+'\',false)" style="width:100%;margin-top:10px;background:#185FA5;color:white;border:none;border-radius:50px;padding:9px;font-family:\'Sora\',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">Je participe &#128588;</button>';
+    return '<div style="background:white;border-radius:12px;padding:13px;margin-bottom:8px;">'+
+      '<div style="font-size:13px;font-weight:800;color:#0C447C;margin-bottom:3px;">'+escapeHtml(m.titre)+'</div>'+
+      '<div style="font-size:11px;color:#5F5E5A;margin-bottom:6px;">&#128197; '+dateStr+heureStr+lieuStr+'</div>'+
+      (m.description?'<div style="font-size:12px;color:#5F5E5A;margin-bottom:6px;white-space:pre-line;">'+escapeHtml(m.description)+'</div>':'')+
+      (objs?'<div style="margin-bottom:2px;">'+objs+'</div>':'')+
+      (m.places_max?'<div style="font-size:10px;color:#8A9BAD;margin-top:7px;">Recherche '+m.places_max+' b&eacute;n&eacute;vole'+(m.places_max>1?'s':'')+'</div>':'')+
+      btn+
+      '</div>';
+  }).join('');
+  return '<div style="background:linear-gradient(135deg,#FFF3D6,#FCE2A9);border-radius:16px;padding:14px;margin-bottom:10px;">'+
+    '<div style="font-size:13px;font-weight:800;color:#7A5B00;margin-bottom:2px;">&#128588; On a besoin de toi !</div>'+
+    '<div style="font-size:11px;color:#8A6D1A;margin-bottom:10px;">Des coups de main hors match &mdash; inscris-toi si tu es dispo.</div>'+
+    cards+'</div>';
+}
+async function toggleAppel(id, joined){
+  if (joined){
+    await sb.from('mission_participations').delete().eq('mission_id', id).eq('benevole_id', CP.id);
+  } else {
+    const r = await sb.from('mission_participations').insert({ mission_id:id, benevole_id:CP.id });
+    if (r.error){ showToast('Erreur : '+r.error.message,'error'); return; }
+  }
+  await loadAppels();
+  renderHomeForProfil(CP);
+}
 async function showApp(p) {
   document.getElementById('app').style.display = 'block'
   renderTopbar(p)
   await loadMyReferent()
   await loadMyFilleuls()
   await loadEventsAVenir()
+  await loadAppels()
   await loadEtapesData()
   await loadNextMatch()
   await loadFaqData()
@@ -3021,6 +3074,7 @@ function renderHugoHome(el, p, pts, niveau, pct) {
       </div>
     </div>
     ${renderNextMatchSection()}
+    ${renderAppelsSection()}
     ${renderFilleulsCard()}
     ${renderEventsAVenirSection()}
     <div class="defi-card">
@@ -3062,6 +3116,7 @@ function renderVirginieHome(el, p) {
     </div>
 
     ${renderNextMatchSection()}
+    ${renderAppelsSection()}
     ${renderFilleulsCard()}
     ${renderReferentCard()}
     ${renderEventsAVenirSection()}
@@ -3083,6 +3138,7 @@ function renderJoelHome(el, p, pts) {
     </div>
 
     ${renderNextMatchSection()}
+    ${renderAppelsSection()}
     ${renderFilleulsCard()}
     ${renderEventsAVenirSection()}
 
