@@ -538,6 +538,8 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
       </div>
       <input id="ap-lieu" placeholder="Lieu (ex. Palais des Sports)" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
       <input id="ap-places" type="number" min="1" placeholder="Nb de b&eacute;n&eacute;voles recherch&eacute;s (optionnel)" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+      <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;margin-bottom:4px;">R&eacute;serv&eacute; &agrave; une comp&eacute;tence ?</div>
+      <select id="ap-competence" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;"><option value="">Tous les b&eacute;n&eacute;voles</option></select>
       <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;">Objectifs / t&acirc;ches (b&acirc;ches, housses, LEDs, salon VIP&hellip;)</div>
       <div id="ap-obj-list" style="display:flex;flex-direction:column;gap:5px;"></div>
       <div style="display:flex;gap:7px;">
@@ -550,6 +552,17 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 
   <div class="sec">&#128203; Appels existants</div>
   <div id="ap-list"></div>
+
+  <div class="sec" style="margin-top:22px;">&#127891; Comp&eacute;tences</div>
+  <div class="card">
+    <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-bottom:10px;">Cr&eacute;e une comp&eacute;tence, puis coche les b&eacute;n&eacute;voles form&eacute;s. Un appel &laquo; r&eacute;serv&eacute; &raquo; ne sera visible que par eux.</div>
+    <div style="display:flex;gap:7px;margin-bottom:12px;">
+      <input id="comp-new" placeholder="Nouvelle comp&eacute;tence (ex. Sono)" style="flex:1;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+      <button class="btn btn-ghost" onclick="addCompetence()">+ Cr&eacute;er</button>
+    </div>
+    <select id="comp-select" onchange="loadCompMembers()" style="width:100%;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;"><option value="">&mdash; Choisir une comp&eacute;tence &mdash;</option></select>
+    <div id="comp-members" style="margin-top:10px;"></div>
+  </div>
 </div>
 
 <div class="screen" id="screen-notes">
@@ -1303,7 +1316,7 @@ async function createMission(){
     lieu:document.getElementById('ap-lieu').value.trim()||null,
     objectifs:_apObjectifs,
     places_max:document.getElementById('ap-places').value?parseInt(document.getElementById('ap-places').value,10):null,
-    created_by:curPiloteId };
+    competence_requise_id:(document.getElementById('ap-competence')?(document.getElementById('ap-competence').value||null):null), created_by:curPiloteId };
   var r=await sb.from('missions').insert(rec);
   if(r.error){ showAlert('alert-appels','Erreur: '+r.error.message,'e'); return; }
   ['ap-titre','ap-desc','ap-date','ap-heure','ap-lieu','ap-places'].forEach(function(id){ document.getElementById(id).value=''; });
@@ -1311,8 +1324,48 @@ async function createMission(){
   showAlert('alert-appels','Appel cree','s');
   loadAppelsPilote();
 }
+let _compMap = {};
+async function loadCompetences(){
+  var r = await sb.from('competences').select('*').order('nom');
+  var comps = r.data || [];
+  _compMap = {};
+  comps.forEach(function(c){ _compMap[c.id] = c.nom; });
+  var sel = document.getElementById('comp-select');
+  if(sel){ var cur = sel.value; sel.innerHTML = '<option value="">&mdash; Choisir une comp&eacute;tence &mdash;</option>' + comps.map(function(c){ return '<option value="'+c.id+'">'+escapeHtml(c.nom)+'</option>'; }).join(''); sel.value = cur; }
+  var ap = document.getElementById('ap-competence');
+  if(ap){ var curA = ap.value; ap.innerHTML = '<option value="">Tous les b&eacute;n&eacute;voles</option>' + comps.map(function(c){ return '<option value="'+c.id+'">'+escapeHtml(c.nom)+'</option>'; }).join(''); ap.value = curA; }
+}
+async function addCompetence(){
+  var inp = document.getElementById('comp-new'); var v = (inp.value||'').trim();
+  if(!v){ return; }
+  var r = await sb.from('competences').insert({ nom: v });
+  if(r.error){ showAlert('alert-appels','Erreur: '+r.error.message,'e'); return; }
+  inp.value = '';
+  showAlert('alert-appels','Competence creee','s');
+  await loadCompetences();
+}
+async function loadCompMembers(){
+  var sel = document.getElementById('comp-select'); var compId = sel ? sel.value : '';
+  var box = document.getElementById('comp-members'); if(!box) return;
+  if(!compId){ box.innerHTML = ''; return; }
+  var b = await sb.from('benevoles').select('id,prenom,nom').order('nom');
+  var benevoles = b.data || [];
+  var m = await sb.from('benevole_competences').select('benevole_id').eq('competence_id', compId);
+  var has = {}; (m.data||[]).forEach(function(x){ has[x.benevole_id] = true; });
+  if(!benevoles.length){ box.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.4);">Aucun b&eacute;n&eacute;vole.</div>'; return; }
+  box.innerHTML = benevoles.map(function(bv){
+    var nm = ((bv.prenom||'')+' '+(bv.nom||'')).trim() || bv.id;
+    return '<label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;color:white;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.06);"><input type="checkbox" '+(has[bv.id]?'checked':'')+' onchange="toggleCompMember(\''+bv.id+'\',this.checked)" style="width:16px;height:16px;"> '+escapeHtml(nm)+'</label>';
+  }).join('');
+}
+async function toggleCompMember(benevoleId, on){
+  var sel = document.getElementById('comp-select'); var compId = sel ? sel.value : ''; if(!compId) return;
+  if(on){ await sb.from('benevole_competences').insert({ benevole_id: benevoleId, competence_id: compId }); }
+  else { await sb.from('benevole_competences').delete().eq('benevole_id', benevoleId).eq('competence_id', compId); }
+}
 async function loadAppelsPilote(){
   var el=document.getElementById('ap-list'); if(!el) return;
+  await loadCompetences();
   var r=await sb.from('missions').select('*, mission_participations(id, statut, benevole_id, benevoles(prenom, nom, telephone))').order('date_mission',{ascending:true,nullsFirst:false}).order('created_at',{ascending:false});
   if(r.error){ el.innerHTML='<div class="card"><div style="color:#FAC775;font-size:12px;">Erreur: '+r.error.message+'</div></div>'; return; }
   var list=r.data||[];
@@ -1328,6 +1381,7 @@ async function loadAppelsPilote(){
     return '<div class="card" style="margin-bottom:10px;">'+
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><div style="flex:1;font-size:14px;font-weight:800;color:white;">'+escapeHtml(m.titre)+'</div><span class="s-badge" style="background:'+(isOpen?'rgba(34,197,94,0.15);color:#86EFAC':'rgba(255,255,255,0.08);color:rgba(255,255,255,0.4)')+';">'+(isOpen?'Ouvert':'Ferme')+'</span></div>'+
       '<div style="font-size:11px;color:rgba(181,212,244,0.7);margin-bottom:6px;">&#128197; '+dateStr+heureStr+(m.lieu?(' &middot; '+escapeHtml(m.lieu)):'')+'</div>'+
+      (m.competence_requise_id?'<div style="display:inline-block;background:rgba(245,200,66,0.18);color:#F5C842;border-radius:6px;padding:2px 9px;font-size:10px;font-weight:700;margin-bottom:6px;">&#127891; R&eacute;serv&eacute; : '+escapeHtml(_compMap[m.competence_requise_id]||'competence')+'</div>':'')+
       (m.description?'<div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:6px;white-space:pre-line;">'+escapeHtml(m.description)+'</div>':'')+
       (objs?'<div style="margin-bottom:8px;">'+objs+'</div>':'')+
       '<div style="font-size:11px;font-weight:700;color:#F5C842;margin-bottom:4px;">&#128101; '+nb+' inscrit'+(nb>1?'s':'')+(m.places_max?(' / '+m.places_max):'')+'</div>'+
