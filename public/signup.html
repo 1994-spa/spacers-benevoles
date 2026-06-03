@@ -331,7 +331,8 @@ async function doSignup() {
     postes_preferes: Array.from(postesSel).join(', '),
     telephone: tel || null,
     ville: ville || null,
-    date_naissance: naiss || null
+    date_naissance: naiss || null,
+    ref: (new URLSearchParams(window.location.search).get('ref') || '').trim().toUpperCase() || null
   }
 
   const { data, error } = await sb.auth.signUp({
