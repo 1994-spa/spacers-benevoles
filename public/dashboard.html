@@ -574,6 +574,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       </div>
     </div>
     <div class="t-right">
+      <button class="btn-logout" onclick="openGuideBenev()" style="margin-right:6px;">?</button>
       <button id="btn-pilote-view" class="btn-pilote" onclick="window.location.href='pilote.html'" style="display:none;">🎯 Vue pilote</button>
       <button class="btn-logout" onclick="handleLogout()">✕</button>
     </div>
@@ -2983,7 +2984,7 @@ function renderAppelsSection(){
       btn+
       '</div>';
   }).join('');
-  return '<div style="background:linear-gradient(135deg,#FFF3D6,#FCE2A9);border-radius:16px;padding:14px;margin-bottom:10px;">'+
+  return '<div id="guide-appels" style="background:linear-gradient(135deg,#FFF3D6,#FCE2A9);border-radius:16px;padding:14px;margin-bottom:10px;">'+
     '<div style="font-size:13px;font-weight:800;color:#7A5B00;margin-bottom:2px;">&#128588; On a besoin de toi !</div>'+
     '<div style="font-size:11px;color:#8A6D1A;margin-bottom:10px;">Des coups de main hors match &mdash; inscris-toi si tu es dispo.</div>'+
     cards+'</div>';
@@ -3036,6 +3037,94 @@ function copyParrainLink(){
     navigator.clipboard.writeText(el.value).then(function(){ showToast('Lien copie !','success'); }).catch(function(){ el.select(); try{ document.execCommand('copy'); showToast('Lien copie !','success'); }catch(_){} });
   } else { el.select(); try{ document.execCommand('copy'); showToast('Lien copie !','success'); }catch(_){} }
 }
+// ============================================================
+// GUIDE BENEVOLE (visite guidee spotlight)
+// ============================================================
+const GUIDE_STEPS_B = [
+  { center:true, ic:'&#127952;', tt:'Bienvenue chez les Spacers !', quoi:'Ton espace bénévole en 1 minute : où voir tes matchs, gagner des points et donner un coup de main. C\'est parti !', pourquoi:'' },
+  { sel:'#bn-planning', ic:'&#128197;', tt:'Tes matchs & tes dispos', quoi:'Dans Planning, tu vois les matchs &agrave; venir et tu indiques si tu es disponible. Une fois affecté, ton créneau et ton poste s\'affichent.', pourquoi:'Plus tu te rends dispo tôt, plus c\'est simple d\'organiser l\'équipe.' },
+  { sel:'#bn-points', ic:'&#127942;', tt:'Tes points & ton niveau', quoi:'&Agrave; chaque présence validée, tu gagnes des points et tu montes : Bronze, Argent, Or.', pourquoi:'Tes points donnent droit &agrave; des récompenses &mdash; jette un œil &agrave; l\'onglet Cadeaux.' },
+  { view:'home', sel:'#guide-appels', ic:'&#128588;', tt:'On a besoin de toi', quoi:'En dehors des matchs, le club lance parfois des appels (montage, événements&hellip;). Si tu es dispo, inscris-toi en un tap.', pourquoi:'Un coup de main de temps en temps, ça aide énormément toute l\'équipe.' },
+  { view:'home', sel:'#parrain-link', ic:'&#129309;', tt:'Parraine tes amis', quoi:'Partage ton lien perso : quand ta recrue vient pour la première fois, tu gagnes 100 points.', pourquoi:'C\'est le moyen le plus simple d\'agrandir l\'équipe&hellip; et de grimper au classement.' },
+  { sel:'#bn-profil', ic:'&#128100;', tt:'Ton profil', quoi:'Ta photo (utile pour ton accréditation), tes infos et tes consentements se gèrent ici, &agrave; tout moment.', pourquoi:'' },
+  { center:true, ic:'&#127881;', tt:'&Agrave; toi de jouer !', quoi:'Tu peux rouvrir ce guide quand tu veux avec le &laquo; ? &raquo; en haut &agrave; droite. Merci pour ton engagement !', pourquoi:'' }
+];
+let _gbIdx = 0;
+
+function openGuideBenev(){
+  _gbIdx = 0;
+  if(!document.getElementById('gb-ov')){
+    var ov = document.createElement('div');
+    ov.id = 'gb-ov';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:9997;pointer-events:none;';
+    ov.innerHTML =
+      '<div id="gb-hole" style="position:fixed;left:50%;top:50%;width:0;height:0;border-radius:14px;box-shadow:0 0 0 9999px rgba(4,12,24,0.62);transition:all .3s ease;pointer-events:none;"></div>'
+      + '<div id="gb-tip" style="position:fixed;left:16px;bottom:90px;width:calc(100% - 32px);max-width:360px;background:#fff;border-radius:18px;padding:18px;box-shadow:0 12px 40px rgba(4,44,83,0.28);pointer-events:auto;z-index:9999;"></div>';
+    document.body.appendChild(ov);
+    window.addEventListener('resize', _gbReposition);
+  }
+  document.getElementById('gb-ov').style.display = 'block';
+  showGbStep();
+}
+
+function showGbStep(){
+  var s = GUIDE_STEPS_B[_gbIdx];
+  var tip = document.getElementById('gb-tip');
+  var dots = GUIDE_STEPS_B.map(function(_, i){ return '<div style="width:'+(i===_gbIdx?'20px':'6px')+';height:6px;border-radius:50px;background:'+(i===_gbIdx?'#042C53':'#D6E0EA')+';transition:all .2s;"></div>'; }).join('');
+  var html = '<div style="display:flex;gap:5px;margin-bottom:12px;">'+dots+'</div>'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><div style="font-size:30px;line-height:1;">'+s.ic+'</div>'
+    + '<div><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#0C447C;opacity:.7;">&Eacute;tape '+(_gbIdx+1)+' / '+GUIDE_STEPS_B.length+'</div>'
+    + '<div style="font-size:16px;font-weight:800;color:#042C53;">'+s.tt+'</div></div></div>'
+    + '<div style="font-size:13px;line-height:1.55;color:#3A4A5A;">'+s.quoi+'</div>';
+  if(s.pourquoi){ html += '<div style="margin-top:12px;background:#FFF7E0;border-left:3px solid #F5C842;border-radius:8px;padding:9px 11px;"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#B8860B;margin-bottom:2px;">&#128161; Pourquoi</div><div style="font-size:12px;line-height:1.5;color:#5F5E5A;">'+s.pourquoi+'</div></div>'; }
+  html += '<div style="display:flex;gap:8px;margin-top:16px;">'
+    + '<button style="flex:1;'+(_gbIdx===0?'visibility:hidden;':'')+'background:#EAF0F6;color:#042C53;border:none;border-radius:50px;padding:11px;font-family:\'Sora\',sans-serif;font-weight:700;font-size:13px;cursor:pointer;" onclick="guideBPrev()">Précédent</button>'
+    + '<button style="flex:2;background:#042C53;color:#fff;border:none;border-radius:50px;padding:11px;font-family:\'Sora\',sans-serif;font-weight:700;font-size:13px;cursor:pointer;" onclick="guideBNext()">'+(_gbIdx===GUIDE_STEPS_B.length-1?'C\'est parti !':'Suivant')+'</button>'
+    + '</div>'
+    + '<div style="text-align:center;margin-top:9px;"><span onclick="closeGuideBenev()" style="font-size:11px;color:#8A9BAD;cursor:pointer;text-decoration:underline;">Passer le guide</span></div>';
+  tip.innerHTML = html;
+  if(s.view){ try{ bSwitch(s.view); }catch(e){} }
+  setTimeout(_gbReposition, s.view?260:40);
+}
+
+function _gbReposition(){
+  var s = GUIDE_STEPS_B[_gbIdx];
+  var hole = document.getElementById('gb-hole');
+  var tip = document.getElementById('gb-tip');
+  if(!hole || !tip) return;
+  var el = (s.center || !s.sel) ? null : document.querySelector(s.sel);
+  if(!el){
+    hole.style.width='0'; hole.style.height='0'; hole.style.border='none';
+    hole.style.left='50%'; hole.style.top='50%';
+    tip.style.left='50%'; tip.style.top='50%'; tip.style.bottom='auto';
+    tip.style.transform='translate(-50%,-50%)';
+    return;
+  }
+  el.scrollIntoView({ block:'center', behavior:'smooth' });
+  setTimeout(function(){
+    var r = el.getBoundingClientRect();
+    var pad = 6;
+    hole.style.border='2px solid #F5C842';
+    hole.style.left=(r.left-pad)+'px';
+    hole.style.top=(r.top-pad)+'px';
+    hole.style.width=(r.width+pad*2)+'px';
+    hole.style.height=(r.height+pad*2)+'px';
+    tip.style.transform='none';
+    var th = tip.offsetHeight, tw = tip.offsetWidth;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var left = Math.min(Math.max(12, r.left), vw - tw - 12);
+    tip.style.left = left+'px';
+    if(r.top - th - 14 > 0){ tip.style.top=(r.top - th - 12)+'px'; tip.style.bottom='auto'; }
+    else if(r.bottom + th + 14 < vh){ tip.style.top=(r.bottom+12)+'px'; tip.style.bottom='auto'; }
+    else { tip.style.top='auto'; tip.style.bottom='12px'; }
+  }, 320);
+}
+
+function guideBNext(){ if(_gbIdx < GUIDE_STEPS_B.length-1){ _gbIdx++; showGbStep(); } else { closeGuideBenev(); } }
+function guideBPrev(){ if(_gbIdx > 0){ _gbIdx--; showGbStep(); } }
+function closeGuideBenev(){ var ov=document.getElementById('gb-ov'); if(ov) ov.style.display='none'; try{ bSwitch('home'); }catch(e){} try{ localStorage.setItem('benev_guide_v1','1'); }catch(e){} }
+function maybeOpenGuideBenev(){ try{ if(!localStorage.getItem('benev_guide_v1')){ setTimeout(openGuideBenev, 700); } }catch(e){} }
+
 async function showApp(p) {
   document.getElementById('app').style.display = 'block'
   renderTopbar(p)
