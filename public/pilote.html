@@ -191,6 +191,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
     <div class="kpi"><div class="kpi-val r" id="kpi-r">—</div><div class="kpi-lbl">Comptes à risque</div></div>
   </div>
   <div class="sec">Actions rapides</div>
+  <button class="btn btn-ghost btn-full" onclick="openGuide()" style="border:1px solid rgba(245,200,66,0.4);color:#F5C842;">&#128214; Comment &ccedil;a marche ?</button>
   <button class="btn btn-orange btn-full" id="btn-acc-sug" onclick="switchTab('suggestions')" style="display:none;">💡 <span id="acc-sug-msg"></span></button>
   <button class="btn btn-blue btn-full" onclick="switchTab('accreds')">🪪 Valider les photos</button>
   <button class="btn btn-ghost btn-full" onclick="switchTab('match')">🏐 Gérer le match</button>
@@ -891,6 +892,58 @@ function promptModal(opts) {
   })
 }
 
+// ============================================================
+// GUIDE PILOTE (onboarding pedagogique)
+// ============================================================
+const GUIDE_STEPS = [
+  { ic:'&#127916;', tt:'Bienvenue dans l\'espace pilote !', quoi:'C\'est ici que tu fais vivre l\'équipe de bénévoles. En 5 étapes, voici comment tout s\'enchaîne &mdash; de l\'ouverture d\'un match jusqu\'à la reconnaissance de tes bénévoles.', pourquoi:'', onglet:'' },
+  { ic:'&#127952;', tt:'1. Gérer le match', quoi:'Dans l\'onglet Match, tu vois les postes à pourvoir, qui est disponible, et tu affectes chaque bénévole. Un tap sur &laquo; Notifier &raquo; les prévient.', pourquoi:'Tant qu\'un match n\'est pas géré, les bénévoles n\'ont rien à réserver : c\'est ton point de départ.', onglet:'&#127952; Onglet Match' },
+  { ic:'&#128336;', tt:'2. Le planning du match', quoi:'Ajoute les créneaux (arrivée, mise en place, match, repas, rangement&hellip;) avec leurs horaires. Chaque bénévole verra SA frise personnalisée selon son poste.', pourquoi:'Un bénévole qui sait quand venir et quoi faire est serein &mdash; et un bénévole serein, ça revient.', onglet:'&#127952; Onglet Match' },
+  { ic:'&#9989;', tt:'3. Valider les présences', quoi:'Le jour J, coche qui était présent dans la section Validation. C\'est ce geste qui attribue les points et fait monter les niveaux (Bronze, Argent, Or).', pourquoi:'La reconnaissance, c\'est le carburant : des points qui montent, c\'est l\'envie de revenir.', onglet:'&#127952; Onglet Match' },
+  { ic:'&#128588;', tt:'4. Lancer un appel ciblé', quoi:'Besoin de bras hors-match (montage, événement, régie) ? Crée un appel et notifie. Tu peux le réserver à une compétence (ex. Régie Vidéo) : seuls les bénévoles formés le verront.', pourquoi:'Tu mobilises les bonnes personnes sans spammer tout le monde &mdash; et on répond plus volontiers quand c\'est pertinent.', onglet:'&#128588; Onglet Appels' },
+  { ic:'&#10024;', tt:'5. Valoriser & écouter', quoi:'Valide les photos (onglet Accréds) pour générer les accréditations, et garde un œil sur les Suggestions des bénévoles : ce sont tes meilleures idées d\'amélioration. Tu pourras rouvrir ce guide à tout moment depuis l\'Accueil.', pourquoi:'', onglet:'' }
+];
+let _guideIdx = 0;
+function openGuide(){
+  _guideIdx = 0;
+  let ov = document.getElementById('guide-ov');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'guide-ov';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9998;display:flex;align-items:center;justify-content:center;padding:16px;';
+    ov.innerHTML = '<div style="background:#2a2a28;border-radius:20px;width:100%;max-width:420px;padding:22px;box-shadow:0 10px 40px rgba(0,0,0,0.6);">'
+      + '<div id="guide-dots" style="display:flex;gap:6px;justify-content:center;margin-bottom:14px;"></div>'
+      + '<div id="guide-body"></div>'
+      + '<div style="display:flex;gap:8px;margin-top:18px;">'
+      +   '<button id="guide-prev" class="btn btn-ghost" style="flex:1;" onclick="guidePrev()">Précédent</button>'
+      +   '<button id="guide-next" class="btn btn-blue" style="flex:2;" onclick="guideNext()">Suivant</button>'
+      + '</div>'
+      + '<div style="text-align:center;margin-top:10px;"><span onclick="closeGuide()" style="font-size:11px;color:rgba(255,255,255,0.4);cursor:pointer;text-decoration:underline;">Passer le guide</span></div>'
+      + '</div>';
+    document.body.appendChild(ov);
+  }
+  ov.style.display = 'flex';
+  renderGuide();
+}
+function renderGuide(){
+  var s = GUIDE_STEPS[_guideIdx];
+  var dots = GUIDE_STEPS.map(function(_, i){ return '<div style="width:'+(i===_guideIdx?'22px':'7px')+';height:7px;border-radius:50px;background:'+(i===_guideIdx?'#F5C842':'rgba(255,255,255,0.2)')+';transition:all .2s;"></div>'; }).join('');
+  document.getElementById('guide-dots').innerHTML = dots;
+  var html = '<div style="text-align:center;font-size:46px;line-height:1;margin-bottom:10px;">'+s.ic+'</div>'
+    + '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,200,66,0.7);text-align:center;margin-bottom:6px;">&Eacute;tape '+(_guideIdx+1)+' / '+GUIDE_STEPS.length+'</div>'
+    + '<div style="font-size:18px;font-weight:800;color:white;text-align:center;margin-bottom:12px;">'+s.tt+'</div>'
+    + '<div style="font-size:13px;line-height:1.55;color:rgba(255,255,255,0.78);text-align:center;">'+s.quoi+'</div>';
+  if(s.onglet){ html += '<div style="text-align:center;margin-top:12px;"><span style="display:inline-block;background:rgba(24,95,165,0.25);color:#9DC0E6;border-radius:50px;padding:4px 12px;font-size:11px;font-weight:700;">'+s.onglet+'</span></div>'; }
+  if(s.pourquoi){ html += '<div style="margin-top:14px;background:rgba(245,200,66,0.1);border-left:3px solid #F5C842;border-radius:8px;padding:10px 12px;"><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#F5C842;margin-bottom:3px;">&#128161; Pourquoi</div><div style="font-size:12px;line-height:1.5;color:rgba(255,255,255,0.75);">'+s.pourquoi+'</div></div>'; }
+  document.getElementById('guide-body').innerHTML = html;
+  document.getElementById('guide-prev').style.visibility = (_guideIdx===0 ? 'hidden' : 'visible');
+  document.getElementById('guide-next').textContent = (_guideIdx===GUIDE_STEPS.length-1 ? 'C\'est parti !' : 'Suivant');
+}
+function guideNext(){ if(_guideIdx < GUIDE_STEPS.length-1){ _guideIdx++; renderGuide(); } else { closeGuide(); } }
+function guidePrev(){ if(_guideIdx > 0){ _guideIdx--; renderGuide(); } }
+function closeGuide(){ var ov=document.getElementById('guide-ov'); if(ov) ov.style.display='none'; try{ localStorage.setItem('pilote_guide_v1','1'); }catch(e){} }
+function maybeOpenGuide(){ try{ if(!localStorage.getItem('pilote_guide_v1')){ setTimeout(openGuide, 600); } }catch(e){} }
+
 async function init() {
   const { data: { session } } = await sb.auth.getSession()
   if (!session) { window.location.href = 'index.html'; return }
@@ -921,6 +974,7 @@ async function init() {
 
   await loadAll()
   await loadNotesHistory()
+  maybeOpenGuide()
 }
 
 async function loadAll() {
