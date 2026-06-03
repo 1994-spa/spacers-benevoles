@@ -178,6 +178,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <button class="tab"    id="tab-reward"      onclick="switchTab('reward')">🎁 Cadeaux<span class="bdg-num" id="bdg-reward" style="display:none;"></span></button>
   <button class="tab"    id="tab-emploi"      onclick="switchTab('emploi')">💼 Emploi<span class="bdg-num" id="bdg-emploi" style="display:none;"></span></button>
   <button class="tab"    id="tab-evenements"  onclick="switchTab('evenements')">🎉 Events<span class="bdg-num" id="bdg-evenements" style="display:none;"></span></button>
+  <button class="tab"    id="tab-appels"      onclick="switchTab('appels')">&#128588; Appels<span class="bdg-num" id="bdg-appels" style="display:none;"></span></button>
   <button class="tab"    id="tab-notes"       onclick="switchTab('notes')">📖 Mémoire</button>
 </div>
 
@@ -523,6 +524,34 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 </div>
 
 <!-- MÉMOIRE -->
+<div class="screen" id="screen-appels">
+  <div id="alert-appels"></div>
+
+  <div class="sec">&#128588; Nouvel appel &agrave; b&eacute;n&eacute;voles</div>
+  <div class="card">
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      <input id="ap-titre" placeholder="Titre (ex. Montage salle &ndash; match vs Tours)" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+      <textarea id="ap-desc" class="note-area" placeholder="Description (optionnel)"></textarea>
+      <div style="display:flex;gap:7px;">
+        <input id="ap-date" type="date" style="flex:1;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+        <input id="ap-heure" type="time" style="flex:1;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+      </div>
+      <input id="ap-lieu" placeholder="Lieu (ex. Palais des Sports)" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+      <input id="ap-places" type="number" min="1" placeholder="Nb de b&eacute;n&eacute;voles recherch&eacute;s (optionnel)" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+      <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;">Objectifs / t&acirc;ches (b&acirc;ches, housses, LEDs, salon VIP&hellip;)</div>
+      <div id="ap-obj-list" style="display:flex;flex-direction:column;gap:5px;"></div>
+      <div style="display:flex;gap:7px;">
+        <input id="ap-obj-input" placeholder="Ajouter une t&acirc;che" onkeydown="if(event.key==='Enter'){event.preventDefault();addObjectif();}" style="flex:1;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+        <button class="btn btn-ghost" onclick="addObjectif()">+ T&acirc;che</button>
+      </div>
+      <button class="btn btn-blue btn-full" onclick="createMission()">Cr&eacute;er l'appel</button>
+    </div>
+  </div>
+
+  <div class="sec">&#128203; Appels existants</div>
+  <div id="ap-list"></div>
+</div>
+
 <div class="screen" id="screen-notes">
   <div class="sec">Historique des notes pilote</div>
   <div id="notes-hist">
@@ -1254,6 +1283,61 @@ async function delCreneau(id){
   var r=await sb.from('match_creneaux').delete().eq('id',id);
   if(!r.error) loadCreneaux();
 }
+let _apObjectifs = [];
+function renderApObj(){
+  var el=document.getElementById('ap-obj-list'); if(!el) return;
+  el.innerHTML=_apObjectifs.map(function(o,idx){ return '<div style="display:flex;align-items:center;gap:8px;background:#2a2a28;border-radius:8px;padding:6px 10px;"><span style="flex:1;font-size:12px;color:white;">&#8226; '+escapeHtml(o)+'</span><button class="btn btn-sm" style="background:#7a2525;color:white;" onclick="rmObjectif('+idx+')">&#10005;</button></div>'; }).join('');
+}
+function addObjectif(){
+  var inp=document.getElementById('ap-obj-input'); var v=(inp.value||'').trim();
+  if(!v) return; _apObjectifs.push(v); inp.value=''; renderApObj();
+}
+function rmObjectif(i){ _apObjectifs.splice(i,1); renderApObj(); }
+async function createMission(){
+  var titre=document.getElementById('ap-titre').value.trim();
+  if(!titre){ showAlert('alert-appels','Indique un titre','e'); return; }
+  var rec={ titre:titre,
+    description:document.getElementById('ap-desc').value.trim()||null,
+    date_mission:document.getElementById('ap-date').value||null,
+    heure_rdv:document.getElementById('ap-heure').value||null,
+    lieu:document.getElementById('ap-lieu').value.trim()||null,
+    objectifs:_apObjectifs,
+    places_max:document.getElementById('ap-places').value?parseInt(document.getElementById('ap-places').value,10):null,
+    created_by:curPiloteId };
+  var r=await sb.from('missions').insert(rec);
+  if(r.error){ showAlert('alert-appels','Erreur: '+r.error.message,'e'); return; }
+  ['ap-titre','ap-desc','ap-date','ap-heure','ap-lieu','ap-places'].forEach(function(id){ document.getElementById(id).value=''; });
+  _apObjectifs=[]; renderApObj();
+  showAlert('alert-appels','Appel cree','s');
+  loadAppelsPilote();
+}
+async function loadAppelsPilote(){
+  var el=document.getElementById('ap-list'); if(!el) return;
+  var r=await sb.from('missions').select('*, mission_participations(id, statut, benevole_id, benevoles(prenom, nom, telephone))').order('date_mission',{ascending:true,nullsFirst:false}).order('created_at',{ascending:false});
+  if(r.error){ el.innerHTML='<div class="card"><div style="color:#FAC775;font-size:12px;">Erreur: '+r.error.message+'</div></div>'; return; }
+  var list=r.data||[];
+  if(list.length===0){ el.innerHTML='<div class="card"><div style="color:rgba(255,255,255,0.3);font-size:12px;font-style:italic;">Aucun appel pour le moment.</div></div>'; return; }
+  el.innerHTML=list.map(function(m){
+    var parts=m.mission_participations||[];
+    var nb=parts.length;
+    var objs=(m.objectifs||[]).map(function(o){ return '<div style="font-size:11px;color:rgba(255,255,255,0.55);">&#8226; '+escapeHtml(o)+'</div>'; }).join('');
+    var partRows=parts.length?parts.map(function(p){ var b=p.benevoles||{}; var tel=b.telephone?(' <span style="color:rgba(255,255,255,0.35);">'+escapeHtml(b.telephone)+'</span>'):''; return '<div style="font-size:12px;color:white;padding:3px 0;">&#8226; '+escapeHtml(((b.prenom||'')+' '+(b.nom||'')).trim()||'Benevole')+tel+'</div>'; }).join(''):'<div style="font-size:11px;color:rgba(255,255,255,0.3);">Aucun inscrit pour l\'instant.</div>';
+    var dateStr=m.date_mission?new Date(m.date_mission+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}):'Date a definir';
+    var heureStr=m.heure_rdv?(' &middot; '+m.heure_rdv.slice(0,5)):'';
+    var isOpen=m.statut==='ouverte';
+    return '<div class="card" style="margin-bottom:10px;">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><div style="flex:1;font-size:14px;font-weight:800;color:white;">'+escapeHtml(m.titre)+'</div><span class="s-badge" style="background:'+(isOpen?'rgba(34,197,94,0.15);color:#86EFAC':'rgba(255,255,255,0.08);color:rgba(255,255,255,0.4)')+';">'+(isOpen?'Ouvert':'Ferme')+'</span></div>'+
+      '<div style="font-size:11px;color:rgba(181,212,244,0.7);margin-bottom:6px;">&#128197; '+dateStr+heureStr+(m.lieu?(' &middot; '+escapeHtml(m.lieu)):'')+'</div>'+
+      (m.description?'<div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:6px;white-space:pre-line;">'+escapeHtml(m.description)+'</div>':'')+
+      (objs?'<div style="margin-bottom:8px;">'+objs+'</div>':'')+
+      '<div style="font-size:11px;font-weight:700;color:#F5C842;margin-bottom:4px;">&#128101; '+nb+' inscrit'+(nb>1?'s':'')+(m.places_max?(' / '+m.places_max):'')+'</div>'+
+      '<div style="margin-bottom:8px;">'+partRows+'</div>'+
+      '<div style="display:flex;gap:7px;"><button class="btn btn-sm btn-ghost" style="flex:1;" onclick="toggleMission(\''+m.id+'\',\''+(isOpen?'fermee':'ouverte')+'\')">'+(isOpen?'Fermer':'Rouvrir')+'</button><button class="btn btn-sm" style="background:#7a2525;color:white;" onclick="delMission(\''+m.id+'\')">Supprimer</button></div>'+
+      '</div>';
+  }).join('');
+}
+async function toggleMission(id,statut){ var r=await sb.from('missions').update({statut:statut}).eq('id',id); if(r.error){ showAlert('alert-appels','Erreur: '+r.error.message,'e'); return; } loadAppelsPilote(); }
+async function delMission(id){ var r=await sb.from('missions').delete().eq('id',id); if(!r.error) loadAppelsPilote(); }
 async function affecterPoste(inscriptionId, posteId, selectEl) {
   selectEl.disabled = true
   const updates = { poste_id: posteId || null }
@@ -2879,6 +2963,7 @@ function switchTab(n) {
   if (n === 'reward') loadReward()
   if (n === 'emploi') loadEmploi()
   if (n === 'evenements') loadEvenementsPilote()
+  if (n === 'appels') loadAppelsPilote()
 }
 
 function showAlert(id,msg,type){
