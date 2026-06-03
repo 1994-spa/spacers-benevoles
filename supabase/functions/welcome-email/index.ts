@@ -123,6 +123,18 @@ function getWelcomeHTML(b: any): string {
         <a href="${APP_URL}" style="display:block;background:#185FA5;color:white;border-radius:50px;padding:14px;text-align:center;font-weight:700;font-size:14px;text-decoration:none;margin-top:20px;">
           Accéder à mon espace →
         </a>
+        <div style="background:#FFF7E6;border:1px solid #F5D78A;border-radius:12px;padding:16px;margin:22px 0 4px;">
+          <div style="font-size:14px;font-weight:700;color:#0C447C;margin-bottom:8px;">&#128242; Installe l'appli sur ton t&eacute;l&eacute;phone</div>
+          <div style="font-size:13px;color:#5F5E5A;line-height:1.8;">
+            Pour retrouver ton espace en un seul tap, comme une vraie application&nbsp;:<br><br>
+            <strong>&#128241; iPhone / iPad (Safari)</strong><br>
+            Ouvre le site, touche le bouton <strong>Partager</strong> (&#11014;&#65039;) en bas, puis <strong>&laquo;&nbsp;Sur l'&eacute;cran d'accueil&nbsp;&raquo;</strong>.<br><br>
+            <strong>&#129302; Android (Chrome)</strong><br>
+            Ouvre le site, touche le menu <strong>&#8942;</strong> en haut &agrave; droite, puis <strong>&laquo;&nbsp;Installer l'application&nbsp;&raquo;</strong>.<br><br>
+            L'ic&ocirc;ne Spacers appara&icirc;tra sur ton &eacute;cran d'accueil. &#127952;
+          </div>
+        </div>
+
         <p style="font-size:12px;color:#888;margin-top:24px;text-align:center;">
           Une question ? Réponds simplement à cet email, on est là pour toi.
         </p>

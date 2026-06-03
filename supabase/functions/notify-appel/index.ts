@@ -22,27 +22,38 @@ function buildHtml(m){
   const dateStr = m.date_mission ? new Date(m.date_mission + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : 'à définir'
   const heure = m.heure_rdv ? m.heure_rdv.slice(0, 5) : null
   const objs = Array.isArray(m.objectifs) ? m.objectifs : []
+  const objRows = objs.map(function(o){ return '<div style="font-size:14px;color:#3F4A57;padding:4px 0;line-height:1.45;">&#10003;&nbsp; ' + esc(o) + '</div>' }).join('')
   const objHtml = objs.length
-    ? '<div style="background:#E6F1FB;border-radius:12px;padding:14px;margin:16px 0;"><div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:6px;">Ce qu\'il y a à faire</div><ul style="margin:0;padding-left:18px;color:#5F5E5A;font-size:14px;line-height:1.8;">' + objs.map(function(o){ return '<li>' + esc(o) + '</li>' }).join('') + '</ul></div>'
+    ? '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:4px 0 20px;"><tr><td style="background-color:#F4F7FB;border-radius:12px;padding:16px 18px;"><div style="font-size:12px;font-weight:700;color:#042C53;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Ce qu\'il y a &agrave; faire</div>' + objRows + '</td></tr></table>'
     : ''
-  const infoLigne = 'RDV ' + esc(dateStr) + (heure ? (' à ' + esc(heure)) : '') + (m.lieu ? (' · ' + esc(m.lieu)) : '')
+  const infoLigne = 'RDV ' + esc(dateStr) + (heure ? (' &agrave; ' + esc(heure)) : '') + (m.lieu ? (' &middot; ' + esc(m.lieu)) : '')
+  const descHtml = m.description ? '<p style="font-size:15px;line-height:1.65;color:#3F4A57;margin:0 0 18px;white-space:pre-line;">' + esc(m.description) + '</p>' : ''
   return '' +
-  '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;">' +
-    '<div style="background:linear-gradient(135deg,#042C53,#185FA5);padding:30px;text-align:center;">' +
-      '<div style="font-size:40px;margin-bottom:10px;">&#128588;</div>' +
-      '<div style="font-size:20px;font-weight:800;color:white;">On a besoin de toi !</div>' +
-      '<div style="font-size:13px;color:rgba(181,212,244,0.85);margin-top:6px;">Appel à bénévoles · hors match</div>' +
-    '</div>' +
-    '<div style="padding:26px 30px;">' +
-      '<div style="font-size:18px;font-weight:800;color:#0C447C;margin-bottom:6px;">' + esc(m.titre || 'Coup de main') + '</div>' +
-      '<div style="font-size:13px;color:#185FA5;font-weight:600;margin-bottom:12px;">&#128197; ' + infoLigne + '</div>' +
-      (m.description ? '<p style="color:#5F5E5A;font-size:14px;line-height:1.7;white-space:pre-line;">' + esc(m.description) + '</p>' : '') +
-      objHtml +
-      '<a href="' + APP_URL + '" style="display:block;background:#185FA5;color:white;border-radius:50px;padding:14px;text-align:center;font-weight:700;font-size:14px;text-decoration:none;margin-top:18px;">Je participe &#8594;</a>' +
-      '<p style="font-size:12px;color:#888;margin-top:20px;text-align:center;">Connecte-toi à ton espace bénévole pour t\'inscrire. Merci pour ton aide !</p>' +
-    '</div>' +
-    '<div style="background:#042C53;padding:16px;text-align:center;"><p style="font-size:11px;color:rgba(181,212,244,0.5);margin:0;">Spacer\'s Toulouse Volley · Palais des Sports André Brouat</p></div>' +
-  '</div>'
+  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#EEF2F7;margin:0;padding:24px 12px;"><tr><td align="center">' +
+    '<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background-color:#ffffff;border-radius:16px;overflow:hidden;font-family:\'Segoe UI\',Arial,Helvetica,sans-serif;">' +
+      '<tr><td bgcolor="#042C53" style="background-color:#042C53;padding:30px 30px 26px;text-align:center;">' +
+        '<div style="font-size:11px;letter-spacing:3px;color:#F5C842;font-weight:700;text-transform:uppercase;">Spacer\'s Toulouse Volley</div>' +
+        '<div style="font-size:38px;line-height:1;margin:16px 0 8px;">&#128588;</div>' +
+        '<div style="font-size:22px;font-weight:800;color:#ffffff;">On a besoin de toi&nbsp;!</div>' +
+        '<div style="font-size:13px;color:#9DC0E6;margin-top:6px;">Appel &agrave; b&eacute;n&eacute;voles &middot; hors match</div>' +
+      '</td></tr>' +
+      '<tr><td bgcolor="#F5C842" style="background-color:#F5C842;height:4px;line-height:4px;font-size:4px;">&nbsp;</td></tr>' +
+      '<tr><td style="padding:28px 32px 30px;">' +
+        '<div style="font-size:21px;font-weight:800;color:#042C53;margin-bottom:12px;">' + esc(m.titre || 'Coup de main') + '</div>' +
+        '<table role="presentation" cellpadding="0" cellspacing="0" style="margin-bottom:18px;"><tr><td style="background-color:#E6F1FB;border-radius:8px;padding:9px 15px;font-size:13px;color:#185FA5;font-weight:600;">&#128197;&nbsp; ' + infoLigne + '</td></tr></table>' +
+        descHtml +
+        objHtml +
+        '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:4px 0;">' +
+          '<a href="' + APP_URL + '" style="display:inline-block;background-color:#185FA5;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 44px;border-radius:50px;">Je participe &#8594;</a>' +
+        '</td></tr></table>' +
+        '<p style="font-size:12px;color:#8A9BAD;text-align:center;margin:20px 0 0;line-height:1.6;">Connecte-toi &agrave; ton espace b&eacute;n&eacute;vole pour t\'inscrire.<br>Merci pour ton aide&nbsp;!</p>' +
+      '</td></tr>' +
+      '<tr><td bgcolor="#042C53" style="background-color:#042C53;padding:20px 30px;text-align:center;">' +
+        '<div style="font-size:12px;color:#9DC0E6;font-weight:600;">Spacer\'s Toulouse Volley</div>' +
+        '<div style="font-size:11px;color:#6E92BC;margin-top:4px;">Palais des Sports Andr&eacute; Brouat &middot; Toulouse</div>' +
+      '</td></tr>' +
+    '</table>' +
+  '</td></tr></table>'
 }
 
 Deno.serve(async function(req){
