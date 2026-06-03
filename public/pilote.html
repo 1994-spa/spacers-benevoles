@@ -1332,10 +1332,11 @@ async function loadAppelsPilote(){
       (objs?'<div style="margin-bottom:8px;">'+objs+'</div>':'')+
       '<div style="font-size:11px;font-weight:700;color:#F5C842;margin-bottom:4px;">&#128101; '+nb+' inscrit'+(nb>1?'s':'')+(m.places_max?(' / '+m.places_max):'')+'</div>'+
       '<div style="margin-bottom:8px;">'+partRows+'</div>'+
-      '<div style="display:flex;gap:7px;"><button class="btn btn-sm btn-ghost" style="flex:1;" onclick="toggleMission(\''+m.id+'\',\''+(isOpen?'fermee':'ouverte')+'\')">'+(isOpen?'Fermer':'Rouvrir')+'</button><button class="btn btn-sm" style="background:#7a2525;color:white;" onclick="delMission(\''+m.id+'\')">Supprimer</button></div>'+
+      '<div style="display:flex;gap:7px;">'+(isOpen?'<button class="btn btn-sm" style="flex:1;background:#1f6f43;color:white;" onclick="notifyAppel(\''+m.id+'\')">&#128227; Notifier</button>':'')+'<button class="btn btn-sm btn-ghost" style="flex:1;" onclick="toggleMission(\''+m.id+'\',\''+(isOpen?'fermee':'ouverte')+'\')">'+(isOpen?'Fermer':'Rouvrir')+'</button><button class="btn btn-sm" style="background:#7a2525;color:white;" onclick="delMission(\''+m.id+'\')">Supprimer</button></div>'+
       '</div>';
   }).join('');
 }
+async function notifyAppel(id){ if(!confirm('Envoyer un email a tous les benevoles actifs pour cet appel ?')) return; showAlert('alert-appels','Envoi en cours...','s'); var r=await sb.functions.invoke('notify-appel',{ body:{ mission_id:id } }); if(r.error){ showAlert('alert-appels','Erreur envoi','e'); return; } var n=(r.data&&r.data.sent)||0; showAlert('alert-appels','Email envoye a '+n+' benevole'+(n>1?'s':''),'s'); }
 async function toggleMission(id,statut){ var r=await sb.from('missions').update({statut:statut}).eq('id',id); if(r.error){ showAlert('alert-appels','Erreur: '+r.error.message,'e'); return; } loadAppelsPilote(); }
 async function delMission(id){ var r=await sb.from('missions').delete().eq('id',id); if(!r.error) loadAppelsPilote(); }
 async function affecterPoste(inscriptionId, posteId, selectEl) {
