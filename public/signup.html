@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spacers Bénévoles — Inscription</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:flex;flex-direction:column;}
+
+.su-screen{
+  flex:1;display:flex;flex-direction:column;
+  background:linear-gradient(160deg,#042C53 0%,#0C447C 60%,#185FA5 100%);
+}
+.su-screen.hidden{display:none;}
+
+/* HEADER */
+.su-header{padding:28px 24px 14px;text-align:center;flex-shrink:0;}
+.logo-wrap{
+  width:64px;height:64px;border-radius:20px;
+  background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);
+  font-size:30px;display:flex;align-items:center;justify-content:center;
+  margin:0 auto 14px;
+}
+.su-title{font-size:24px;font-weight:800;color:white;line-height:1.2;margin-bottom:5px;}
+.su-sub{font-size:12px;color:rgba(181,212,244,0.8);line-height:1.5;}
+
+/* BODY (scroll) */
+.su-body{flex:1;padding:6px 22px 12px;overflow-y:auto;}
+.su-body::-webkit-scrollbar{display:none;}
+
+.section-label{
+  font-size:10px;letter-spacing:1.5px;color:rgba(181,212,244,0.55);
+  text-transform:uppercase;margin:18px 0 9px;font-weight:700;
+}
+.section-label:first-child{margin-top:6px;}
+
+.input-wrap{width:100%;margin-bottom:11px;}
+.input-label{font-size:11px;font-weight:600;color:rgba(255,255,255,0.72);margin-bottom:5px;display:block;}
+.input-label .opt{color:rgba(181,212,244,0.45);font-weight:400;}
+.input-hint{font-size:10px;color:rgba(181,212,244,0.45);margin-top:4px;line-height:1.4;}
+.inp{
+  width:100%;padding:13px 16px;border-radius:12px;
+  border:1.5px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.1);color:white;
+  font-family:'Sora',sans-serif;font-size:13px;outline:none;
+}
+.inp::placeholder{color:rgba(255,255,255,0.35);}
+.inp:focus{border-color:rgba(181,212,244,0.6);background:rgba(255,255,255,0.15);}
+.inp.err{border-color:rgba(244,184,206,0.7);background:rgba(153,53,86,0.18);}
+select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(181,212,244,0.7)' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px;}
+select.inp option{background:#0C447C;color:white;}
+
+/* CHIPS (taille + postes) */
+.chips{display:flex;flex-wrap:wrap;gap:7px;}
+.chip{
+  padding:9px 13px;border-radius:11px;
+  border:1.5px solid rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.06);
+  color:rgba(255,255,255,0.78);font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .15s;user-select:none;
+  display:flex;align-items:center;gap:6px;
+}
+.chip:hover{border-color:rgba(255,255,255,0.3);}
+.chip.sel{
+  background:rgba(59,109,17,0.30);
+  border-color:rgba(123,176,74,0.7);
+  color:white;
+}
+.chips-size .chip{flex:0 0 auto;min-width:46px;justify-content:center;}
+.chips-postes .chip{flex:1 1 calc(50% - 4px);}
+
+/* MESSAGES */
+.msg-box{
+  border-radius:10px;padding:10px 14px;font-size:12px;
+  margin:0 0 8px;display:none;line-height:1.5;
+}
+.msg-err{background:rgba(153,53,86,0.25);color:#F4B8CE;border:1px solid rgba(153,53,86,0.3);}
+
+/* FOOTER */
+.su-footer{padding:10px 22px 26px;flex-shrink:0;}
+.btn-primary{
+  width:100%;padding:15px;background:white;color:#0C447C;
+  border:none;border-radius:50px;font-family:'Sora',sans-serif;
+  font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;
+}
+.btn-primary:hover{background:#E6F1FB;}
+.btn-primary:disabled{background:rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);cursor:not-allowed;}
+.su-login-link{
+  font-size:12px;color:rgba(181,212,244,0.6);text-align:center;
+  margin-top:14px;display:block;text-decoration:none;
+}
+.su-login-link a{color:#9BC4F1;font-weight:700;text-decoration:none;}
+.su-login-link a:hover{text-decoration:underline;}
+
+.consent-mini{
+  font-size:10px;color:rgba(181,212,244,0.5);text-align:center;
+  margin-top:10px;line-height:1.5;
+}
+
+/* SUCCESS */
+.su-success{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:34px 28px;text-align:center;}
+.su-success .icon{font-size:58px;margin-bottom:18px;}
+.su-success h1{font-size:26px;font-weight:800;color:white;line-height:1.2;margin-bottom:12px;}
+.su-success p{font-size:13px;color:rgba(181,212,244,0.85);line-height:1.7;margin-bottom:8px;}
+.su-success .mail{font-weight:700;color:white;}
+.su-success .note{
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
+  border-radius:14px;padding:14px 16px;margin:20px 0;font-size:11.5px;
+  color:rgba(181,212,244,0.78);line-height:1.6;text-align:left;
+}
+</style>
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#042C53">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Spacers">
+<meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+
+<!-- ══ FORMULAIRE D'INSCRIPTION ═══════════════════════════════ -->
+<div class="su-screen" id="screen-signup">
+  <div class="su-header">
+    <div class="logo-wrap">🏐</div>
+    <h1 class="su-title">Devenir bénévole</h1>
+    <p class="su-sub">Spacers Toulouse Volley · Saison 2026–2027</p>
+  </div>
+
+  <div class="su-body">
+    <div class="msg-box msg-err" id="msg-err"></div>
+
+    <!-- Identifiants -->
+    <div class="section-label">Vos identifiants</div>
+
+    <div class="input-wrap">
+      <label class="input-label">Adresse email</label>
+      <input class="inp" type="email" id="email" placeholder="votre@email.com" autocomplete="email">
+    </div>
+    <div class="input-wrap">
+      <label class="input-label">Mot de passe</label>
+      <input class="inp" type="password" id="pwd" placeholder="8 caractères minimum" autocomplete="new-password">
+    </div>
+    <div class="input-wrap">
+      <label class="input-label">Confirmer le mot de passe</label>
+      <input class="inp" type="password" id="pwd2" placeholder="••••••••" autocomplete="new-password">
+    </div>
+
+    <!-- Informations personnelles -->
+    <div class="section-label">Vos informations</div>
+
+    <div class="input-wrap">
+      <label class="input-label">Prénom</label>
+      <input class="inp" type="text" id="prenom" placeholder="Prénom" autocomplete="given-name" maxlength="50">
+    </div>
+    <div class="input-wrap">
+      <label class="input-label">Nom</label>
+      <input class="inp" type="text" id="nom" placeholder="Nom" autocomplete="family-name" maxlength="50">
+    </div>
+    <div class="input-wrap">
+      <label class="input-label">Date de naissance <span class="opt">(facultatif)</span></label>
+      <input class="inp" type="date" id="naissance">
+      <div class="input-hint">Inscription réservée aux 15 ans et plus.</div>
+    </div>
+
+    <div class="input-wrap">
+      <label class="input-label">Taille de t-shirt</label>
+      <div class="chips chips-size" id="chips-taille">
+        <div class="chip" data-val="XS">XS</div>
+        <div class="chip" data-val="S">S</div>
+        <div class="chip" data-val="M">M</div>
+        <div class="chip" data-val="L">L</div>
+        <div class="chip" data-val="XL">XL</div>
+        <div class="chip" data-val="XXL">XXL</div>
+        <div class="chip" data-val="XXXL">XXXL</div>
+      </div>
+    </div>
+
+    <!-- Coordonnées -->
+    <div class="section-label">Vos coordonnées <span class="opt" style="text-transform:none;letter-spacing:0;font-weight:400;color:rgba(181,212,244,0.4);">(facultatif)</span></div>
+
+    <div class="input-wrap">
+      <label class="input-label">Numéro de téléphone <span class="opt">(facultatif)</span></label>
+      <input class="inp" type="tel" id="telephone" placeholder="06 12 34 56 78" autocomplete="tel" maxlength="20">
+      <div class="input-hint">Pour les convocations urgentes et le groupe WhatsApp.</div>
+    </div>
+    <div class="input-wrap">
+      <label class="input-label">Ville de résidence <span class="opt">(facultatif)</span></label>
+      <input class="inp" type="text" id="ville" placeholder="Toulouse" autocomplete="address-level2" maxlength="60">
+    </div>
+
+    <!-- Postes -->
+    <div class="section-label">Quels postes vous intéressent ?</div>
+    <div class="chips chips-postes" id="chips-postes">
+      <div class="chip" data-val="Scan Entrée Public">🎟️ Scan Entrée Public</div>
+      <div class="chip" data-val="Placement Public">🪑 Placement Public</div>
+      <div class="chip" data-val="Buvettes">🥤 Buvettes</div>
+      <div class="chip" data-val="Boutique">🛍️ Boutique</div>
+      <div class="chip" data-val="Animation / Mascotte">🎭 Animation / Mascotte</div>
+      <div class="chip" data-val="Consigne">🎒 Consigne</div>
+      <div class="chip" data-val="Sécurité Tribune VIP">🛡️ Sécurité Tribune VIP</div>
+    </div>
+    <div class="input-hint" style="margin-top:7px;">Sélectionnez un ou plusieurs postes. Le poste final sera attribué par le club.</div>
+  </div>
+
+  <div class="su-footer">
+    <button class="btn-primary" id="btn-signup" onclick="doSignup()">Créer mon compte →</button>
+    <div class="consent-mini">
+      En créant un compte, vous acceptez de finaliser vos consentements RGPD à la première connexion.
+    </div>
+    <span class="su-login-link">Déjà inscrit ? <a href="index.html">Se connecter</a></span>
+  </div>
+</div>
+
+<!-- ══ SUCCÈS — VÉRIFIEZ VOTRE EMAIL ══════════════════════════ -->
+<div class="su-screen hidden" id="screen-success">
+  <div class="su-success">
+    <div class="icon">📬</div>
+    <h1>Vérifiez vos emails</h1>
+    <p>Votre compte est presque prêt.<br>Un email de confirmation vient d'être envoyé à&nbsp;:</p>
+    <p class="mail" id="success-email">—</p>
+    <div class="note">
+      👉 Cliquez sur le lien dans cet email pour <strong>activer votre compte</strong>, puis revenez vous connecter.<br><br>
+      Pas reçu après quelques minutes ? Pensez à vérifier vos <strong>spams</strong> / courriers indésirables.
+    </div>
+    <button class="btn-primary" style="max-width:280px;" onclick="window.location.href='index.html'">Aller à la connexion →</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://xphuolvbamdkizydveij.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwaHVvbHZiYW1ka2l6eWR2ZWlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDQ2MDksImV4cCI6MjA5MjYyMDYwOX0.vpxV6ApwAkhlTx-LMCBZwee7LCdQGYP_5sbPMXEFFUQ'
+const AGE_MINIMUM = 15
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+// Déjà connecté ? on renvoie au dashboard
+sb.auth.getSession().then(({ data }) => {
+  if (data.session) window.location.href = 'dashboard.html'
+})
+
+// ─── Sélecteurs de chips ───────────────────────────────────
+let tailleSel = null
+const postesSel = new Set()
+
+document.querySelectorAll('#chips-taille .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#chips-taille .chip').forEach(c => c.classList.remove('sel'))
+    chip.classList.add('sel')
+    tailleSel = chip.dataset.val
+  })
+})
+
+document.querySelectorAll('#chips-postes .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const v = chip.dataset.val
+    if (postesSel.has(v)) { postesSel.delete(v); chip.classList.remove('sel') }
+    else { postesSel.add(v); chip.classList.add('sel') }
+  })
+})
+
+// ─── Helpers ───────────────────────────────────────────────
+function showErr(m) {
+  const e = document.getElementById('msg-err')
+  e.textContent = m
+  e.style.display = 'block'
+  document.querySelector('.su-body').scrollTo({ top: 0, behavior: 'smooth' })
+}
+function hideErr() { document.getElementById('msg-err').style.display = 'none' }
+function markErr(id, on) { document.getElementById(id).classList.toggle('err', on) }
+
+function computeAge(dobStr) {
+  if (!dobStr) return null
+  const dob = new Date(dobStr)
+  if (isNaN(dob.getTime())) return null
+  const now = new Date()
+  let age = now.getFullYear() - dob.getFullYear()
+  const m = now.getMonth() - dob.getMonth()
+  if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--
+  return age
+}
+
+// Anti-injection léger sur prénom/nom (défense en profondeur, cf. audit F-006)
+function cleanName(s) { return s.replace(/[<>]/g, '').trim() }
+
+// ─── Inscription ───────────────────────────────────────────
+async function doSignup() {
+  hideErr()
+  ;['email','pwd','pwd2','prenom','nom','naissance'].forEach(id => markErr(id, false))
+
+  const email  = document.getElementById('email').value.trim()
+  const pwd     = document.getElementById('pwd').value
+  const pwd2    = document.getElementById('pwd2').value
+  const prenom  = cleanName(document.getElementById('prenom').value)
+  const nom     = cleanName(document.getElementById('nom').value)
+  const naiss   = document.getElementById('naissance').value
+  const tel     = document.getElementById('telephone').value.trim()
+  const ville   = document.getElementById('ville').value.trim()
+
+  // ── Validations ──
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { markErr('email', true); return showErr('Adresse email invalide.') }
+  if (!pwd || pwd.length < 8) { markErr('pwd', true); return showErr('Le mot de passe doit faire au moins 8 caractères.') }
+  if (pwd !== pwd2) { markErr('pwd2', true); return showErr('Les deux mots de passe ne correspondent pas.') }
+  if (!prenom) { markErr('prenom', true); return showErr('Le prénom est obligatoire.') }
+  if (!nom)    { markErr('nom', true);    return showErr('Le nom est obligatoire.') }
+
+  if (naiss) {
+    const age = computeAge(naiss)
+    if (age === null) { markErr('naissance', true); return showErr('Date de naissance invalide.') }
+    if (age < AGE_MINIMUM) { markErr('naissance', true); return showErr('Inscription réservée aux ' + AGE_MINIMUM + ' ans et plus.') }
+    if (age > 110) { markErr('naissance', true); return showErr('Date de naissance invalide.') }
+  }
+
+  if (!tailleSel) return showErr('Choisissez votre taille de t-shirt.')
+  if (postesSel.size === 0) return showErr('Sélectionnez au moins un poste qui vous intéresse.')
+
+  const btn = document.getElementById('btn-signup')
+  btn.disabled = true
+  btn.textContent = 'Création du compte...'
+
+  // ── Métadonnées lues par le trigger handle_new_auth_user ──
+  const meta = {
+    prenom,
+    nom,
+    taille_tshirt: tailleSel,
+    postes_preferes: Array.from(postesSel).join(', '),
+    telephone: tel || null,
+    ville: ville || null,
+    date_naissance: naiss || null
+  }
+
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password: pwd,
+    options: {
+      emailRedirectTo: window.location.origin + '/',
+      data: meta
+    }
+  })
+
+  if (error) {
+    btn.disabled = false
+    btn.textContent = 'Créer mon compte →'
+    return showErr(mapSignupErr(error.message))
+  }
+
+  // Email déjà enregistré : Supabase renvoie un user "fantôme" sans identités
+  if (data && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    btn.disabled = false
+    btn.textContent = 'Créer mon compte →'
+    return showErr('Un compte existe déjà avec cet email. Connectez-vous, ou utilisez « Mot de passe oublié ».')
+  }
+
+  // ── Succès : écran "vérifiez vos emails" ──
+  document.getElementById('success-email').textContent = email
+  document.getElementById('screen-signup').classList.add('hidden')
+  document.getElementById('screen-success').classList.remove('hidden')
+}
+
+function mapSignupErr(m) {
+  if (/already registered|already exists/i.test(m)) return 'Un compte existe déjà avec cet email. Connectez-vous, ou utilisez « Mot de passe oublié ».'
+  if (/password/i.test(m) && /short|length|least/i.test(m)) return 'Mot de passe trop court (8 caractères minimum).'
+  if (/rate|too many/i.test(m)) return 'Trop de tentatives. Patientez quelques minutes.'
+  if (/valid email|invalid/i.test(m)) return 'Adresse email invalide.'
+  return 'Erreur : ' + m
+}
+</script>
+
+<!-- Service worker (PWA), comme sur les autres pages -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .catch(err => console.log('[SW] registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>
