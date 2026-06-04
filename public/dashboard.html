@@ -3043,9 +3043,9 @@ function copyParrainLink(){
 const GUIDE_STEPS_B = [
   { center:true, ic:'&#127952;', tt:'Bienvenue chez les Spacers !', quoi:'Ton espace bénévole en 1 minute : où voir tes matchs, gagner des points et donner un coup de main. C\'est parti !', pourquoi:'' },
   { sel:'#bn-planning', ic:'&#128197;', tt:'Tes matchs & tes dispos', quoi:'Dans Planning, tu vois les matchs &agrave; venir et tu indiques si tu es disponible. Une fois affecté, ton créneau et ton poste s\'affichent.', pourquoi:'Plus tu te rends dispo tôt, plus c\'est simple d\'organiser l\'équipe.' },
-  { sel:'#bn-points', ic:'&#127942;', tt:'Tes points & ton niveau', quoi:'&Agrave; chaque présence validée, tu gagnes des points et tu montes : Bronze, Argent, Or.', pourquoi:'Tes points donnent droit &agrave; des récompenses &mdash; jette un œil &agrave; l\'onglet Cadeaux.' },
+  { sel:'#bn-points', ic:'&#127942;', tt:'Tes points & ton niveau', quoi:'&Agrave; chaque présence validée, tu gagnes des points et tu montes : Comète, Satellite, Étoile, Galaxie.', pourquoi:'Tes points donnent droit &agrave; des récompenses &mdash; jette un œil &agrave; l\'onglet Cadeaux.' },
   { view:'home', sel:'#guide-appels', ic:'&#128588;', tt:'On a besoin de toi', quoi:'En dehors des matchs, le club lance parfois des appels (montage, événements&hellip;). Si tu es dispo, inscris-toi en un tap.', pourquoi:'Un coup de main de temps en temps, ça aide énormément toute l\'équipe.' },
-  { view:'home', sel:'#parrain-link', ic:'&#129309;', tt:'Parraine tes amis', quoi:'Partage ton lien perso : quand ta recrue vient pour la première fois, tu gagnes 100 points.', pourquoi:'C\'est le moyen le plus simple d\'agrandir l\'équipe&hellip; et de grimper au classement.' },
+  { view:'home', sel:'#parrain-link', ic:'&#129309;', tt:'Parraine tes amis', quoi:'Partage ton lien perso : quand ta recrue vient pour la première fois, tu gagnes 60 points.', pourquoi:'C\'est le moyen le plus simple d\'agrandir l\'équipe&hellip; et de grimper au classement.' },
   { sel:'#bn-profil', ic:'&#128100;', tt:'Ton profil', quoi:'Ta photo (utile pour ton accréditation), tes infos et tes consentements se gèrent ici, &agrave; tout moment.', pourquoi:'' },
   { center:true, ic:'&#127881;', tt:'&Agrave; toi de jouer !', quoi:'Tu peux rouvrir ce guide quand tu veux avec le &laquo; ? &raquo; en haut &agrave; droite. Merci pour ton engagement !', pourquoi:'' }
 ];
@@ -3181,24 +3181,24 @@ function renderHomeForProfil(p) {
   const home = document.getElementById('bs-home')
   const profil = p.profil_type || 'hugo'
   const pts = p.points_total || 0
-  const niveau = p.niveau || 'Bronze'
-  const pct = niveau==='Or'?100:niveau==='Argent'?Math.min(((pts-600)/400)*100,100):Math.min((pts/600)*100,100)
+  const _pi = palierInfo(pts); const niveau = _pi.cur.l
+  const pct = _pi.pct
 
   if (profil === 'hugo') renderHugoHome(home, p, pts, niveau, pct)
   else if (profil === 'virginie') renderVirginieHome(home, p)
   else renderJoelHome(home, p, pts)
 }
 
-function renderHugoHome(el, p, pts, niveau, pct) {
+function renderHugoHome(el, p, pts, niveau, pct) { const _pi = palierInfo(pts);
   el.innerHTML = `
     <div class="hugo-hero">
       <div style="font-size:9px;color:rgba(245,200,66,0.5);letter-spacing:2px;margin-bottom:3px;">VOS POINTS SAISON</div>
       <div class="hugo-pts">${pts}</div>
-      <div class="hugo-level">${niveau==='Or'?'🥇':niveau==='Argent'?'🥈':'🥉'} Niveau ${niveau}</div>
+      <div class="hugo-level">${_pi.cur.e} ${_pi.cur.l}</div>
       <div class="hugo-prog"><div class="hugo-fill" style="width:${pct}%;"></div></div>
       <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(181,212,244,0.4);">
         <span>${p.matchs_joues||0} matchs</span>
-        <span>${niveau==='Or'?'Max !':niveau==='Argent'?(1000-pts)+' pts avant Or':(600-pts)+' pts avant Argent'}</span>
+        <span>${_pi.nxt?_pi.avant+' pts avant '+_pi.nxt.l:'Palier max'}</span>
       </div>
     </div>
     ${renderNextMatchSection()}
@@ -3214,9 +3214,9 @@ function renderHugoHome(el, p, pts, niveau, pct) {
         <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-left:8px;">${p.matchs_joues||0}/5</div>
       </div>
       <div class="defi-item">
-        <div style="font-size:11px;color:white;flex:1;">Atteindre 600 pts</div>
-        <div class="defi-prog"><div class="defi-prog-fill" style="width:${Math.min((pts/600)*100,100)}%;"></div></div>
-        <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-left:8px;">${pts}/600</div>
+        <div style="font-size:11px;color:white;flex:1;">Atteindre ${_pi.nxt?_pi.nxt.l:'le palier max'}</div>
+        <div class="defi-prog"><div class="defi-prog-fill" style="width:${_pi.pct}%;"></div></div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-left:8px;">${pts}/${_pi.nxt?_pi.nxt.s:pts}</div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -3264,7 +3264,7 @@ function renderJoelHome(el, p, pts) {
     <div class="joel-hero">
       <div style="font-size:10px;color:rgba(192,221,151,0.6);letter-spacing:2px;margin-bottom:3px;">${p.role==='referent'||p.role==='pilote'||p.role==='admin'?'🏅 RÉFÉRENT OFFICIEL':'BÉNÉVOLE EXPÉRIMENTÉ'}</div>
       <div style="font-size:18px;font-weight:800;color:white;margin-bottom:4px;">${p.prenom||''} ${p.nom||''}</div>
-      <div style="font-size:12px;color:rgba(192,221,151,0.7);">${p.matchs_joues||0} matchs · ${pts} pts · ${p.niveau||'Bronze'}</div>
+      <div style="font-size:12px;color:rgba(192,221,151,0.7);">${p.matchs_joues||0} matchs · ${pts} pts · ${p.niveau||'Comète'}</div>
     </div>
 
     ${renderNextMatchSection()}
@@ -4331,7 +4331,7 @@ function generateExportPDF(data, filename) {
   addLine('Matchs joués : ' + (p.matchs_joues || 0))
   addLine('Points totaux : ' + (p.points_total || 0))
   addLine('Points dépensés : ' + (p.points_depenses || 0))
-  addLine('Niveau : ' + (p.niveau || 'Bronze'))
+  addLine('Niveau : ' + (p.niveau || 'Comète'))
 
   addSection('Mes consentements (' + ((data.consentements || []).length) + ' au total)')
   ;(data.consentements || []).slice(0, 30).forEach(c => {

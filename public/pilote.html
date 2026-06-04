@@ -573,6 +573,18 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-ev-presences" style="display:none;">
+  <div class="modal" style="max-width:480px;">
+    <h2 id="evpres-title">&#128101; Valider les pr&eacute;sences</h2>
+    <p style="font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:12px;line-height:1.6;">Coche les b&eacute;n&eacute;voles pr&eacute;sents. Chaque b&eacute;n&eacute;vole coch&eacute; re&ccedil;oit un mail de remerciement.</p>
+    <input id="evpres-search" class="input-field" type="text" placeholder="Rechercher un b&eacute;n&eacute;vole&hellip;" oninput="renderEvPresences()" style="margin-bottom:10px;">
+    <div id="evpres-list" style="max-height:50vh;overflow-y:auto;"></div>
+    <div class="modal-actions" style="margin-top:14px;">
+      <button class="btn btn-ghost" style="flex:1;" onclick="closeEvPresences()">Fermer</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-flot" class="toast-flot"></div>
 </div><!-- /main-content -->
 
