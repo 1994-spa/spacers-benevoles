@@ -2693,13 +2693,91 @@ function renderEvPiloteList() {
         </div>
         <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5;margin-bottom:10px;white-space:pre-line;">${escapeHtmlPilote(e.description||'')}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${!isHidden
+          ${isPast ? `<button class="btn btn-blue btn-sm" onclick="openEvPresences('${e.id}')">&#128101; Valider les pr&eacute;sences</button>` : ''}${!isHidden
             ? `<button class="btn btn-ghost btn-sm" onclick="masquerEvenement('${e.id}')">⏸ Masquer</button>`
             : `<button class="btn btn-ghost btn-sm" onclick="republierEvenement('${e.id}')">▶ Republier</button>`}
           <button class="btn btn-red btn-sm" onclick="supprimerEvenement('${e.id}')">🗑 Supprimer</button>
         </div>
       </div>`
   }).join('')
+}
+
+// ============================================================
+// ============================================================
+// VALIDATION DES PRESENCES AUX EVENEMENTS
+// ============================================================
+let evPresEventId = null
+let evPresSet = new Set()
+let evPresInteretSet = new Set()
+
+async function openEvPresences(eventId) {
+  evPresEventId = eventId
+  const ev = (evPiloteData || []).find(e => e.id === eventId)
+  const titleEl = document.getElementById('evpres-title')
+  if (titleEl && ev) titleEl.innerHTML = '&#128101; Pr&eacute;sences &middot; ' + escapeHtmlPilote(ev.titre || '')
+  const searchEl = document.getElementById('evpres-search'); if (searchEl) searchEl.value = ''
+  evPresSet = new Set()
+  evPresInteretSet = new Set()
+  document.getElementById('evpres-list').innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:12px;padding:16px;text-align:center;">Chargement&hellip;</div>'
+  document.getElementById('modal-ev-presences').style.display = 'flex'
+
+  const [presRes, intRes] = await Promise.all([
+    sb.from('events_presences').select('benevole_id').eq('event_id', eventId),
+    sb.from('events_interets').select('benevole_id').eq('event_id', eventId),
+  ])
+  if (presRes.error) showAlert('alert-evenements', '\u274c Erreur : ' + presRes.error.message, 'e')
+  ;(presRes.data || []).forEach(r => evPresSet.add(r.benevole_id))
+  ;(intRes.data || []).forEach(r => evPresInteretSet.add(r.benevole_id))
+  renderEvPresences()
+}
+
+function closeEvPresences() {
+  document.getElementById('modal-ev-presences').style.display = 'none'
+  evPresEventId = null
+}
+
+function renderEvPresences() {
+  const el = document.getElementById('evpres-list')
+  if (!el) return
+  const q = (document.getElementById('evpres-search')?.value || '').toLowerCase().trim()
+  let list = (allBenv || []).filter(b => b.statut_compte === 'actif')
+  if (q) list = list.filter(b => ((b.prenom || '') + ' ' + (b.nom || '')).toLowerCase().includes(q))
+  list.sort((a, b) => (evPresInteretSet.has(b.id) ? 1 : 0) - (evPresInteretSet.has(a.id) ? 1 : 0))
+  if (list.length === 0) {
+    el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:12px;padding:16px;text-align:center;">Aucun b&eacute;n&eacute;vole.</div>'
+    return
+  }
+  el.innerHTML = list.map(b => {
+    const on = evPresSet.has(b.id)
+    const interesse = evPresInteretSet.has(b.id)
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.06);">'
+      + (b._signedUrl ? '<img src="' + b._signedUrl + '" class="bav">' : '<div class="bav-ph">' + ini(b) + '</div>')
+      + '<div style="flex:1;min-width:0;">'
+      +   '<div style="font-size:12px;font-weight:700;color:white;">' + escapeHtmlPilote(((b.prenom || '') + ' ' + (b.nom || '')).trim()) + '</div>'
+      +   (interesse ? '<div style="font-size:10px;color:#FAC775;">&#10022; Int&eacute;ress&eacute;(e)</div>' : '')
+      + '</div>'
+      + '<button class="btn btn-sm ' + (on ? 'btn-green' : 'btn-ghost') + '" onclick="toggleEvPresence(\'' + b.id + '\')">' + (on ? '&#10003; Pr&eacute;sent' : 'Absent') + '</button>'
+      + '</div>'
+  }).join('')
+}
+
+async function toggleEvPresence(benevoleId) {
+  if (!evPresEventId) return
+  const on = evPresSet.has(benevoleId)
+  try {
+    if (on) {
+      const { error } = await sb.from('events_presences').delete().eq('event_id', evPresEventId).eq('benevole_id', benevoleId)
+      if (error) throw error
+      evPresSet.delete(benevoleId)
+    } else {
+      const { error } = await sb.from('events_presences').insert({ event_id: evPresEventId, benevole_id: benevoleId, validee_par: curPiloteId })
+      if (error) throw error
+      evPresSet.add(benevoleId)
+    }
+    renderEvPresences()
+  } catch (err) {
+    showAlert('alert-evenements', '\u274c Erreur : ' + (err.message || err), 'e')
+  }
 }
 
 // ============================================================
