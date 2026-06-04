@@ -1248,7 +1248,7 @@ async function loadMatch() {
     <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;">📅 ${formatDate(m.date_match)} · ${m.heure||''} · ${m.lieu||'Palais des Sports'}</div>`
 
   // Postes
-  const { data: postes } = await sb.from('postes').select('*').order('nom')
+  const { data: postes } = await sb.from('postes').select('*').eq('actif', true).order('nom')
   curPostes = postes || []
   loadCreneaux()
 
