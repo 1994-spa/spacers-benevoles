@@ -3415,27 +3415,67 @@ async function setDispo(matchId,statut,btn) {
 }
 
 // -- POINTS ---------------------------------------------------
-function loadPoints() {
+function palierInfo(pts){
+  pts = pts || 0
+  const P=[{code:'comete',l:'Comète',e:'☄️',s:0},{code:'satellite',l:'Satellite',e:'🛰️',s:300},{code:'etoile',l:'Étoile',e:'⭐',s:700},{code:'galaxie',l:'Galaxie',e:'🌌',s:1500}]
+  let cur=P[0],nxt=null
+  for(let i=0;i<P.length;i++){ if(pts>=P[i].s){ cur=P[i]; nxt=P[i+1]||null } }
+  const pct = nxt?Math.max(3,Math.min(100,Math.round((pts-cur.s)/(nxt.s-cur.s)*100))):100
+  return {P,cur,nxt,pct,avant:nxt?nxt.s-pts:0}
+}
+
+async function loadPoints() {
   if (!CP) return
-  const p=CP, pts=p.points_total||0, niveau=p.niveau||'Bronze'
-  const pct=niveau==='Or'?100:niveau==='Argent'?Math.min(((pts-600)/400)*100,100):Math.min((pts/600)*100,100)
-  document.getElementById('points-content').innerHTML=`
-    <div style="background:linear-gradient(135deg,#1a1a18,#0C447C);border-radius:16px;padding:18px;margin-bottom:12px;">
-      <div style="font-size:36px;font-weight:800;color:#F5C842;font-family:monospace;">${pts}</div>
-      <div style="font-size:13px;font-weight:700;color:white;margin-top:3px;">${niveau==='Bronze'?'🥉':niveau==='Argent'?'🥈':'🥇'} ${niveau}</div>
-      <div style="height:7px;background:rgba(255,255,255,0.1);border-radius:4px;margin:10px 0 4px;overflow:hidden;">
-        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#C9821A,#F5C842);border-radius:4px;"></div>
+  const el = document.getElementById('points-content'); if(!el) return
+  const pts = CP.points_total||0
+  const pi = palierInfo(pts)
+  const ladder = pi.P.map(t=>`<div style="flex:1;text-align:center;padding:10px 4px;border-radius:12px;${t.code===pi.cur.code?'background:rgba(245,200,66,0.16);border:1px solid rgba(245,200,66,0.45);':'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);'}"><div style="font-size:17px;">${t.e}</div><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.85);margin-top:2px;">${t.l}</div><div style="font-size:9px;color:${t.code===pi.cur.code?'#FFD97A':'rgba(255,255,255,0.5)'};">${t.s}</div></div>`).join('')
+  const nextTxt = pi.nxt ? `Plus que <b style="color:#FFD97A;">${pi.avant} pts</b> avant ${pi.nxt.e} ${pi.nxt.l}` : 'Palier maximum atteint 🏆'
+  const LOTS={satellite:'−10 % boutique',etoile:'−20 % boutique + un bon cadeau',galaxie:'−30 % boutique + écharpe + 2 places match'}
+  const teaser = pi.nxt && LOTS[pi.nxt.code] ? `<div style="background:linear-gradient(120deg,#0a3a68,#15518c);border:1px solid rgba(245,200,66,0.3);border-radius:14px;padding:14px;display:flex;gap:11px;align-items:center;margin-top:12px;"><span style="font-size:22px;">🎁</span><p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;line-height:1.4;">Au prochain palier <b style="color:#FFD97A;">${pi.nxt.e} ${pi.nxt.l}</b> : <b style="color:#FFD97A;">${LOTS[pi.nxt.code]}</b>.</p></div>` : ''
+  const bareme = [['📲','Inscription sur l\'appli','+30'],['🏐','Présence confirmée','+50'],['⏱️','Ponctualité','+20'],['🤝','Aide hors match','+30'],['🎉','Proposer un événement','+60'],['👥','Parrainage','+60'],['🏅','Badge 5 matchs','+100'],['🏆','Badge 10 matchs','+150']].map(([i,l,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #F1EFE8;font-size:13px;"><div style="display:flex;gap:8px;align-items:center;"><span>${i}</span><span style="color:#243b5a;font-weight:500;">${l}</span></div><strong style="color:#185FA5;">${v} pts</strong></div>`).join('')
+
+  el.innerHTML = `
+    <div style="background:linear-gradient(120deg,#02203f,#1c4f86 55%,#2f6fc0);border-radius:18px;padding:18px;margin-bottom:12px;color:white;">
+      <div style="font-size:26px;">${pi.cur.e}</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+        <div style="font-size:22px;font-weight:800;">${pi.cur.l}</div>
+        <div style="margin-left:auto;text-align:right;"><div style="font-size:22px;font-weight:800;color:#FFD97A;">${pts}</div><div style="font-size:10px;color:rgba(255,255,255,0.6);">points · saison en cours</div></div>
       </div>
-      <div style="font-size:9px;color:rgba(181,212,244,0.4);">${niveau==='Or'?'Niveau max':niveau==='Argent'?(1000-pts)+' pts avant Or':(600-pts)+' pts avant Argent'}</div>
+      <div style="height:8px;background:rgba(255,255,255,0.16);border-radius:99px;margin-top:14px;overflow:hidden;"><div style="height:100%;width:${pi.pct}%;background:linear-gradient(90deg,#C9821A,#FFD97A);border-radius:99px;"></div></div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:8px;">${nextTxt}</div>
+      <div style="display:flex;gap:6px;margin-top:13px;">${ladder}</div>
     </div>
-    <div style="background:white;border-radius:12px;padding:13px;">
-      <div style="font-size:12px;font-weight:700;color:#0C447C;margin-bottom:10px;">Comment gagner des points</div>
-      ${[['📅','Présence confirmée','+50'],['⏱️','Ponctualité','+20'],['🏅','Badge 5 matchs','+100'],['🎂','Anniversaire','+30'],['👥','Parrainage','+50']].map(([i,l,v])=>`
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #F1EFE8;font-size:12px;">
-        <div style="display:flex;gap:7px;align-items:center;"><span>${i}</span><span style="color:#5F5E5A;">${l}</span></div>
-        <strong style="color:#185FA5;">${v} pts</strong>
-      </div>`).join('')}
-    </div>`
+    <div style="background:white;border-radius:14px;padding:15px;margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:700;color:#0C447C;margin-bottom:8px;">Comment gagner des points</div>
+      ${bareme}
+    </div>
+    <div id="points-badges"></div>
+    ${teaser}`
+
+  try {
+    const [bd, bb, st] = await Promise.all([
+      sb.from('badges_def').select('*'),
+      sb.from('benevole_badges').select('badge_code').eq('benevole_id', CU.id),
+      sb.from('v_benevole_stats').select('*').eq('benevole_id', CU.id).maybeSingle()
+    ])
+    const earned = new Set((bb.data||[]).map(x=>x.badge_code))
+    const stats = st.data||{}
+    const prog = {batisseur:['parrainages',3],lanceur:['evenements',1],etoile_pol:['presences',5],ingenieur:['aides',3]}
+    const order = ['lanceur','etoile_pol','batisseur','ingenieur','trajectoire']
+    const cards = (bd.data||[]).sort((a,b)=>order.indexOf(a.code)-order.indexOf(b.code)).map(b=>{
+      const got = earned.has(b.code)
+      const full = b.code==='trajectoire'
+      let sub = b.description||''
+      if(!got && prog[b.code]){ const pp=prog[b.code]; sub = `${b.description} — ${Math.min(stats[pp[0]]||0,pp[1])}/${pp[1]}` }
+      return `<div style="${full?'grid-column:1/-1;background:linear-gradient(120deg,rgba(245,200,66,0.14),rgba(255,255,255,0.05));border:1px solid rgba(245,200,66,0.3);':'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);'}border-radius:14px;padding:12px;display:flex;gap:9px;align-items:center;${got?'':'opacity:0.45;'}"><span style="font-size:21px;">${b.emoji}</span><div><div style="font-size:12px;font-weight:600;color:white;">${b.libelle}${got?' <span style="color:#F5C842;">✓</span>':''}</div><div style="font-size:10px;color:rgba(255,255,255,0.55);margin-top:2px;">${sub}</div></div></div>`
+    }).join('')
+    document.getElementById('points-badges').innerHTML = `
+      <div style="background:linear-gradient(160deg,#042C53,#0a3a68);border-radius:14px;padding:15px;">
+        <div style="font-size:12px;letter-spacing:0.5px;color:rgba(255,255,255,0.7);text-transform:uppercase;font-weight:600;padding:0 2px 10px;">Vos badges</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:9px;">${cards}</div>
+      </div>`
+  } catch(e){ console.error('[points badges]', e) }
 }
 
 // -- FORUM ----------------------------------------------------

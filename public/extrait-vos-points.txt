@@ -1,0 +1,260 @@
+===== lignes 595 a 625 =====
+  595:   <div class="bscreen on" id="bs-home"></div>
+  596: 
+  597:   <!-- -- PLANNING -- -->
+  598:   <div class="bscreen" id="bs-planning">
+  599:     <div id="planning-alert"></div>
+  600:     <div class="sec">Matchs saison 2026–2027</div>
+  601:     <div id="planning-list"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
+  602:   </div>
+  603: 
+  604:   <!-- -- POINTS -- -->
+  605:   <div class="bscreen" id="bs-points">
+  606:     <div class="sec">Vos points</div>
+  607:     <div id="points-content"></div>
+  608:   </div>
+  609: 
+  610:   <!-- -- FORUM -- -->
+  611:   <div class="bscreen" id="bs-forum">
+  612:     <div class="sec">Forum bénévoles</div>
+  613:     <div style="background:white;border-radius:12px;padding:13px;margin-bottom:10px;">
+  614:       <textarea id="post-txt" class="post-textarea" placeholder="Partagez un message avec la communauté..."></textarea>
+  615:       <button class="btn btn-blue" style="width:100%;padding:10px;margin-top:8px;font-size:12px;" onclick="publishPost()">Publier</button>
+  616:     </div>
+  617:     <div id="posts-list"></div>
+  618:   </div>
+  619: 
+  620:   <!-- -- CADEAUX (chantier 6) -- -->
+  621:   <div class="bscreen" id="bs-reward">
+  622:     <div class="sec">🎁 Cadeaux & récompenses</div>
+  623:     <div id="reward-content"><div style="text-align:center;color:rgba(181,212,244,0.5);padding:30px;font-size:12px;">Chargement...</div></div>
+  624:   </div>
+  625: 
+
+===== lignes 3035 a 3055 =====
+ 3035:   if (!el) return;
+ 3036:   if (navigator.clipboard && navigator.clipboard.writeText) {
+ 3037:     navigator.clipboard.writeText(el.value).then(function(){ showToast('Lien copie !','success'); }).catch(function(){ el.select(); try{ document.execCommand('copy'); showToast('Lien copie !','success'); }catch(_){} });
+ 3038:   } else { el.select(); try{ document.execCommand('copy'); showToast('Lien copie !','success'); }catch(_){} }
+ 3039: }
+ 3040: // ============================================================
+ 3041: // GUIDE BENEVOLE (visite guidee spotlight)
+ 3042: // ============================================================
+ 3043: const GUIDE_STEPS_B = [
+ 3044:   { center:true, ic:'&#127952;', tt:'Bienvenue chez les Spacers !', quoi:'Ton espace bénévole en 1 minute : où voir tes matchs, gagner des points et donner un coup de main. C\'est parti !', pourquoi:'' },
+ 3045:   { sel:'#bn-planning', ic:'&#128197;', tt:'Tes matchs & tes dispos', quoi:'Dans Planning, tu vois les matchs &agrave; venir et tu indiques si tu es disponible. Une fois affecté, ton créneau et ton poste s\'affichent.', pourquoi:'Plus tu te rends dispo tôt, plus c\'est simple d\'organiser l\'équipe.' },
+ 3046:   { sel:'#bn-points', ic:'&#127942;', tt:'Tes points & ton niveau', quoi:'&Agrave; chaque présence validée, tu gagnes des points et tu montes : Bronze, Argent, Or.', pourquoi:'Tes points donnent droit &agrave; des récompenses &mdash; jette un œil &agrave; l\'onglet Cadeaux.' },
+ 3047:   { view:'home', sel:'#guide-appels', ic:'&#128588;', tt:'On a besoin de toi', quoi:'En dehors des matchs, le club lance parfois des appels (montage, événements&hellip;). Si tu es dispo, inscris-toi en un tap.', pourquoi:'Un coup de main de temps en temps, ça aide énormément toute l\'équipe.' },
+ 3048:   { view:'home', sel:'#parrain-link', ic:'&#129309;', tt:'Parraine tes amis', quoi:'Partage ton lien perso : quand ta recrue vient pour la première fois, tu gagnes 100 points.', pourquoi:'C\'est le moyen le plus simple d\'agrandir l\'équipe&hellip; et de grimper au classement.' },
+ 3049:   { sel:'#bn-profil', ic:'&#128100;', tt:'Ton profil', quoi:'Ta photo (utile pour ton accréditation), tes infos et tes consentements se gèrent ici, &agrave; tout moment.', pourquoi:'' },
+ 3050:   { center:true, ic:'&#127881;', tt:'&Agrave; toi de jouer !', quoi:'Tu peux rouvrir ce guide quand tu veux avec le &laquo; ? &raquo; en haut &agrave; droite. Merci pour ton engagement !', pourquoi:'' }
+ 3051: ];
+ 3052: let _gbIdx = 0;
+ 3053: 
+ 3054: function openGuideBenev(){
+ 3055:   _gbIdx = 0;
+
+===== lignes 3170 a 3280 =====
+ 3170:     b.classList.remove('hugo','virginie','joel')
+ 3171:     b.classList.add(p.profil_type||'hugo')
+ 3172:   })
+ 3173:   const btnPilote = document.getElementById('btn-pilote-view')
+ 3174:   if (btnPilote) {
+ 3175:     btnPilote.style.display = (p.role === 'admin' || p.role === 'pilote') ? 'inline-block' : 'none'
+ 3176:   }
+ 3177: }
+ 3178: 
+ 3179: // -- HOME ADAPTATIF --------------------------------------------
+ 3180: function renderHomeForProfil(p) {
+ 3181:   const home = document.getElementById('bs-home')
+ 3182:   const profil = p.profil_type || 'hugo'
+ 3183:   const pts = p.points_total || 0
+ 3184:   const niveau = p.niveau || 'Bronze'
+ 3185:   const pct = niveau==='Or'?100:niveau==='Argent'?Math.min(((pts-600)/400)*100,100):Math.min((pts/600)*100,100)
+ 3186: 
+ 3187:   if (profil === 'hugo') renderHugoHome(home, p, pts, niveau, pct)
+ 3188:   else if (profil === 'virginie') renderVirginieHome(home, p)
+ 3189:   else renderJoelHome(home, p, pts)
+ 3190: }
+ 3191: 
+ 3192: function renderHugoHome(el, p, pts, niveau, pct) {
+ 3193:   el.innerHTML = `
+ 3194:     <div class="hugo-hero">
+ 3195:       <div style="font-size:9px;color:rgba(245,200,66,0.5);letter-spacing:2px;margin-bottom:3px;">VOS POINTS SAISON</div>
+ 3196:       <div class="hugo-pts">${pts}</div>
+ 3197:       <div class="hugo-level">${niveau==='Or'?'🥇':niveau==='Argent'?'🥈':'🥉'} Niveau ${niveau}</div>
+ 3198:       <div class="hugo-prog"><div class="hugo-fill" style="width:${pct}%;"></div></div>
+ 3199:       <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(181,212,244,0.4);">
+ 3200:         <span>${p.matchs_joues||0} matchs</span>
+ 3201:         <span>${niveau==='Or'?'Max !':niveau==='Argent'?(1000-pts)+' pts avant Or':(600-pts)+' pts avant Argent'}</span>
+ 3202:       </div>
+ 3203:     </div>
+ 3204:     ${renderNextMatchSection()}
+ 3205:     ${renderAppelsSection()}
+ 3206:     ${renderFilleulsCard()}
+ 3207:     ${renderEventsAVenirSection()}
+ 3208:     ${renderParrainageCard()}
+ 3209:     <div class="defi-card">
+ 3210:       <div class="defi-title">🎯 Défis en cours</div>
+ 3211:       <div class="defi-item">
+ 3212:         <div style="font-size:11px;color:white;flex:1;">5 matchs consécutifs</div>
+ 3213:         <div class="defi-prog"><div class="defi-prog-fill" style="width:${Math.min(((p.matchs_joues||0)/5)*100,100)}%;"></div></div>
+ 3214:         <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-left:8px;">${p.matchs_joues||0}/5</div>
+ 3215:       </div>
+ 3216:       <div class="defi-item">
+ 3217:         <div style="font-size:11px;color:white;flex:1;">Atteindre 600 pts</div>
+ 3218:         <div class="defi-prog"><div class="defi-prog-fill" style="width:${Math.min((pts/600)*100,100)}%;"></div></div>
+ 3219:         <div style="font-size:9px;color:rgba(255,255,255,0.4);margin-left:8px;">${pts}/600</div>
+ 3220:       </div>
+ 3221:     </div>
+ 3222:     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+ 3223:       <div style="background:white;border-radius:14px;padding:13px;cursor:pointer;" onclick="bSwitch('planning')">
+ 3224:         <div style="font-size:22px;margin-bottom:5px;">🏆</div>
+ 3225:         <div style="font-size:12px;font-weight:700;color:#0C447C;">Planning</div>
+ 3226:         <div style="font-size:10px;color:#5F5E5A;">Matchs ouverts</div>
+ 3227:       </div>
+ 3228:       <div style="background:white;border-radius:14px;padding:13px;cursor:pointer;" onclick="bSwitch('points')">
+ 3229:         <div style="font-size:22px;margin-bottom:5px;">🏆</div>
+ 3230:         <div style="font-size:12px;font-weight:700;color:#0C447C;">Classement</div>
+ 3231:         <div style="font-size:10px;color:#185FA5;font-weight:600;">Voir mon rang</div>
+ 3232:       </div>
+ 3233:     </div>
+ 3234:     ${renderDecouverteSection()}
+ 3235:     ${renderInstaFeed()}
+ 3236:     ${renderSuggestionSection('hugo')}`
+ 3237: }
+ 3238: 
+ 3239: function renderVirginieHome(el, p) {
+ 3240:   el.innerHTML = `
+ 3241:     <div class="bienvenue-card">
+ 3242:       <div style="font-size:20px;margin-bottom:6px;">👋</div>
+ 3243:       <div style="font-size:16px;font-weight:800;color:#533BB7;">Bonjour ${p.prenom||''} !</div>
+ 3244:       <div style="font-size:12px;color:#6D5DAA;margin-top:4px;line-height:1.6;">Vous faites partie des Spacers — voici comment tout se passe ici.</div>
+ 3245:     </div>
+ 3246: 
+ 3247:     ${renderNextMatchSection()}
+ 3248:     ${renderAppelsSection()}
+ 3249:     ${renderFilleulsCard()}
+ 3250:     ${renderReferentCard()}
+ 3251:     ${renderEventsAVenirSection()}
+ 3252:     ${renderParrainageCard()}
+ 3253: 
+ 3254:     ${renderEtapesSection()}
+ 3255: 
+ 3256:     ${renderFaqSection()}
+ 3257:     ${renderDecouverteSection()}
+ 3258:     ${renderInstaFeed()}
+ 3259:     ${renderSuggestionSection('virginie')}`
+ 3260: }
+ 3261: 
+ 3262: function renderJoelHome(el, p, pts) {
+ 3263:   el.innerHTML = `
+ 3264:     <div class="joel-hero">
+ 3265:       <div style="font-size:10px;color:rgba(192,221,151,0.6);letter-spacing:2px;margin-bottom:3px;">${p.role==='referent'||p.role==='pilote'||p.role==='admin'?'🏅 RÉFÉRENT OFFICIEL':'BÉNÉVOLE EXPÉRIMENTÉ'}</div>
+ 3266:       <div style="font-size:18px;font-weight:800;color:white;margin-bottom:4px;">${p.prenom||''} ${p.nom||''}</div>
+ 3267:       <div style="font-size:12px;color:rgba(192,221,151,0.7);">${p.matchs_joues||0} matchs · ${pts} pts · ${p.niveau||'Bronze'}</div>
+ 3268:     </div>
+ 3269: 
+ 3270:     ${renderNextMatchSection()}
+ 3271:     ${renderAppelsSection()}
+ 3272:     ${renderFilleulsCard()}
+ 3273:     ${renderEventsAVenirSection()}
+ 3274:     ${renderParrainageCard()}
+ 3275: 
+ 3276:     <div class="joel-btn" onclick="bSwitch('planning')">
+ 3277:       <div class="joel-btn-icon" style="background:#E6F1FB;">📅</div>
+ 3278:       <div><div class="joel-btn-title">Planning & Disponibilités</div><div class="joel-btn-sub">Consulter et répondre aux matchs</div></div>
+ 3279:       <div style="font-size:18px;color:#D3D1C7;">›</div>
+ 3280:     </div>
+
+===== lignes 3405 a 3475 =====
+ 3405:              </div>`
+ 3406:         : `<span class="s-closed">Fermé</span>`}
+ 3407:     </div>`).join('')
+ 3408: }
+ 3409: 
+ 3410: async function setDispo(matchId,statut,btn) {
+ 3411:   btn.textContent='...';btn.disabled=true
+ 3412:   const{error}=await sb.from('inscriptions').upsert({benevole_id:CU.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'})
+ 3413:   if(!error){btn.textContent=statut==='disponible'?'✓':'✗';btn.style.background=statut==='disponible'?'#3B6D11':'#888';setTimeout(loadPlanning,800)}
+ 3414:   else{btn.textContent='Err';btn.disabled=false}
+ 3415: }
+ 3416: 
+ 3417: // -- POINTS ---------------------------------------------------
+ 3418: function loadPoints() {
+ 3419:   if (!CP) return
+ 3420:   const p=CP, pts=p.points_total||0, niveau=p.niveau||'Bronze'
+ 3421:   const pct=niveau==='Or'?100:niveau==='Argent'?Math.min(((pts-600)/400)*100,100):Math.min((pts/600)*100,100)
+ 3422:   document.getElementById('points-content').innerHTML=`
+ 3423:     <div style="background:linear-gradient(135deg,#1a1a18,#0C447C);border-radius:16px;padding:18px;margin-bottom:12px;">
+ 3424:       <div style="font-size:36px;font-weight:800;color:#F5C842;font-family:monospace;">${pts}</div>
+ 3425:       <div style="font-size:13px;font-weight:700;color:white;margin-top:3px;">${niveau==='Bronze'?'🥉':niveau==='Argent'?'🥈':'🥇'} ${niveau}</div>
+ 3426:       <div style="height:7px;background:rgba(255,255,255,0.1);border-radius:4px;margin:10px 0 4px;overflow:hidden;">
+ 3427:         <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#C9821A,#F5C842);border-radius:4px;"></div>
+ 3428:       </div>
+ 3429:       <div style="font-size:9px;color:rgba(181,212,244,0.4);">${niveau==='Or'?'Niveau max':niveau==='Argent'?(1000-pts)+' pts avant Or':(600-pts)+' pts avant Argent'}</div>
+ 3430:     </div>
+ 3431:     <div style="background:white;border-radius:12px;padding:13px;">
+ 3432:       <div style="font-size:12px;font-weight:700;color:#0C447C;margin-bottom:10px;">Comment gagner des points</div>
+ 3433:       ${[['📅','Présence confirmée','+50'],['⏱️','Ponctualité','+20'],['🏅','Badge 5 matchs','+100'],['🎂','Anniversaire','+30'],['👥','Parrainage','+50']].map(([i,l,v])=>`
+ 3434:       <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #F1EFE8;font-size:12px;">
+ 3435:         <div style="display:flex;gap:7px;align-items:center;"><span>${i}</span><span style="color:#5F5E5A;">${l}</span></div>
+ 3436:         <strong style="color:#185FA5;">${v} pts</strong>
+ 3437:       </div>`).join('')}
+ 3438:     </div>`
+ 3439: }
+ 3440: 
+ 3441: // -- FORUM ----------------------------------------------------
+ 3442: // PATCH F01 : embed remplacé par requête séparée sur benevoles_public
+ 3443: async function loadPosts() {
+ 3444:   const el = document.getElementById('posts-list')
+ 3445:   const { data: posts } = await sb.from('posts')
+ 3446:     .select('*')
+ 3447:     .order('created_at', { ascending: false })
+ 3448:     .limit(20)
+ 3449: 
+ 3450:   if (!posts || posts.length === 0) {
+ 3451:     el.innerHTML = '<div style="text-align:center;color:#5F5E5A;padding:20px;font-size:12px;">Soyez le premier à poster !</div>'
+ 3452:     return
+ 3453:   }
+ 3454: 
+ 3455:   // Hydrate les auteurs via la vue publique (RLS-friendly)
+ 3456:   const auteurIds = [...new Set(posts.map(p => p.auteur_id).filter(Boolean))]
+ 3457:   const auteursMap = {}
+ 3458:   if (auteurIds.length > 0) {
+ 3459:     const { data: auteurs } = await sb.from('benevoles_public')
+ 3460:       .select('id, prenom, nom, photo_path, profil_type')
+ 3461:       .in('id', auteurIds)
+ 3462:     if (auteurs) auteurs.forEach(a => { auteursMap[a.id] = a })
+ 3463:   }
+ 3464:   posts.forEach(p => { p.benevoles = auteursMap[p.auteur_id] || null })
+ 3465: 
+ 3466:   const paths = posts.map(p => p.benevoles?.photo_path).filter(Boolean)
+ 3467:   const urlMap = await getSignedPhotoUrls(paths)
+ 3468: 
+ 3469:   el.innerHTML = posts.map(p => {
+ 3470:     const ptBg = {hugo:'#E6F1FB',virginie:'#EDE9FE',joel:'#EAF3DE'}[p.benevoles?.profil_type||'hugo']||'#E6F1FB'
+ 3471:     const ptC  = {hugo:'#0C447C',virginie:'#533BB7',joel:'#3B6D11'}[p.benevoles?.profil_type||'hugo']||'#0C447C'
+ 3472:     const photoPath = p.benevoles?.photo_path
+ 3473:     const photoUrl  = photoPath ? urlMap[photoPath] : null
+ 3474:     return `<div style="background:white;border-radius:12px;padding:13px;margin-bottom:8px;">
+ 3475:       <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+
+===== lignes 4285 a 4300 =====
+ 4285:   addLine('Rôle dans l\'app : ' + (p.role || 'benevole'))
+ 4286:   addLine('Statut du compte : ' + (p.statut_compte || '—'))
+ 4287:   addLine('Photo accréditation stockée : ' + (p.photo_path ? 'oui' : 'non'))
+ 4288:   addLine('Compte créé le : ' + (p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : '—'))
+ 4289: 
+ 4290:   addSection('Mon activité bénévole')
+ 4291:   addLine('Matchs joués : ' + (p.matchs_joues || 0))
+ 4292:   addLine('Points totaux : ' + (p.points_total || 0))
+ 4293:   addLine('Points dépensés : ' + (p.points_depenses || 0))
+ 4294:   addLine('Niveau : ' + (p.niveau || 'Bronze'))
+ 4295: 
+ 4296:   addSection('Mes consentements (' + ((data.consentements || []).length) + ' au total)')
+ 4297:   ;(data.consentements || []).slice(0, 30).forEach(c => {
+ 4298:     const dt = new Date(c.granted_at).toLocaleDateString('fr-FR')
+ 4299:     const status = c.granted ? '[OK]' : '[NON]'
+ 4300:     addLine(`${status} ${c.consent_type} (v${c.consent_version}) — ${dt}`, { size: 9 })
+
