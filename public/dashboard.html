@@ -2691,8 +2691,49 @@ function renderNextMatchSection() {
     </div>`
 }
 
+// -- Indispo < 48h : signalement aux pilotes (option B) --
+const DESIST_CUTOFF_H = 48
+async function _matchDateById(matchId) {
+  if (CP && CP._nextMatch && CP._nextMatch.id === matchId && CP._nextMatch.date_match) return CP._nextMatch.date_match
+  const { data } = await sb.from('matchs').select('date_match').eq('id', matchId).maybeSingle()
+  return data ? data.date_match : null
+}
+function _within48h(dateMatch) {
+  if (!dateMatch) return false
+  return (new Date(dateMatch).getTime() - Date.now()) <= DESIST_CUTOFF_H * 3600 * 1000
+}
+function openSignalIndispoModal(matchId) {
+  const old = document.getElementById('modal-signal-indispo'); if (old) old.remove()
+  const ov = document.createElement('div')
+  ov.id = 'modal-signal-indispo'
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px;'
+  ov.innerHTML =
+    '<div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:22px;font-family:Sora,sans-serif;box-sizing:border-box;">'
+    + '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#993556;margin-bottom:6px;">&Agrave; moins de 48&nbsp;h</div>'
+    + '<div style="font-size:18px;font-weight:800;color:#1a1a18;margin-bottom:8px;">Tu ne peux plus te d&eacute;sister seul</div>'
+    + '<div style="font-size:13px;color:#5F5E5A;line-height:1.6;margin-bottom:14px;">On est &agrave; moins de 48&nbsp;h du match. Pr&eacute;viens les pilotes : ils chercheront un rempla&ccedil;ant. Tu peux expliquer (optionnel).</div>'
+    + '<textarea id="signal-indispo-msg" placeholder="Ex : emp&ecirc;chement de derni&egrave;re minute..." style="width:100%;min-height:80px;border:1px solid #ddd;border-radius:10px;padding:10px;font-family:Sora,sans-serif;font-size:13px;box-sizing:border-box;"></textarea>'
+    + '<div style="display:flex;gap:8px;margin-top:14px;">'
+    + '<button id="signal-indispo-cancel" style="flex:1;background:#eee;color:#333;border:none;border-radius:50px;padding:12px;font-family:Sora,sans-serif;font-weight:700;cursor:pointer;">Annuler</button>'
+    + '<button id="signal-indispo-send" style="flex:1;background:#993556;color:#fff;border:none;border-radius:50px;padding:12px;font-family:Sora,sans-serif;font-weight:700;cursor:pointer;">Pr&eacute;venir les pilotes</button>'
+    + '</div></div>'
+  document.body.appendChild(ov)
+  ov.addEventListener('click', function(e){ if (e.target === ov) ov.remove() })
+  document.getElementById('signal-indispo-cancel').onclick = function(){ ov.remove() }
+  document.getElementById('signal-indispo-send').onclick = async function(){
+    const btn = document.getElementById('signal-indispo-send'); btn.disabled = true; btn.textContent = 'Envoi...'
+    const msg = (document.getElementById('signal-indispo-msg').value || '').trim()
+    const { error } = await sb.rpc('signaler_indisponibilite', { p_match_id: matchId, p_message: msg || null })
+    if (error) { btn.disabled = false; btn.textContent = 'Prevenir les pilotes'; showToast('Erreur : ' + error.message, 'error'); return }
+    ov.remove(); showToast('Pilotes prevenus, merci de nous avoir avertis', 'success')
+    if (typeof loadNextMatch === 'function') { try { await loadNextMatch(); if (typeof renderHomeForProfil === 'function' && CP) renderHomeForProfil(CP) } catch(e){} }
+    if (typeof loadPlanning === 'function' && document.getElementById('planning-list')) { try { loadPlanning() } catch(e){} }
+  }
+}
+
 async function setDispoFromHome(matchId, statut) {
   if (!CU || !CP) return
+  if (statut === 'indisponible' && _within48h(await _matchDateById(matchId))) { openSignalIndispoModal(matchId); return }
   const { error } = await sb.from('inscriptions').upsert({
     benevole_id: CP.id,
     match_id: matchId,
@@ -3408,6 +3449,7 @@ async function loadPlanning() {
 }
 
 async function setDispo(matchId,statut,btn) {
+  if (statut === 'indisponible' && _within48h(await _matchDateById(matchId))) { openSignalIndispoModal(matchId); return }
   btn.textContent='...';btn.disabled=true
   const{error}=await sb.from('inscriptions').upsert({benevole_id:CU.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'})
   if(!error){btn.textContent=statut==='disponible'?'✓':'✗';btn.style.background=statut==='disponible'?'#3B6D11':'#888';setTimeout(loadPlanning,800)}
