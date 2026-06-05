@@ -3397,7 +3397,7 @@ async function loadPlanning() {
       <div class="match-info">📅 ${formatDate(m.date_match)} · ${m.heure||''} · ${m.lieu||'Palais des Sports'}</div>
       ${m.statut_inscriptions==='ouvert'
         ? insMap[m.id]
-          ? `<span class="s-dispo">${insMap[m.id].statut==='disponible'?'✓ Disponible':'✗ Indisponible'}</span>${insMap[m.id].statut==='disponible'?friseHtml(creMap[m.id],insMap[m.id].poste_id):''}`
+          ? `<span class="s-dispo">${insMap[m.id].statut==='disponible'?'✓ Disponible':'✗ Indisponible'}</span>${insMap[m.id].statut==='disponible'?friseHtml(creMap[m.id],insMap[m.id].poste_id):''}${insMap[m.id].statut==='disponible'?`<div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne peux plus venir</button></div>`:''}`
           : `<span class="s-open">✅ Ouvert</span>
              <div class="match-actions">
                <button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Dispo</button>
