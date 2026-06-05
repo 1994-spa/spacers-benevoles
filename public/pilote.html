@@ -225,6 +225,9 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <div class="sec">Bénévoles disponibles — affecter un poste</div>
   <div id="dispos-match"></div>
 
+  <div class="sec">&#9888;&#65039; Indispos signal&eacute;es</div>
+  <div id="indispo-match"></div>
+
   <div class="sec">Bénévoles non-répondants</div>
   <div id="non-rep-match"></div>
 
@@ -1246,6 +1249,7 @@ async function loadMatch() {
     document.getElementById('aff-table').innerHTML = ''
     document.getElementById('dispos-match').innerHTML = ''
     document.getElementById('non-rep-match').innerHTML = ''
+    { const _ie = document.getElementById('indispo-match'); if (_ie) _ie.innerHTML = '' }
     document.getElementById('note-match').value = ''
     curMatch = null
     curInscriptionsAffectes = []
@@ -1271,6 +1275,33 @@ async function loadMatch() {
     .eq('statut', 'disponible')
 
   const dispos = insc || []
+
+  // Indispos signalees (option B) : benevoles retires < 48h
+  const { data: _indispos } = await sb.from('inscriptions')
+    .select('id, benevole_id, indispo_message, indispo_signalee_le, benevoles!inscriptions_benevole_id_fkey(prenom, nom)')
+    .eq('match_id', m.id)
+    .eq('statut', 'indispo_signalee')
+    .order('indispo_signalee_le', { ascending: false })
+  const _indEl = document.getElementById('indispo-match')
+  if (_indEl) {
+    const _list = _indispos || []
+    if (_list.length === 0) {
+      _indEl.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:8px 0;">Aucune indispo signalee.</div>'
+    } else {
+      const _escInd = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+      _indEl.innerHTML = _list.map(i => {
+        const b = i.benevoles || {}
+        const when = i.indispo_signalee_le ? new Date(i.indispo_signalee_le).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : ''
+        const msg = i.indispo_message ? '<div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:3px;font-style:italic;">&laquo; '+_escInd(i.indispo_message)+' &raquo;</div>' : ''
+        return '<div class="benv-row" style="border-left:3px solid #F09595;padding-left:8px;">'
+          + '<div style="flex:1;">'
+          + '<div style="font-size:12px;font-weight:700;color:white;">'+_escInd(b.prenom||'')+' '+_escInd(b.nom||'')+'</div>'
+          + '<div style="font-size:10px;color:#F09595;">&#9888;&#65039; &agrave; remplacer'+(when?' &middot; signale le '+when:'')+'</div>'
+          + msg
+          + '</div></div>'
+      }).join('')
+    }
+  }
 
   // Résout les signed URLs pour les bénévoles inscrits (chantier 11)
   await resolvePhotosInList(dispos, i => i.benevoles)
