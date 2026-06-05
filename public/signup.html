@@ -8,11 +8,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:flex;flex-direction:column;}
+body{font-family:'Sora',sans-serif;background:var(--c-navy-darkest);min-height:100vh;display:flex;flex-direction:column;}
 
 .su-screen{
   flex:1;display:flex;flex-direction:column;
-  background:linear-gradient(160deg,#042C53 0%,#0C447C 60%,#185FA5 100%);
+  background:linear-gradient(160deg,var(--c-navy) 0%,var(--c-navy-2) 60%,var(--c-action) 100%);
 }
 .su-screen.hidden{display:none;}
 
@@ -51,7 +51,7 @@ body{font-family:'Sora',sans-serif;background:#0C1B2E;min-height:100vh;display:f
 .inp:focus{border-color:rgba(181,212,244,0.6);background:rgba(255,255,255,0.15);}
 .inp.err{border-color:rgba(244,184,206,0.7);background:rgba(153,53,86,0.18);}
 select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(181,212,244,0.7)' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px;}
-select.inp option{background:#0C447C;color:white;}
+select.inp option{background:var(--c-navy-2);color:white;}
 
 /* CHIPS (taille + postes) */
 .chips{display:flex;flex-wrap:wrap;gap:7px;}
@@ -77,22 +77,22 @@ select.inp option{background:#0C447C;color:white;}
   border-radius:10px;padding:10px 14px;font-size:12px;
   margin:0 0 8px;display:none;line-height:1.5;
 }
-.msg-err{background:rgba(153,53,86,0.25);color:#F4B8CE;border:1px solid rgba(153,53,86,0.3);}
+.msg-err{background:rgba(153,53,86,0.25);color:var(--c-accent-100);border:1px solid rgba(153,53,86,0.3);}
 
 /* FOOTER */
 .su-footer{padding:10px 22px 26px;flex-shrink:0;}
 .btn-primary{
-  width:100%;padding:15px;background:white;color:#0C447C;
+  width:100%;padding:15px;background:white;color:var(--c-navy-2);
   border:none;border-radius:50px;font-family:'Sora',sans-serif;
   font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;
 }
-.btn-primary:hover{background:#E6F1FB;}
+.btn-primary:hover{background:var(--c-blue-50);}
 .btn-primary:disabled{background:rgba(255,255,255,0.3);color:rgba(255,255,255,0.5);cursor:not-allowed;}
 .su-login-link{
   font-size:12px;color:rgba(181,212,244,0.6);text-align:center;
   margin-top:14px;display:block;text-decoration:none;
 }
-.su-login-link a{color:#9BC4F1;font-weight:700;text-decoration:none;}
+.su-login-link a{color:var(--c-blue-200);font-weight:700;text-decoration:none;}
 .su-login-link a:hover{text-decoration:underline;}
 
 .consent-mini{
@@ -114,13 +114,14 @@ select.inp option{background:#0C447C;color:white;}
 </style>
 <!-- PWA -->
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#042C53">
+<meta name="theme-color" content="var(--c-navy)">
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Spacers">
 <meta name="mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="/theme.css">
 </head>
 <body>
 

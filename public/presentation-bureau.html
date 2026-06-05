@@ -10,10 +10,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bleu-club:#0C447C;--bleu-fonce:#042C53;--bleu-clair:#185FA5;--bleu-tres-clair:#E6F1FB;
-  --or:#C9821A;--or-clair:#F5C842;--rouge:#993556;--rouge-clair:#FBEAF0;
-  --vert:#3B6D11;--vert-clair:#E8F2DC;--noir:#1a1a18;--gris-fonce:#3D3C39;
-  --gris:#5F5E5A;--gris-clair:#9A9994;--gris-tres-clair:#F1EFE8;
+  --bleu-club:var(--c-navy-2);--bleu-fonce:var(--c-navy);--bleu-clair:var(--c-action);--bleu-tres-clair:var(--c-blue-50);
+  --or:var(--c-amber);--or-clair:var(--c-gold);--rouge:var(--c-accent);--rouge-clair:var(--c-accent-50);
+  --vert:var(--c-green);--vert-clair:#E8F2DC;--noir:var(--c-ink);--gris-fonce:#3D3C39;
+  --gris:var(--c-muted);--gris-clair:#9A9994;--gris-tres-clair:var(--c-cream);
   --paper:#FBFAF6;--rule:#E5E2D9;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;}
@@ -123,7 +123,7 @@ tr:last-child td{border-bottom:none;}
 .feature p{margin-bottom:10px;font-size:14px;}
 .feature ul{font-size:14px;}
 
-.placeholder{background:repeating-linear-gradient(45deg,#F1EFE8,#F1EFE8 10px,#FBFAF6 10px,#FBFAF6 20px);border:1.5px dashed var(--gris-clair);padding:30px;text-align:center;color:var(--gris);font-size:13px;font-style:italic;margin:14px 0;border-radius:6px;}
+.placeholder{background:repeating-linear-gradient(45deg,var(--c-cream),var(--c-cream) 10px,#FBFAF6 10px,#FBFAF6 20px);border:1.5px dashed var(--gris-clair);padding:30px;text-align:center;color:var(--gris);font-size:13px;font-style:italic;margin:14px 0;border-radius:6px;}
 .placeholder strong{color:var(--gris-fonce);font-style:normal;}
 
 .screenshot{display:block;margin:18px auto;max-width:100%;width:100%;height:auto;border:1px solid var(--rule);border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.08);background:white;}
@@ -159,13 +159,14 @@ tr:last-child td{border-bottom:none;}
 </style>
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#042C53">
+    <meta name="theme-color" content="var(--c-navy)">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Spacers">
     <meta name="mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="/theme.css">
 </head>
 <body>
 <div class="page">

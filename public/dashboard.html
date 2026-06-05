@@ -9,7 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
+body{font-family:'Sora',sans-serif;background:var(--c-navy);min-height:100vh;}
 
 /* -- QUIZ PROFIL -- */
 .quiz-wrap{
@@ -25,23 +25,23 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .quiz-step.on{display:block;}
 .quiz-header{text-align:center;margin-bottom:24px;}
 .quiz-icon{font-size:48px;margin-bottom:12px;}
-.quiz-title{font-size:20px;font-weight:800;color:#0C447C;line-height:1.3;margin-bottom:6px;}
-.quiz-sub{font-size:13px;color:#5F5E5A;line-height:1.6;}
+.quiz-title{font-size:20px;font-weight:800;color:var(--c-navy-2);line-height:1.3;margin-bottom:6px;}
+.quiz-sub{font-size:13px;color:var(--c-muted);line-height:1.6;}
 .quiz-dots{display:flex;justify-content:center;gap:6px;margin-bottom:20px;}
-.quiz-dot{width:8px;height:8px;border-radius:50%;background:#E6F1FB;}
-.quiz-dot.on{background:#185FA5;width:24px;border-radius:4px;}
+.quiz-dot{width:8px;height:8px;border-radius:50%;background:var(--c-blue-50);}
+.quiz-dot.on{background:var(--c-action);width:24px;border-radius:4px;}
 .quiz-options{display:flex;flex-direction:column;gap:10px;}
 .quiz-opt{
-  padding:14px 16px;border:2px solid #E6F1FB;border-radius:14px;
+  padding:14px 16px;border:2px solid var(--c-blue-50);border-radius:14px;
   cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;
 }
-.quiz-opt:hover,.quiz-opt:active{border-color:#185FA5;background:#f0f7ff;}
-.quiz-opt.selected{border-color:#185FA5;background:#E6F1FB;}
+.quiz-opt:hover,.quiz-opt:active{border-color:var(--c-action);background:#f0f7ff;}
+.quiz-opt.selected{border-color:var(--c-action);background:var(--c-blue-50);}
 .quiz-opt-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
-.quiz-opt-text{font-size:13px;font-weight:600;color:#1a1a18;line-height:1.4;}
-.quiz-opt-sub{font-size:10px;color:#5F5E5A;margin-top:2px;}
-.quiz-progress{height:4px;background:#E6F1FB;border-radius:2px;margin-bottom:20px;overflow:hidden;}
-.quiz-progress-fill{height:100%;background:linear-gradient(90deg,#0C447C,#185FA5);border-radius:2px;transition:width .4s ease;}
+.quiz-opt-text{font-size:13px;font-weight:600;color:var(--c-ink);line-height:1.4;}
+.quiz-opt-sub{font-size:10px;color:var(--c-muted);margin-top:2px;}
+.quiz-progress{height:4px;background:var(--c-blue-50);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--c-navy-2),var(--c-action));border-radius:2px;transition:width .4s ease;}
 
 /* RÉSULTAT PROFIL */
 .profil-reveal{text-align:center;padding:10px 0;}
@@ -55,16 +55,16 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   letter-spacing:1.5px;text-transform:uppercase;
   padding:3px 12px;border-radius:50px;margin-bottom:8px;
 }
-.profil-name{font-size:26px;font-weight:800;color:#0C447C;margin-bottom:6px;}
-.profil-desc{font-size:13px;color:#5F5E5A;line-height:1.7;margin-bottom:20px;}
+.profil-name{font-size:26px;font-weight:800;color:var(--c-navy-2);margin-bottom:6px;}
+.profil-desc{font-size:13px;color:var(--c-muted);line-height:1.7;margin-bottom:20px;}
 .profil-traits{display:flex;flex-direction:column;gap:6px;margin-bottom:20px;text-align:left;}
-.trait{display:flex;align-items:center;gap:8px;font-size:12px;color:#5F5E5A;}
+.trait{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--c-muted);}
 
 /* BOUTONS */
 .btn{border:none;border-radius:50px;padding:13px 20px;font-family:'Sora',sans-serif;font-size:14px;font-weight:700;cursor:pointer;width:100%;transition:all .15s;}
 .btn:active{transform:scale(0.97);}
-.btn-blue{background:#185FA5;color:white;}
-.btn-ghost{background:#F1EFE8;color:#5F5E5A;margin-top:8px;}
+.btn-blue{background:var(--c-action);color:white;}
+.btn-ghost{background:var(--c-cream);color:var(--c-muted);margin-top:8px;}
 .btn:disabled{opacity:0.5;cursor:not-allowed;}
 
 /* -- TOPBAR -- */
@@ -75,24 +75,24 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   box-shadow:0 2px 12px rgba(0,0,0,0.08);
 }
 .t-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
-.av{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #B5D4F4;flex-shrink:0;}
-.av-ph{width:36px;height:36px;border-radius:50%;background:#E6F1FB;border:2px solid #B5D4F4;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#185FA5;flex-shrink:0;}
-.t-name{font-size:13px;font-weight:700;color:#0C447C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.t-sub{font-size:10px;color:#5F5E5A;margin-top:1px;}
+.av{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--c-blue-100);flex-shrink:0;}
+.av-ph{width:36px;height:36px;border-radius:50%;background:var(--c-blue-50);border:2px solid var(--c-blue-100);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--c-action);flex-shrink:0;}
+.t-name{font-size:13px;font-weight:700;color:var(--c-navy-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.t-sub{font-size:10px;color:var(--c-muted);margin-top:1px;}
 .profil-badge{font-size:9px;padding:1px 7px;border-radius:50px;font-weight:700;display:inline-block;}
 .t-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.btn-logout{background:#FBEAF0;color:#993556;border:none;border-radius:50px;padding:6px 10px;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;cursor:pointer;}
-.btn-pilote{background:#E6F1FB;color:#0C447C;border:none;border-radius:50px;padding:6px 10px;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;cursor:pointer;}
+.btn-logout{background:var(--c-accent-50);color:var(--c-accent);border:none;border-radius:50px;padding:6px 10px;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;cursor:pointer;}
+.btn-pilote{background:var(--c-blue-50);color:var(--c-navy-2);border:none;border-radius:50px;padding:6px 10px;font-family:'Sora',sans-serif;font-size:10px;font-weight:700;cursor:pointer;}
 
 /* -- BOTTOM NAV -- */
-.bnav{background:white;position:fixed;bottom:0;left:0;right:0;display:flex;border-top:1px solid #F1EFE8;z-index:99;}
+.bnav{background:white;position:fixed;bottom:0;left:0;right:0;display:flex;border-top:1px solid var(--c-cream);z-index:99;}
 .bn{flex:1;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:none;cursor:pointer;font-family:'Sora',sans-serif;}
 .bn-icon{font-size:18px;line-height:1;}
-.bn-label{font-size:8px;color:#5F5E5A;font-weight:500;}
+.bn-label{font-size:8px;color:var(--c-muted);font-weight:500;}
 .bn.on .bn-label{font-weight:700;}
-.bn.on.hugo .bn-label{color:#185FA5;}
-.bn.on.virginie .bn-label{color:#533BB7;}
-.bn.on.joel .bn-label{color:#3B6D11;}
+.bn.on.hugo .bn-label{color:var(--c-action);}
+.bn.on.virginie .bn-label{color:var(--c-purple);}
+.bn.on.joel .bn-label{color:var(--c-green);}
 
 /* -- SCREENS -- */
 .bscreen{display:none;padding:14px 14px 80px;max-width:480px;margin:0 auto;}
@@ -100,163 +100,163 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 
 /* HUGO — GAMIFICATION */
 .hugo-hero{
-  background:linear-gradient(135deg,#1a1a18,#042C53,#0C447C);
+  background:linear-gradient(135deg,var(--c-ink),var(--c-navy),var(--c-navy-2));
   border-radius:20px;padding:18px;margin-bottom:12px;
   position:relative;overflow:hidden;
 }
 .hugo-hero::before{content:'';position:absolute;right:-20px;top:-20px;width:100px;height:100px;background:rgba(245,200,66,0.08);border-radius:50%;}
-.hugo-pts{font-size:44px;font-weight:800;color:#F5C842;font-family:monospace;line-height:1;}
+.hugo-pts{font-size:44px;font-weight:800;color:var(--c-gold);font-family:monospace;line-height:1;}
 .hugo-level{font-size:13px;font-weight:700;color:white;margin-top:3px;}
 .hugo-prog{height:7px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;margin:10px 0 4px;}
-.hugo-fill{height:100%;background:linear-gradient(90deg,#9B6B3A,#F5C842);border-radius:4px;transition:width 1s ease;}
-.defi-card{background:linear-gradient(135deg,#0C447C,#185FA5);border-radius:14px;padding:13px;margin-bottom:8px;}
+.hugo-fill{height:100%;background:linear-gradient(90deg,#9B6B3A,var(--c-gold));border-radius:4px;transition:width 1s ease;}
+.defi-card{background:linear-gradient(135deg,var(--c-navy-2),var(--c-action));border-radius:14px;padding:13px;margin-bottom:8px;}
 .defi-title{font-size:11px;font-weight:700;color:white;margin-bottom:6px;}
 .defi-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.08);}
 .defi-item:last-child{border:none;}
 .defi-prog{flex:1;height:5px;background:rgba(255,255,255,0.15);border-radius:3px;overflow:hidden;}
-.defi-prog-fill{height:100%;background:#F5C842;border-radius:3px;}
+.defi-prog-fill{height:100%;background:var(--c-gold);border-radius:3px;}
 .rank-mini{background:white;border-radius:12px;padding:11px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
 .rank-pos{font-size:16px;min-width:24px;}
 
 /* VIRGINIE — ACCOMPAGNEMENT */
 .referent-card{
-  background:linear-gradient(135deg,#3a1a5e,#533BB7,#7C3FC4);
+  background:linear-gradient(135deg,#3a1a5e,var(--c-purple),#7C3FC4);
   border-radius:20px;padding:16px;margin-bottom:12px;
   display:flex;align-items:center;gap:14px;
 }
 .ref-av{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
-.bienvenue-card{background:linear-gradient(135deg,#EDE9FE,#DDD6FE);border-radius:16px;padding:14px;margin-bottom:10px;}
+.bienvenue-card{background:linear-gradient(135deg,var(--c-purple-50),#DDD6FE);border-radius:16px;padding:14px;margin-bottom:10px;}
 .etape-item{display:flex;gap:10px;align-items:start;padding:9px 0;border-bottom:1px solid rgba(83,59,183,0.08);}
 .etape-item:last-child{border:none;}
-.etape-num{width:24px;height:24px;border-radius:50%;background:#533BB7;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-.etape-done{background:#EAF3DE;color:#3B6D11;}
+.etape-num{width:24px;height:24px;border-radius:50%;background:var(--c-purple);color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.etape-done{background:var(--c-green-50);color:var(--c-green);}
 .faq-item{background:white;border-radius:10px;padding:11px;margin-bottom:7px;cursor:pointer;}
-.faq-q{font-size:12px;font-weight:600;color:#533BB7;display:flex;justify-content:space-between;align-items:center;}
-.faq-a{font-size:11px;color:#5F5E5A;line-height:1.7;margin-top:6px;display:none;}
+.faq-q{font-size:12px;font-weight:600;color:var(--c-purple);display:flex;justify-content:space-between;align-items:center;}
+.faq-a{font-size:11px;color:var(--c-muted);line-height:1.7;margin-top:6px;display:none;}
 .faq-a.on{display:block;}
 
 /* JOËL — EFFICACITÉ */
-.joel-hero{background:linear-gradient(135deg,#1a3d2e,#3B6D11);border-radius:20px;padding:18px;margin-bottom:12px;}
+.joel-hero{background:linear-gradient(135deg,#1a3d2e,var(--c-green));border-radius:20px;padding:18px;margin-bottom:12px;}
 .joel-btn{
   background:white;border-radius:16px;padding:18px;
   display:flex;align-items:center;gap:14px;
   cursor:pointer;margin-bottom:10px;border:2px solid transparent;
   transition:all .15s;
 }
-.joel-btn:active{transform:scale(0.98);border-color:#3B6D11;}
+.joel-btn:active{transform:scale(0.98);border-color:var(--c-green);}
 .joel-btn-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
-.joel-btn-title{font-size:15px;font-weight:700;color:#0C447C;}
-.joel-btn-sub{font-size:11px;color:#5F5E5A;margin-top:2px;}
-.transmettre-card{background:linear-gradient(135deg,#1a3d2e,#3B6D11);border-radius:16px;padding:15px;margin-bottom:10px;}
+.joel-btn-title{font-size:15px;font-weight:700;color:var(--c-navy-2);}
+.joel-btn-sub{font-size:11px;color:var(--c-muted);margin-top:2px;}
+.transmettre-card{background:linear-gradient(135deg,#1a3d2e,var(--c-green));border-radius:16px;padding:15px;margin-bottom:10px;}
 .note-area{width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;color:white;resize:none;height:80px;outline:none;}
 .note-area::placeholder{color:rgba(255,255,255,0.4);}
 
 /* MODAL CHANGEMENT PROFIL */
 .modal-ov{position:fixed;inset:0;background:rgba(4,44,83,0.6);display:flex;align-items:flex-end;justify-content:center;z-index:200;}
 .modal{background:white;border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:440px;}
-.modal h2{font-size:16px;font-weight:800;color:#0C447C;margin-bottom:16px;}
-.profil-choice{border:2px solid #E6F1FB;border-radius:14px;padding:13px;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:all .15s;}
-.profil-choice:hover,.profil-choice.selected{border-color:#185FA5;background:#f0f7ff;}
+.modal h2{font-size:16px;font-weight:800;color:var(--c-navy-2);margin-bottom:16px;}
+.profil-choice{border:2px solid var(--c-blue-50);border-radius:14px;padding:13px;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:all .15s;}
+.profil-choice:hover,.profil-choice.selected{border-color:var(--c-action);background:#f0f7ff;}
 .profil-choice-icon{font-size:28px;}
 
 /* MATCH ITEMS */
 .match-item{background:white;border-radius:12px;padding:12px;margin-bottom:8px;}
-.match-vs{font-size:13px;font-weight:700;color:#0C447C;}
-.match-info{font-size:10px;color:#5F5E5A;margin-top:2px;}
-.s-open{background:#EAF3DE;color:#3B6D11;font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;display:inline-block;margin-top:4px;}
-.s-closed{background:#F1EFE8;color:#5F5E5A;font-size:9px;padding:2px 8px;border-radius:50px;display:inline-block;margin-top:4px;}
-.s-dispo{background:#E6F1FB;color:#0C447C;font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;display:inline-block;margin-top:4px;}
+.match-vs{font-size:13px;font-weight:700;color:var(--c-navy-2);}
+.match-info{font-size:10px;color:var(--c-muted);margin-top:2px;}
+.s-open{background:var(--c-green-50);color:var(--c-green);font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;display:inline-block;margin-top:4px;}
+.s-closed{background:var(--c-cream);color:var(--c-muted);font-size:9px;padding:2px 8px;border-radius:50px;display:inline-block;margin-top:4px;}
+.s-dispo{background:var(--c-blue-50);color:var(--c-navy-2);font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;display:inline-block;margin-top:4px;}
 .match-actions{margin-top:8px;display:flex;gap:6px;}
 .btn-sm{border:none;border-radius:50px;padding:7px 13px;font-family:'Sora',sans-serif;font-size:11px;font-weight:700;cursor:pointer;}
-.btn-sm-green{background:#3B6D11;color:white;}
-.btn-sm-ghost{background:#F1EFE8;color:#5F5E5A;}
+.btn-sm-green{background:var(--c-green);color:white;}
+.btn-sm-ghost{background:var(--c-cream);color:var(--c-muted);}
 
 /* SECTION TITLE */
 .sec{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(181,212,244,0.6);margin:12px 0 7px;}
 
 /* ALERT */
 .alert{padding:9px 12px;border-radius:9px;font-size:11px;margin-bottom:10px;}
-.alert-s{background:#EAF3DE;color:#3B6D11;}
-.alert-e{background:#FBEAF0;color:#993556;}
+.alert-s{background:var(--c-green-50);color:var(--c-green);}
+.alert-e{background:var(--c-accent-50);color:var(--c-accent);}
 
 /* TEXTAREA FORUM */
-.post-textarea{width:100%;border:1.5px solid #D3D1C7;border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;outline:none;resize:none;height:70px;}
-.post-textarea:focus{border-color:#185FA5;}
+.post-textarea{width:100%;border:1.5px solid var(--c-line);border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;outline:none;resize:none;height:70px;}
+.post-textarea:focus{border-color:var(--c-action);}
 
 /* TOAST FLOTTANT */
 .toast-flot{
   position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(120px);
-  background:#0C447C;color:white;padding:12px 18px;border-radius:50px;
+  background:var(--c-navy-2);color:white;padding:12px 18px;border-radius:50px;
   font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.25);
   transition:transform 0.3s ease;z-index:300;max-width:90%;text-align:center;
   pointer-events:none;
 }
 .toast-flot.show{transform:translateX(-50%) translateY(0);}
-.toast-flot.success{background:#3B6D11;}
-.toast-flot.error{background:#993556;}
-.toast-flot.info{background:#185FA5;}
+.toast-flot.success{background:var(--c-green);}
+.toast-flot.error{background:var(--c-accent);}
+.toast-flot.info{background:var(--c-action);}
 
 /* -- PHOTO UPLOAD (chantier 4) -- */
 .photo-card{background:white;border-radius:16px;padding:16px;margin-bottom:10px;}
 .photo-display{
   width:140px;height:140px;border-radius:50%;
-  object-fit:cover;border:3px solid #B5D4F4;
+  object-fit:cover;border:3px solid var(--c-blue-100);
   display:block;margin:0 auto;
 }
 .photo-display-ph{
   width:140px;height:140px;border-radius:50%;
-  background:#E6F1FB;border:3px solid #B5D4F4;
+  background:var(--c-blue-50);border:3px solid var(--c-blue-100);
   display:flex;align-items:center;justify-content:center;
-  font-size:42px;font-weight:700;color:#185FA5;
+  font-size:42px;font-weight:700;color:var(--c-action);
   margin:0 auto;
 }
-.photo-display.preview{border-color:#FAC775;}
+.photo-display.preview{border-color:var(--c-gold-2);}
 .photo-status{
   display:inline-block;font-size:10px;padding:4px 11px;
   border-radius:50px;font-weight:700;margin-top:10px;
 }
-.photo-status.sans{background:#F1EFE8;color:#5F5E5A;}
-.photo-status.att{background:#FEF3C7;color:#C9821A;}
-.photo-status.val{background:#EAF3DE;color:#3B6D11;}
-.photo-status.ref{background:#FBEAF0;color:#993556;}
-.photo-status.gen{background:#E6F1FB;color:#0C447C;}
+.photo-status.sans{background:var(--c-cream);color:var(--c-muted);}
+.photo-status.att{background:var(--c-gold-50);color:var(--c-amber);}
+.photo-status.val{background:var(--c-green-50);color:var(--c-green);}
+.photo-status.ref{background:var(--c-accent-50);color:var(--c-accent);}
+.photo-status.gen{background:var(--c-blue-50);color:var(--c-navy-2);}
 .photo-tips{
-  background:#F1EFE8;border-radius:8px;padding:10px;
-  font-size:10px;color:#5F5E5A;line-height:1.7;margin-bottom:12px;
+  background:var(--c-cream);border-radius:8px;padding:10px;
+  font-size:10px;color:var(--c-muted);line-height:1.7;margin-bottom:12px;
 }
-.photo-tips strong{color:#0C447C;}
+.photo-tips strong{color:var(--c-navy-2);}
 
 /* -- RÉCOMPENSES (chantier 6) -- */
 .rew-hero{
-  background:linear-gradient(135deg,#1a1a18,#042C53,#0C447C);
+  background:linear-gradient(135deg,var(--c-ink),var(--c-navy),var(--c-navy-2));
   border-radius:20px;padding:18px;margin-bottom:12px;
   position:relative;overflow:hidden;
 }
 .rew-hero::before{content:'';position:absolute;right:-30px;top:-30px;width:140px;height:140px;background:rgba(245,200,66,0.06);border-radius:50%;}
-.rew-pts-big{font-size:38px;font-weight:800;color:#F5C842;font-family:monospace;line-height:1;}
+.rew-pts-big{font-size:38px;font-weight:800;color:var(--c-gold);font-family:monospace;line-height:1;}
 .rew-pts-sub{font-size:11px;color:rgba(181,212,244,0.6);margin-top:4px;}
 .rew-prog{height:7px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;margin:12px 0 4px;}
-.rew-prog-fill{height:100%;background:linear-gradient(90deg,#9B6B3A,#F5C842);border-radius:4px;transition:width 1s ease;}
+.rew-prog-fill{height:100%;background:linear-gradient(90deg,#9B6B3A,var(--c-gold));border-radius:4px;transition:width 1s ease;}
 .rew-prog-lbl{font-size:10px;color:rgba(181,212,244,0.5);}
 .palier-card{
   background:white;border-radius:16px;padding:16px;margin-bottom:10px;
   border:2px solid transparent;transition:all .2s;
 }
-.palier-card.unlocked{border-color:#3B6D11;box-shadow:0 4px 16px rgba(59,109,17,0.15);}
+.palier-card.unlocked{border-color:var(--c-green);box-shadow:0 4px 16px rgba(59,109,17,0.15);}
 .palier-card.locked{opacity:0.85;}
 .palier-icon{font-size:32px;line-height:1;}
-.palier-title{font-size:15px;font-weight:800;color:#0C447C;}
-.palier-desc{font-size:11px;color:#5F5E5A;margin-top:3px;line-height:1.5;}
+.palier-title{font-size:15px;font-weight:800;color:var(--c-navy-2);}
+.palier-desc{font-size:11px;color:var(--c-muted);margin-top:3px;line-height:1.5;}
 .palier-cost{
-  display:inline-block;font-size:11px;font-weight:700;color:#185FA5;
-  background:#E6F1FB;border-radius:50px;padding:3px 10px;margin-top:8px;
+  display:inline-block;font-size:11px;font-weight:700;color:var(--c-action);
+  background:var(--c-blue-50);border-radius:50px;padding:3px 10px;margin-top:8px;
 }
 .palier-progress-mini{
-  height:4px;background:#E6F1FB;border-radius:2px;margin:10px 0 4px;overflow:hidden;
+  height:4px;background:var(--c-blue-50);border-radius:2px;margin:10px 0 4px;overflow:hidden;
 }
-.palier-progress-mini-fill{height:100%;background:#3B6D11;border-radius:2px;}
+.palier-progress-mini-fill{height:100%;background:var(--c-green);border-radius:2px;}
 .code-card{
-  background:linear-gradient(135deg,#3B6D11,#5C9C1C);
+  background:linear-gradient(135deg,var(--c-green),#5C9C1C);
   border-radius:16px;padding:16px;margin-bottom:10px;color:white;
 }
 .code-display{
@@ -265,13 +265,13 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   font-family:monospace;font-size:18px;font-weight:800;letter-spacing:2px;
 }
 .pending-card{
-  background:#FEF3C7;border-radius:14px;padding:14px;margin-bottom:10px;
-  border-left:3px solid #C9821A;
+  background:var(--c-gold-50);border-radius:14px;padding:14px;margin-bottom:10px;
+  border-left:3px solid var(--c-amber);
 }
-.pending-title{font-size:13px;font-weight:700;color:#C9821A;}
-.pending-sub{font-size:11px;color:#5F5E5A;margin-top:4px;line-height:1.5;}
+.pending-title{font-size:13px;font-weight:700;color:var(--c-amber);}
+.pending-sub{font-size:11px;color:var(--c-muted);margin-top:4px;line-height:1.5;}
 .boutique-link{
-  background:linear-gradient(135deg,#0F0F0F,#2a2a28);
+  background:linear-gradient(135deg,#0F0F0F,var(--c-ink-2));
   border-radius:14px;padding:14px;margin-bottom:10px;display:flex;
   align-items:center;gap:12px;cursor:pointer;text-decoration:none;
 }
@@ -281,10 +281,10 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   display:flex;justify-content:space-between;align-items:center;font-size:11px;
 }
 .histo-statut{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;}
-.histo-att{background:#FEF3C7;color:#C9821A;}
-.histo-attr{background:#EAF3DE;color:#3B6D11;}
-.histo-ann{background:#F1EFE8;color:#5F5E5A;}
-.histo-ref{background:#FBEAF0;color:#993556;}
+.histo-att{background:var(--c-gold-50);color:var(--c-amber);}
+.histo-attr{background:var(--c-green-50);color:var(--c-green);}
+.histo-ann{background:var(--c-cream);color:var(--c-muted);}
+.histo-ref{background:var(--c-accent-50);color:var(--c-accent);}
 
 /* -- EMPLOI (chantier 8) -- */
 .seg-b{
@@ -292,52 +292,52 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   color:rgba(181,212,244,0.6);font-size:11px;font-weight:600;border-radius:50px;cursor:pointer;
   font-family:'Sora',sans-serif;
 }
-.seg-b.on{background:#185FA5;color:white;border-color:#185FA5;}
+.seg-b.on{background:var(--c-action);color:white;border-color:var(--c-action);}
 .annonce-card{
   background:white;border-radius:14px;padding:14px;margin-bottom:10px;
 }
 .annonce-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
 .annonce-logo{
   width:40px;height:40px;border-radius:10px;object-fit:cover;
-  background:#E6F1FB;flex-shrink:0;
+  background:var(--c-blue-50);flex-shrink:0;
 }
 .annonce-logo-ph{
-  width:40px;height:40px;border-radius:10px;background:#E6F1FB;
+  width:40px;height:40px;border-radius:10px;background:var(--c-blue-50);
   display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
 }
 .annonce-tags{display:flex;gap:5px;flex-wrap:wrap;}
 .annonce-tag{
   font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;
 }
-.annonce-tag.partenaire{background:#FEF3C7;color:#C9821A;}
-.annonce-tag.benevole{background:#E6F1FB;color:#185FA5;}
-.annonce-tag.contrat{background:#F1EFE8;color:#5F5E5A;}
-.annonce-titre{font-size:14px;font-weight:800;color:#0C447C;margin-bottom:3px;line-height:1.3;}
-.annonce-partenaire{font-size:11px;color:#5F5E5A;margin-bottom:6px;}
+.annonce-tag.partenaire{background:var(--c-gold-50);color:var(--c-amber);}
+.annonce-tag.benevole{background:var(--c-blue-50);color:var(--c-action);}
+.annonce-tag.contrat{background:var(--c-cream);color:var(--c-muted);}
+.annonce-titre{font-size:14px;font-weight:800;color:var(--c-navy-2);margin-bottom:3px;line-height:1.3;}
+.annonce-partenaire{font-size:11px;color:var(--c-muted);margin-bottom:6px;}
 .annonce-desc{
-  font-size:12px;color:#1a1a18;line-height:1.55;margin-bottom:10px;
+  font-size:12px;color:var(--c-ink);line-height:1.55;margin-bottom:10px;
   white-space:pre-line;
 }
 .annonce-meta-bas{
-  display:flex;gap:10px;font-size:10px;color:#5F5E5A;margin-bottom:10px;
+  display:flex;gap:10px;font-size:10px;color:var(--c-muted);margin-bottom:10px;
   flex-wrap:wrap;
 }
 
 /* -- PROPOSER ANNONCE (modale PDF-like) -- */
 .prop-section-header{
-  background:linear-gradient(90deg,#E6F1FB,#D0E5F8);
-  border-left:4px solid #185FA5;
+  background:linear-gradient(90deg,var(--c-blue-50),#D0E5F8);
+  border-left:4px solid var(--c-action);
   border-radius:6px;
   padding:9px 12px;
   margin:16px 0 10px;
   font-size:11px;
   font-weight:800;
-  color:#0C447C;
+  color:var(--c-navy-2);
   letter-spacing:1.2px;
 }
 .prop-section-header:first-of-type{margin-top:8px;}
 .prop-modal-header{
-  background:linear-gradient(135deg,#0C447C,#185FA5);
+  background:linear-gradient(135deg,var(--c-navy-2),var(--c-action));
   margin:-22px -22px 14px -22px;
   padding:18px 22px 16px;
   border-radius:14px 14px 0 0;
@@ -364,56 +364,56 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 }
 
 /* -- BACK BUTTON (commun aux écrans secondaires) -- */
-.back-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(181,212,244,0.2);color:#B5D4F4;border-radius:50px;padding:6px 14px;font-family:'Sora',sans-serif;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:10px;}
+.back-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(181,212,244,0.2);color:var(--c-blue-100);border-radius:50px;padding:6px 14px;font-family:'Sora',sans-serif;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:10px;}
 .back-btn:hover,.back-btn:active{background:rgba(255,255,255,0.15);}
 
 /* -- DÉCOUVERTE (CTAs sur home) -- */
 .decouv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .decouv-card{background:white;border-radius:14px;padding:13px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
-.decouv-card:hover,.decouv-card:active{border-color:#185FA5;}
+.decouv-card:hover,.decouv-card:active{border-color:var(--c-action);}
 .decouv-icon{font-size:24px;margin-bottom:5px;line-height:1;}
-.decouv-title{font-size:12px;font-weight:700;color:#0C447C;}
-.decouv-sub{font-size:10px;color:#5F5E5A;margin-top:1px;}
+.decouv-title{font-size:12px;font-weight:700;color:var(--c-navy-2);}
+.decouv-sub{font-size:10px;color:var(--c-muted);margin-top:1px;}
 
 /* -- POSTES -- */
 .poste-card{background:white;border-radius:14px;padding:13px;margin-bottom:8px;display:flex;gap:12px;align-items:center;cursor:pointer;border:2px solid transparent;transition:all .15s;}
-.poste-card:hover,.poste-card:active{border-color:#185FA5;}
+.poste-card:hover,.poste-card:active{border-color:var(--c-action);}
 .poste-icon{font-size:36px;flex-shrink:0;line-height:1;}
 .poste-info{flex:1;min-width:0;}
-.poste-nom{font-size:14px;font-weight:700;color:#0C447C;}
+.poste-nom{font-size:14px;font-weight:700;color:var(--c-navy-2);}
 .poste-meta{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;align-items:center;}
 .poste-difficulte{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;}
-.poste-difficulte.facile{background:#EAF3DE;color:#3B6D11;}
-.poste-difficulte.moyen{background:#FEF3C7;color:#C9821A;}
-.poste-difficulte.avancé,.poste-difficulte.avance{background:#FBEAF0;color:#993556;}
-.poste-meta-info{font-size:9px;color:#5F5E5A;}
-.poste-video-tag{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#FFE4E1;color:#993556;}
-.poste-desc-preview{font-size:11px;color:#5F5E5A;margin-top:5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.poste-arrow{font-size:24px;color:#D3D1C7;flex-shrink:0;}
+.poste-difficulte.facile{background:var(--c-green-50);color:var(--c-green);}
+.poste-difficulte.moyen{background:var(--c-gold-50);color:var(--c-amber);}
+.poste-difficulte.avancé,.poste-difficulte.avance{background:var(--c-accent-50);color:var(--c-accent);}
+.poste-meta-info{font-size:9px;color:var(--c-muted);}
+.poste-video-tag{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#FFE4E1;color:var(--c-accent);}
+.poste-desc-preview{font-size:11px;color:var(--c-muted);margin-top:5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.poste-arrow{font-size:24px;color:var(--c-line);flex-shrink:0;}
 
-.poste-section-header{font-size:10px;font-weight:800;letter-spacing:1px;color:#0C447C;background:linear-gradient(90deg,#E6F1FB,#D0E5F8);border-left:3px solid #185FA5;border-radius:6px;padding:7px 10px;margin:14px 0 8px;}
-.poste-section-body{font-size:11.5px;color:#1a1a18;line-height:1.7;}
-.poste-section-title{font-weight:700;color:#0C447C;margin-top:8px;margin-bottom:4px;}
+.poste-section-header{font-size:10px;font-weight:800;letter-spacing:1px;color:var(--c-navy-2);background:linear-gradient(90deg,var(--c-blue-50),#D0E5F8);border-left:3px solid var(--c-action);border-radius:6px;padding:7px 10px;margin:14px 0 8px;}
+.poste-section-body{font-size:11.5px;color:var(--c-ink);line-height:1.7;}
+.poste-section-title{font-weight:700;color:var(--c-navy-2);margin-top:8px;margin-bottom:4px;}
 .poste-section-line{padding:2px 0 2px 4px;}
 .poste-video-wrap{position:relative;width:100%;max-width:280px;margin:0 auto;aspect-ratio:9/16;border-radius:12px;overflow:hidden;background:#000;}
 .poste-video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
 
 /* -- TOULOUSE -- */
 .tlse-card{background:white;border-radius:14px;overflow:hidden;margin-bottom:10px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
-.tlse-card:hover,.tlse-card:active{border-color:#185FA5;}
-.tlse-img{width:100%;height:120px;object-fit:cover;display:block;background:#E6F1FB;}
+.tlse-card:hover,.tlse-card:active{border-color:var(--c-action);}
+.tlse-img{width:100%;height:120px;object-fit:cover;display:block;background:var(--c-blue-50);}
 .tlse-content{padding:12px;}
 .tlse-cat{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;display:inline-block;}
-.tlse-cat-sortir{background:#FBEAF0;color:#993556;}
-.tlse-cat-culture{background:#EDE9FE;color:#533BB7;}
-.tlse-titre{font-size:14px;font-weight:800;color:#0C447C;margin-top:6px;line-height:1.3;}
-.tlse-soustitre{font-size:11px;color:#5F5E5A;margin-top:2px;}
-.tlse-desc-preview{font-size:11px;color:#5F5E5A;margin-top:8px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.tlse-cat-sortir{background:var(--c-accent-50);color:var(--c-accent);}
+.tlse-cat-culture{background:var(--c-purple-50);color:var(--c-purple);}
+.tlse-titre{font-size:14px;font-weight:800;color:var(--c-navy-2);margin-top:6px;line-height:1.3;}
+.tlse-soustitre{font-size:11px;color:var(--c-muted);margin-top:2px;}
+.tlse-desc-preview{font-size:11px;color:var(--c-muted);margin-top:8px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
 
 /* -- INSTAGRAM FEED (Actu du club) -- */
 .spi-feed{background:white;border-radius:14px;padding:12px;margin-bottom:10px;}
 .spi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
-.spi-tile{position:relative;aspect-ratio:1/1;overflow:hidden;border-radius:8px;background:#E6F1FB;text-decoration:none;display:block;}
+.spi-tile{position:relative;aspect-ratio:1/1;overflow:hidden;border-radius:8px;background:var(--c-blue-50);text-decoration:none;display:block;}
 .spi-tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease;}
 .spi-tile:active img{transform:scale(0.96);}
 .spi-tile-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(4,44,83,.92) 0%,rgba(4,44,83,.4) 50%,transparent 100%);opacity:0;transition:opacity .2s;display:flex;align-items:flex-end;padding:8px;}
@@ -421,52 +421,53 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 .spi-tile-cap{color:white;font-size:10px;line-height:1.4;font-weight:500;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
 .spi-tile-badge{position:absolute;top:6px;right:6px;background:rgba(4,44,83,.7);backdrop-filter:blur(6px);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none;}
 .spi-tile-badge svg{width:11px;height:11px;fill:white;}
-.spi-skel{background:linear-gradient(90deg,#E6F1FB 0%,#F1EFE8 50%,#E6F1FB 100%);background-size:200% 100%;animation:spi-shim 1.4s infinite;}
+.spi-skel{background:linear-gradient(90deg,var(--c-blue-50) 0%,var(--c-cream) 50%,var(--c-blue-50) 100%);background-size:200% 100%;animation:spi-shim 1.4s infinite;}
 @keyframes spi-shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.spi-more{display:block;text-align:center;font-size:11px;font-weight:600;color:#185FA5;text-decoration:none;padding:10px 0 4px;margin-top:8px;border-top:1px solid #F1EFE8;}
-.spi-empty{grid-column:1/-1;color:#5F5E5A;text-align:center;padding:24px 0;font-size:11px;}
+.spi-more{display:block;text-align:center;font-size:11px;font-weight:600;color:var(--c-action);text-decoration:none;padding:10px 0 4px;margin-top:8px;border-top:1px solid var(--c-cream);}
+.spi-empty{grid-column:1/-1;color:var(--c-muted);text-align:center;padding:24px 0;font-size:11px;}
 
 /* -- ÉVÉNEMENTS BÉNÉVOLES -- */
 .ev-card{background:white;border-radius:14px;overflow:hidden;margin-bottom:10px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
-.ev-card:active{border-color:#185FA5;}
+.ev-card:active{border-color:var(--c-action);}
 .ev-img{height:110px;position:relative;}
 .ev-img .ev-cat{position:absolute;top:10px;left:10px;}
 .ev-hero{width:calc(100% + 44px);margin:-22px -22px 14px -22px;height:150px;display:flex;align-items:flex-end;padding:14px;}
 .ev-content{padding:12px;}
 .ev-cat{font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;display:inline-block;}
-.cat-convivial{background:#E6F1FB;color:#185FA5;}
-.cat-sportif{background:#EAF3DE;color:#3B6D11;}
-.cat-formation{background:#FEF3C7;color:#C9821A;}
-.cat-sortie{background:#EDE9FE;color:#533BB7;}
-.evph-convivial{background:linear-gradient(135deg,#0C447C,#185FA5);}
-.evph-sportif{background:linear-gradient(135deg,#1a3d2e,#3B6D11);}
-.evph-formation{background:linear-gradient(135deg,#9B6B3A,#C9821A);}
-.evph-sortie{background:linear-gradient(135deg,#3a1a5e,#533BB7);}
-.ev-titre{font-size:14px;font-weight:800;color:#0C447C;margin-top:6px;line-height:1.3;}
-.ev-meta{font-size:11px;color:#5F5E5A;margin-top:4px;}
-.ev-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid #F1EFE8;}
-.ev-org{font-size:11px;font-weight:700;color:#185FA5;}
+.cat-convivial{background:var(--c-blue-50);color:var(--c-action);}
+.cat-sportif{background:var(--c-green-50);color:var(--c-green);}
+.cat-formation{background:var(--c-gold-50);color:var(--c-amber);}
+.cat-sortie{background:var(--c-purple-50);color:var(--c-purple);}
+.evph-convivial{background:linear-gradient(135deg,var(--c-navy-2),var(--c-action));}
+.evph-sportif{background:linear-gradient(135deg,#1a3d2e,var(--c-green));}
+.evph-formation{background:linear-gradient(135deg,#9B6B3A,var(--c-amber));}
+.evph-sortie{background:linear-gradient(135deg,#3a1a5e,var(--c-purple));}
+.ev-titre{font-size:14px;font-weight:800;color:var(--c-navy-2);margin-top:6px;line-height:1.3;}
+.ev-meta{font-size:11px;color:var(--c-muted);margin-top:4px;}
+.ev-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--c-cream);}
+.ev-org{font-size:11px;font-weight:700;color:var(--c-action);}
 .ev-myitem{background:white;border-radius:12px;padding:13px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
-.ev-mytitre{font-size:13px;font-weight:700;color:#0C447C;}
-.ev-mymeta{font-size:11px;color:#5F5E5A;margin-top:3px;}
+.ev-mytitre{font-size:13px;font-weight:700;color:var(--c-navy-2);}
+.ev-mymeta{font-size:11px;color:var(--c-muted);margin-top:3px;}
 .ev-st{font-size:9px;font-weight:700;padding:3px 9px;border-radius:50px;white-space:nowrap;}
-.ev-st-draft{background:#FEF3C7;color:#C9821A;}
-.ev-st-published{background:#EAF3DE;color:#3B6D11;}
-.ev-st-hidden{background:#F1EFE8;color:#5F5E5A;}
-.ev-st-past{background:#E6F1FB;color:#0C447C;}
-.ev-interet-bar{display:flex;align-items:center;justify-content:space-between;background:#F1EFE8;border-radius:12px;padding:11px 14px;margin:14px 0;}
-.ev-heart{border:1.5px solid #B5D4F4;background:white;border-radius:50px;padding:8px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;color:#185FA5;cursor:pointer;}
-.ev-heart.on{background:#185FA5;color:white;border-color:#185FA5;}
+.ev-st-draft{background:var(--c-gold-50);color:var(--c-amber);}
+.ev-st-published{background:var(--c-green-50);color:var(--c-green);}
+.ev-st-hidden{background:var(--c-cream);color:var(--c-muted);}
+.ev-st-past{background:var(--c-blue-50);color:var(--c-navy-2);}
+.ev-interet-bar{display:flex;align-items:center;justify-content:space-between;background:var(--c-cream);border-radius:12px;padding:11px 14px;margin:14px 0;}
+.ev-heart{border:1.5px solid var(--c-blue-100);background:white;border-radius:50px;padding:8px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;color:var(--c-action);cursor:pointer;}
+.ev-heart.on{background:var(--c-action);color:white;border-color:var(--c-action);}
 </style>
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#042C53">
+    <meta name="theme-color" content="var(--c-navy)">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Spacers">
     <meta name="mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="/theme.css">
 </head>
 <body>
 
@@ -489,15 +490,15 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       </div>
       <div class="quiz-options">
         <div class="quiz-opt" onclick="quizSelect(1,'v')">
-          <div class="quiz-opt-icon" style="background:#EDE9FE;">🌱</div>
+          <div class="quiz-opt-icon" style="background:var(--c-purple-50);">🌱</div>
           <div><div class="quiz-opt-text">Première fois</div><div class="quiz-opt-sub">Je découvre le bénévolat sportif</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(1,'h')">
-          <div class="quiz-opt-icon" style="background:#E6F1FB;">⚡</div>
+          <div class="quiz-opt-icon" style="background:var(--c-blue-50);">⚡</div>
           <div><div class="quiz-opt-text">Quelques expériences</div><div class="quiz-opt-sub">J'ai déjà participé à des événements</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(1,'j')">
-          <div class="quiz-opt-icon" style="background:#EAF3DE;">🎯</div>
+          <div class="quiz-opt-icon" style="background:var(--c-green-50);">🎯</div>
           <div><div class="quiz-opt-text">Plusieurs saisons</div><div class="quiz-opt-sub">Je suis un(e) bénévole expérimenté(e)</div></div>
         </div>
       </div>
@@ -512,15 +513,15 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       </div>
       <div class="quiz-options">
         <div class="quiz-opt" onclick="quizSelect(2,'v')">
-          <div class="quiz-opt-icon" style="background:#EDE9FE;">🤝</div>
+          <div class="quiz-opt-icon" style="background:var(--c-purple-50);">🤝</div>
           <div><div class="quiz-opt-text">Découvrir et rencontrer</div><div class="quiz-opt-sub">Les nouvelles personnes et expériences</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(2,'h')">
-          <div class="quiz-opt-icon" style="background:#E6F1FB;">🏆</div>
+          <div class="quiz-opt-icon" style="background:var(--c-blue-50);">🏆</div>
           <div><div class="quiz-opt-text">Progresser et gagner</div><div class="quiz-opt-sub">Les défis, la compétition, les récompenses</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(2,'j')">
-          <div class="quiz-opt-icon" style="background:#EAF3DE;">💪</div>
+          <div class="quiz-opt-icon" style="background:var(--c-green-50);">💪</div>
           <div><div class="quiz-opt-text">Être utile et transmettre</div><div class="quiz-opt-sub">Mon expérience au service de l'équipe</div></div>
         </div>
       </div>
@@ -535,15 +536,15 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       </div>
       <div class="quiz-options">
         <div class="quiz-opt" onclick="quizSelect(3,'v')">
-          <div class="quiz-opt-icon" style="background:#EDE9FE;">🗺️</div>
+          <div class="quiz-opt-icon" style="background:var(--c-purple-50);">🗺️</div>
           <div><div class="quiz-opt-text">J'ai besoin d'être guidé(e)</div><div class="quiz-opt-sub">Des instructions claires m'aident à être au top</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(3,'h')">
-          <div class="quiz-opt-icon" style="background:#E6F1FB;">📊</div>
+          <div class="quiz-opt-icon" style="background:var(--c-blue-50);">📊</div>
           <div><div class="quiz-opt-text">Je veux tout voir</div><div class="quiz-opt-sub">Stats, points, classement — je gère tout</div></div>
         </div>
         <div class="quiz-opt" onclick="quizSelect(3,'j')">
-          <div class="quiz-opt-icon" style="background:#EAF3DE;">⚡</div>
+          <div class="quiz-opt-icon" style="background:var(--c-green-50);">⚡</div>
           <div><div class="quiz-opt-text">Je vais droit au but</div><div class="quiz-opt-sub">L'essentiel, sans fioritures</div></div>
         </div>
       </div>
@@ -628,7 +629,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <div class="sec">💼 Minute emploi</div>
 
     <!-- CTA : Proposer une annonce -->
-    <button class="btn btn-blue" style="width:100%;font-size:13px;margin-bottom:12px;background:linear-gradient(135deg,#185FA5,#0C447C);" onclick="openProposerEmploi()">
+    <button class="btn btn-blue" style="width:100%;font-size:13px;margin-bottom:12px;background:linear-gradient(135deg,var(--c-action),var(--c-navy-2));" onclick="openProposerEmploi()">
       ✍️ Proposer une annonce
     </button>
 
@@ -650,24 +651,24 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 
     <!-- PHOTO DE PROFIL (chantier 4) -->
     <div class="photo-card">
-      <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:4px;">📷 Photo de profil</div>
-      <div style="font-size:11px;color:#5F5E5A;margin-bottom:14px;">Utilisée pour ton accréditation officielle.</div>
+      <div style="font-size:13px;font-weight:700;color:var(--c-navy-2);margin-bottom:4px;">📷 Photo de profil</div>
+      <div style="font-size:11px;color:var(--c-muted);margin-bottom:14px;">Utilisée pour ton accréditation officielle.</div>
       <div id="photo-card-content"></div>
       <input type="file" id="photo-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="onPhotoSelected(event)">
     </div>
 
     <div style="background:white;border-radius:16px;padding:16px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:12px;">Informations personnelles</div>
-      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;display:block;">Prénom</label><input style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-prenom" type="text"></div>
-      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;display:block;">Nom</label><input style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-nom" type="text"></div>
-      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:#1a1a18;margin-bottom:4px;display:block;">Téléphone</label><input style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-tel" type="tel"></div>
+      <div style="font-size:13px;font-weight:700;color:var(--c-navy-2);margin-bottom:12px;">Informations personnelles</div>
+      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:var(--c-ink);margin-bottom:4px;display:block;">Prénom</label><input style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-prenom" type="text"></div>
+      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:var(--c-ink);margin-bottom:4px;display:block;">Nom</label><input style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-nom" type="text"></div>
+      <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:600;color:var(--c-ink);margin-bottom:4px;display:block;">Téléphone</label><input style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;" id="f-tel" type="tel"></div>
       <button class="btn btn-blue" style="font-size:13px;" onclick="saveProfile()">Sauvegarder</button>
     </div>
 
     <!-- CHANGER PROFIL -->
     <div style="background:white;border-radius:16px;padding:16px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:4px;">Mon profil bénévole</div>
-      <div style="font-size:11px;color:#5F5E5A;margin-bottom:12px;">Personnalise votre expérience dans l'app</div>
+      <div style="font-size:13px;font-weight:700;color:var(--c-navy-2);margin-bottom:4px;">Mon profil bénévole</div>
+      <div style="font-size:11px;color:var(--c-muted);margin-bottom:12px;">Personnalise votre expérience dans l'app</div>
       <div id="current-profil-display"></div>
       <button class="btn btn-blue" style="font-size:12px;margin-top:10px;" onclick="openChangeProfil()">Changer de profil</button>
     </div>
@@ -708,7 +709,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       Propose et rejoins les événements de la tribu — afterworks, sorties, formations, tournois internes.
     </div>
 
-    <button class="btn btn-blue" style="width:100%;font-size:13px;margin-bottom:12px;background:linear-gradient(135deg,#185FA5,#0C447C);" onclick="openCreateEv()">
+    <button class="btn btn-blue" style="width:100%;font-size:13px;margin-bottom:12px;background:linear-gradient(135deg,var(--c-action),var(--c-navy-2));" onclick="openCreateEv()">
       ✍️ Proposer un événement
     </button>
 
@@ -746,7 +747,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     Partage tes suggestions et idées pour améliorer le club, l'app ou les jours de match.
   </div>
 
-  <button class="btn btn-blue" style="width:100%;font-size:13px;margin-bottom:12px;background:linear-gradient(135deg,#185FA5,#0C447C);" onclick="openCreateIdee()">
+  <button class="btn btn-blue" style="width:100%;font-size:13px;margin-bottom:12px;background:linear-gradient(135deg,var(--c-action),var(--c-navy-2));" onclick="openCreateIdee()">
     ✍️ Proposer une idée
   </button>
 
@@ -768,7 +769,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
   <div class="modal">
     <div id="modal-confirm-icon" style="text-align:center;font-size:42px;margin-bottom:6px;line-height:1;"></div>
     <h2 id="modal-confirm-title" style="text-align:center;">Confirmer ?</h2>
-    <div id="modal-confirm-msg" style="font-size:13px;color:#5F5E5A;line-height:1.6;margin-bottom:14px;white-space:pre-line;text-align:center;"></div>
+    <div id="modal-confirm-msg" style="font-size:13px;color:var(--c-muted);line-height:1.6;margin-bottom:14px;white-space:pre-line;text-align:center;"></div>
     <div id="modal-confirm-input-wrap" style="display:none;margin-bottom:14px;">
       <textarea id="modal-confirm-input" class="post-textarea" placeholder=""></textarea>
     </div>
@@ -789,7 +790,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       <img src="/logo-spacers.png" class="prop-modal-logo" alt="Spacers Toulouse Volley">
     </div>
 
-    <div style="font-size:11px;color:#5F5E5A;line-height:1.5;text-align:center;margin-bottom:8px;">
+    <div style="font-size:11px;color:var(--c-muted);line-height:1.5;text-align:center;margin-bottom:8px;">
       Ta proposition sera examinée par un pilote avant publication.
     </div>
 
@@ -825,7 +826,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <!-- Section 2 : CONTACT -->
     <div class="prop-section-header">2. CONTACT POUR LA CANDIDATURE</div>
 
-    <div style="font-size:10px;color:#5F5E5A;margin-bottom:8px;font-style:italic;">📞 Au moins un contact obligatoire</div>
+    <div style="font-size:10px;color:var(--c-muted);margin-bottom:8px;font-style:italic;">📞 Au moins un contact obligatoire</div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
       <div>
@@ -846,7 +847,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="closeProposerEmp()">Annuler</button>
     </div>
 
-    <div style="font-size:9px;color:#5F5E5A;text-align:center;margin-top:14px;font-style:italic;">
+    <div style="font-size:9px;color:var(--c-muted);text-align:center;margin-top:14px;font-style:italic;">
       * Champs obligatoires
     </div>
   </div>
@@ -869,45 +870,45 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 <!-- MODAL CANDIDATURE (Sprint C.1) — annonces Business Club -->
 <div class="modal-ov" id="modal-candidature" style="display:none;" onclick="if(event.target.id==='modal-candidature')closeCandidatureModal()">
   <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:480px;padding:22px;">
-    <div style="background:linear-gradient(135deg,#0C447C,#185FA5);margin:-22px -22px 14px -22px;padding:18px 22px 16px;border-radius:14px 14px 0 0;">
+    <div style="background:linear-gradient(135deg,var(--c-navy-2),var(--c-action));margin:-22px -22px 14px -22px;padding:18px 22px 16px;border-radius:14px 14px 0 0;">
       <div style="font-size:9px;letter-spacing:2px;color:rgba(245,200,66,0.8);font-weight:700;margin-bottom:6px;">CANDIDATER</div>
       <div style="font-size:17px;font-weight:800;color:white;line-height:1.3;" id="cand-offre-titre">Annonce</div>
       <div style="font-size:11px;color:rgba(181,212,244,0.7);margin-top:4px;" id="cand-offre-partenaire"></div>
     </div>
 
-    <div style="font-size:11px;color:#5F5E5A;line-height:1.5;margin-bottom:14px;">
+    <div style="font-size:11px;color:var(--c-muted);line-height:1.5;margin-bottom:14px;">
       Le partenaire reçoit ta candidature directement. Sois clair et chaleureux 👋
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
       <div>
-        <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Prénom *</label>
-        <input id="cand-prenom" type="text" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+        <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Prénom *</label>
+        <input id="cand-prenom" type="text" style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
       </div>
       <div>
-        <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Nom *</label>
-        <input id="cand-nom" type="text" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+        <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Nom *</label>
+        <input id="cand-nom" type="text" style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
       </div>
     </div>
 
     <div style="margin-bottom:8px;">
-      <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Email *</label>
-      <input id="cand-email" type="email" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+      <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Email *</label>
+      <input id="cand-email" type="email" style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
     </div>
 
     <div style="margin-bottom:8px;">
-      <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Téléphone</label>
-      <input id="cand-tel" type="tel" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+      <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Téléphone</label>
+      <input id="cand-tel" type="tel" style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
     </div>
 
     <div style="margin-bottom:8px;">
-      <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Message au partenaire</label>
-      <textarea id="cand-message" rows="4" placeholder="Parle de ton parcours, ta motivation..." style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;"></textarea>
+      <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Message au partenaire</label>
+      <textarea id="cand-message" rows="4" placeholder="Parle de ton parcours, ta motivation..." style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;"></textarea>
     </div>
 
     <div style="margin-bottom:14px;">
-      <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Lien vers mon CV (LinkedIn, Drive, Dropbox...)</label>
-      <input id="cand-cv-url" type="url" placeholder="https://..." style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
+      <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Lien vers mon CV (LinkedIn, Drive, Dropbox...)</label>
+      <input id="cand-cv-url" type="url" placeholder="https://..." style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;">
     </div>
 
     <div id="cand-status" style="font-size:12px;text-align:center;min-height:18px;margin-bottom:10px;line-height:1.5;"></div>
@@ -917,7 +918,7 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="closeCandidatureModal()">Annuler</button>
     </div>
 
-    <div style="font-size:9px;color:#5F5E5A;text-align:center;margin-top:12px;font-style:italic;">
+    <div style="font-size:9px;color:var(--c-muted);text-align:center;margin-top:12px;font-style:italic;">
       * Champs obligatoires
     </div>
   </div>
@@ -926,55 +927,55 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 <!-- MODAL CRÉATION ÉVÉNEMENT -->
 <div class="modal-ov" id="modal-ev-create" style="display:none;" onclick="if(event.target.id==='modal-ev-create')closeCreateEv()">
   <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:480px;">
-    <h2 style="font-size:16px;font-weight:800;color:#0C447C;margin-bottom:4px;">✍️ Proposer un événement</h2>
-    <div style="font-size:11px;color:#5F5E5A;margin-bottom:14px;line-height:1.5;">Ta proposition sera examinée par un pilote avant publication.</div>
+    <h2 style="font-size:16px;font-weight:800;color:var(--c-navy-2);margin-bottom:4px;">✍️ Proposer un événement</h2>
+    <div style="font-size:11px;color:var(--c-muted);margin-bottom:14px;line-height:1.5;">Ta proposition sera examinée par un pilote avant publication.</div>
 
-    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Titre *</label>
-    <input id="ev-f-titre" type="text" placeholder="Afterwork bénévoles post-match" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
+    <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Titre *</label>
+    <input id="ev-f-titre" type="text" placeholder="Afterwork bénévoles post-match" style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <div>
-        <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Date *</label>
-        <input id="ev-f-date" type="date" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
+        <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Date *</label>
+        <input id="ev-f-date" type="date" style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
       </div>
       <div>
-        <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Lieu</label>
-        <input id="ev-f-lieu" type="text" placeholder="Brasserie, gymnase…" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
+        <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Lieu</label>
+        <input id="ev-f-lieu" type="text" placeholder="Brasserie, gymnase…" style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
       </div>
     </div>
 
-    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Catégorie *</label>
-    <select id="ev-f-cat" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
+    <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Catégorie *</label>
+    <select id="ev-f-cat" style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
       <option value="convivial">😄 Convivial</option>
       <option value="sportif">🏐 Sportif</option>
       <option value="formation">🎓 Formation</option>
       <option value="sortie">🌳 Sortie</option>
     </select>
 
-    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Description *</label>
-    <textarea id="ev-f-desc" rows="3" placeholder="De quoi s'agit-il ?" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;margin-bottom:10px;"></textarea>
+    <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Description *</label>
+    <textarea id="ev-f-desc" rows="3" placeholder="De quoi s'agit-il ?" style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;margin-bottom:10px;"></textarea>
 
-    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Lien d'inscription (optionnel)</label>
-    <input id="ev-f-form" type="url" placeholder="https://forms.gle/…" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
+    <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Lien d'inscription (optionnel)</label>
+    <input id="ev-f-form" type="url" placeholder="https://forms.gle/…" style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
 
-    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Photo de couverture (optionnel)</label>
-    <div id="ev-cover-empty" onclick="document.getElementById('ev-f-cover-input').click()" style="text-align:center;padding:18px;border:1.5px dashed #D3D1C7;border-radius:9px;cursor:pointer;margin-bottom:10px;transition:border-color .15s;">
+    <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Photo de couverture (optionnel)</label>
+    <div id="ev-cover-empty" onclick="document.getElementById('ev-f-cover-input').click()" style="text-align:center;padding:18px;border:1.5px dashed var(--c-line);border-radius:9px;cursor:pointer;margin-bottom:10px;transition:border-color .15s;">
       <div style="font-size:28px;line-height:1;">📷</div>
-      <div style="font-size:12px;color:#0C447C;font-weight:600;margin-top:6px;">Cliquer pour ajouter une photo</div>
-      <div style="font-size:10px;color:#5F5E5A;margin-top:2px;">5 Mo max · JPEG, PNG, WebP</div>
+      <div style="font-size:12px;color:var(--c-navy-2);font-weight:600;margin-top:6px;">Cliquer pour ajouter une photo</div>
+      <div style="font-size:10px;color:var(--c-muted);margin-top:2px;">5 Mo max · JPEG, PNG, WebP</div>
     </div>
     <div id="ev-cover-preview" style="display:none;margin-bottom:10px;"></div>
     <input type="file" id="ev-f-cover-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="onEvCoverSelected(event)">
 
-    <div style="background:#E6F1FB;color:#0C447C;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;">
-      ⓘ Ton événement part en <b style="color:#185FA5;">attente de validation</b> pilote. 3 brouillons max en attente.
+    <div style="background:var(--c-blue-50);color:var(--c-navy-2);border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;">
+      ⓘ Ton événement part en <b style="color:var(--c-action);">attente de validation</b> pilote. 3 brouillons max en attente.
     </div>
 
     <div style="display:flex;gap:8px;">
       <button class="btn btn-blue" style="flex:1;font-size:13px;" onclick="soumettreEvenement()">📤 Soumettre</button>
       <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="closeCreateEv()">Annuler</button>
     </div>
-    <div style="font-size:9px;color:#5F5E5A;text-align:center;margin-top:12px;font-style:italic;">* Champs obligatoires</div>
+    <div style="font-size:9px;color:var(--c-muted);text-align:center;margin-top:12px;font-style:italic;">* Champs obligatoires</div>
   </div>
 </div>
 
@@ -988,11 +989,11 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
 <!-- MODAL CRÉATION IDÉE (Boîte à idées) -->
 <div class="modal-ov" id="modal-idee-create" style="display:none;" onclick="if(event.target.id==='modal-idee-create')closeCreateIdee()">
   <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:480px;">
-    <h2 style="font-size:16px;font-weight:800;color:#0C447C;margin-bottom:4px;">💡 Proposer une idée</h2>
-    <div style="font-size:11px;color:#5F5E5A;margin-bottom:14px;line-height:1.5;">Ton idée pour améliorer le club, l'app ou un jour de match.</div>
+    <h2 style="font-size:16px;font-weight:800;color:var(--c-navy-2);margin-bottom:4px;">💡 Proposer une idée</h2>
+    <div style="font-size:11px;color:var(--c-muted);margin-bottom:14px;line-height:1.5;">Ton idée pour améliorer le club, l'app ou un jour de match.</div>
 
-    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Catégorie</label>
-    <select id="idee-tag" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
+    <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Catégorie</label>
+    <select id="idee-tag" style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
       <option value="jour_match">📅 Jour de match</option>
       <option value="hors_match">🏠 Hors-match</option>
       <option value="accueil">👋 Accueil bénévoles</option>
@@ -1000,17 +1001,17 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       <option value="autre">💭 Autre</option>
     </select>
 
-    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Ton idée *</label>
-    <textarea id="idee-txt" rows="4" placeholder="Décris ton idée en quelques lignes..." style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;margin-bottom:10px;"></textarea>
+    <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Ton idée *</label>
+    <textarea id="idee-txt" rows="4" placeholder="Décris ton idée en quelques lignes..." style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;margin-bottom:10px;"></textarea>
 
-    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:6px;">Visibilité</label>
+    <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:6px;">Visibilité</label>
     <div style="display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap;">
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;color:#1a1a18;">
-        <input type="checkbox" id="idee-cb-forum" checked style="cursor:pointer;width:15px;height:15px;accent-color:#185FA5;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;color:var(--c-ink);">
+        <input type="checkbox" id="idee-cb-forum" checked style="cursor:pointer;width:15px;height:15px;accent-color:var(--c-action);">
         💬 Visible par tous
       </label>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;color:#1a1a18;">
-        <input type="checkbox" id="idee-cb-pilotes" style="cursor:pointer;width:15px;height:15px;accent-color:#185FA5;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;color:var(--c-ink);">
+        <input type="checkbox" id="idee-cb-pilotes" style="cursor:pointer;width:15px;height:15px;accent-color:var(--c-action);">
         🎯 Privé pilotes
       </label>
     </div>
@@ -1019,34 +1020,34 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
       <button class="btn btn-blue" style="flex:1;font-size:13px;" onclick="soumettreIdee()">📤 Partager</button>
       <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="closeCreateIdee()">Annuler</button>
     </div>
-    <div style="font-size:9px;color:#5F5E5A;text-align:center;margin-top:12px;font-style:italic;">* Champ obligatoire</div>
+    <div style="font-size:9px;color:var(--c-muted);text-align:center;margin-top:12px;font-style:italic;">* Champ obligatoire</div>
   </div>
 </div>
 
 <!-- MODAL SIGNALEMENT PHOTO (Bloc C / 3b) -->
 <div class="modal-ov" id="modal-report-photo" style="display:none;" onclick="if(event.target.id==='modal-report-photo')closeReportPhotoModal()">
   <div class="modal" style="max-height:90vh;overflow-y:auto;max-width:460px;">
-    <h2 style="font-size:16px;font-weight:800;color:#0C447C;margin-bottom:4px;">🚩 Signaler cette photo</h2>
-    <div style="font-size:11px;color:#5F5E5A;margin-bottom:14px;line-height:1.5;">
+    <h2 style="font-size:16px;font-weight:800;color:var(--c-navy-2);margin-bottom:4px;">🚩 Signaler cette photo</h2>
+    <div style="font-size:11px;color:var(--c-muted);margin-bottom:14px;line-height:1.5;">
       Aide-nous à modérer en signalant ce qui te gêne. Un pilote examinera ton signalement. La photo sera masquée le temps de la review.
     </div>
 
-    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Raison du signalement *</label>
-    <select id="report-reason" style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
+    <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Raison du signalement *</label>
+    <select id="report-reason" style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;margin-bottom:10px;">
       <option value="visage_non_consentement">👤 Personne / visage non-consentant</option>
       <option value="contenu_inapproprie">⚠️ Contenu inapproprié</option>
       <option value="enfant_visible">🧒 Enfant identifiable</option>
       <option value="autre">💭 Autre</option>
     </select>
 
-    <label style="font-size:11px;font-weight:600;color:#0C447C;display:block;margin-bottom:4px;">Précisions (optionnel)</label>
-    <textarea id="report-message" rows="3" placeholder="Détaille ton signalement si nécessaire..." style="width:100%;padding:10px;border:1.5px solid #D3D1C7;border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;margin-bottom:14px;"></textarea>
+    <label style="font-size:11px;font-weight:600;color:var(--c-navy-2);display:block;margin-bottom:4px;">Précisions (optionnel)</label>
+    <textarea id="report-message" rows="3" placeholder="Détaille ton signalement si nécessaire..." style="width:100%;padding:10px;border:1.5px solid var(--c-line);border-radius:9px;font-family:'Sora',sans-serif;font-size:13px;outline:none;resize:vertical;margin-bottom:14px;"></textarea>
 
     <div style="display:flex;gap:8px;">
-      <button class="btn btn-red" style="flex:1;font-size:13px;background:#993556;" id="report-submit-btn" onclick="submitPhotoReport()">🚩 Envoyer le signalement</button>
+      <button class="btn btn-red" style="flex:1;font-size:13px;background:var(--c-accent);" id="report-submit-btn" onclick="submitPhotoReport()">🚩 Envoyer le signalement</button>
       <button class="btn btn-ghost" style="flex:1;font-size:13px;margin-top:0;" onclick="closeReportPhotoModal()">Annuler</button>
     </div>
-    <div style="font-size:9px;color:#5F5E5A;text-align:center;margin-top:10px;font-style:italic;">* Raison obligatoire</div>
+    <div style="font-size:9px;color:var(--c-muted);text-align:center;margin-top:10px;font-style:italic;">* Raison obligatoire</div>
   </div>
 </div>
 <!-- MODAL CHANGEMENT PROFIL (PRÉNOMS SUPPRIMÉS) -->
@@ -1055,15 +1056,15 @@ body{font-family:'Sora',sans-serif;background:#042C53;min-height:100vh;}
     <h2>🎭 Changer de profil</h2>
     <div class="profil-choice" onclick="selectNewProfil('hugo')" id="pc-hugo">
       <div class="profil-choice-icon">🎯</div>
-      <div><div style="font-size:13px;font-weight:700;color:#0C447C;">Compétiteur</div><div style="font-size:10px;color:#5F5E5A;">Gamification, points, classement</div></div>
+      <div><div style="font-size:13px;font-weight:700;color:var(--c-navy-2);">Compétiteur</div><div style="font-size:10px;color:var(--c-muted);">Gamification, points, classement</div></div>
     </div>
     <div class="profil-choice" onclick="selectNewProfil('virginie')" id="pc-virginie">
       <div class="profil-choice-icon">🎯</div>
-      <div><div style="font-size:13px;font-weight:700;color:#533BB7;">Découverte</div><div style="font-size:10px;color:#5F5E5A;">Accompagnement, référent, FAQ</div></div>
+      <div><div style="font-size:13px;font-weight:700;color:var(--c-purple);">Découverte</div><div style="font-size:10px;color:var(--c-muted);">Accompagnement, référent, FAQ</div></div>
     </div>
     <div class="profil-choice" onclick="selectNewProfil('joel')" id="pc-joel">
       <div class="profil-choice-icon">🎯</div>
-      <div><div style="font-size:13px;font-weight:700;color:#3B6D11;">Expérimenté</div><div style="font-size:10px;color:#5F5E5A;">Interface simple, 3 boutons, référent</div></div>
+      <div><div style="font-size:13px;font-weight:700;color:var(--c-green);">Expérimenté</div><div style="font-size:10px;color:var(--c-muted);">Interface simple, 3 boutons, référent</div></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:12px;">
       <button class="btn btn-blue" style="flex:1;font-size:13px;" onclick="confirmChangeProfil()">Confirmer</button>
@@ -1219,8 +1220,8 @@ function renderMesPropositions(list) {
       return `
         <div class="histo-item" style="margin-bottom:6px;">
           <div style="flex:1;min-width:0;">
-            <div style="font-weight:600;color:#0C447C;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(p.titre)}</div>
-            ${p.pilote_message ? `<div style="font-size:9px;color:#5F5E5A;margin-top:2px;font-style:italic;">"${escapeHtml(p.pilote_message)}"</div>` : ''}
+            <div style="font-weight:600;color:var(--c-navy-2);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(p.titre)}</div>
+            ${p.pilote_message ? `<div style="font-size:9px;color:var(--c-muted);margin-top:2px;font-style:italic;">"${escapeHtml(p.pilote_message)}"</div>` : ''}
           </div>
           ${lbl}
         </div>`
@@ -1315,7 +1316,7 @@ function renderEmploi() {
     } else {
       // Annonce bénévole native → boutons mailto/tel/lien (comportement existant)
       if (a.contact_lien) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;" href="${escapeHtml(a.contact_lien)}" target="_blank" rel="noopener">🔗 Postuler</a>`)
-      if (a.contact_email) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;${contactBtns.length?'background:#3B6D11;':''}" href="mailto:${encodeURIComponent(a.contact_email)}">📧 Email</a>`)
+      if (a.contact_email) contactBtns.push(`<a class="btn btn-blue" style="font-size:12px;text-decoration:none;display:inline-block;${contactBtns.length?'background:var(--c-green);':''}" href="mailto:${encodeURIComponent(a.contact_email)}">📧 Email</a>`)
       if (a.contact_tel) {
         const cleaned = (a.contact_tel || '').replace(/[^\d+]/g, '')
         contactBtns.push(`<a class="btn btn-ghost" style="font-size:12px;text-decoration:none;display:inline-block;" href="tel:${cleaned}">📞 ${escapeHtml(a.contact_tel)}</a>`)
@@ -1385,8 +1386,8 @@ async function submitCandidature() {
   const message = document.getElementById('cand-message').value.trim()
   const cvUrl = document.getElementById('cand-cv-url').value.trim()
 
-  if (!prenom || !nom) { status.textContent = '⚠ Prénom et nom obligatoires'; status.style.color = '#993556'; return }
-  if (!email || !email.includes('@')) { status.textContent = '⚠ Email invalide'; status.style.color = '#993556'; return }
+  if (!prenom || !nom) { status.textContent = '⚠ Prénom et nom obligatoires'; status.style.color = 'var(--c-accent)'; return }
+  if (!email || !email.includes('@')) { status.textContent = '⚠ Email invalide'; status.style.color = 'var(--c-accent)'; return }
 
   btn.disabled = true
   btn.textContent = '⏳ Envoi en cours...'
@@ -1414,7 +1415,7 @@ async function submitCandidature() {
     if (!res.ok || json.error) throw new Error(json.error || `Erreur ${res.status}`)
 
     status.innerHTML = '✅ <b>Candidature envoyée !</b> Le partenaire sera notifié.'
-    status.style.color = '#3B6D11'
+    status.style.color = 'var(--c-green)'
     btn.textContent = '✓ Envoyée'
     showToast('🎉 Candidature envoyée au partenaire !', 'success')
     setTimeout(() => {
@@ -1425,7 +1426,7 @@ async function submitCandidature() {
   } catch (e) {
     console.error('submitCandidature error:', e)
     status.textContent = '❌ Erreur : ' + e.message
-    status.style.color = '#993556'
+    status.style.color = 'var(--c-accent)'
     btn.disabled = false
     btn.textContent = '📩 Envoyer ma candidature'
   }
@@ -1616,22 +1617,22 @@ function openPosteDetail(id) {
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:10px;">
       <div style="flex:1;min-width:0;">
         <div style="font-size:42px;line-height:1;">${icone}</div>
-        <div style="font-size:18px;font-weight:800;color:#0C447C;margin-top:8px;">${escapeHtml(nomClean)}</div>
+        <div style="font-size:18px;font-weight:800;color:var(--c-navy-2);margin-top:8px;">${escapeHtml(nomClean)}</div>
         <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
           ${p.difficulte ? `<span class="poste-difficulte ${diff}">${escapeHtml(p.difficulte)}</span>` : ''}
           <span class="poste-meta-info">⏱️ ~${p.heures_estimees||3}h</span>
           ${p.benevoles_max_match ? `<span class="poste-meta-info">👥 ${p.benevoles_max_match} bénévoles/match</span>` : ''}
         </div>
       </div>
-      <button onclick="closePosteDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
+      <button onclick="closePosteDetail()" style="border:none;background:var(--c-cream);width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
     </div>
-    ${p.description ? `<div style="font-size:12px;color:#1a1a18;line-height:1.7;margin-bottom:10px;">${escapeHtml(p.description)}</div>` : ''}
+    ${p.description ? `<div style="font-size:12px;color:var(--c-ink);line-height:1.7;margin-bottom:10px;">${escapeHtml(p.description)}</div>` : ''}
     ${videoId ? `
       <div class="poste-section-header">▶ VIDÉO DE PRÉSENTATION</div>
       <div class="poste-video-wrap">
         <iframe id="poste-video-iframe" src="https://www.youtube.com/embed/${videoId}" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </div>
-    ` : `<div style="background:#F1EFE8;border-radius:10px;padding:12px;text-align:center;color:#5F5E5A;font-size:11px;margin:14px 0;">📹 Vidéo de présentation bientôt disponible</div>`}
+    ` : `<div style="background:var(--c-cream);border-radius:10px;padding:12px;text-align:center;color:var(--c-muted);font-size:11px;margin:14px 0;">📹 Vidéo de présentation bientôt disponible</div>`}
     ${p.missions ? `
       <div class="poste-section-header">📋 MISSIONS</div>
       <div class="poste-section-body">${formatPosteText(p.missions)}</div>
@@ -1738,12 +1739,12 @@ function openToulouseDetail(id) {
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:10px;">
       <div style="flex:1;min-width:0;">
         <span class="tlse-cat tlse-cat-${cat}">${catLabel}</span>
-        <div style="font-size:18px;font-weight:800;color:#0C447C;margin-top:8px;line-height:1.3;">${escapeHtml(t.titre || '')}</div>
-        ${t.sous_titre ? `<div style="font-size:12px;color:#5F5E5A;margin-top:4px;">${escapeHtml(t.sous_titre)}</div>` : ''}
+        <div style="font-size:18px;font-weight:800;color:var(--c-navy-2);margin-top:8px;line-height:1.3;">${escapeHtml(t.titre || '')}</div>
+        ${t.sous_titre ? `<div style="font-size:12px;color:var(--c-muted);margin-top:4px;">${escapeHtml(t.sous_titre)}</div>` : ''}
       </div>
-      <button onclick="closeToulouseDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
+      <button onclick="closeToulouseDetail()" style="border:none;background:var(--c-cream);width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
     </div>
-    <div style="font-size:12px;color:#1a1a18;line-height:1.7;">${renderMarkdownLite(t.description || '')}</div>
+    <div style="font-size:12px;color:var(--c-ink);line-height:1.7;">${renderMarkdownLite(t.description || '')}</div>
     ${t.lien_externe ? `<a class="btn btn-blue" style="display:block;text-align:center;text-decoration:none;font-size:13px;margin-top:14px;" href="${escapeHtml(t.lien_externe)}" target="_blank" rel="noopener">🔗 Plus d'infos</a>` : ''}
     <button class="btn btn-ghost" style="font-size:13px;" onclick="closeToulouseDetail()">Fermer</button>
   `
@@ -1797,7 +1798,7 @@ function onEvCoverSelected(ev) {
   const prev = document.getElementById('ev-cover-preview')
   prev.style.display = 'block'
   prev.innerHTML = `
-    <div style="position:relative;border-radius:9px;overflow:hidden;border:1.5px solid #185FA5;">
+    <div style="position:relative;border-radius:9px;overflow:hidden;border:1.5px solid var(--c-action);">
       <img src="${url}" style="width:100%;height:140px;object-fit:cover;display:block;">
       <button type="button" onclick="clearEvCover()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50px;width:28px;height:28px;cursor:pointer;font-size:13px;line-height:1;">✕</button>
       <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top, rgba(0,0,0,0.6), transparent);color:white;padding:14px 10px 8px;font-size:10px;font-weight:600;">${file.name} · ${(file.size/1024/1024).toFixed(2)} Mo</div>
@@ -1864,7 +1865,7 @@ function renderEvenements() {
     const cnt = evInterets[e.id] || 0
     const coverUrl = getEventCoverUrl(e.cover_path)
     const heroAttrs = coverUrl
-      ? `class="ev-img" style="background:url('${coverUrl}') center/cover #0C447C;"`
+      ? `class="ev-img" style="background:url('${coverUrl}') center/cover var(--c-navy-2);"`
       : `class="ev-img ${EV_PH[e.categorie] || 'evph-convivial'}"`
     return `
       <div class="ev-card" onclick="openEvDetail('${e.id}')">
@@ -1900,7 +1901,7 @@ async function loadMesEvenements() {
       <div style="flex:1;min-width:0;">
         <div class="ev-mytitre">${escapeHtml(e.titre)}</div>
         <div class="ev-mymeta">${EV_CATLBL[e.categorie] || ''} · ${formatDate(e.date_event)}</div>
-        ${e.pilote_message ? `<div style="font-size:10px;color:#993556;margin-top:3px;font-style:italic;">"${escapeHtml(e.pilote_message)}"</div>` : ''}
+        ${e.pilote_message ? `<div style="font-size:10px;color:var(--c-accent);margin-top:3px;font-style:italic;">"${escapeHtml(e.pilote_message)}"</div>` : ''}
       </div>
       <span class="ev-st ev-st-${e.statut}">${lbl}</span>
     </div>`
@@ -1925,20 +1926,20 @@ function openEvDetail(id) {
   const moi = evMoi.has(id)
   const coverUrl = getEventCoverUrl(e.cover_path)
   const heroAttrs = coverUrl
-    ? `class="ev-hero" style="background:url('${coverUrl}') center/cover #0C447C;"`
+    ? `class="ev-hero" style="background:url('${coverUrl}') center/cover var(--c-navy-2);"`
     : `class="ev-hero ${EV_PH[e.categorie] || 'evph-convivial'}"`
   document.getElementById('modal-ev-detail-content').innerHTML = `
     <div ${heroAttrs}><span class="ev-cat cat-${e.categorie}">${EV_CATLBL[e.categorie] || escapeHtml(e.categorie)}</span></div>
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px;">
-      <div style="font-size:18px;font-weight:800;color:#0C447C;line-height:1.3;flex:1;">${escapeHtml(e.titre)}</div>
-      <button onclick="closeEvDetail()" style="border:none;background:#F1EFE8;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
+      <div style="font-size:18px;font-weight:800;color:var(--c-navy-2);line-height:1.3;flex:1;">${escapeHtml(e.titre)}</div>
+      <button onclick="closeEvDetail()" style="border:none;background:var(--c-cream);width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
     </div>
     <div class="ev-meta" style="font-size:12px;">📅 ${formatDate(e.date_event)}</div>
     ${e.lieu ? `<div class="ev-meta" style="font-size:12px;">📍 ${escapeHtml(e.lieu)}</div>` : ''}
     <div class="ev-meta" style="font-size:12px;margin-bottom:12px;">👤 Proposé par ${escapeHtml(e.organisateur_nom || 'Bénévole')}</div>
-    ${e.description ? `<p style="font-size:13px;line-height:1.7;color:#1a1a18;">${escapeHtml(e.description)}</p>` : ''}
+    ${e.description ? `<p style="font-size:13px;line-height:1.7;color:var(--c-ink);">${escapeHtml(e.description)}</p>` : ''}
     <div class="ev-interet-bar">
-      <span style="font-size:13px;font-weight:700;color:#0C447C;">✦ <span id="ev-cnt">${cnt}</span> intéressé${cnt > 1 ? 's' : ''}</span>
+      <span style="font-size:13px;font-weight:700;color:var(--c-navy-2);">✦ <span id="ev-cnt">${cnt}</span> intéressé${cnt > 1 ? 's' : ''}</span>
       <button class="ev-heart ${moi ? 'on' : ''}" id="ev-heart" onclick="toggleEvInteret('${e.id}')">${moi ? '✓ Intéressé(e)' : "Ça m'intéresse"}</button>
     </div>
     ${e.google_form_url ? `<a class="btn btn-blue" style="display:block;text-align:center;text-decoration:none;font-size:13px;margin-bottom:8px;" href="${escapeHtml(e.google_form_url)}" target="_blank" rel="noopener">🔗 Lien d'inscription</a>` : ''}
@@ -1957,7 +1958,7 @@ let _evPhotosCache = {}  // eventId -> [photos avec _signedUrl]
 async function renderEventPhotosSection(eventId) {
   const el = document.getElementById('ev-photos-section')
   if (!el) return
-  el.innerHTML = `<div style="font-size:11px;color:#5F5E5A;text-align:center;padding:14px;">â³ Chargement des photos...</div>`
+  el.innerHTML = `<div style="font-size:11px;color:var(--c-muted);text-align:center;padding:14px;">â³ Chargement des photos...</div>`
 
   try {
     const { data: photos, error } = await sb.from('events_photos')
@@ -1980,19 +1981,19 @@ async function renderEventPhotosSection(eventId) {
     _evPhotosCache[eventId] = photos || []
 
     let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:700;color:#0C447C;">ðŸ“¸ Photos de l'Ã©vÃ©nement</div>
+      <div style="font-size:13px;font-weight:700;color:var(--c-navy-2);">ðŸ“¸ Photos de l'Ã©vÃ©nement</div>
       <button class="btn btn-blue" style="font-size:11px;padding:6px 12px;width:auto;margin-top:0;" onclick="triggerEventPhotoUpload('${eventId}')">ðŸ“· Ajouter</button>
     </div>`
 
     if (!photos || photos.length === 0) {
-      html += `<div style="background:#F1EFE8;border-radius:10px;padding:14px;text-align:center;font-size:11px;color:#5F5E5A;line-height:1.6;">
+      html += `<div style="background:var(--c-cream);border-radius:10px;padding:14px;text-align:center;font-size:11px;color:var(--c-muted);line-height:1.6;">
         Aucune photo pour l'instant.<br>Sois le premier Ã  partager tes photos !
       </div>`
     } else {
       html += `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">`
       photos.forEach(p => {
         if (!p._signedUrl) return
-        html += `<div style="position:relative;aspect-ratio:1/1;border-radius:8px;overflow:hidden;background:#E6F1FB;cursor:pointer;" onclick="openEventPhotoLightbox('${p.id}')">
+        html += `<div style="position:relative;aspect-ratio:1/1;border-radius:8px;overflow:hidden;background:var(--c-blue-50);cursor:pointer;" onclick="openEventPhotoLightbox('${p.id}')">
           <img src="${p._signedUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
           <button onclick="event.stopPropagation();openReportPhotoModal('${p.id}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.55);color:white;border:none;border-radius:50%;width:26px;height:26px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;" title="Signaler cette photo">🚩</button>
         </div>`
@@ -2342,31 +2343,31 @@ function renderIdees() {
     let badges = ''
     if (ideesView === 'mes') {
       if (p.visible_forum && p.visible_pilotes) {
-        badges += '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#EDE9FE;color:#533BB7;">🎯 Pilotes + 💬 Public</span>'
+        badges += '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:var(--c-purple-50);color:var(--c-purple);">🎯 Pilotes + 💬 Public</span>'
       } else if (p.visible_pilotes) {
-        badges += '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#FEF3C7;color:#C9821A;">🎯 Privé pilotes</span>'
+        badges += '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:var(--c-gold-50);color:var(--c-amber);">🎯 Privé pilotes</span>'
       } else if (p.visible_forum) {
-        badges += '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#E6F1FB;color:#185FA5;">💬 Public</span>'
+        badges += '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:var(--c-blue-50);color:var(--c-action);">💬 Public</span>'
       }
       if (p.visible_pilotes) {
         badges += p.lu_par_pilote
-          ? '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#EAF3DE;color:#3B6D11;">✓ Lu par pilote</span>'
-          : '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#F1EFE8;color:#5F5E5A;">⏳ En attente</span>'
+          ? '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:var(--c-green-50);color:var(--c-green);">✓ Lu par pilote</span>'
+          : '<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:var(--c-cream);color:var(--c-muted);">⏳ En attente</span>'
       }
     }
 
     const author = (ideesView === 'forum' && p.auteur)
-      ? `<div style="font-size:10px;color:#5F5E5A;margin-top:4px;">👤 ${escapeHtml(((p.auteur.prenom||'') + ' ' + ((p.auteur.nom||'')[0] || '') + '.').trim())}</div>`
+      ? `<div style="font-size:10px;color:var(--c-muted);margin-top:4px;">👤 ${escapeHtml(((p.auteur.prenom||'') + ' ' + ((p.auteur.nom||'')[0] || '') + '.').trim())}</div>`
       : ''
 
     return `
       <div style="background:white;border-radius:14px;padding:13px;margin-bottom:8px;">
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-          <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:#F1EFE8;color:#0C447C;">${escapeHtml(tagLbl)}</span>
+          <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:50px;background:var(--c-cream);color:var(--c-navy-2);">${escapeHtml(tagLbl)}</span>
           ${badges}
         </div>
-        <div style="font-size:12.5px;color:#1a1a18;line-height:1.6;white-space:pre-wrap;">${escapeHtml(contenu)}</div>
-        <div style="font-size:10px;color:#5F5E5A;margin-top:6px;">🕐 ${date}</div>
+        <div style="font-size:12.5px;color:var(--c-ink);line-height:1.6;white-space:pre-wrap;">${escapeHtml(contenu)}</div>
+        <div style="font-size:10px;color:var(--c-muted);margin-top:6px;">🕐 ${date}</div>
         ${author}
       </div>`
   }).join('')
@@ -2477,7 +2478,7 @@ async function loadInstaFeed() {
     }).join('')
   } catch (err) {
     console.error('[insta-feed]', err)
-    grid.innerHTML = '<div class="spi-empty">Suivez-nous sur <a href="https://instagram.com/spacerstoulouse" target="_blank" style="color:#185FA5;font-weight:600;">@spacerstoulouse</a></div>'
+    grid.innerHTML = '<div class="spi-empty">Suivez-nous sur <a href="https://instagram.com/spacerstoulouse" target="_blank" style="color:var(--c-action);font-weight:600;">@spacerstoulouse</a></div>'
   }
 }
 
@@ -2539,22 +2540,22 @@ function showQuizAgain() {
 function showProfilResult() {
   const configs = {
     hugo: {
-      icon:'⚡', bg:'linear-gradient(135deg,#E6F1FB,#B5D4F4)',
-      tag:'PROFIL COMPÉTITEUR', tagBg:'#E6F1FB', tagColor:'#0C447C',
+      icon:'⚡', bg:'linear-gradient(135deg,var(--c-blue-50),var(--c-blue-100))',
+      tag:'PROFIL COMPÉTITEUR', tagBg:'var(--c-blue-50)', tagColor:'var(--c-navy-2)',
       name:'Compétiteur', emoji:'🏆',
       desc:'Vous adorez les défis et la compétition ! Votre dashboard met en avant vos points, votre classement et vos badges. Chaque match est une nouvelle opportunité de progresser.',
       traits:['⚡ Gamification complète activée','🏆 Classement en temps réel','🎯 Défis et badges personnalisés','📊 Stats détaillées']
     },
     virginie: {
-      icon:'🌸', bg:'linear-gradient(135deg,#EDE9FE,#DDD6FE)',
-      tag:'PROFIL DÉCOUVERTE', tagBg:'#EDE9FE', tagColor:'#533BB7',
+      icon:'🌸', bg:'linear-gradient(135deg,var(--c-purple-50),#DDD6FE)',
+      tag:'PROFIL DÉCOUVERTE', tagBg:'var(--c-purple-50)', tagColor:'var(--c-purple)',
       name:'Découverte', emoji:'🤝',
       desc:'Bienvenue dans l\'aventure ! Un référent va vous être assigné pour vous guider à chaque étape. Votre dashboard est pensé pour vous accompagner en douceur.',
       traits:['🤝 Référent assigné automatiquement','📖 Guide pas à pas intégré','💡 FAQ pratique accessible','💜 Interface douce et rassurante']
     },
     joel: {
-      icon:'🎯', bg:'linear-gradient(135deg,#EAF3DE,#C0DD97)',
-      tag:'PROFIL EXPÉRIMENTÉ', tagBg:'#EAF3DE', tagColor:'#3B6D11',
+      icon:'🎯', bg:'linear-gradient(135deg,var(--c-green-50),var(--c-green-light))',
+      tag:'PROFIL EXPÉRIMENTÉ', tagBg:'var(--c-green-50)', tagColor:'var(--c-green)',
       name:'Expérimenté', emoji:'💪',
       desc:'Vous connaissez le terrain ! Votre interface est épurée avec les 3 boutons essentiels. Vous pouvez aussi partager votre savoir-faire avec les nouveaux bénévoles.',
       traits:['⚡ Interface 3 boutons streamlinée','📋 Planning & dispos en 1 tap','📝 Section "Transmettre" activée','🏅 Rôle référent reconnu']
@@ -2663,8 +2664,8 @@ function renderNextMatchSection() {
 
   if (insc) {
     const isDispo = insc.statut === 'disponible'
-    const bg = isDispo ? 'linear-gradient(135deg,#EAF3DE,#C0DD97)' : 'linear-gradient(135deg,#F1EFE8,#D3D1C7)'
-    const fg = isDispo ? '#3B6D11' : '#5F5E5A'
+    const bg = isDispo ? 'linear-gradient(135deg,var(--c-green-50),var(--c-green-light))' : 'linear-gradient(135deg,var(--c-cream),var(--c-line))'
+    const fg = isDispo ? 'var(--c-green)' : 'var(--c-muted)'
     const icon = isDispo ? '✓' : '✗'
     const label = isDispo ? 'Tu as répondu : Disponible' : 'Tu as répondu : Indisponible'
     return `
@@ -2680,12 +2681,12 @@ function renderNextMatchSection() {
   }
 
   return `
-    <div style="background:linear-gradient(135deg,#0C447C,#185FA5);border-radius:14px;padding:14px;margin-bottom:10px;color:white;">
-      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#F5C842;margin-bottom:3px;">🏐 PROCHAIN MATCH — Es-tu dispo ?</div>
+    <div style="background:linear-gradient(135deg,var(--c-navy-2),var(--c-action));border-radius:14px;padding:14px;margin-bottom:10px;color:white;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-gold);margin-bottom:3px;">🏐 PROCHAIN MATCH — Es-tu dispo ?</div>
       <div style="font-size:16px;font-weight:800;margin-bottom:4px;">Spacers vs ${escapeHtml(m.adversaire)}</div>
       <div style="font-size:11px;color:rgba(181,212,244,0.85);margin-bottom:12px;">📅 ${escapeHtml(dateStr)}${heureStr ? ' · ' + escapeHtml(heureStr) : ''} · ${escapeHtml(lieuStr)}</div>
       <div style="display:flex;gap:8px;">
-        <button class="btn" style="flex:1;background:#3B6D11;color:white;font-size:13px;padding:10px;border-radius:50px;border:none;font-family:'Sora',sans-serif;font-weight:700;cursor:pointer;" onclick="setDispoFromHome('${m.id}','disponible')">👍 Je suis dispo</button>
+        <button class="btn" style="flex:1;background:var(--c-green);color:white;font-size:13px;padding:10px;border-radius:50px;border:none;font-family:'Sora',sans-serif;font-weight:700;cursor:pointer;" onclick="setDispoFromHome('${m.id}','disponible')">👍 Je suis dispo</button>
         <button class="btn" style="flex:1;background:rgba(255,255,255,0.15);color:white;font-size:13px;padding:10px;border-radius:50px;border:none;font-family:'Sora',sans-serif;font-weight:700;cursor:pointer;" onclick="setDispoFromHome('${m.id}','indisponible')">👎 Indispo</button>
       </div>
     </div>`
@@ -2709,13 +2710,13 @@ function openSignalIndispoModal(matchId) {
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px;'
   ov.innerHTML =
     '<div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:22px;font-family:Sora,sans-serif;box-sizing:border-box;">'
-    + '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#993556;margin-bottom:6px;">&Agrave; moins de 48&nbsp;h</div>'
-    + '<div style="font-size:18px;font-weight:800;color:#1a1a18;margin-bottom:8px;">Tu ne peux plus te d&eacute;sister seul</div>'
-    + '<div style="font-size:13px;color:#5F5E5A;line-height:1.6;margin-bottom:14px;">On est &agrave; moins de 48&nbsp;h du match. Pr&eacute;viens les pilotes : ils chercheront un rempla&ccedil;ant. Tu peux expliquer (optionnel).</div>'
+    + '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--c-accent);margin-bottom:6px;">&Agrave; moins de 48&nbsp;h</div>'
+    + '<div style="font-size:18px;font-weight:800;color:var(--c-ink);margin-bottom:8px;">Tu ne peux plus te d&eacute;sister seul</div>'
+    + '<div style="font-size:13px;color:var(--c-muted);line-height:1.6;margin-bottom:14px;">On est &agrave; moins de 48&nbsp;h du match. Pr&eacute;viens les pilotes : ils chercheront un rempla&ccedil;ant. Tu peux expliquer (optionnel).</div>'
     + '<textarea id="signal-indispo-msg" placeholder="Ex : emp&ecirc;chement de derni&egrave;re minute..." style="width:100%;min-height:80px;border:1px solid #ddd;border-radius:10px;padding:10px;font-family:Sora,sans-serif;font-size:13px;box-sizing:border-box;"></textarea>'
     + '<div style="display:flex;gap:8px;margin-top:14px;">'
     + '<button id="signal-indispo-cancel" style="flex:1;background:#eee;color:#333;border:none;border-radius:50px;padding:12px;font-family:Sora,sans-serif;font-weight:700;cursor:pointer;">Annuler</button>'
-    + '<button id="signal-indispo-send" style="flex:1;background:#993556;color:#fff;border:none;border-radius:50px;padding:12px;font-family:Sora,sans-serif;font-weight:700;cursor:pointer;">Pr&eacute;venir les pilotes</button>'
+    + '<button id="signal-indispo-send" style="flex:1;background:var(--c-accent);color:#fff;border:none;border-radius:50px;padding:12px;font-family:Sora,sans-serif;font-weight:700;cursor:pointer;">Pr&eacute;venir les pilotes</button>'
     + '</div></div>'
   document.body.appendChild(ov)
   ov.addEventListener('click', function(e){ if (e.target === ov) ov.remove() })
@@ -2777,10 +2778,10 @@ function renderEtapesSection() {
   const allDone = etapes.every(e => e.done)
   if (allDone) {
     return `
-    <div style="background:linear-gradient(135deg,#EAF3DE,#C0DD97);border-radius:14px;padding:14px;margin-bottom:10px;text-align:center;">
+    <div style="background:linear-gradient(135deg,var(--c-green-50),var(--c-green-light));border-radius:14px;padding:14px;margin-bottom:10px;text-align:center;">
       <div style="font-size:24px;line-height:1;margin-bottom:6px;">🎉</div>
-      <div style="font-size:14px;font-weight:800;color:#3B6D11;margin-bottom:3px;">Tu es opérationnel(le) !</div>
-      <div style="font-size:11px;color:#3B6D11;">Continue à monter en niveau dans tes points.</div>
+      <div style="font-size:14px;font-weight:800;color:var(--c-green);margin-bottom:3px;">Tu es opérationnel(le) !</div>
+      <div style="font-size:11px;color:var(--c-green);">Continue à monter en niveau dans tes points.</div>
     </div>`
   }
 
@@ -2790,8 +2791,8 @@ function renderEtapesSection() {
       ${etapes.map(e=>`
         <div class="etape-item" ${!e.done && e.action ? `style="cursor:pointer;" onclick="bSwitch('${e.action}')"` : ''}>
           <div class="etape-num ${e.done?'etape-done':''}">${e.done?'✓':'→'}</div>
-          <div style="font-size:12px;color:${e.done?'#5F5E5A':'#1a1a18'};font-weight:${e.done?'400':'600'};${e.done?'text-decoration:line-through;text-decoration-color:#C0DD97;':''}flex:1;">${escapeHtml(e.txt)}</div>
-          ${!e.done && e.action ? '<span style="font-size:14px;color:#533BB7;">›</span>' : ''}
+          <div style="font-size:12px;color:${e.done?'var(--c-muted)':'var(--c-ink)'};font-weight:${e.done?'400':'600'};${e.done?'text-decoration:line-through;text-decoration-color:var(--c-green-light);':''}flex:1;">${escapeHtml(e.txt)}</div>
+          ${!e.done && e.action ? '<span style="font-size:14px;color:var(--c-purple);">›</span>' : ''}
         </div>`).join('')}
     </div>`
 }
@@ -3012,14 +3013,14 @@ function renderAppelsSection(){
     const dateStr = m.date_mission ? new Date(m.date_mission+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}) : 'Date &agrave; d&eacute;finir';
     const heureStr = m.heure_rdv ? (' &middot; RDV ' + m.heure_rdv.slice(0,5)) : '';
     const lieuStr = m.lieu ? (' &middot; ' + escapeHtml(m.lieu)) : '';
-    const objs = (m.objectifs||[]).slice(0,5).map(function(o){ return '<span style="display:inline-block;background:#EEF3F9;color:#0C447C;border-radius:6px;padding:2px 8px;font-size:10px;margin:3px 3px 0 0;">'+escapeHtml(o)+'</span>'; }).join('');
+    const objs = (m.objectifs||[]).slice(0,5).map(function(o){ return '<span style="display:inline-block;background:#EEF3F9;color:var(--c-navy-2);border-radius:6px;padding:2px 8px;font-size:10px;margin:3px 3px 0 0;">'+escapeHtml(o)+'</span>'; }).join('');
     const btn = joined
-      ? '<button onclick="toggleAppel(\''+m.id+'\',true)" style="width:100%;margin-top:10px;background:#EAF3DE;color:#3B6D11;border:none;border-radius:50px;padding:9px;font-family:\'Sora\',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">&#10003; Inscrit &middot; me d&eacute;sister</button>'
-      : '<button onclick="toggleAppel(\''+m.id+'\',false)" style="width:100%;margin-top:10px;background:#185FA5;color:white;border:none;border-radius:50px;padding:9px;font-family:\'Sora\',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">Je participe &#128588;</button>';
+      ? '<button onclick="toggleAppel(\''+m.id+'\',true)" style="width:100%;margin-top:10px;background:var(--c-green-50);color:var(--c-green);border:none;border-radius:50px;padding:9px;font-family:\'Sora\',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">&#10003; Inscrit &middot; me d&eacute;sister</button>'
+      : '<button onclick="toggleAppel(\''+m.id+'\',false)" style="width:100%;margin-top:10px;background:var(--c-action);color:white;border:none;border-radius:50px;padding:9px;font-family:\'Sora\',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">Je participe &#128588;</button>';
     return '<div style="background:white;border-radius:12px;padding:13px;margin-bottom:8px;">'+
-      '<div style="font-size:13px;font-weight:800;color:#0C447C;margin-bottom:3px;">'+escapeHtml(m.titre)+'</div>'+
-      '<div style="font-size:11px;color:#5F5E5A;margin-bottom:6px;">&#128197; '+dateStr+heureStr+lieuStr+'</div>'+
-      (m.description?'<div style="font-size:12px;color:#5F5E5A;margin-bottom:6px;white-space:pre-line;">'+escapeHtml(m.description)+'</div>':'')+
+      '<div style="font-size:13px;font-weight:800;color:var(--c-navy-2);margin-bottom:3px;">'+escapeHtml(m.titre)+'</div>'+
+      '<div style="font-size:11px;color:var(--c-muted);margin-bottom:6px;">&#128197; '+dateStr+heureStr+lieuStr+'</div>'+
+      (m.description?'<div style="font-size:12px;color:var(--c-muted);margin-bottom:6px;white-space:pre-line;">'+escapeHtml(m.description)+'</div>':'')+
       (objs?'<div style="margin-bottom:2px;">'+objs+'</div>':'')+
       (m.places_max?'<div style="font-size:10px;color:#8A9BAD;margin-top:7px;">Recherche '+m.places_max+' b&eacute;n&eacute;vole'+(m.places_max>1?'s':'')+'</div>':'')+
       btn+
@@ -3058,16 +3059,16 @@ function renderParrainageCard(){
   const nb = recrues.length;
   const actifs = recrues.filter(function(r){ return r.credite; }).length;
   const chips = nb
-    ? recrues.map(function(r){ const nm = ((r.prenom||'') + ' ' + ((r.nom||'').slice(0,1)) + (r.nom?'.':'')).trim(); return '<span style="display:inline-block;background:#EEF3F9;color:#0C447C;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600;">' + escapeHtml(nm||'Recrue') + (r.credite?' &#10003;':'') + '</span>'; }).join('')
+    ? recrues.map(function(r){ const nm = ((r.prenom||'') + ' ' + ((r.nom||'').slice(0,1)) + (r.nom?'.':'')).trim(); return '<span style="display:inline-block;background:#EEF3F9;color:var(--c-navy-2);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600;">' + escapeHtml(nm||'Recrue') + (r.credite?' &#10003;':'') + '</span>'; }).join('')
     : '<div style="font-size:12px;color:#8A9BAD;font-style:italic;">Aucune recrue pour l\'instant — partage ton lien !</div>';
   return '<div style="background:white;border-radius:16px;padding:16px;margin-bottom:10px;">' +
-    '<div style="font-size:13px;font-weight:800;color:#0C447C;margin-bottom:3px;">&#129309; Parraine tes amis</div>' +
-    '<div style="font-size:11px;color:#5F5E5A;margin-bottom:12px;line-height:1.5;">Partage ton lien : quand ta recrue fait sa 1&egrave;re pr&eacute;sence, tu gagnes 100 pts.</div>' +
+    '<div style="font-size:13px;font-weight:800;color:var(--c-navy-2);margin-bottom:3px;">&#129309; Parraine tes amis</div>' +
+    '<div style="font-size:11px;color:var(--c-muted);margin-bottom:12px;line-height:1.5;">Partage ton lien : quand ta recrue fait sa 1&egrave;re pr&eacute;sence, tu gagnes 100 pts.</div>' +
     '<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">' +
-      '<input id="parrain-link" readonly value="' + link + '" style="flex:1;min-width:0;background:#F4F7FB;border:1px solid #E2E8F0;border-radius:8px;padding:9px 12px;font-size:11px;color:#5F5E5A;">' +
-      '<button onclick="copyParrainLink()" style="background:#185FA5;color:white;border:none;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Copier</button>' +
+      '<input id="parrain-link" readonly value="' + link + '" style="flex:1;min-width:0;background:#F4F7FB;border:1px solid #E2E8F0;border-radius:8px;padding:9px 12px;font-size:11px;color:var(--c-muted);">' +
+      '<button onclick="copyParrainLink()" style="background:var(--c-action);color:white;border:none;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Copier</button>' +
     '</div>' +
-    '<div style="font-size:11px;font-weight:700;color:#0C447C;margin-bottom:7px;">' + nb + ' recrue' + (nb>1?'s':'') + (nb?(' &middot; ' + actifs + ' ayant d&eacute;j&agrave; particip&eacute;'):'') + '</div>' +
+    '<div style="font-size:11px;font-weight:700;color:var(--c-navy-2);margin-bottom:7px;">' + nb + ' recrue' + (nb>1?'s':'') + (nb?(' &middot; ' + actifs + ' ayant d&eacute;j&agrave; particip&eacute;'):'') + '</div>' +
     '<div style="display:flex;flex-wrap:wrap;gap:5px;">' + chips + '</div>' +
   '</div>';
 }
@@ -3111,16 +3112,16 @@ function openGuideBenev(){
 function showGbStep(){
   var s = GUIDE_STEPS_B[_gbIdx];
   var tip = document.getElementById('gb-tip');
-  var dots = GUIDE_STEPS_B.map(function(_, i){ return '<div style="width:'+(i===_gbIdx?'20px':'6px')+';height:6px;border-radius:50px;background:'+(i===_gbIdx?'#042C53':'#D6E0EA')+';transition:all .2s;"></div>'; }).join('');
+  var dots = GUIDE_STEPS_B.map(function(_, i){ return '<div style="width:'+(i===_gbIdx?'20px':'6px')+';height:6px;border-radius:50px;background:'+(i===_gbIdx?'var(--c-navy)':'#D6E0EA')+';transition:all .2s;"></div>'; }).join('');
   var html = '<div style="display:flex;gap:5px;margin-bottom:12px;">'+dots+'</div>'
     + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><div style="font-size:30px;line-height:1;">'+s.ic+'</div>'
-    + '<div><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#0C447C;opacity:.7;">&Eacute;tape '+(_gbIdx+1)+' / '+GUIDE_STEPS_B.length+'</div>'
-    + '<div style="font-size:16px;font-weight:800;color:#042C53;">'+s.tt+'</div></div></div>'
+    + '<div><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-navy-2);opacity:.7;">&Eacute;tape '+(_gbIdx+1)+' / '+GUIDE_STEPS_B.length+'</div>'
+    + '<div style="font-size:16px;font-weight:800;color:var(--c-navy);">'+s.tt+'</div></div></div>'
     + '<div style="font-size:13px;line-height:1.55;color:#3A4A5A;">'+s.quoi+'</div>';
-  if(s.pourquoi){ html += '<div style="margin-top:12px;background:#FFF7E0;border-left:3px solid #F5C842;border-radius:8px;padding:9px 11px;"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#B8860B;margin-bottom:2px;">&#128161; Pourquoi</div><div style="font-size:12px;line-height:1.5;color:#5F5E5A;">'+s.pourquoi+'</div></div>'; }
+  if(s.pourquoi){ html += '<div style="margin-top:12px;background:#FFF7E0;border-left:3px solid var(--c-gold);border-radius:8px;padding:9px 11px;"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#B8860B;margin-bottom:2px;">&#128161; Pourquoi</div><div style="font-size:12px;line-height:1.5;color:var(--c-muted);">'+s.pourquoi+'</div></div>'; }
   html += '<div style="display:flex;gap:8px;margin-top:16px;">'
-    + '<button style="flex:1;'+(_gbIdx===0?'visibility:hidden;':'')+'background:#EAF0F6;color:#042C53;border:none;border-radius:50px;padding:11px;font-family:\'Sora\',sans-serif;font-weight:700;font-size:13px;cursor:pointer;" onclick="guideBPrev()">Précédent</button>'
-    + '<button style="flex:2;background:#042C53;color:#fff;border:none;border-radius:50px;padding:11px;font-family:\'Sora\',sans-serif;font-weight:700;font-size:13px;cursor:pointer;" onclick="guideBNext()">'+(_gbIdx===GUIDE_STEPS_B.length-1?'C\'est parti !':'Suivant')+'</button>'
+    + '<button style="flex:1;'+(_gbIdx===0?'visibility:hidden;':'')+'background:#EAF0F6;color:var(--c-navy);border:none;border-radius:50px;padding:11px;font-family:\'Sora\',sans-serif;font-weight:700;font-size:13px;cursor:pointer;" onclick="guideBPrev()">Précédent</button>'
+    + '<button style="flex:2;background:var(--c-navy);color:#fff;border:none;border-radius:50px;padding:11px;font-family:\'Sora\',sans-serif;font-weight:700;font-size:13px;cursor:pointer;" onclick="guideBNext()">'+(_gbIdx===GUIDE_STEPS_B.length-1?'C\'est parti !':'Suivant')+'</button>'
     + '</div>'
     + '<div style="text-align:center;margin-top:9px;"><span onclick="closeGuideBenev()" style="font-size:11px;color:#8A9BAD;cursor:pointer;text-decoration:underline;">Passer le guide</span></div>';
   tip.innerHTML = html;
@@ -3145,7 +3146,7 @@ function _gbReposition(){
   setTimeout(function(){
     var r = el.getBoundingClientRect();
     var pad = 6;
-    hole.style.border='2px solid #F5C842';
+    hole.style.border='2px solid var(--c-gold)';
     hole.style.left=(r.left-pad)+'px';
     hole.style.top=(r.top-pad)+'px';
     hole.style.width=(r.width+pad*2)+'px';
@@ -3185,9 +3186,9 @@ async function showApp(p) {
 function renderTopbar(p) {
   const name = ((p.prenom||'')+' '+(p.nom||'')).trim() || CU.email
   const profilCfg = {
-    hugo:    {label:'COMPÉTITEUR', bg:'#E6F1FB', color:'#0C447C'},
-    virginie:{label:'DÉCOUVERTE',  bg:'#EDE9FE', color:'#533BB7'},
-    joel:    {label:'EXPÉRIMENTÉ', bg:'#EAF3DE', color:'#3B6D11'},
+    hugo:    {label:'COMPÉTITEUR', bg:'var(--c-blue-50)', color:'var(--c-navy-2)'},
+    virginie:{label:'DÉCOUVERTE',  bg:'var(--c-purple-50)', color:'var(--c-purple)'},
+    joel:    {label:'EXPÉRIMENTÉ', bg:'var(--c-green-50)', color:'var(--c-green)'},
   }
   const cfg = profilCfg[p.profil_type||'hugo']
   document.getElementById('t-name').textContent = name
@@ -3263,13 +3264,13 @@ function renderHugoHome(el, p, pts, niveau, pct) { const _pi = palierInfo(pts);
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
       <div style="background:white;border-radius:14px;padding:13px;cursor:pointer;" onclick="bSwitch('planning')">
         <div style="font-size:22px;margin-bottom:5px;">🏆</div>
-        <div style="font-size:12px;font-weight:700;color:#0C447C;">Planning</div>
-        <div style="font-size:10px;color:#5F5E5A;">Matchs ouverts</div>
+        <div style="font-size:12px;font-weight:700;color:var(--c-navy-2);">Planning</div>
+        <div style="font-size:10px;color:var(--c-muted);">Matchs ouverts</div>
       </div>
       <div style="background:white;border-radius:14px;padding:13px;cursor:pointer;" onclick="bSwitch('points')">
         <div style="font-size:22px;margin-bottom:5px;">🏆</div>
-        <div style="font-size:12px;font-weight:700;color:#0C447C;">Classement</div>
-        <div style="font-size:10px;color:#185FA5;font-weight:600;">Voir mon rang</div>
+        <div style="font-size:12px;font-weight:700;color:var(--c-navy-2);">Classement</div>
+        <div style="font-size:10px;color:var(--c-action);font-weight:600;">Voir mon rang</div>
       </div>
     </div>
     ${renderDecouverteSection()}
@@ -3281,7 +3282,7 @@ function renderVirginieHome(el, p) {
   el.innerHTML = `
     <div class="bienvenue-card">
       <div style="font-size:20px;margin-bottom:6px;">👋</div>
-      <div style="font-size:16px;font-weight:800;color:#533BB7;">Bonjour ${p.prenom||''} !</div>
+      <div style="font-size:16px;font-weight:800;color:var(--c-purple);">Bonjour ${p.prenom||''} !</div>
       <div style="font-size:12px;color:#6D5DAA;margin-top:4px;line-height:1.6;">Vous faites partie des Spacers — voici comment tout se passe ici.</div>
     </div>
 
@@ -3315,19 +3316,19 @@ function renderJoelHome(el, p, pts) {
     ${renderParrainageCard()}
 
     <div class="joel-btn" onclick="bSwitch('planning')">
-      <div class="joel-btn-icon" style="background:#E6F1FB;">📅</div>
+      <div class="joel-btn-icon" style="background:var(--c-blue-50);">📅</div>
       <div><div class="joel-btn-title">Planning & Disponibilités</div><div class="joel-btn-sub">Consulter et répondre aux matchs</div></div>
-      <div style="font-size:18px;color:#D3D1C7;">›</div>
+      <div style="font-size:18px;color:var(--c-line);">›</div>
     </div>
     <div class="joel-btn" onclick="bSwitch('points')">
-      <div class="joel-btn-icon" style="background:#EAF3DE;">🏆</div>
+      <div class="joel-btn-icon" style="background:var(--c-green-50);">🏆</div>
       <div><div class="joel-btn-title">Points & Badges</div><div class="joel-btn-sub">${pts} pts cette saison</div></div>
-      <div style="font-size:18px;color:#D3D1C7;">›</div>
+      <div style="font-size:18px;color:var(--c-line);">›</div>
     </div>
     <div class="joel-btn" onclick="bSwitch('profil')">
-      <div class="joel-btn-icon" style="background:#F1EFE8;">👤</div>
+      <div class="joel-btn-icon" style="background:var(--c-cream);">👤</div>
       <div><div class="joel-btn-title">Mon profil</div><div class="joel-btn-sub">Infos et accréditation</div></div>
-      <div style="font-size:18px;color:#D3D1C7;">›</div>
+      <div style="font-size:18px;color:var(--c-line);">›</div>
     </div>
 
     ${renderDecouverteSection()}
@@ -3364,30 +3365,30 @@ function renderDecouverteSection() {
 
 function renderSuggestionSection(profilType) {
   const cfg = {
-    hugo:    {bg:'linear-gradient(135deg,#0C447C,#185FA5)', sub:'rgba(181,212,244,0.75)'},
-    virginie:{bg:'linear-gradient(135deg,#3a1a5e,#533BB7)', sub:'rgba(221,214,254,0.75)'},
-    joel:    {bg:'linear-gradient(135deg,#1a3d2e,#3B6D11)', sub:'rgba(192,221,151,0.75)'},
-  }[profilType] || {bg:'linear-gradient(135deg,#0C447C,#185FA5)', sub:'rgba(181,212,244,0.75)'}
+    hugo:    {bg:'linear-gradient(135deg,var(--c-navy-2),var(--c-action))', sub:'rgba(181,212,244,0.75)'},
+    virginie:{bg:'linear-gradient(135deg,#3a1a5e,var(--c-purple))', sub:'rgba(221,214,254,0.75)'},
+    joel:    {bg:'linear-gradient(135deg,#1a3d2e,var(--c-green))', sub:'rgba(192,221,151,0.75)'},
+  }[profilType] || {bg:'linear-gradient(135deg,var(--c-navy-2),var(--c-action))', sub:'rgba(181,212,244,0.75)'}
 
   return `
     <div class="transmettre-card" style="background:${cfg.bg};">
       <div style="font-size:13px;font-weight:700;color:white;margin-bottom:6px;">💡 Améliorer l'expérience bénévole</div>
       <div style="font-size:11px;color:${cfg.sub};margin-bottom:10px;line-height:1.6;">Partage tes suggestions, retours, idées pour améliorer le club.</div>
       <select id="sugg-tag" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:9px 10px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:8px;cursor:pointer;">
-        <option value="jour_match" style="color:#1a1a18;">📅 Jour de match</option>
-        <option value="hors_match" style="color:#1a1a18;">🏠 Hors-match</option>
-        <option value="accueil" style="color:#1a1a18;">👋 Accueil bénévoles</option>
-        <option value="application" style="color:#1a1a18;">📱 Application</option>
-        <option value="autre" style="color:#1a1a18;">💭 Autre</option>
+        <option value="jour_match" style="color:var(--c-ink);">📅 Jour de match</option>
+        <option value="hors_match" style="color:var(--c-ink);">🏠 Hors-match</option>
+        <option value="accueil" style="color:var(--c-ink);">👋 Accueil bénévoles</option>
+        <option value="application" style="color:var(--c-ink);">📱 Application</option>
+        <option value="autre" style="color:var(--c-ink);">💭 Autre</option>
       </select>
       <textarea class="note-area" id="sugg-txt" placeholder="Suggestion, retour, idée d'amélioration..."></textarea>
       <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;">
         <label style="display:flex;align-items:center;gap:6px;color:white;font-size:11px;cursor:pointer;">
-          <input type="checkbox" id="cb-forum" checked style="cursor:pointer;width:15px;height:15px;accent-color:#185FA5;">
+          <input type="checkbox" id="cb-forum" checked style="cursor:pointer;width:15px;height:15px;accent-color:var(--c-action);">
           💬 Visible par tous
         </label>
         <label style="display:flex;align-items:center;gap:6px;color:white;font-size:11px;cursor:pointer;">
-          <input type="checkbox" id="cb-pilotes" style="cursor:pointer;width:15px;height:15px;accent-color:#185FA5;">
+          <input type="checkbox" id="cb-pilotes" style="cursor:pointer;width:15px;height:15px;accent-color:var(--c-action);">
           🎯 Privé pilotes
         </label>
       </div>
@@ -3404,7 +3405,7 @@ function toggleFaq(el) {
 }
 
 // -- PLANNING -------------------------------------------------
-function _crCol(c){ return ({arrivee:'#3B82F6',mise_en_place:'#8B5CF6',en_position:'#22C55E',match:'#042C53',repas:'#F5C842',desinstallation:'#F97316'})[c]||'#9CA3AF'; }
+function _crCol(c){ return ({arrivee:'#3B82F6',mise_en_place:'#8B5CF6',en_position:'#22C55E',match:'var(--c-navy)',repas:'var(--c-gold)',desinstallation:'#F97316'})[c]||'#9CA3AF'; }
 function _crLab(c){ return ({arrivee:'Arriv&eacute;e / accueil',mise_en_place:'Mise en place',en_position:'En position',match:'Match',repas:'Repas',desinstallation:'D&eacute;sinstallation'})[c]||'Autre'; }
 function friseHtml(creneaux, monPoste){
   if(!creneaux || creneaux.length===0) return '';
@@ -3415,8 +3416,8 @@ function friseHtml(creneaux, monPoste){
     const lab = c.libelle ? escapeHtml(c.libelle) : _crLab(c.categorie);
     return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">'+
       '<span style="width:10px;height:10px;border-radius:3px;flex-shrink:0;background:'+_crCol(c.categorie)+';"></span>'+
-      '<span style="font-size:12px;font-weight:700;color:#0C447C;min-width:96px;">'+h+'</span>'+
-      '<span style="font-size:12px;color:#5F5E5A;">'+lab+'</span>'+
+      '<span style="font-size:12px;font-weight:700;color:var(--c-navy-2);min-width:96px;">'+h+'</span>'+
+      '<span style="font-size:12px;color:var(--c-muted);">'+lab+'</span>'+
       '</div>';
   }).join('');
   return '<div style="background:#F4F7FB;border-radius:10px;padding:10px 12px;margin-top:8px;">'+
@@ -3452,7 +3453,7 @@ async function setDispo(matchId,statut,btn) {
   if (statut === 'indisponible' && _within48h(await _matchDateById(matchId))) { openSignalIndispoModal(matchId); return }
   btn.textContent='...';btn.disabled=true
   const{error}=await sb.from('inscriptions').upsert({benevole_id:CU.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'})
-  if(!error){btn.textContent=statut==='disponible'?'✓':'✗';btn.style.background=statut==='disponible'?'#3B6D11':'#888';setTimeout(loadPlanning,800)}
+  if(!error){btn.textContent=statut==='disponible'?'✓':'✗';btn.style.background=statut==='disponible'?'var(--c-green)':'#888';setTimeout(loadPlanning,800)}
   else{btn.textContent='Err';btn.disabled=false}
 }
 
@@ -3471,25 +3472,25 @@ async function loadPoints() {
   const el = document.getElementById('points-content'); if(!el) return
   const pts = CP.points_total||0
   const pi = palierInfo(pts)
-  const ladder = pi.P.map(t=>`<div style="flex:1;text-align:center;padding:10px 4px;border-radius:12px;${t.code===pi.cur.code?'background:rgba(245,200,66,0.16);border:1px solid rgba(245,200,66,0.45);':'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);'}"><div style="font-size:17px;">${t.e}</div><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.85);margin-top:2px;">${t.l}</div><div style="font-size:9px;color:${t.code===pi.cur.code?'#FFD97A':'rgba(255,255,255,0.5)'};">${t.s}</div></div>`).join('')
-  const nextTxt = pi.nxt ? `Plus que <b style="color:#FFD97A;">${pi.avant} pts</b> avant ${pi.nxt.e} ${pi.nxt.l}` : 'Palier maximum atteint 🏆'
+  const ladder = pi.P.map(t=>`<div style="flex:1;text-align:center;padding:10px 4px;border-radius:12px;${t.code===pi.cur.code?'background:rgba(245,200,66,0.16);border:1px solid rgba(245,200,66,0.45);':'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);'}"><div style="font-size:17px;">${t.e}</div><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.85);margin-top:2px;">${t.l}</div><div style="font-size:9px;color:${t.code===pi.cur.code?'var(--c-gold-light)':'rgba(255,255,255,0.5)'};">${t.s}</div></div>`).join('')
+  const nextTxt = pi.nxt ? `Plus que <b style="color:var(--c-gold-light);">${pi.avant} pts</b> avant ${pi.nxt.e} ${pi.nxt.l}` : 'Palier maximum atteint 🏆'
   const LOTS={satellite:'−10 % boutique',etoile:'−20 % boutique + un bon cadeau',galaxie:'−30 % boutique + écharpe + 2 places match'}
-  const teaser = pi.nxt && LOTS[pi.nxt.code] ? `<div style="background:linear-gradient(120deg,#0a3a68,#15518c);border:1px solid rgba(245,200,66,0.3);border-radius:14px;padding:14px;display:flex;gap:11px;align-items:center;margin-top:12px;"><span style="font-size:22px;">🎁</span><p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;line-height:1.4;">Au prochain palier <b style="color:#FFD97A;">${pi.nxt.e} ${pi.nxt.l}</b> : <b style="color:#FFD97A;">${LOTS[pi.nxt.code]}</b>.</p></div>` : ''
-  const bareme = [['📲','Inscription sur l\'appli','+30'],['🏐','Présence confirmée','+50'],['⏱️','Ponctualité','+20'],['🤝','Aide hors match','+30'],['🎉','Proposer un événement','+60'],['👥','Parrainage','+60'],['🏅','Badge 5 matchs','+100'],['🏆','Badge 10 matchs','+150']].map(([i,l,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #F1EFE8;font-size:13px;"><div style="display:flex;gap:8px;align-items:center;"><span>${i}</span><span style="color:#243b5a;font-weight:500;">${l}</span></div><strong style="color:#185FA5;">${v} pts</strong></div>`).join('')
+  const teaser = pi.nxt && LOTS[pi.nxt.code] ? `<div style="background:linear-gradient(120deg,#0a3a68,#15518c);border:1px solid rgba(245,200,66,0.3);border-radius:14px;padding:14px;display:flex;gap:11px;align-items:center;margin-top:12px;"><span style="font-size:22px;">🎁</span><p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;line-height:1.4;">Au prochain palier <b style="color:var(--c-gold-light);">${pi.nxt.e} ${pi.nxt.l}</b> : <b style="color:var(--c-gold-light);">${LOTS[pi.nxt.code]}</b>.</p></div>` : ''
+  const bareme = [['📲','Inscription sur l\'appli','+30'],['🏐','Présence confirmée','+50'],['⏱️','Ponctualité','+20'],['🤝','Aide hors match','+30'],['🎉','Proposer un événement','+60'],['👥','Parrainage','+60'],['🏅','Badge 5 matchs','+100'],['🏆','Badge 10 matchs','+150']].map(([i,l,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--c-cream);font-size:13px;"><div style="display:flex;gap:8px;align-items:center;"><span>${i}</span><span style="color:#243b5a;font-weight:500;">${l}</span></div><strong style="color:var(--c-action);">${v} pts</strong></div>`).join('')
 
   el.innerHTML = `
     <div style="background:linear-gradient(120deg,#02203f,#1c4f86 55%,#2f6fc0);border-radius:18px;padding:18px;margin-bottom:12px;color:white;">
       <div style="font-size:26px;">${pi.cur.e}</div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
         <div style="font-size:22px;font-weight:800;">${pi.cur.l}</div>
-        <div style="margin-left:auto;text-align:right;"><div style="font-size:22px;font-weight:800;color:#FFD97A;">${pts}</div><div style="font-size:10px;color:rgba(255,255,255,0.6);">points · saison en cours</div></div>
+        <div style="margin-left:auto;text-align:right;"><div style="font-size:22px;font-weight:800;color:var(--c-gold-light);">${pts}</div><div style="font-size:10px;color:rgba(255,255,255,0.6);">points · saison en cours</div></div>
       </div>
-      <div style="height:8px;background:rgba(255,255,255,0.16);border-radius:99px;margin-top:14px;overflow:hidden;"><div style="height:100%;width:${pi.pct}%;background:linear-gradient(90deg,#C9821A,#FFD97A);border-radius:99px;"></div></div>
+      <div style="height:8px;background:rgba(255,255,255,0.16);border-radius:99px;margin-top:14px;overflow:hidden;"><div style="height:100%;width:${pi.pct}%;background:linear-gradient(90deg,var(--c-amber),var(--c-gold-light));border-radius:99px;"></div></div>
       <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:8px;">${nextTxt}</div>
       <div style="display:flex;gap:6px;margin-top:13px;">${ladder}</div>
     </div>
     <div style="background:white;border-radius:14px;padding:15px;margin-bottom:12px;">
-      <div style="font-size:14px;font-weight:700;color:#0C447C;margin-bottom:8px;">Comment gagner des points</div>
+      <div style="font-size:14px;font-weight:700;color:var(--c-navy-2);margin-bottom:8px;">Comment gagner des points</div>
       ${bareme}
     </div>
     <div id="points-badges"></div>
@@ -3510,10 +3511,10 @@ async function loadPoints() {
       const full = b.code==='trajectoire'
       let sub = b.description||''
       if(!got && prog[b.code]){ const pp=prog[b.code]; sub = `${b.description} — ${Math.min(stats[pp[0]]||0,pp[1])}/${pp[1]}` }
-      return `<div style="${full?'grid-column:1/-1;background:linear-gradient(120deg,rgba(245,200,66,0.14),rgba(255,255,255,0.05));border:1px solid rgba(245,200,66,0.3);':'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);'}border-radius:14px;padding:12px;display:flex;gap:9px;align-items:center;${got?'':'opacity:0.45;'}"><span style="font-size:21px;">${b.emoji}</span><div><div style="font-size:12px;font-weight:600;color:white;">${b.libelle}${got?' <span style="color:#F5C842;">✓</span>':''}</div><div style="font-size:10px;color:rgba(255,255,255,0.55);margin-top:2px;">${sub}</div></div></div>`
+      return `<div style="${full?'grid-column:1/-1;background:linear-gradient(120deg,rgba(245,200,66,0.14),rgba(255,255,255,0.05));border:1px solid rgba(245,200,66,0.3);':'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);'}border-radius:14px;padding:12px;display:flex;gap:9px;align-items:center;${got?'':'opacity:0.45;'}"><span style="font-size:21px;">${b.emoji}</span><div><div style="font-size:12px;font-weight:600;color:white;">${b.libelle}${got?' <span style="color:var(--c-gold);">✓</span>':''}</div><div style="font-size:10px;color:rgba(255,255,255,0.55);margin-top:2px;">${sub}</div></div></div>`
     }).join('')
     document.getElementById('points-badges').innerHTML = `
-      <div style="background:linear-gradient(160deg,#042C53,#0a3a68);border-radius:14px;padding:15px;">
+      <div style="background:linear-gradient(160deg,var(--c-navy),#0a3a68);border-radius:14px;padding:15px;">
         <div style="font-size:12px;letter-spacing:0.5px;color:rgba(255,255,255,0.7);text-transform:uppercase;font-weight:600;padding:0 2px 10px;">Vos badges</div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:9px;">${cards}</div>
       </div>`
@@ -3530,7 +3531,7 @@ async function loadPosts() {
     .limit(20)
 
   if (!posts || posts.length === 0) {
-    el.innerHTML = '<div style="text-align:center;color:#5F5E5A;padding:20px;font-size:12px;">Soyez le premier à poster !</div>'
+    el.innerHTML = '<div style="text-align:center;color:var(--c-muted);padding:20px;font-size:12px;">Soyez le premier à poster !</div>'
     return
   }
 
@@ -3549,21 +3550,21 @@ async function loadPosts() {
   const urlMap = await getSignedPhotoUrls(paths)
 
   el.innerHTML = posts.map(p => {
-    const ptBg = {hugo:'#E6F1FB',virginie:'#EDE9FE',joel:'#EAF3DE'}[p.benevoles?.profil_type||'hugo']||'#E6F1FB'
-    const ptC  = {hugo:'#0C447C',virginie:'#533BB7',joel:'#3B6D11'}[p.benevoles?.profil_type||'hugo']||'#0C447C'
+    const ptBg = {hugo:'var(--c-blue-50)',virginie:'var(--c-purple-50)',joel:'var(--c-green-50)'}[p.benevoles?.profil_type||'hugo']||'var(--c-blue-50)'
+    const ptC  = {hugo:'var(--c-navy-2)',virginie:'var(--c-purple)',joel:'var(--c-green)'}[p.benevoles?.profil_type||'hugo']||'var(--c-navy-2)'
     const photoPath = p.benevoles?.photo_path
     const photoUrl  = photoPath ? urlMap[photoPath] : null
     return `<div style="background:white;border-radius:12px;padding:13px;margin-bottom:8px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
         ${photoUrl
-          ? `<img src="${photoUrl}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid #B5D4F4;">`
+          ? `<img src="${photoUrl}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid var(--c-blue-100);">`
           : `<div style="width:28px;height:28px;border-radius:50%;background:${ptBg};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${ptC};">${escapeHtml(((p.benevoles?.prenom||'?')[0]+(p.benevoles?.nom||'?')[0]).toUpperCase())}</div>`}
         <div>
-          <div style="font-size:12px;font-weight:700;color:#0C447C;">${p.benevoles ? escapeHtml((p.benevoles.prenom||'')+' '+(p.benevoles.nom||'')) : 'Bénévole'}</div>
-          <div style="font-size:9px;color:#5F5E5A;">${formatDateTime(p.created_at)}</div>
+          <div style="font-size:12px;font-weight:700;color:var(--c-navy-2);">${p.benevoles ? escapeHtml((p.benevoles.prenom||'')+' '+(p.benevoles.nom||'')) : 'Bénévole'}</div>
+          <div style="font-size:9px;color:var(--c-muted);">${formatDateTime(p.created_at)}</div>
         </div>
       </div>
-      <div style="font-size:12px;color:#5F5E5A;line-height:1.7;">${escapeHtml(p.contenu||'')}</div>
+      <div style="font-size:12px;color:var(--c-muted);line-height:1.7;">${escapeHtml(p.contenu||'')}</div>
     </div>`
   }).join('')
 }
@@ -3584,16 +3585,16 @@ function loadProfilFields(p) {
   document.getElementById('f-nom').value=p.nom||''
   document.getElementById('f-tel').value=p.telephone||''
   const cfgP={
-    hugo:    {icon:'⚡',name:'Compétiteur',desc:'Gamification et classement en avant-plan',bg:'#E6F1FB',color:'#0C447C'},
-    virginie:{icon:'🌸',name:'Découverte', desc:'Accompagnement et référent assigné',bg:'#EDE9FE',color:'#533BB7'},
-    joel:    {icon:'🎯',name:'Expérimenté',desc:'Interface simplifiée 3 boutons',bg:'#EAF3DE',color:'#3B6D11'},
+    hugo:    {icon:'⚡',name:'Compétiteur',desc:'Gamification et classement en avant-plan',bg:'var(--c-blue-50)',color:'var(--c-navy-2)'},
+    virginie:{icon:'🌸',name:'Découverte', desc:'Accompagnement et référent assigné',bg:'var(--c-purple-50)',color:'var(--c-purple)'},
+    joel:    {icon:'🎯',name:'Expérimenté',desc:'Interface simplifiée 3 boutons',bg:'var(--c-green-50)',color:'var(--c-green)'},
   }
   const c=cfgP[p.profil_type||'hugo']
   document.getElementById('current-profil-display').innerHTML=`
     <div style="background:${c.bg};border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;">
       <div style="font-size:28px;">${c.icon}</div>
       <div><div style="font-size:13px;font-weight:700;color:${c.color};">${c.name}</div>
-        <div style="font-size:10px;color:#5F5E5A;margin-top:1px;">${c.desc}</div></div>
+        <div style="font-size:10px;color:var(--c-muted);margin-top:1px;">${c.desc}</div></div>
     </div>`
   renderPhotoCard()
   loadAccountState().then(() => renderAccountCard())
@@ -3674,8 +3675,8 @@ async function renderPhotoCard() {
     el.innerHTML = `
       <div style="text-align:center;margin-bottom:14px;">
         <img src="${previewUrl}" class="photo-display preview" alt="Aperçu">
-        <div style="font-size:11px;color:#C9821A;margin-top:10px;font-weight:700;">⚠️ Aperçu — confirme pour envoyer aux pilotes</div>
-        <div style="font-size:10px;color:#5F5E5A;margin-top:3px;">${pendingPhotoFile.name} · ${formatFileSize(pendingPhotoFile.size)}</div>
+        <div style="font-size:11px;color:var(--c-amber);margin-top:10px;font-weight:700;">⚠️ Aperçu — confirme pour envoyer aux pilotes</div>
+        <div style="font-size:10px;color:var(--c-muted);margin-top:3px;">${pendingPhotoFile.name} · ${formatFileSize(pendingPhotoFile.size)}</div>
       </div>
       <div class="photo-tips">
         <strong>Vérifie avant d'envoyer :</strong><br>
@@ -3711,11 +3712,11 @@ async function renderPhotoCard() {
 
   let contextMsg = ''
   if (statut === 'refusee') {
-    contextMsg = '<div style="background:#FBEAF0;color:#993556;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;font-weight:600;">Ta photo précédente a été refusée. Envoie une nouvelle photo plus claire.</div>'
+    contextMsg = '<div style="background:var(--c-accent-50);color:var(--c-accent);border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;font-weight:600;">Ta photo précédente a été refusée. Envoie une nouvelle photo plus claire.</div>'
   } else if (statut === 'en_attente') {
-    contextMsg = '<div style="background:#FEF3C7;color:#C9821A;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;">Un pilote va valider ta photo bientôt. Tu peux la changer si besoin.</div>'
+    contextMsg = '<div style="background:var(--c-gold-50);color:var(--c-amber);border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;">Un pilote va valider ta photo bientôt. Tu peux la changer si besoin.</div>'
   } else if (statut === 'generee') {
-    contextMsg = '<div style="background:#E6F1FB;color:#0C447C;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;">Ton accréditation est prête. Si tu changes ta photo, elle devra être re-validée.</div>'
+    contextMsg = '<div style="background:var(--c-blue-50);color:var(--c-navy-2);border-radius:8px;padding:10px;font-size:11px;line-height:1.6;margin-bottom:12px;">Ton accréditation est prête. Si tu changes ta photo, elle devra être re-validée.</div>'
   }
 
   el.innerHTML = `
@@ -3885,7 +3886,7 @@ async function loadReward() {
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.7);">${expirat}</div>
           <div class="code-display">${c.code}</div>
-          <button class="btn btn-blue" style="font-size:12px;width:100%;background:white;color:#3B6D11;" onclick="copyCode('${c.code}')">📋 Copier le code</button>
+          <button class="btn btn-blue" style="font-size:12px;width:100%;background:white;color:var(--c-green);" onclick="copyCode('${c.code}')">📋 Copier le code</button>
         </div>`
     })
   }
@@ -3908,7 +3909,7 @@ async function loadReward() {
         </div>
         ${ptsDispo < p.pts ? `
           <div class="palier-progress-mini"><div class="palier-progress-mini-fill" style="width:${progressPct}%;"></div></div>
-          <div style="font-size:10px;color:#5F5E5A;margin-top:4px;">Encore ${p.pts - ptsDispo} pts pour débloquer</div>
+          <div style="font-size:10px;color:var(--c-muted);margin-top:4px;">Encore ${p.pts - ptsDispo} pts pour débloquer</div>
         ` : ''}
         <button class="btn btn-blue"
           style="font-size:12px;margin-top:10px;${peutDemander ? '' : 'opacity:0.5;cursor:not-allowed;'}"
@@ -3955,8 +3956,8 @@ async function loadReward() {
       html += `
         <div class="histo-item">
           <div>
-            <div style="font-weight:600;color:#0C447C;">${d.palier_pts} pts</div>
-            <div style="font-size:9px;color:#5F5E5A;">${formatDateTime(d.cree_le)}</div>
+            <div style="font-weight:600;color:var(--c-navy-2);">${d.palier_pts} pts</div>
+            <div style="font-size:9px;color:var(--c-muted);">${formatDateTime(d.cree_le)}</div>
           </div>
           ${lbl}
         </div>`
@@ -4132,8 +4133,8 @@ function renderConsentsSnapshot(consents) {
     const date = new Date(c.granted_at).toLocaleDateString('fr-FR')
     const ok = c.granted
     return `
-      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11px;color:#5F5E5A;">
-        <span style="color:${ok?'#3B6D11':'#993556'};font-weight:700;width:14px;text-align:center;">${ok?'✓':'✗'}</span>
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:11px;color:var(--c-muted);">
+        <span style="color:${ok?'var(--c-green)':'var(--c-accent)'};font-weight:700;width:14px;text-align:center;">${ok?'✓':'✗'}</span>
         <span>${meta.icon}</span>
         <span style="flex:1;min-width:0;">${meta.label}</span>
         <span style="font-size:10px;color:#7A7670;white-space:nowrap;">v${c.consent_version} · ${date}</span>
@@ -4144,8 +4145,8 @@ function renderConsentsSnapshot(consents) {
     const meta = TYPE_META[c.consent_type] || { icon: '•', label: c.consent_type }
     const dt = new Date(c.granted_at).toLocaleString('fr-FR', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'})
     return `
-      <div style="padding:6px 10px;border-bottom:1px solid #E9E6DC;font-size:10px;color:#5F5E5A;display:flex;align-items:center;gap:6px;">
-        <span style="color:${c.granted?'#3B6D11':'#993556'};font-weight:700;width:12px;">${c.granted?'✓':'✗'}</span>
+      <div style="padding:6px 10px;border-bottom:1px solid #E9E6DC;font-size:10px;color:var(--c-muted);display:flex;align-items:center;gap:6px;">
+        <span style="color:${c.granted?'var(--c-green)':'var(--c-accent)'};font-weight:700;width:12px;">${c.granted?'✓':'✗'}</span>
         <span>${meta.icon}</span>
         <span style="flex:1;min-width:0;font-weight:600;">${meta.label}</span>
         <span style="font-size:9px;color:#7A7670;white-space:nowrap;">v${c.consent_version} · ${dt}</span>
@@ -4160,12 +4161,12 @@ function renderConsentsSnapshot(consents) {
       ${snapshotItems}
     </div>
     <details style="margin-top:8px;">
-      <summary style="font-size:11px;color:#185FA5;cursor:pointer;padding:4px 0;font-weight:600;">📜 Voir l'historique complet (${historyLabel})</summary>
+      <summary style="font-size:11px;color:var(--c-action);cursor:pointer;padding:4px 0;font-weight:600;">📜 Voir l'historique complet (${historyLabel})</summary>
       <div style="margin-top:6px;max-height:220px;overflow-y:auto;background:#FAFAF7;border-radius:8px;border:1px solid #E9E6DC;">
         ${historyItems}
       </div>
     </details>
-    <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-top:10px;background:#FFF8E1;border-left:3px solid #F4B400;border-radius:4px;padding:8px 10px;">
+    <div style="font-size:10px;color:var(--c-muted);line-height:1.5;margin-top:10px;background:#FFF8E1;border-left:3px solid #F4B400;border-radius:4px;padding:8px 10px;">
       <strong style="color:#7A5500;">ℹ Bon à savoir</strong> — Les consentements traitement, règlement et photo sont nécessaires pour utiliser l'application. Pour les révoquer, demande la suppression de ton compte ci-dessous. Seule la newsletter peut être réactivée/désactivée à tout moment via la case ci-dessus.
     </div>`
 }
@@ -4189,9 +4190,9 @@ function renderAccountCard() {
     const dateStr = dt.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'})
     const daysLeft = Math.max(0, Math.ceil((dt - new Date()) / 86400000))
     pendingHtml = `
-      <div style="background:#FBEAF0;border:1px solid #993556;border-left-width:4px;border-radius:10px;padding:14px;margin-bottom:12px;">
-        <div style="font-size:13px;font-weight:700;color:#993556;margin-bottom:4px;">⚠️ Suppression de compte planifiée</div>
-        <div style="font-size:11px;color:#5F5E5A;line-height:1.6;margin-bottom:10px;">
+      <div style="background:var(--c-accent-50);border:1px solid var(--c-accent);border-left-width:4px;border-radius:10px;padding:14px;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:var(--c-accent);margin-bottom:4px;">⚠️ Suppression de compte planifiée</div>
+        <div style="font-size:11px;color:var(--c-muted);line-height:1.6;margin-bottom:10px;">
           Ton compte sera <strong>définitivement supprimé le ${dateStr}</strong> (dans ${daysLeft} jour${daysLeft>1?'s':''}). Tu peux annuler cette demande tant que la date n'est pas passée.
         </div>
         <button class="btn btn-blue" style="font-size:12px;width:100%;" onclick="cancelDeletion()">↺ Annuler la demande de suppression</button>
@@ -4200,46 +4201,46 @@ function renderAccountCard() {
 
   wrap.innerHTML = `
     <div style="background:white;border-radius:16px;padding:16px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:700;color:#0C447C;margin-bottom:4px;">🛡️ Mon compte & mes données</div>
-      <div style="font-size:11px;color:#5F5E5A;margin-bottom:14px;line-height:1.5;">Gère tes consentements et tes données personnelles (RGPD).</div>
+      <div style="font-size:13px;font-weight:700;color:var(--c-navy-2);margin-bottom:4px;">🛡️ Mon compte & mes données</div>
+      <div style="font-size:11px;color:var(--c-muted);margin-bottom:14px;line-height:1.5;">Gère tes consentements et tes données personnelles (RGPD).</div>
 
       ${pendingHtml}
 
-      <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:6px;">
+      <div style="border-top:1px solid var(--c-cream);padding-top:12px;margin-top:6px;">
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
-          <input type="checkbox" id="acc-newsletter" ${newsletterChecked?'checked':''} ${isPendingDeletion?'disabled':''} onchange="toggleNewsletter(this)" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:#3B6D11;cursor:pointer;">
+          <input type="checkbox" id="acc-newsletter" ${newsletterChecked?'checked':''} ${isPendingDeletion?'disabled':''} onchange="toggleNewsletter(this)" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:var(--c-green);cursor:pointer;">
           <div>
-            <div style="font-size:12px;font-weight:600;color:#0C447C;">💌 Communications non-essentielles</div>
-            <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-top:2px;">Recevoir occasionnellement des informations sur la vie du club (newsletter, événements). Désabonnement à tout moment.</div>
+            <div style="font-size:12px;font-weight:600;color:var(--c-navy-2);">💌 Communications non-essentielles</div>
+            <div style="font-size:10px;color:var(--c-muted);line-height:1.5;margin-top:2px;">Recevoir occasionnellement des informations sur la vie du club (newsletter, événements). Désabonnement à tout moment.</div>
           </div>
         </label>
       </div>
 
-      <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:12px;">
-        <div style="font-size:12px;font-weight:600;color:#0C447C;margin-bottom:8px;">🔐 Mes consentements</div>
+      <div style="border-top:1px solid var(--c-cream);padding-top:12px;margin-top:12px;">
+        <div style="font-size:12px;font-weight:600;color:var(--c-navy-2);margin-bottom:8px;">🔐 Mes consentements</div>
         ${renderConsentsSnapshot(a._consents || [])}
       </div>
 
-      <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:12px;">
-        <div style="font-size:12px;font-weight:600;color:#0C447C;margin-bottom:3px;">📥 Exporter mes données</div>
-        <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-bottom:8px;">Télécharge l'intégralité des données te concernant (JSON + résumé PDF).</div>
+      <div style="border-top:1px solid var(--c-cream);padding-top:12px;margin-top:12px;">
+        <div style="font-size:12px;font-weight:600;color:var(--c-navy-2);margin-bottom:3px;">📥 Exporter mes données</div>
+        <div style="font-size:10px;color:var(--c-muted);line-height:1.5;margin-bottom:8px;">Télécharge l'intégralité des données te concernant (JSON + résumé PDF).</div>
         <button class="btn btn-ghost" id="btn-export" style="font-size:12px;margin-top:0;" onclick="exportMyData()">Télécharger mes données</button>
       </div>
 
       ${!isPendingDeletion ? `
-      <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:12px;">
-        <div style="font-size:12px;font-weight:600;color:#993556;margin-bottom:3px;">🗑️ Supprimer mon compte</div>
-        <div style="font-size:10px;color:#5F5E5A;line-height:1.5;margin-bottom:8px;">
+      <div style="border-top:1px solid var(--c-cream);padding-top:12px;margin-top:12px;">
+        <div style="font-size:12px;font-weight:600;color:var(--c-accent);margin-bottom:3px;">🗑️ Supprimer mon compte</div>
+        <div style="font-size:10px;color:var(--c-muted);line-height:1.5;margin-bottom:8px;">
           Effacement définitif après un délai de 30 jours (annulable). Tes contributions au forum et historique de bénévolat seront anonymisés mais conservés.
         </div>
-        <button class="btn" style="background:#FBEAF0;color:#993556;border:1.5px solid #993556;font-size:12px;width:100%;" onclick="requestDeletion()">Demander la suppression de mon compte</button>
+        <button class="btn" style="background:var(--c-accent-50);color:var(--c-accent);border:1.5px solid var(--c-accent);font-size:12px;width:100%;" onclick="requestDeletion()">Demander la suppression de mon compte</button>
       </div>
       ` : ''}
 
-      <div style="border-top:1px solid #F1EFE8;padding-top:12px;margin-top:12px;">
-        <div style="font-size:10px;color:#5F5E5A;line-height:1.6;text-align:center;">
+      <div style="border-top:1px solid var(--c-cream);padding-top:12px;margin-top:12px;">
+        <div style="font-size:10px;color:var(--c-muted);line-height:1.6;text-align:center;">
           Référent RGPD : <strong>Didier CONJEAUD</strong><br>
-          📧 <a href="mailto:contact@spacerstoulouse.fr" style="color:#185FA5;">contact@spacerstoulouse.fr</a>
+          📧 <a href="mailto:contact@spacerstoulouse.fr" style="color:var(--c-action);">contact@spacerstoulouse.fr</a>
         </div>
       </div>
     </div>`

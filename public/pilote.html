@@ -9,98 +9,98 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
-.header{background:linear-gradient(135deg,#1a1a18,#0C447C);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}
+body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
+.header{background:linear-gradient(135deg,var(--c-ink),var(--c-navy-2));padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}
 .header h1{font-size:18px;font-weight:800;color:white;}
 .header p{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;}
 .btn-benv{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;padding:6px 14px;border-radius:50px;font-family:'Sora',sans-serif;font-size:11px;font-weight:600;cursor:pointer;}
-.tabs{display:flex;background:#111110;border-bottom:1px solid #2a2a28;overflow-x:auto;}
+.tabs{display:flex;background:#111110;border-bottom:1px solid var(--c-ink-2);overflow-x:auto;}
 .tabs::-webkit-scrollbar{display:none;}
 .tab{flex:1;padding:12px 8px;font-size:10px;font-weight:600;color:rgba(255,255,255,0.4);border:none;background:none;cursor:pointer;font-family:'Sora',sans-serif;white-space:nowrap;min-width:70px;position:relative;}
-.tab.on{color:white;border-bottom:2px solid #185FA5;}
-.tab .bdg{position:absolute;top:6px;right:6px;width:7px;height:7px;background:#E24B4A;border-radius:50%;}
-.tab .bdg-num{position:absolute;top:4px;right:2px;min-width:16px;height:14px;background:#E24B4A;border-radius:7px;font-size:9px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1;}
+.tab.on{color:white;border-bottom:2px solid var(--c-action);}
+.tab .bdg{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--c-danger);border-radius:50%;}
+.tab .bdg-num{position:absolute;top:4px;right:2px;min-width:16px;height:14px;background:var(--c-danger);border-radius:7px;font-size:9px;font-weight:700;color:white;display:flex;align-items:center;justify-content:center;padding:0 4px;line-height:1;}
 .screen{display:none;padding:16px;}
 .screen.on{display:block;}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-.kpi{background:#2a2a28;border-radius:12px;padding:14px;text-align:center;}
+.kpi{background:var(--c-ink-2);border-radius:12px;padding:14px;text-align:center;}
 .kpi-val{font-size:28px;font-weight:800;color:white;font-family:monospace;}
-.kpi-val.g{color:#C0DD97;} .kpi-val.a{color:#FAC775;} .kpi-val.r{color:#F09595;}
+.kpi-val.g{color:var(--c-green-light);} .kpi-val.a{color:var(--c-gold-2);} .kpi-val.r{color:var(--c-danger-soft);}
 .kpi-lbl{font-size:10px;color:rgba(255,255,255,0.4);margin-top:3px;}
 .sec{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin:14px 0 8px;}
-.card{background:#2a2a28;border-radius:14px;padding:14px;margin-bottom:10px;}
+.card{background:var(--c-ink-2);border-radius:14px;padding:14px;margin-bottom:10px;}
 .btn{border:none;border-radius:50px;padding:8px 16px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;}
-.btn-blue{background:#185FA5;color:white;}
-.btn-green{background:#3B6D11;color:white;}
-.btn-red{background:#993556;color:white;}
-.btn-orange{background:#C9821A;color:white;}
+.btn-blue{background:var(--c-action);color:white;}
+.btn-green{background:var(--c-green);color:white;}
+.btn-red{background:var(--c-accent);color:white;}
+.btn-orange{background:var(--c-amber);color:white;}
 .btn-ghost{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);}
 .btn-full{width:100%;padding:12px;margin-bottom:8px;}
 .btn-sm{font-size:10px;padding:5px 10px;}
 .btn:disabled{opacity:.5;cursor:not-allowed;}
-.photo-card{background:#2a2a28;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:center;}
-.thumb{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #444441;flex-shrink:0;}
-.thumb-ph{width:52px;height:52px;border-radius:50%;background:#444441;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;flex-shrink:0;}
+.photo-card{background:var(--c-ink-2);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:center;}
+.thumb{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--c-ink-3);flex-shrink:0;}
+.thumb-ph{width:52px;height:52px;border-radius:50%;background:var(--c-ink-3);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;flex-shrink:0;}
 .s-badge{display:inline-block;font-size:9px;padding:2px 8px;border-radius:50px;font-weight:700;}
-.s-att{background:rgba(201,130,26,0.2);color:#FAC775;}
-.s-val{background:rgba(59,109,17,0.2);color:#C0DD97;}
-.s-ref{background:rgba(153,53,86,0.2);color:#F4B8CE;}
-.s-gen{background:rgba(24,95,165,0.2);color:#B5D4F4;}
+.s-att{background:rgba(201,130,26,0.2);color:var(--c-gold-2);}
+.s-val{background:rgba(59,109,17,0.2);color:var(--c-green-light);}
+.s-ref{background:rgba(153,53,86,0.2);color:var(--c-accent-100);}
+.s-gen{background:rgba(24,95,165,0.2);color:var(--c-blue-100);}
 .s-non{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);}
-.benv-row{background:#2a2a28;border-radius:10px;padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
-.bav{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1.5px solid #444441;flex-shrink:0;}
-.bav-ph{width:34px;height:34px;border-radius:50%;background:#444441;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;}
-.poste-sel{background:#1a1a18;border:1px solid #444441;border-radius:6px;padding:5px 8px;font-family:'Sora',sans-serif;font-size:10px;color:white;min-width:120px;}
-.poste-sel.ok{border-color:#3B6D11;background:rgba(59,109,17,0.2);color:#C0DD97;}
+.benv-row{background:var(--c-ink-2);border-radius:10px;padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.bav{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1.5px solid var(--c-ink-3);flex-shrink:0;}
+.bav-ph{width:34px;height:34px;border-radius:50%;background:var(--c-ink-3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;}
+.poste-sel{background:var(--c-ink);border:1px solid var(--c-ink-3);border-radius:6px;padding:5px 8px;font-family:'Sora',sans-serif;font-size:10px;color:white;min-width:120px;}
+.poste-sel.ok{border-color:var(--c-green);background:rgba(59,109,17,0.2);color:var(--c-green-light);}
 .aff-table{width:100%;border-collapse:collapse;}
-.aff-table th{background:#0C447C;color:rgba(255,255,255,0.7);padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:1px;}
+.aff-table th{background:var(--c-navy-2);color:rgba(255,255,255,0.7);padding:8px 10px;text-align:left;font-size:9px;font-weight:700;letter-spacing:1px;}
 .aff-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:11px;color:rgba(255,255,255,0.8);vertical-align:middle;}
 .aff-table tr:last-child td{border:none;}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px;}
-.modal{background:#2a2a28;border-radius:20px;padding:20px;width:100%;max-width:440px;}
+.modal{background:var(--c-ink-2);border-radius:20px;padding:20px;width:100%;max-width:440px;}
 .modal h2{font-size:15px;font-weight:800;color:white;margin-bottom:14px;}
-.modal-img{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid #185FA5;display:block;margin:0 auto 14px;}
+.modal-img{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--c-action);display:block;margin:0 auto 14px;}
 .modal-actions{display:flex;gap:8px;margin-top:14px;}
-.note-area{width:100%;background:#1a1a18;border:1px solid #444441;border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;color:white;resize:none;height:80px;outline:none;}
-.note-area:focus{border-color:#185FA5;}
-.input-field{width:100%;background:#1a1a18;border:1px solid #444441;border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;}
-.input-field:focus{border-color:#185FA5;}
+.note-area{width:100%;background:var(--c-ink);border:1px solid var(--c-ink-3);border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;color:white;resize:none;height:80px;outline:none;}
+.note-area:focus{border-color:var(--c-action);}
+.input-field{width:100%;background:var(--c-ink);border:1px solid var(--c-ink-3);border-radius:10px;padding:10px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;}
+.input-field:focus{border-color:var(--c-action);}
 .input-label{display:block;font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:6px;font-weight:600;}
 .input-hint{font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;font-style:italic;}
 .alert{padding:10px 14px;border-radius:10px;font-size:12px;margin-bottom:12px;}
-.alert-s{background:rgba(59,109,17,0.2);color:#C0DD97;border:1px solid rgba(59,109,17,0.3);}
-.alert-e{background:rgba(153,53,86,0.2);color:#F4B8CE;border:1px solid rgba(153,53,86,0.3);}
-.toast-flot{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120px);background:#2a2a28;color:white;padding:13px 22px;border-radius:50px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.5);opacity:0;transition:all .3s ease;pointer-events:none;max-width:90%;text-align:center;border:1px solid rgba(255,255,255,0.1);}
+.alert-s{background:rgba(59,109,17,0.2);color:var(--c-green-light);border:1px solid rgba(59,109,17,0.3);}
+.alert-e{background:rgba(153,53,86,0.2);color:var(--c-accent-100);border:1px solid rgba(153,53,86,0.3);}
+.toast-flot{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--c-ink-2);color:white;padding:13px 22px;border-radius:50px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.5);opacity:0;transition:all .3s ease;pointer-events:none;max-width:90%;text-align:center;border:1px solid rgba(255,255,255,0.1);}
 .toast-flot.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.toast-flot.s{background:#3B6D11;border-color:#5C9C1C;}
-.toast-flot.e{background:#993556;border-color:#C04D72;}
+.toast-flot.s{background:var(--c-green);border-color:#5C9C1C;}
+.toast-flot.e{background:var(--c-accent);border-color:var(--c-accent-2);}
 
 /* ── SUGGESTIONS (chantier 3) ── */
-.sug-search{width:100%;background:#2a2a28;border:1px solid #444441;border-radius:50px;padding:9px 14px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:10px;}
-.sug-search:focus{border-color:#185FA5;}
+.sug-search{width:100%;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:50px;padding:9px 14px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:10px;}
+.sug-search:focus{border-color:var(--c-action);}
 .chips-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
 .chip{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);padding:5px 11px;border-radius:50px;font-family:'Sora',sans-serif;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;}
-.chip.on{background:rgba(24,95,165,0.3);border-color:#185FA5;color:#B5D4F4;}
+.chip.on{background:rgba(24,95,165,0.3);border-color:var(--c-action);color:var(--c-blue-100);}
 .seg-row{margin-bottom:8px;display:flex;}
-.seg-group{display:inline-flex;background:#2a2a28;border-radius:50px;padding:3px;}
+.seg-group{display:inline-flex;background:var(--c-ink-2);border-radius:50px;padding:3px;}
 .seg{background:none;border:none;color:rgba(255,255,255,0.5);padding:5px 12px;border-radius:50px;font-family:'Sora',sans-serif;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;}
-.seg.on{background:#185FA5;color:white;}
+.seg.on{background:var(--c-action);color:white;}
 .sug-toolbar{display:flex;gap:8px;margin:10px 0 12px;align-items:center;}
-.sug-sort{background:#1a1a18;border:1px solid #444441;border-radius:50px;padding:6px 12px;font-family:'Sora',sans-serif;font-size:10px;color:white;outline:none;flex:1;cursor:pointer;}
-.sug-card{background:#2a2a28;border-radius:14px;padding:14px;margin-bottom:8px;cursor:pointer;border-left:3px solid transparent;transition:background .15s, border-color .15s;}
-.sug-card.unread{border-left-color:#E24B4A;background:rgba(226,75,74,0.04);}
+.sug-sort{background:var(--c-ink);border:1px solid var(--c-ink-3);border-radius:50px;padding:6px 12px;font-family:'Sora',sans-serif;font-size:10px;color:white;outline:none;flex:1;cursor:pointer;}
+.sug-card{background:var(--c-ink-2);border-radius:14px;padding:14px;margin-bottom:8px;cursor:pointer;border-left:3px solid transparent;transition:background .15s, border-color .15s;}
+.sug-card.unread{border-left-color:var(--c-danger);background:rgba(226,75,74,0.04);}
 .sug-card-head{display:flex;align-items:flex-start;gap:10px;}
 .sug-tag-emoji{font-size:20px;flex-shrink:0;line-height:1;margin-top:1px;}
 .sug-card-meta{flex:1;min-width:0;}
 .sug-title{font-size:13px;font-weight:700;color:white;margin-bottom:4px;word-break:break-word;}
 .sug-info{font-size:10px;color:rgba(255,255,255,0.4);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-.sug-dot{width:8px;height:8px;background:#E24B4A;border-radius:50%;flex-shrink:0;margin-top:6px;}
+.sug-dot{width:8px;height:8px;background:var(--c-danger);border-radius:50%;flex-shrink:0;margin-top:6px;}
 .sug-extract{font-size:11.5px;color:rgba(255,255,255,0.6);line-height:1.55;margin-top:8px;white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .sug-card.expanded .sug-extract{-webkit-line-clamp:unset;line-clamp:unset;display:block;overflow:visible;}
 .sug-actions{display:none;gap:6px;margin-top:10px;flex-wrap:wrap;}
 .sug-card.expanded .sug-actions{display:flex;}
 .sug-empty{background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.1);border-radius:10px;padding:18px 14px;font-size:12px;color:rgba(255,255,255,0.5);text-align:center;}
-.sug-empty.s{background:rgba(59,109,17,0.1);border-color:rgba(59,109,17,0.3);color:#C0DD97;border-style:solid;}
+.sug-empty.s{background:rgba(59,109,17,0.1);border-color:rgba(59,109,17,0.3);color:var(--c-green-light);border-style:solid;}
 
 /* ── VALIDATION PRÉSENCE (chantier 5) ── */
 .btn-val{
@@ -110,44 +110,45 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   transition:all .15s;text-align:center;white-space:nowrap;
 }
 .btn-val:active{transform:scale(0.97);}
-.btn-val.on.g{background:#3B6D11;border-color:#5C9C1C;color:white;}
-.btn-val.on.a{background:#C9821A;border-color:#FAC775;color:white;}
-.btn-val.on.r{background:#993556;border-color:#C04D72;color:white;}
+.btn-val.on.g{background:var(--c-green);border-color:#5C9C1C;color:white;}
+.btn-val.on.a{background:var(--c-amber);border-color:var(--c-gold-2);color:white;}
+.btn-val.on.r{background:var(--c-accent);border-color:var(--c-accent-2);color:white;}
 
 /* ── RÉCOMPENSES (chantier 6) ── */
 .code-stock-row{
-  background:#2a2a28;border-radius:10px;padding:11px 13px;margin-bottom:7px;
+  background:var(--c-ink-2);border-radius:10px;padding:11px 13px;margin-bottom:7px;
   display:flex;align-items:center;gap:10px;
 }
 .code-tag{
-  font-family:monospace;font-size:11px;font-weight:700;color:#C0DD97;
+  font-family:monospace;font-size:11px;font-weight:700;color:var(--c-green-light);
   background:rgba(59,109,17,0.15);padding:3px 8px;border-radius:6px;
 }
 .code-tag.utilise{color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.05);text-decoration:line-through;}
 .bulk-code-area{
-  width:100%;background:#1a1a18;border:1px solid #444441;border-radius:10px;
+  width:100%;background:var(--c-ink);border:1px solid var(--c-ink-3);border-radius:10px;
   padding:10px;font-family:monospace;font-size:12px;color:white;
   resize:vertical;min-height:80px;outline:none;
 }
-.bulk-code-area:focus{border-color:#185FA5;}
+.bulk-code-area:focus{border-color:var(--c-action);}
 .demande-card{
-  background:#2a2a28;border-radius:14px;padding:14px;margin-bottom:8px;
-  border-left:3px solid #C9821A;
+  background:var(--c-ink-2);border-radius:14px;padding:14px;margin-bottom:8px;
+  border-left:3px solid var(--c-amber);
 }
 
 /* ACCÈS REFUSÉ */
-#access-denied{display:none;position:fixed;inset:0;background:#1a1a18;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
+#access-denied{display:none;position:fixed;inset:0;background:var(--c-ink);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;}
 #access-denied.show{display:flex;}
 </style>
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#042C53">
+    <meta name="theme-color" content="var(--c-navy)">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Spacers">
     <meta name="mobile-web-app-capable" content="yes">
+  <link rel="stylesheet" href="/theme.css">
 </head>
 <body>
 
@@ -191,7 +192,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
     <div class="kpi"><div class="kpi-val r" id="kpi-r">—</div><div class="kpi-lbl">Comptes à risque</div></div>
   </div>
   <div class="sec">Actions rapides</div>
-  <button class="btn btn-ghost btn-full" onclick="openGuide()" style="border:1px solid rgba(245,200,66,0.4);color:#F5C842;">&#128214; Comment &ccedil;a marche ?</button>
+  <button class="btn btn-ghost btn-full" onclick="openGuide()" style="border:1px solid rgba(245,200,66,0.4);color:var(--c-gold);">&#128214; Comment &ccedil;a marche ?</button>
   <button class="btn btn-orange btn-full" id="btn-acc-sug" onclick="switchTab('suggestions')" style="display:none;">💡 <span id="acc-sug-msg"></span></button>
   <button class="btn btn-blue btn-full" onclick="switchTab('accreds')">🪪 Valider les photos</button>
   <button class="btn btn-ghost btn-full" onclick="switchTab('match')">🏐 Gérer le match</button>
@@ -245,7 +246,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <div class="card">
     <div id="creneaux-list" style="margin-bottom:12px;"></div>
     <div style="display:flex;flex-direction:column;gap:7px;">
-      <select id="cr-cat" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+      <select id="cr-cat" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
         <option value="arrivee">Arriv&eacute;e / accueil</option>
         <option value="mise_en_place">Mise en place / briefing</option>
         <option value="en_position">En position &ndash; ouverture</option>
@@ -254,13 +255,13 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
         <option value="desinstallation">D&eacute;sinstallation</option>
         <option value="autre">Autre</option>
       </select>
-      <input id="cr-lib" placeholder="Libell&eacute; (optionnel, ex. Mise en place buvette)" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+      <input id="cr-lib" placeholder="Libell&eacute; (optionnel, ex. Mise en place buvette)" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
       <div style="font-size:10px;color:rgba(255,255,255,0.4);">Heure de d&eacute;but / fin (fin optionnelle)</div>
       <div style="display:flex;gap:7px;">
-        <input id="cr-deb" type="time" style="flex:1;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
-        <input id="cr-fin" type="time" style="flex:1;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+        <input id="cr-deb" type="time" style="flex:1;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+        <input id="cr-fin" type="time" style="flex:1;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
       </div>
-      <select id="cr-poste" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;"><option value="">Tous les postes</option></select>
+      <select id="cr-poste" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;"><option value="">Tous les postes</option></select>
       <button class="btn btn-blue btn-full" onclick="addCreneau()">+ Ajouter le cr&eacute;neau</button>
     </div>
   </div>
@@ -275,7 +276,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
 
 <!-- BÉNÉVOLES -->
 <div class="screen" id="screen-benevoles">
-  <input id="search" placeholder="Rechercher un bénévole..." style="width:100%;background:#2a2a28;border:1px solid #444441;border-radius:50px;padding:9px 14px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:12px;" oninput="filterBenv()">
+  <input id="search" placeholder="Rechercher un bénévole..." style="width:100%;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:50px;padding:9px 14px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:12px;" oninput="filterBenv()">
   <div id="benv-list"></div>
 </div>
 
@@ -534,20 +535,20 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <div class="sec">&#128588; Nouvel appel &agrave; b&eacute;n&eacute;voles</div>
   <div class="card">
     <div style="display:flex;flex-direction:column;gap:7px;">
-      <input id="ap-titre" placeholder="Titre (ex. Montage salle &ndash; match vs Tours)" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+      <input id="ap-titre" placeholder="Titre (ex. Montage salle &ndash; match vs Tours)" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
       <textarea id="ap-desc" class="note-area" placeholder="Description (optionnel)"></textarea>
       <div style="display:flex;gap:7px;">
-        <input id="ap-date" type="date" style="flex:1;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
-        <input id="ap-heure" type="time" style="flex:1;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+        <input id="ap-date" type="date" style="flex:1;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+        <input id="ap-heure" type="time" style="flex:1;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
       </div>
-      <input id="ap-lieu" placeholder="Lieu (ex. Palais des Sports)" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
-      <input id="ap-places" type="number" min="1" placeholder="Nb de b&eacute;n&eacute;voles recherch&eacute;s (optionnel)" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+      <input id="ap-lieu" placeholder="Lieu (ex. Palais des Sports)" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+      <input id="ap-places" type="number" min="1" placeholder="Nb de b&eacute;n&eacute;voles recherch&eacute;s (optionnel)" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
       <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;margin-bottom:4px;">R&eacute;serv&eacute; &agrave; une comp&eacute;tence ?</div>
-      <select id="ap-competence" style="background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;"><option value="">Tous les b&eacute;n&eacute;voles</option></select>
+      <select id="ap-competence" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;"><option value="">Tous les b&eacute;n&eacute;voles</option></select>
       <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;">Objectifs / t&acirc;ches (b&acirc;ches, housses, LEDs, salon VIP&hellip;)</div>
       <div id="ap-obj-list" style="display:flex;flex-direction:column;gap:5px;"></div>
       <div style="display:flex;gap:7px;">
-        <input id="ap-obj-input" placeholder="Ajouter une t&acirc;che" onkeydown="if(event.key==='Enter'){event.preventDefault();addObjectif();}" style="flex:1;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+        <input id="ap-obj-input" placeholder="Ajouter une t&acirc;che" onkeydown="if(event.key==='Enter'){event.preventDefault();addObjectif();}" style="flex:1;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
         <button class="btn btn-ghost" onclick="addObjectif()">+ T&acirc;che</button>
       </div>
       <button class="btn btn-blue btn-full" onclick="createMission()">Cr&eacute;er l'appel</button>
@@ -561,10 +562,10 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
   <div class="card">
     <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-bottom:10px;">Cr&eacute;e une comp&eacute;tence, puis coche les b&eacute;n&eacute;voles form&eacute;s. Un appel &laquo; r&eacute;serv&eacute; &raquo; ne sera visible que par eux.</div>
     <div style="display:flex;gap:7px;margin-bottom:12px;">
-      <input id="comp-new" placeholder="Nouvelle comp&eacute;tence (ex. Sono)" style="flex:1;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+      <input id="comp-new" placeholder="Nouvelle comp&eacute;tence (ex. Sono)" style="flex:1;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
       <button class="btn btn-ghost" onclick="addCompetence()">+ Cr&eacute;er</button>
     </div>
-    <select id="comp-select" onchange="loadCompMembers()" style="width:100%;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;"><option value="">&mdash; Choisir une comp&eacute;tence &mdash;</option></select>
+    <select id="comp-select" onchange="loadCompMembers()" style="width:100%;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;"><option value="">&mdash; Choisir une comp&eacute;tence &mdash;</option></select>
     <div id="comp-members" style="margin-top:10px;"></div>
   </div>
 </div>
@@ -642,21 +643,21 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
         <button class="btn btn-ghost btn-full" style="margin-bottom:8px;text-align:left;" onclick="rgpdActionShowDelete()" id="rgpd-delete-btn">
           <span style="font-size:18px;margin-right:8px;">🗑️</span>
           <span style="display:inline-block;vertical-align:middle;">
-            <strong style="color:#F4B8CE;">Demander la suppression</strong><br>
+            <strong style="color:var(--c-accent-100);">Demander la suppression</strong><br>
             <span style="font-size:10px;color:rgba(255,255,255,0.5);">Effacement programmé J+30 (annulable)</span>
           </span>
         </button>
         <button class="btn btn-ghost btn-full" style="margin-bottom:8px;text-align:left;display:none;" onclick="rgpdActionCancel()" id="rgpd-cancel-btn">
           <span style="font-size:18px;margin-right:8px;">↺</span>
           <span style="display:inline-block;vertical-align:middle;">
-            <strong style="color:#C0DD97;">Annuler la suppression</strong><br>
+            <strong style="color:var(--c-green-light);">Annuler la suppression</strong><br>
             <span style="font-size:10px;color:rgba(255,255,255,0.5);">Réactiver le compte immédiatement</span>
           </span>
         </button>
       </div>
       <!-- Vue formulaire suppression (cachée par défaut) -->
       <div id="rgpd-delete-form" style="display:none;">
-        <div style="background:rgba(153,53,86,0.15);border:1px solid rgba(153,53,86,0.3);border-radius:10px;padding:12px;font-size:11px;color:#F4B8CE;line-height:1.7;margin-bottom:14px;">
+        <div style="background:rgba(153,53,86,0.15);border:1px solid rgba(153,53,86,0.3);border-radius:10px;padding:12px;font-size:11px;color:var(--c-accent-100);line-height:1.7;margin-bottom:14px;">
           ⚠️ La suppression sera <strong>effective dans 30 jours</strong>. Le bénévole recevra un email immédiat avec la possibilité de contester.
         </div>
         <label style="display:block;font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:6px;font-weight:600;">Motif de la suppression (obligatoire)</label>
@@ -685,7 +686,7 @@ body{font-family:'Sora',sans-serif;background:#1a1a18;min-height:100vh;}
     <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;margin-bottom:12px;">
       <div style="font-size:12px;font-weight:700;color:white;margin-bottom:8px;">⭐ Statut référent</div>
       <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
-        <input type="checkbox" id="referent-is-checkbox" style="width:18px;height:18px;cursor:pointer;accent-color:#185FA5;margin-top:2px;flex-shrink:0;" onchange="toggleReferentStatus()">
+        <input type="checkbox" id="referent-is-checkbox" style="width:18px;height:18px;cursor:pointer;accent-color:var(--c-action);margin-top:2px;flex-shrink:0;" onchange="toggleReferentStatus()">
         <div>
           <div style="font-size:12px;color:white;">Marquer comme référent</div>
           <div style="font-size:10px;color:rgba(255,255,255,0.5);">Pourra être assigné à de nouveaux bénévoles. Si décoché, les filleuls actuels seront automatiquement désaffectés.</div>
@@ -929,7 +930,7 @@ function openGuide(){
     ov.style.cssText = 'position:fixed;inset:0;z-index:9997;pointer-events:none;';
     ov.innerHTML =
       '<div id="guide-hole" style="position:fixed;left:50%;top:50%;width:0;height:0;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.8);transition:all .3s ease;pointer-events:none;"></div>'
-      + '<div id="guide-tip" style="position:fixed;left:16px;bottom:16px;width:calc(100% - 32px);max-width:380px;background:#2a2a28;border-radius:18px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,0.6);pointer-events:auto;z-index:9999;"></div>';
+      + '<div id="guide-tip" style="position:fixed;left:16px;bottom:16px;width:calc(100% - 32px);max-width:380px;background:var(--c-ink-2);border-radius:18px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,0.6);pointer-events:auto;z-index:9999;"></div>';
     document.body.appendChild(ov);
     window.addEventListener('resize', _guideReposition);
   }
@@ -940,13 +941,13 @@ function openGuide(){
 function showGuideStep(){
   var s = GUIDE_STEPS[_guideIdx];
   var tip = document.getElementById('guide-tip');
-  var dots = GUIDE_STEPS.map(function(_, i){ return '<div style="width:'+(i===_guideIdx?'20px':'6px')+';height:6px;border-radius:50px;background:'+(i===_guideIdx?'#F5C842':'rgba(255,255,255,0.22)')+';transition:all .2s;"></div>'; }).join('');
+  var dots = GUIDE_STEPS.map(function(_, i){ return '<div style="width:'+(i===_guideIdx?'20px':'6px')+';height:6px;border-radius:50px;background:'+(i===_guideIdx?'var(--c-gold)':'rgba(255,255,255,0.22)')+';transition:all .2s;"></div>'; }).join('');
   var html = '<div style="display:flex;gap:5px;margin-bottom:12px;">'+dots+'</div>'
     + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><div style="font-size:30px;line-height:1;">'+s.ic+'</div>'
     + '<div><div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,200,66,0.7);">&Eacute;tape '+(_guideIdx+1)+' / '+GUIDE_STEPS.length+'</div>'
     + '<div style="font-size:16px;font-weight:800;color:white;">'+s.tt+'</div></div></div>'
     + '<div style="font-size:13px;line-height:1.55;color:rgba(255,255,255,0.8);">'+s.quoi+'</div>';
-  if(s.pourquoi){ html += '<div style="margin-top:12px;background:rgba(245,200,66,0.1);border-left:3px solid #F5C842;border-radius:8px;padding:9px 11px;"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#F5C842;margin-bottom:2px;">&#128161; Pourquoi</div><div style="font-size:12px;line-height:1.5;color:rgba(255,255,255,0.72);">'+s.pourquoi+'</div></div>'; }
+  if(s.pourquoi){ html += '<div style="margin-top:12px;background:rgba(245,200,66,0.1);border-left:3px solid var(--c-gold);border-radius:8px;padding:9px 11px;"><div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--c-gold);margin-bottom:2px;">&#128161; Pourquoi</div><div style="font-size:12px;line-height:1.5;color:rgba(255,255,255,0.72);">'+s.pourquoi+'</div></div>'; }
   html += '<div style="display:flex;gap:8px;margin-top:16px;">'
     + '<button class="btn btn-ghost" style="flex:1;'+(_guideIdx===0?'visibility:hidden;':'')+'" onclick="guidePrev()">Précédent</button>'
     + '<button class="btn btn-blue" style="flex:2;" onclick="guideNext()">'+(_guideIdx===GUIDE_STEPS.length-1?'C\'est parti !':'Suivant')+'</button>'
@@ -974,7 +975,7 @@ function _guideReposition(){
   setTimeout(function(){
     var r = el.getBoundingClientRect();
     var pad = 6;
-    hole.style.border='2px solid #F5C842';
+    hole.style.border='2px solid var(--c-gold)';
     hole.style.left=(r.left-pad)+'px';
     hole.style.top=(r.top-pad)+'px';
     hole.style.width=(r.width+pad*2)+'px';
@@ -1051,7 +1052,7 @@ async function loadAll() {
       ${b._signedUrl?`<img src="${b._signedUrl}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
       <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
         <div style="font-size:10px;color:rgba(255,255,255,0.4);">${b.matchs_joues||0} matchs</div></div>
-      <div style="font-size:14px;font-weight:800;color:#F5C842;font-family:monospace;">${b.points_total||0}</div>
+      <div style="font-size:14px;font-weight:800;color:var(--c-gold);font-family:monospace;">${b.points_total||0}</div>
     </div>`).join('')
 
   renderPhotosAtt(att)
@@ -1066,7 +1067,7 @@ async function loadAll() {
 
 function renderPhotosAtt(list) {
   document.getElementById('photos-att').innerHTML = list.length===0
-    ? '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucune photo en attente</div>'
+    ? '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:var(--c-green-light);">✓ Aucune photo en attente</div>'
     : list.map(b=>`
       <div class="photo-card">
         ${b._signedUrl?`<img src="${b._signedUrl}" class="thumb">`:`<div class="thumb-ph">${ini(b)}</div>`}
@@ -1101,10 +1102,10 @@ function renderBenv(list) {
       <div style="flex:1;min-width:0;">
         <div style="font-size:12px;font-weight:700;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${b.prenom||''} ${b.nom||''}</div>
         <div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;">
-          <span class="s-badge" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">${b.niveau||'Bronze'}</span>
+          <span class="s-badge" style="background:rgba(24,95,165,0.2);color:var(--c-blue-100);">${b.niveau||'Bronze'}</span>
           <span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);">${b.points_total||0} pts</span>
           ${getAccBadge(b.statut_accreditation)}
-          ${b.statut_compte==='pending_deletion'?`<span class="s-badge" style="background:rgba(153,53,86,0.25);color:#F4B8CE;">🗑️ Suppression</span>`:''}
+          ${b.statut_compte==='pending_deletion'?`<span class="s-badge" style="background:rgba(153,53,86,0.25);color:var(--c-accent-100);">🗑️ Suppression</span>`:''}
           ${b.statut_compte==='supprime'?`<span class="s-badge" style="background:rgba(95,94,90,0.3);color:rgba(255,255,255,0.5);">⚫ Supprimé</span>`:''}
         </div>
       </div>
@@ -1143,7 +1144,7 @@ async function openModalPh(id) {
   document.getElementById('modal-ph-content').innerHTML=`
     ${photoUrl
       ?`<img src="${photoUrl}" class="modal-img" alt="">`
-      :`<div style="width:100px;height:100px;border-radius:50%;background:#444441;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:white;margin:0 auto 14px;">${ini(b)}</div>`}
+      :`<div style="width:100px;height:100px;border-radius:50%;background:var(--c-ink-3);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:white;margin:0 auto 14px;">${ini(b)}</div>`}
     <div style="text-align:center;margin-bottom:12px;">
       <div style="font-size:16px;font-weight:800;color:white;">${b.prenom||''} ${b.nom||''}</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">${b.email}</div>
@@ -1196,7 +1197,7 @@ async function printAccred(id, prenom, nom, num) {
 <style>
 @page{size:85.6mm 54mm;margin:0;}
 body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#F0F0F0;}
-.card{width:85.6mm;height:54mm;background:linear-gradient(135deg,#042C53,#185FA5);border-radius:8px;padding:14px;color:white;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;}
+.card{width:85.6mm;height:54mm;background:linear-gradient(135deg,var(--c-navy),var(--c-action));border-radius:8px;padding:14px;color:white;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;}
 .top{display:flex;justify-content:space-between;align-items:start;}
 .club{font-size:7px;letter-spacing:2px;text-transform:uppercase;color:rgba(181,212,244,0.7);}
 .photo{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);}
@@ -1204,7 +1205,8 @@ body{margin:0;display:flex;justify-content:center;align-items:center;min-height:
 .bottom{} .type{font-size:8px;color:rgba(181,212,244,0.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
 .name{font-size:15px;font-weight:800;} .season{font-size:8px;color:rgba(181,212,244,0.6);margin-top:2px;}
 .num{font-size:8px;font-family:monospace;color:rgba(181,212,244,0.4);margin-top:6px;}
-</style></head><body>
+</style>  <link rel="stylesheet" href="/theme.css">
+</head><body>
 <div class="card">
   <div class="top">
     <div class="club">Spacer's Toulouse Volley</div>
@@ -1293,10 +1295,10 @@ async function loadMatch() {
         const b = i.benevoles || {}
         const when = i.indispo_signalee_le ? new Date(i.indispo_signalee_le).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : ''
         const msg = i.indispo_message ? '<div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:3px;font-style:italic;">&laquo; '+_escInd(i.indispo_message)+' &raquo;</div>' : ''
-        return '<div class="benv-row" style="border-left:3px solid #F09595;padding-left:8px;">'
+        return '<div class="benv-row" style="border-left:3px solid var(--c-danger-soft);padding-left:8px;">'
           + '<div style="flex:1;">'
           + '<div style="font-size:12px;font-weight:700;color:white;">'+_escInd(b.prenom||'')+' '+_escInd(b.nom||'')+'</div>'
-          + '<div style="font-size:10px;color:#F09595;">&#9888;&#65039; &agrave; remplacer'+(when?' &middot; signale le '+when:'')+'</div>'
+          + '<div style="font-size:10px;color:var(--c-danger-soft);">&#9888;&#65039; &agrave; remplacer'+(when?' &middot; signale le '+when:'')+'</div>'
           + msg
           + '</div></div>'
       }).join('')
@@ -1317,7 +1319,7 @@ async function loadMatch() {
         : ok === 0
           ? `<span class="s-badge s-ref">URGENT</span>`
           : `<span class="s-badge s-att">${besoin-ok} manquant${besoin-ok>1?'s':''}</span>`
-      const couleur = ok >= besoin ? '#C0DD97' : ok === 0 ? '#F09595' : '#FAC775'
+      const couleur = ok >= besoin ? 'var(--c-green-light)' : ok === 0 ? 'var(--c-danger-soft)' : 'var(--c-gold-2)'
       return `<tr><td>${p.nom}</td><td>${besoin}</td><td style="font-weight:700;color:${couleur}">${ok}</td><td>${s}</td></tr>`
     }).join('')
 
@@ -1357,7 +1359,7 @@ async function loadMatch() {
 
   if (nonReps.length === 0) {
     document.getElementById('non-rep-match').innerHTML =
-      '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:10px;font-size:12px;color:#C0DD97;">✓ Tous les bénévoles ont répondu</div>'
+      '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:10px;font-size:12px;color:var(--c-green-light);">✓ Tous les bénévoles ont répondu</div>'
   } else {
     document.getElementById('non-rep-match').innerHTML = nonReps.map(b => `
       <div class="benv-row">
@@ -1385,8 +1387,8 @@ const CR_CATS = [
   ['arrivee','Arriv&eacute;e / accueil','#3B82F6'],
   ['mise_en_place','Mise en place / briefing','#8B5CF6'],
   ['en_position','En position','#22C55E'],
-  ['match','Match','#042C53'],
-  ['repas','Repas','#F5C842'],
+  ['match','Match','var(--c-navy)'],
+  ['repas','Repas','var(--c-gold)'],
   ['desinstallation','D&eacute;sinstallation','#F97316'],
   ['autre','Autre','#9CA3AF']
 ];
@@ -1432,7 +1434,7 @@ async function delCreneau(id){
 let _apObjectifs = [];
 function renderApObj(){
   var el=document.getElementById('ap-obj-list'); if(!el) return;
-  el.innerHTML=_apObjectifs.map(function(o,idx){ return '<div style="display:flex;align-items:center;gap:8px;background:#2a2a28;border-radius:8px;padding:6px 10px;"><span style="flex:1;font-size:12px;color:white;">&#8226; '+escapeHtml(o)+'</span><button class="btn btn-sm" style="background:#7a2525;color:white;" onclick="rmObjectif('+idx+')">&#10005;</button></div>'; }).join('');
+  el.innerHTML=_apObjectifs.map(function(o,idx){ return '<div style="display:flex;align-items:center;gap:8px;background:var(--c-ink-2);border-radius:8px;padding:6px 10px;"><span style="flex:1;font-size:12px;color:white;">&#8226; '+escapeHtml(o)+'</span><button class="btn btn-sm" style="background:#7a2525;color:white;" onclick="rmObjectif('+idx+')">&#10005;</button></div>'; }).join('');
 }
 function addObjectif(){
   var inp=document.getElementById('ap-obj-input'); var v=(inp.value||'').trim();
@@ -1500,7 +1502,7 @@ async function loadAppelsPilote(){
   var el=document.getElementById('ap-list'); if(!el) return;
   await loadCompetences();
   var r=await sb.from('missions').select('*, mission_participations(id, statut, benevole_id, benevoles(prenom, nom, telephone))').order('date_mission',{ascending:true,nullsFirst:false}).order('created_at',{ascending:false});
-  if(r.error){ el.innerHTML='<div class="card"><div style="color:#FAC775;font-size:12px;">Erreur: '+r.error.message+'</div></div>'; return; }
+  if(r.error){ el.innerHTML='<div class="card"><div style="color:var(--c-gold-2);font-size:12px;">Erreur: '+r.error.message+'</div></div>'; return; }
   var list=r.data||[];
   if(list.length===0){ el.innerHTML='<div class="card"><div style="color:rgba(255,255,255,0.3);font-size:12px;font-style:italic;">Aucun appel pour le moment.</div></div>'; return; }
   el.innerHTML=list.map(function(m){
@@ -1514,10 +1516,10 @@ async function loadAppelsPilote(){
     return '<div class="card" style="margin-bottom:10px;">'+
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><div style="flex:1;font-size:14px;font-weight:800;color:white;">'+escapeHtml(m.titre)+'</div><span class="s-badge" style="background:'+(isOpen?'rgba(34,197,94,0.15);color:#86EFAC':'rgba(255,255,255,0.08);color:rgba(255,255,255,0.4)')+';">'+(isOpen?'Ouvert':'Ferme')+'</span></div>'+
       '<div style="font-size:11px;color:rgba(181,212,244,0.7);margin-bottom:6px;">&#128197; '+dateStr+heureStr+(m.lieu?(' &middot; '+escapeHtml(m.lieu)):'')+'</div>'+
-      (m.competence_requise_id?'<div style="display:inline-block;background:rgba(245,200,66,0.18);color:#F5C842;border-radius:6px;padding:2px 9px;font-size:10px;font-weight:700;margin-bottom:6px;">&#127891; R&eacute;serv&eacute; : '+escapeHtml(_compMap[m.competence_requise_id]||'competence')+'</div>':'')+
+      (m.competence_requise_id?'<div style="display:inline-block;background:rgba(245,200,66,0.18);color:var(--c-gold);border-radius:6px;padding:2px 9px;font-size:10px;font-weight:700;margin-bottom:6px;">&#127891; R&eacute;serv&eacute; : '+escapeHtml(_compMap[m.competence_requise_id]||'competence')+'</div>':'')+
       (m.description?'<div style="font-size:12px;color:rgba(255,255,255,0.7);margin-bottom:6px;white-space:pre-line;">'+escapeHtml(m.description)+'</div>':'')+
       (objs?'<div style="margin-bottom:8px;">'+objs+'</div>':'')+
-      '<div style="font-size:11px;font-weight:700;color:#F5C842;margin-bottom:4px;">&#128101; '+nb+' inscrit'+(nb>1?'s':'')+(m.places_max?(' / '+m.places_max):'')+'</div>'+
+      '<div style="font-size:11px;font-weight:700;color:var(--c-gold);margin-bottom:4px;">&#128101; '+nb+' inscrit'+(nb>1?'s':'')+(m.places_max?(' / '+m.places_max):'')+'</div>'+
       '<div style="margin-bottom:8px;">'+partRows+'</div>'+
       '<div style="display:flex;gap:7px;">'+(isOpen?'<button class="btn btn-sm" style="flex:1;background:#1f6f43;color:white;" onclick="notifyAppel(\''+m.id+'\')">&#128227; Notifier</button>':'')+'<button class="btn btn-sm btn-ghost" style="flex:1;" onclick="toggleMission(\''+m.id+'\',\''+(isOpen?'fermee':'ouverte')+'\')">'+(isOpen?'Fermer':'Rouvrir')+'</button><button class="btn btn-sm" style="background:#7a2525;color:white;" onclick="delMission(\''+m.id+'\')">Supprimer</button></div>'+
       '</div>';
@@ -1574,7 +1576,7 @@ function renderValidation(list) {
       <div class="kpi"><div class="kpi-val r">${absents}</div><div class="kpi-lbl">Absents</div></div>
     </div>
     ${reste > 0
-      ? `<div class="alert" style="background:rgba(201,130,26,0.15);color:#FAC775;border:1px solid rgba(201,130,26,0.3);">⏳ ${reste} bénévole${reste>1?'s':''} reste${reste>1?'nt':''} à valider</div>`
+      ? `<div class="alert" style="background:rgba(201,130,26,0.15);color:var(--c-gold-2);border:1px solid rgba(201,130,26,0.3);">⏳ ${reste} bénévole${reste>1?'s':''} reste${reste>1?'nt':''} à valider</div>`
       : `<div class="alert alert-s">✓ Tous les bénévoles affectés ont été validés</div>`}
   `
 
@@ -1916,11 +1918,11 @@ function sugCardHTML(s) {
 
   let visBadges = ''
   if (isBoth) {
-    visBadges = '<span class="s-badge" style="background:rgba(201,130,26,0.2);color:#FAC775;">🎯 Privé</span><span class="s-badge" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">💬 Public</span>'
+    visBadges = '<span class="s-badge" style="background:rgba(201,130,26,0.2);color:var(--c-gold-2);">🎯 Privé</span><span class="s-badge" style="background:rgba(24,95,165,0.2);color:var(--c-blue-100);">💬 Public</span>'
   } else if (isPrivate) {
-    visBadges = '<span class="s-badge" style="background:rgba(201,130,26,0.2);color:#FAC775;">🎯 Privé pilotes</span>'
+    visBadges = '<span class="s-badge" style="background:rgba(201,130,26,0.2);color:var(--c-gold-2);">🎯 Privé pilotes</span>'
   } else if (isPublic) {
-    visBadges = '<span class="s-badge" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">💬 Public</span>'
+    visBadges = '<span class="s-badge" style="background:rgba(24,95,165,0.2);color:var(--c-blue-100);">💬 Public</span>'
   }
 
   const actionBtn = unread
@@ -2139,7 +2141,7 @@ function renderRewDemandes() {
   const el = document.getElementById('rew-demandes')
 
   if (att.length === 0) {
-    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucune demande en attente</div>'
+    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:var(--c-green-light);">✓ Aucune demande en attente</div>'
     return
   }
 
@@ -2159,7 +2161,7 @@ function renderRewDemandes() {
             </div>
           </div>
         </div>
-        <div style="font-size:10px;color:${stockMatching > 0 ? '#C0DD97' : '#F09595'};margin-bottom:8px;">
+        <div style="font-size:10px;color:${stockMatching > 0 ? 'var(--c-green-light)' : 'var(--c-danger-soft)'};margin-bottom:8px;">
           ${stockMatching > 0 ? `✓ ${stockMatching} code${stockMatching>1?'s':''} dispo${stockMatching>1?'s':''} pour ce palier` : '✗ Aucun code dispo pour ce palier (ajoute du stock)'}
         </div>
         <div style="display:flex;gap:6px;">
@@ -2342,7 +2344,7 @@ function renderEmpDemandes() {
   const el = document.getElementById('emp-demandes')
 
   if (att.length === 0) {
-    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucune demande en attente</div>'
+    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:var(--c-green-light);">✓ Aucune demande en attente</div>'
     return
   }
 
@@ -2462,15 +2464,15 @@ function renderEmploiList() {
     const isRefusee = a.statut_validation === 'refusee'
     const opacity = (a.active && !isExp && !isRefusee) ? '1' : '0.5'
     let statut
-    if (isRefusee) statut = '<span class="s-badge" style="background:rgba(153,53,86,0.15);color:#F09595;">✗ Refusée</span>'
+    if (isRefusee) statut = '<span class="s-badge" style="background:rgba(153,53,86,0.15);color:var(--c-danger-soft);">✗ Refusée</span>'
     else if (!a.active) statut = '<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);">⏸ Désactivée</span>'
-    else if (isExp) statut = '<span class="s-badge" style="background:rgba(201,130,26,0.15);color:#FAC775;">⏰ Expirée</span>'
-    else statut = '<span class="s-badge" style="background:rgba(59,109,17,0.15);color:#C0DD97;">● Active</span>'
+    else if (isExp) statut = '<span class="s-badge" style="background:rgba(201,130,26,0.15);color:var(--c-gold-2);">⏰ Expirée</span>'
+    else statut = '<span class="s-badge" style="background:rgba(59,109,17,0.15);color:var(--c-green-light);">● Active</span>'
 
     return `
       <div class="card" style="opacity:${opacity};">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-          <span class="s-badge" style="background:${isPart?'rgba(201,130,26,0.15);color:#FAC775':'rgba(24,95,165,0.2);color:#B5D4F4'};">
+          <span class="s-badge" style="background:${isPart?'rgba(201,130,26,0.15);color:var(--c-gold-2)':'rgba(24,95,165,0.2);color:var(--c-blue-100)'};">
             ${isPart ? '🤝 Partenaire' : '🏐 Bénévole'}
           </span>
           ${a.type_contrat ? `<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);">${escapeHtmlPilote(a.type_contrat)}</span>` : ''}
@@ -2641,7 +2643,7 @@ function renderEvPiloteAtt() {
   const el = document.getElementById('ev-pilote-att')
   if (!el) return
   if (att.length === 0) {
-    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucune proposition en attente</div>'
+    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:var(--c-green-light);">✓ Aucune proposition en attente</div>'
     return
   }
   el.innerHTML = att.map(e => {
@@ -2662,7 +2664,7 @@ function renderEvPiloteAtt() {
         ${coverHtml}
         <div style="background:rgba(0,0,0,0.2);border-radius:8px;padding:10px;margin-bottom:10px;">
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
-            <span class="s-badge" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">${EV_CATLBL_PILOTE[e.categorie] || escapeHtmlPilote(e.categorie)}</span>
+            <span class="s-badge" style="background:rgba(24,95,165,0.2);color:var(--c-blue-100);">${EV_CATLBL_PILOTE[e.categorie] || escapeHtmlPilote(e.categorie)}</span>
             <span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);">📅 ${formatDate(e.date_event)}</span>
             ${e.lieu ? `<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);">📍 ${escapeHtmlPilote(e.lieu)}</span>` : ''}
           </div>
@@ -2703,7 +2705,7 @@ function renderEvPiloteList() {
     let statut
     if (isHidden) statut = '<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);">⏸ Masqué</span>'
     else if (isPast) statut = '<span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.5);">Passé</span>'
-    else statut = '<span class="s-badge" style="background:rgba(59,109,17,0.15);color:#C0DD97;">● Publié</span>'
+    else statut = '<span class="s-badge" style="background:rgba(59,109,17,0.15);color:var(--c-green-light);">● Publié</span>'
 
     const opacity = (isHidden || isPast) ? '0.6' : '1'
     const coverUrl = getEventCoverUrl(e.cover_path)
@@ -2715,7 +2717,7 @@ function renderEvPiloteList() {
       <div class="card" style="opacity:${opacity};">
         ${coverHtml}
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-          <span class="s-badge" style="background:rgba(24,95,165,0.2);color:#B5D4F4;">${EV_CATLBL_PILOTE[e.categorie] || escapeHtmlPilote(e.categorie)}</span>
+          <span class="s-badge" style="background:rgba(24,95,165,0.2);color:var(--c-blue-100);">${EV_CATLBL_PILOTE[e.categorie] || escapeHtmlPilote(e.categorie)}</span>
           ${statut}
         </div>
         <div style="font-size:13px;font-weight:700;color:white;margin-bottom:3px;">${escapeHtmlPilote(e.titre)}</div>
@@ -2785,7 +2787,7 @@ function renderEvPresences() {
       + (b._signedUrl ? '<img src="' + b._signedUrl + '" class="bav">' : '<div class="bav-ph">' + ini(b) + '</div>')
       + '<div style="flex:1;min-width:0;">'
       +   '<div style="font-size:12px;font-weight:700;color:white;">' + escapeHtmlPilote(((b.prenom || '') + ' ' + (b.nom || '')).trim()) + '</div>'
-      +   (interesse ? '<div style="font-size:10px;color:#FAC775;">&#10022; Int&eacute;ress&eacute;(e)</div>' : '')
+      +   (interesse ? '<div style="font-size:10px;color:var(--c-gold-2);">&#10022; Int&eacute;ress&eacute;(e)</div>' : '')
       + '</div>'
       + '<button class="btn btn-sm ' + (on ? 'btn-green' : 'btn-ghost') + '" onclick="toggleEvPresence(\'' + b.id + '\')">' + (on ? '&#10003; Pr&eacute;sent' : 'Absent') + '</button>'
       + '</div>'
@@ -2865,7 +2867,7 @@ function renderPhotosPending() {
   if (!el) return
   const list = _piloteAllPhotosPending || []
   if (list.length === 0) {
-    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucune photo en attente de modération</div>'
+    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:var(--c-green-light);">✓ Aucune photo en attente de modération</div>'
     return
   }
   el.innerHTML = list.map(p => {
@@ -2874,7 +2876,7 @@ function renderPhotosPending() {
     const uploaderName = ((uploader.prenom||'') + ' ' + (uploader.nom||'')).trim() || 'Inconnu'
     const thumb = p._signedUrl
       ? `<img src="${p._signedUrl}" style="width:120px;height:120px;border-radius:10px;object-fit:cover;cursor:pointer;flex-shrink:0;" onclick="openPilotePhotoLightbox('${p.id}')">`
-      : `<div style="width:120px;height:120px;border-radius:10px;background:#444441;display:flex;align-items:center;justify-content:center;font-size:24px;color:#888;flex-shrink:0;">⏳</div>`
+      : `<div style="width:120px;height:120px;border-radius:10px;background:var(--c-ink-3);display:flex;align-items:center;justify-content:center;font-size:24px;color:#888;flex-shrink:0;">⏳</div>`
     return `
       <div class="demande-card">
         <div style="display:flex;gap:12px;margin-bottom:10px;">
@@ -3029,7 +3031,7 @@ function renderReportsPending() {
   if (!el) return
   const list = _piloteAllReportsPending || []
   if (list.length === 0) {
-    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:#C0DD97;">✓ Aucun signalement en attente</div>'
+    el.innerHTML = '<div style="background:rgba(59,109,17,0.1);border:1px solid rgba(59,109,17,0.2);border-radius:10px;padding:12px;font-size:12px;color:var(--c-green-light);">✓ Aucun signalement en attente</div>'
     return
   }
   el.innerHTML = list.map(r => {
@@ -3040,15 +3042,15 @@ function renderReportsPending() {
 
     const thumb = r._signedUrl
       ? `<img src="${r._signedUrl}" style="width:120px;height:120px;border-radius:10px;object-fit:cover;cursor:pointer;flex-shrink:0;" onclick="openReportPhotoLightbox('${r.id}')">`
-      : `<div style="width:120px;height:120px;border-radius:10px;background:#444441;display:flex;align-items:center;justify-content:center;font-size:24px;color:#888;flex-shrink:0;">🖼️</div>`
+      : `<div style="width:120px;height:120px;border-radius:10px;background:var(--c-ink-3);display:flex;align-items:center;justify-content:center;font-size:24px;color:#888;flex-shrink:0;">🖼️</div>`
 
     return `
-      <div class="demande-card" style="border-left-color:#993556;">
+      <div class="demande-card" style="border-left-color:var(--c-accent);">
         <div style="display:flex;gap:12px;margin-bottom:10px;">
           ${thumb}
           <div style="flex:1;min-width:0;">
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
-              <span class="s-badge" style="background:rgba(153,53,86,0.25);color:#F4B8CE;">🚩 ${escapeHtmlPilote(reasonLbl)}</span>
+              <span class="s-badge" style="background:rgba(153,53,86,0.25);color:var(--c-accent-100);">🚩 ${escapeHtmlPilote(reasonLbl)}</span>
             </div>
             <div style="font-size:12px;font-weight:700;color:white;margin-bottom:2px;">${escapeHtmlPilote(event.titre || 'Event inconnu')}</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:6px;">📅 ${event.date_event ? formatDate(event.date_event) : '?'}</div>
@@ -3557,7 +3559,7 @@ async function rgpdActionConfirmDelete() {
   const target = _rgpdTarget
   const reason = (document.getElementById('rgpd-delete-reason').value || '').trim()
   if (!reason) {
-    document.getElementById('rgpd-delete-reason').style.borderColor = '#993556'
+    document.getElementById('rgpd-delete-reason').style.borderColor = 'var(--c-accent)'
     document.getElementById('rgpd-delete-reason').focus()
     return
   }
@@ -3585,8 +3587,8 @@ async function rgpdActionConfirmDelete() {
     to_name: fullName,
     subject: 'Important : ton compte Spacers Bénévoles va être supprimé',
     body_html:
-      '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#1a1a18;">' +
-      '<h2 style="color:#993556;">Action sur ton compte bénévole</h2>' +
+      '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:var(--c-ink);">' +
+      '<h2 style="color:var(--c-accent);">Action sur ton compte bénévole</h2>' +
       '<p>Bonjour ' + (target.prenom||'') + ',</p>' +
       '<p>Le club a programmé la <strong>suppression de ton compte bénévole Spacers</strong>.</p>' +
       '<ul><li>Date de suppression définitive : <strong>' + dateStr + '</strong></li></ul>' +
@@ -3596,7 +3598,7 @@ async function rgpdActionConfirmDelete() {
       '<li>Si tu souhaites <strong>récupérer tes données</strong> avant la suppression, connecte-toi à l\'app et va dans Profil > Mon compte > Exporter mes données</li>' +
       '<li>Si tu souhaites <strong>annuler la suppression toi-même</strong>, connecte-toi à l\'app : tu seras redirigé vers un écran de récupération.</li>' +
       '</ul>' +
-      '<p style="margin-top:30px;font-size:12px;color:#5F5E5A;">— L\'équipe TOAC-TUC Volley-Ball<br>Référent RGPD : Didier CONJEAUD<br><a href="mailto:contact@spacerstoulouse.fr">contact@spacerstoulouse.fr</a></p>' +
+      '<p style="margin-top:30px;font-size:12px;color:var(--c-muted);">— L\'équipe TOAC-TUC Volley-Ball<br>Référent RGPD : Didier CONJEAUD<br><a href="mailto:contact@spacerstoulouse.fr">contact@spacerstoulouse.fr</a></p>' +
       '</div>',
     body_text:
       'Bonjour ' + (target.prenom||'') + ',\n\n' +
