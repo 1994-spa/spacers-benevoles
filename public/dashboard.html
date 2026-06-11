@@ -4655,5 +4655,138 @@ init()
   window.addEventListener('load', function () { waitAndInject(); });
 })();
 </script>
+<script>
+// ============================================================
+// PASTILLES DE NOUVEAUTE (in-app)
+// Point colore sur un onglet quand du contenu est apparu depuis
+// la derniere visite de cet onglet (suivi local par appareil).
+// ============================================================
+(function () {
+  function S(key, navId, clearsOn, newest) { return { key: key, navId: navId, clearsOn: clearsOn, newest: newest, _lastNewest: null }; }
+
+  const SECTIONS = [
+    S('planning', 'bn-planning', ['planning'], async function () {
+      const { data } = await sb.from('matchs').select('created_at')
+        .eq('statut_inscriptions', 'ouvert').order('created_at', { ascending: false }).limit(1);
+      return data && data[0] ? data[0].created_at : null;
+    }),
+    S('forum', 'bn-forum', ['forum'], async function () {
+      const { data } = await sb.from('posts').select('created_at')
+        .eq('categorie', 'forum').order('created_at', { ascending: false }).limit(1);
+      return data && data[0] ? data[0].created_at : null;
+    }),
+    S('emploi', 'bn-emploi', ['emploi'], async function () {
+      const { data } = await sb.from('annonces_emploi').select('publiee_le')
+        .eq('active', true).eq('statut_validation', 'validee')
+        .order('publiee_le', { ascending: false }).limit(1);
+      return data && data[0] ? data[0].publiee_le : null;
+    }),
+    S('reward', 'bn-reward', ['reward'], async function () {
+      if (typeof CP === 'undefined' || !CP) return null;
+      const { data } = await sb.from('recompenses_demandes').select('traite_le')
+        .eq('benevole_id', CP.id).eq('statut', 'attribuee')
+        .order('traite_le', { ascending: false }).limit(1);
+      return data && data[0] ? data[0].traite_le : null;
+    }),
+    S('evenements', 'bn-home', ['home', 'evenements'], async function () {
+      const { data } = await sb.from('events_benevoles').select('created_at')
+        .eq('statut', 'published').order('created_at', { ascending: false }).limit(1);
+      return data && data[0] ? data[0].created_at : null;
+    }),
+  ];
+
+  function uid() { try { return (typeof CU !== 'undefined' && CU && CU.id) ? CU.id : 'anon'; } catch (e) { return 'anon'; } }
+  function seenKey(key) { return 'spacers_seen_' + uid() + '_' + key; }
+  function getSeen(key) { try { return localStorage.getItem(seenKey(key)); } catch (e) { return null; } }
+  function setSeen(key, val) { try { localStorage.setItem(seenKey(key), val); } catch (e) {} }
+  function isNewer(a, b) { try { return new Date(a).getTime() > new Date(b).getTime(); } catch (e) { return false; } }
+
+  function injectCss() {
+    if (document.getElementById('newdot-css')) return;
+    const st = document.createElement('style');
+    st.id = 'newdot-css';
+    st.textContent =
+      '.bn{position:relative;}' +
+      '.bn-dot{position:absolute;top:4px;left:50%;margin-left:5px;width:9px;height:9px;border-radius:50%;background:var(--c-accent,#993556);box-shadow:0 0 0 1.5px #fff;pointer-events:none;}';
+    document.head.appendChild(st);
+  }
+
+  function setDot(navId, on) {
+    const btn = document.getElementById(navId);
+    if (!btn) return;
+    let dot = btn.querySelector('.bn-dot');
+    if (on) {
+      if (!dot) { dot = document.createElement('span'); dot.className = 'bn-dot'; btn.appendChild(dot); }
+    } else if (dot) {
+      dot.remove();
+    }
+  }
+
+  async function refreshNewestCache() {
+    for (const s of SECTIONS) {
+      try { s._lastNewest = await s.newest(); } catch (e) { s._lastNewest = null; }
+    }
+  }
+
+  function updateAllDots() {
+    injectCss();
+    const nowISO = new Date().toISOString();
+    const dotByNav = {};
+    for (const s of SECTIONS) {
+      const newest = s._lastNewest;
+      const seen = getSeen(s.key);
+      let isNew = false;
+      if (seen === null) { setSeen(s.key, nowISO); }        // 1ere visite : pas de pastille sur l'existant
+      else if (newest && isNewer(newest, seen)) { isNew = true; }
+      dotByNav[s.navId] = dotByNav[s.navId] || isNew;
+    }
+    for (const navId in dotByNav) setDot(navId, dotByNav[navId]);
+  }
+
+  function markSeen(openName) {
+    const affectedNav = {};
+    for (const s of SECTIONS) {
+      if (s.clearsOn.indexOf(openName) >= 0) {
+        setSeen(s.key, new Date().toISOString());
+        affectedNav[s.navId] = true;
+      }
+    }
+    Object.keys(affectedNav).forEach(function (navId) {
+      const stillNew = SECTIONS.some(function (s) {
+        if (s.navId !== navId) return false;
+        const seen = getSeen(s.key);
+        return s._lastNewest && seen && isNewer(s._lastNewest, seen);
+      });
+      setDot(navId, stillNew);
+    });
+  }
+
+  function wrapBSwitch() {
+    if (window._bswitchWrappedForDots) return;
+    const orig = window.bSwitch;
+    if (typeof orig !== 'function') return;
+    window.bSwitch = function (name) {
+      const r = orig.apply(this, arguments);
+      try { markSeen(name); } catch (e) {}
+      return r;
+    };
+    window._bswitchWrappedForDots = true;
+  }
+
+  async function start() {
+    await refreshNewestCache();
+    updateAllDots();
+    wrapBSwitch();
+  }
+
+  function waitAndStart(tries) {
+    tries = tries || 0;
+    if (typeof sb !== 'undefined' && typeof CP !== 'undefined' && CP && typeof window.bSwitch === 'function') { start(); return; }
+    if (tries > 60) return;
+    setTimeout(function () { waitAndStart(tries + 1); }, 300);
+  }
+  window.addEventListener('load', function () { waitAndStart(); });
+})();
+</script>
 </body>
 </html>
