@@ -4529,5 +4529,131 @@ init()
         });
       }
     </script>
+<script>
+// ============================================================
+// NOTIFICATIONS PUSH — abonnement (etape 2)
+// ============================================================
+(function () {
+  const VAPID_PUBLIC_KEY = 'BOkGfTMtsiqrpUaw_2ISBgbR8jczKUORmQ4bEpV54_ZZn7mvv6CRbtK2hQKD_yplvCMzR4kJ9VU_VLQTMCuBZk4';
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    const arr = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+    return arr;
+  }
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+  function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+
+  function injectCard() {
+    const profil = document.getElementById('bs-profil');
+    if (!profil || document.getElementById('notif-card')) return;
+    const anchor = document.getElementById('account-card-wrap');
+    const card = document.createElement('div');
+    card.id = 'notif-card';
+    card.style.cssText = 'background:white;border-radius:16px;padding:16px;margin-bottom:10px;';
+    card.innerHTML =
+      '<div style="font-size:13px;font-weight:700;color:var(--c-navy-2);margin-bottom:4px;">🔔 Notifications</div>' +
+      '<div style="font-size:11px;color:var(--c-muted);margin-bottom:12px;line-height:1.5;">Reçois une alerte sur ton téléphone quand un match ouvre les inscriptions.</div>' +
+      '<div id="notif-zone"></div>';
+    if (anchor) profil.insertBefore(card, anchor); else profil.appendChild(card);
+    refreshZone();
+  }
+
+  async function currentSubscription() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+    const reg = await navigator.serviceWorker.ready;
+    return reg.pushManager.getSubscription();
+  }
+
+  async function refreshZone() {
+    const zone = document.getElementById('notif-zone');
+    if (!zone) return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+      zone.innerHTML = '<div style="font-size:11px;color:var(--c-muted);">Ton navigateur ne gère pas les notifications.</div>';
+      return;
+    }
+    if (isIOS() && !isStandalone()) {
+      zone.innerHTML = '<div style="background:var(--c-blue-50);border-radius:10px;padding:11px;font-size:11px;color:var(--c-navy-2);line-height:1.6;">📲 Sur iPhone, installe d\'abord l\'app : bouton <b>Partager</b> → <b>« Sur l\'écran d\'accueil »</b>, puis rouvre-la depuis l\'icône pour activer les notifications.</div>';
+      return;
+    }
+    if (Notification.permission === 'denied') {
+      zone.innerHTML = '<div style="font-size:11px;color:var(--c-accent);">Notifications bloquées dans les réglages du navigateur. Réactive-les puis recharge la page.</div>';
+      return;
+    }
+    const sub = await currentSubscription();
+    if (sub) {
+      zone.innerHTML =
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="color:var(--c-green);font-weight:700;">✓</span><span style="font-size:12px;color:var(--c-navy-2);font-weight:600;">Notifications activées sur cet appareil</span></div>' +
+        '<button class="btn btn-ghost" style="font-size:12px;margin-top:0;" id="notif-test">Envoyer une notification test</button>' +
+        '<button class="btn btn-ghost" style="font-size:12px;" id="notif-off">Désactiver</button>';
+      document.getElementById('notif-test').onclick = testNotif;
+      document.getElementById('notif-off').onclick = unsubscribe;
+    } else {
+      zone.innerHTML = '<button class="btn btn-blue" style="font-size:13px;" id="notif-on">🔔 Activer les notifications</button>';
+      document.getElementById('notif-on').onclick = subscribe;
+    }
+  }
+
+  async function subscribe() {
+    const btn = document.getElementById('notif-on');
+    if (btn) { btn.disabled = true; btn.textContent = 'Activation...'; }
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') { if (typeof showToast === 'function') showToast('Permission refusée', 'error'); return refreshZone(); }
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+      const json = sub.toJSON();
+      const { error } = await sb.from('push_subscriptions').upsert({
+        benevole_id: CP.id,
+        endpoint: sub.endpoint,
+        p256dh: json.keys.p256dh,
+        auth: json.keys.auth,
+        user_agent: navigator.userAgent,
+        last_seen_at: new Date().toISOString(),
+      }, { onConflict: 'endpoint' });
+      if (error) throw error;
+      if (typeof showToast === 'function') showToast('🔔 Notifications activées !', 'success');
+    } catch (e) {
+      console.error('subscribe error', e);
+      if (typeof showToast === 'function') showToast('Erreur : ' + (e.message || e), 'error');
+    } finally { refreshZone(); }
+  }
+
+  async function unsubscribe() {
+    try {
+      const sub = await currentSubscription();
+      if (sub) { await sb.from('push_subscriptions').delete().eq('endpoint', sub.endpoint); await sub.unsubscribe(); }
+      if (typeof showToast === 'function') showToast('Notifications désactivées', 'info');
+    } catch (e) { console.error('unsubscribe error', e); } finally { refreshZone(); }
+  }
+
+  async function testNotif() {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification('Spacers Bénévoles', {
+        body: 'Ceci est une notification test 🏐',
+        icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
+        data: { url: '/dashboard.html' },
+      });
+    } catch (e) { if (typeof showToast === 'function') showToast('Erreur test : ' + (e.message || e), 'error'); }
+  }
+
+  function waitAndInject(tries) {
+    tries = tries || 0;
+    if (typeof CP !== 'undefined' && CP) { injectCard(); return; }
+    if (tries > 40) return;
+    setTimeout(function () { waitAndInject(tries + 1); }, 300);
+  }
+  window.addEventListener('load', function () { waitAndInject(); });
+})();
+</script>
 </body>
 </html>
