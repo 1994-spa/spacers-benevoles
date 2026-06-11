@@ -4788,5 +4788,142 @@ init()
   window.addEventListener('load', function () { waitAndStart(); });
 })();
 </script>
+<script>
+// ============================================================
+// ANNONCES DE NOUVELLE FONCTIONNALITE
+// Pastille doree "nouveau" + bulle explicative, montree 1 fois par benevole.
+// >>> POUR ANNONCER UNE FONCTIONNALITE : ajoute une entree dans ANNOUNCEMENTS.
+//     - id     : identifiant UNIQUE (en changer = re-annoncer a tout le monde)
+//     - title  : titre de la bulle
+//     - body   : texte explicatif
+//     - target : selecteur CSS de l'element a pointer (idealement un bouton de nav, ex '#bn-profil')
+//     - cta    : optionnel { label, open } -> bouton qui ouvre l'onglet "open"
+// ============================================================
+(function () {
+  const ANNOUNCEMENTS = [
+    {
+      id: 'push-notifs-2026-07',
+      title: '🔔 Nouveau : les notifications',
+      body: "Active les notifications dans ton profil pour être prévenu sur ton téléphone dès qu'un match ouvre les inscriptions.",
+      target: '#bn-profil',
+      cta: { label: 'Activer', open: 'profil' },
+    },
+  ];
+
+  function uid() { try { return (typeof CU !== 'undefined' && CU && CU.id) ? CU.id : 'anon'; } catch (e) { return 'anon'; } }
+  function K(kind, id) { return 'spacers_feat_' + kind + '_' + uid() + '_' + id; }
+  function getF(kind, id) { try { return localStorage.getItem(K(kind, id)) === '1'; } catch (e) { return false; } }
+  function setF(kind, id) { try { localStorage.setItem(K(kind, id), '1'); } catch (e) {} }
+
+  function injectCss() {
+    if (document.getElementById('feat-css')) return;
+    const st = document.createElement('style');
+    st.id = 'feat-css';
+    st.textContent =
+      '.bn{position:relative;}' +
+      '.feat-dot{position:absolute;top:3px;left:50%;margin-left:-14px;width:9px;height:9px;border-radius:50%;background:#E8A33D;box-shadow:0 0 0 1.5px #fff;pointer-events:none;}' +
+      '.feat-ov{position:fixed;inset:0;background:rgba(4,44,83,.35);z-index:9998;animation:featfade .2s ease;}' +
+      '.feat-bub{position:fixed;z-index:9999;max-width:300px;background:#fff;border-radius:14px;padding:15px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:featpop .22s ease;}' +
+      '.feat-bub h4{margin:0 0 6px;font-size:14px;color:var(--c-navy-2,#042C53);font-weight:800;}' +
+      '.feat-bub p{margin:0 0 12px;font-size:12px;line-height:1.55;color:var(--c-muted,#5b6b7d);}' +
+      '.feat-bub .frow{display:flex;gap:8px;justify-content:flex-end;}' +
+      '.feat-bub button{font-family:inherit;border:none;cursor:pointer;border-radius:9px;padding:8px 13px;font-size:12px;font-weight:700;}' +
+      '.feat-bub .ok{background:#eef2f7;color:var(--c-navy-2,#042C53);}' +
+      '.feat-bub .go{background:var(--c-blue,#1d6fb8);color:#fff;}' +
+      '.feat-arrow{position:fixed;z-index:9999;width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-top:9px solid #fff;}' +
+      '@keyframes featfade{from{opacity:0}to{opacity:1}}' +
+      '@keyframes featpop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}';
+    document.head.appendChild(st);
+  }
+
+  function setDot(target, on) {
+    const el = document.querySelector(target);
+    if (!el) return;
+    let dot = el.querySelector('.feat-dot');
+    if (on) { if (!dot && el.classList.contains('bn')) { dot = document.createElement('span'); dot.className = 'feat-dot'; el.appendChild(dot); } }
+    else if (dot) { dot.remove(); }
+  }
+
+  let currentCleanup = null;
+  function closeBubble() { if (currentCleanup) { currentCleanup(); currentCleanup = null; } }
+
+  function dismissSeen(a) { setF('seen', a.id); }
+  function engage(a) { setF('eng', a.id); setDot(a.target, false); }
+
+  function showBubble(a) {
+    const el = document.querySelector(a.target);
+    if (!el) return;
+    injectCss();
+    const r = el.getBoundingClientRect();
+    const ov = document.createElement('div'); ov.className = 'feat-ov';
+    const bub = document.createElement('div'); bub.className = 'feat-bub';
+    const arrow = document.createElement('div'); arrow.className = 'feat-arrow';
+    bub.innerHTML = '<h4></h4><p></p><div class="frow"></div>';
+    bub.querySelector('h4').textContent = a.title;
+    bub.querySelector('p').textContent = a.body;
+    const row = bub.querySelector('.frow');
+    if (a.cta && a.cta.open) {
+      const go = document.createElement('button'); go.className = 'go'; go.textContent = a.cta.label || 'Voir';
+      go.onclick = function () { dismissSeen(a); engage(a); closeBubble(); try { window.bSwitch(a.cta.open); } catch (e) {} };
+      row.appendChild(go);
+    }
+    const ok = document.createElement('button'); ok.className = 'ok'; ok.textContent = 'Compris';
+    ok.onclick = function () { dismissSeen(a); closeBubble(); };
+    row.appendChild(ok);
+    ov.onclick = function () { dismissSeen(a); closeBubble(); };
+
+    document.body.appendChild(ov);
+    document.body.appendChild(bub);
+    document.body.appendChild(arrow);
+
+    const bw = bub.offsetWidth, bh = bub.offsetHeight;
+    const cx = r.left + r.width / 2;
+    let left = cx - bw / 2;
+    left = Math.max(12, Math.min(left, window.innerWidth - bw - 12));
+    const above = (r.top - bh - 12) >= 12;
+    let top = above ? (r.top - bh - 12) : (r.bottom + 12);
+    bub.style.left = left + 'px';
+    bub.style.top = top + 'px';
+    arrow.style.left = (cx - 9) + 'px';
+    if (above) { arrow.style.top = (r.top - 9) + 'px'; }
+    else { arrow.style.top = (r.bottom + 3) + 'px'; arrow.style.transform = 'rotate(180deg)'; }
+
+    currentCleanup = function () { ov.remove(); bub.remove(); arrow.remove(); };
+  }
+
+  function refresh() {
+    injectCss();
+    ANNOUNCEMENTS.forEach(function (a) { if (!getF('eng', a.id)) setDot(a.target, true); });
+    const toShow = ANNOUNCEMENTS.find(function (a) { return !getF('seen', a.id); });
+    if (toShow) setTimeout(function () { showBubble(toShow); }, 700);
+  }
+
+  function wrapBSwitch() {
+    if (window._bswitchWrappedForFeat) return;
+    const orig = window.bSwitch;
+    if (typeof orig !== 'function') return;
+    window.bSwitch = function (name) {
+      const r = orig.apply(this, arguments);
+      try {
+        ANNOUNCEMENTS.forEach(function (a) {
+          if (a.cta && a.cta.open === name) { dismissSeen(a); engage(a); }
+        });
+      } catch (e) {}
+      return r;
+    };
+    window._bswitchWrappedForFeat = true;
+  }
+
+  function waitAndStart(tries) {
+    tries = tries || 0;
+    if (typeof CP !== 'undefined' && CP && typeof window.bSwitch === 'function' && document.querySelector('#bn-profil')) {
+      wrapBSwitch(); refresh(); return;
+    }
+    if (tries > 60) return;
+    setTimeout(function () { waitAndStart(tries + 1); }, 300);
+  }
+  window.addEventListener('load', function () { waitAndStart(); });
+})();
+</script>
 </body>
 </html>
