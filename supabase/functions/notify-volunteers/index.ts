@@ -6,8 +6,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const MAILJET_API_KEY = Deno.env.get('MAILJET_API_KEY')!
-const MAILJET_SECRET_KEY = Deno.env.get('MAILJET_SECRET_KEY')!
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const FROM_EMAIL = 'marketing@spacerstoulouse.fr'
 const FROM_NAME = "Spacer's Toulouse Volley"
 
@@ -26,21 +25,20 @@ function fmtDate(d: string): string {
 }
 
 async function sendEmail(to: { Email: string; Name: string }[], subject: string, html: string) {
-  const auth = btoa(`${MAILJET_API_KEY}:${MAILJET_SECRET_KEY}`)
   const messages = to.map(t => ({
-    From: { Email: FROM_EMAIL, Name: FROM_NAME },
-    To: [t],
-    Subject: subject,
-    HTMLPart: html,
+    from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    to: [t.Email],
+    subject: subject,
+    html: html,
   }))
-  const res = await fetch('https://api.mailjet.com/v3.1/send', {
+  const res = await fetch('https://api.resend.com/emails/batch', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${auth}` },
-    body: JSON.stringify({ Messages: messages }),
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_API_KEY}` },
+    body: JSON.stringify(messages),
   })
   const body = await res.text()
-  console.log('Mailjet status:', res.status, 'body:', body.substring(0, 500))
-  if (!res.ok) throw new Error(`Mailjet error ${res.status}: ${body}`)
+  console.log('Resend status:', res.status, 'body:', body.substring(0, 500))
+  if (!res.ok) throw new Error(`Resend error ${res.status}: ${body}`)
   return res.status
 }
 
@@ -203,26 +201,25 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Envoi par batchs de 50 (limite Mailjet par requête)
-    const BATCH = 50
+    // Envoi par batchs de 100 (limite Resend /emails/batch par requête)
+    const BATCH = 100
     let totalSent = 0
     for (let i = 0; i < recipients.length; i += BATCH) {
       const batch = recipients.slice(i, i + BATCH)
-      // Mailjet : on envoie un message par destinataire pour personnaliser le HTML
-      const auth = btoa(`${MAILJET_API_KEY}:${MAILJET_SECRET_KEY}`)
+      // Resend : un message par destinataire pour personnaliser le HTML
       const messages = batch.map(r => ({
-        From: { Email: FROM_EMAIL, Name: FROM_NAME },
-        To: [{ Email: r.email, Name: `${r.prenom} ${r.nom}`.trim() }],
-        Subject: subject,
-        HTMLPart: buildHtml(r),
+        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        to: [r.email],
+        subject: subject,
+        html: buildHtml(r),
       }))
-      const res = await fetch('https://api.mailjet.com/v3.1/send', {
+      const res = await fetch('https://api.resend.com/emails/batch', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${auth}` },
-        body: JSON.stringify({ Messages: messages }),
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_API_KEY}` },
+        body: JSON.stringify(messages),
       })
       const respBody = await res.text()
-      console.log('Mailjet batch', i / BATCH, 'status:', res.status, 'body:', respBody.substring(0, 300))
+      console.log('Resend batch', i / BATCH, 'status:', res.status, 'body:', respBody.substring(0, 300))
       if (res.ok) totalSent += batch.length
     }
 
