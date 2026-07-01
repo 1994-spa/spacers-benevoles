@@ -6,7 +6,7 @@
 // ============================================================
 // Consomme la table public.email_outbox toutes les 5 minutes :
 // - lit jusqu'à BATCH_SIZE emails 'pending'
-// - envoie chacun via Mailjet Send API v3.1
+// - envoie chacun via Resend API (POST /emails)
 // - marque 'sent' / 'failed' avec gestion des retries (max 3 attempts)
 // ============================================================
 
@@ -15,7 +15,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 // ─── Constantes ────────────────────────────────────────────
 const MAX_ATTEMPTS = 3
 const BATCH_SIZE   = 50
-const MAILJET_URL  = "https://api.mailjet.com/v3.1/send"
+const RESEND_URL   = "https://api.resend.com/emails"
 
 // ─── Auth simple par secret partagé ───────────────────────
 function isAuthorized(req: Request): boolean {
@@ -25,10 +25,9 @@ function isAuthorized(req: Request): boolean {
   return provided === secret
 }
 
-// ─── Mailjet send ─────────────────────────────────────────
-async function sendViaMailjet(args: {
+// ─── Resend send ──────────────────────────────────────────
+async function sendViaResend(args: {
   apiKey: string
-  apiSecret: string
   fromEmail: string
   fromName: string
   toEmail: string
@@ -37,25 +36,23 @@ async function sendViaMailjet(args: {
   htmlPart: string
   textPart: string | null
 }): Promise<{ ok: true } | { ok: false; error: string }> {
-  const auth = btoa(`${args.apiKey}:${args.apiSecret}`)
-
   const message: Record<string, unknown> = {
-    From: { Email: args.fromEmail, Name: args.fromName },
-    To: [{ Email: args.toEmail, Name: args.toName || args.toEmail }],
-    Subject: args.subject,
-    HTMLPart: args.htmlPart,
+    from: `${args.fromName} <${args.fromEmail}>`,
+    to: [args.toEmail],
+    subject: args.subject,
+    html: args.htmlPart,
   }
-  if (args.textPart) message.TextPart = args.textPart
+  if (args.textPart) message.text = args.textPart
 
   let response: Response
   try {
-    response = await fetch(MAILJET_URL, {
+    response = await fetch(RESEND_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Basic ${auth}`,
+        "Authorization": `Bearer ${args.apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ Messages: [message] }),
+      body: JSON.stringify(message),
     })
   } catch (err) {
     return { ok: false, error: `Network error: ${err instanceof Error ? err.message : String(err)}` }
@@ -63,18 +60,11 @@ async function sendViaMailjet(args: {
 
   if (!response.ok) {
     const body = await response.text().catch(() => "(no body)")
-    return { ok: false, error: `Mailjet ${response.status}: ${body.slice(0, 500)}` }
+    return { ok: false, error: `Resend ${response.status}: ${body.slice(0, 500)}` }
   }
 
-  // Mailjet retourne 200 même si l'envoi a échoué partiellement, on inspecte
-  try {
-    const json = await response.json()
-    const status = json?.Messages?.[0]?.Status
-    if (status === "success") return { ok: true }
-    return { ok: false, error: `Mailjet status=${status}: ${JSON.stringify(json).slice(0, 500)}` }
-  } catch (err) {
-    return { ok: false, error: `Mailjet response parse: ${err instanceof Error ? err.message : String(err)}` }
-  }
+  // Resend renvoie un statut HTTP fiable + { id } en cas de succès
+  return { ok: true }
 }
 
 // ─── Handler principal ────────────────────────────────────
@@ -102,14 +92,13 @@ Deno.serve(async (req) => {
   // Env vars
   const supabaseUrl     = Deno.env.get("SUPABASE_URL")
   const serviceRoleKey  = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
-  const mailjetKey      = Deno.env.get("MAILJET_API_KEY")
-  const mailjetSecret   = Deno.env.get("MAILJET_SECRET_KEY")
-  const fromEmail       = Deno.env.get("MAILJET_FROM_EMAIL") || "marketing@spacerstoulouse.fr"
-  const fromName        = Deno.env.get("MAILJET_FROM_NAME")  || "Spacers Toulouse Volley"
+  const resendKey       = Deno.env.get("RESEND_API_KEY")
+  const fromEmail       = Deno.env.get("FROM_EMAIL") || "marketing@spacerstoulouse.fr"
+  const fromName        = Deno.env.get("FROM_NAME")  || "Spacers Toulouse Volley"
 
-  if (!supabaseUrl || !serviceRoleKey || !mailjetKey || !mailjetSecret) {
+  if (!supabaseUrl || !serviceRoleKey || !resendKey) {
     return new Response(
-      JSON.stringify({ error: "Missing required env vars (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, MAILJET_API_KEY, MAILJET_SECRET_KEY)" }),
+      JSON.stringify({ error: "Missing required env vars (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY)" }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     )
   }
@@ -148,9 +137,8 @@ Deno.serve(async (req) => {
   const results: Array<Record<string, unknown>> = []
 
   for (const row of pending) {
-    const result = await sendViaMailjet({
-      apiKey:     mailjetKey,
-      apiSecret:  mailjetSecret,
+    const result = await sendViaResend({
+      apiKey:     resendKey,
       fromEmail,
       fromName,
       toEmail:    row.to_email,
