@@ -1,10 +1,9 @@
 // ────────────────────────────────────────────────────────────────────
 // thank-you - Email de remerciement apres validation de presence (match)
 // ────────────────────────────────────────────────────────────────────
-const MAILJET_KEY    = Deno.env.get('MAILJET_API_KEY')!
-const MAILJET_SECRET = Deno.env.get('MAILJET_SECRET_KEY')!
-const FROM_EMAIL     = Deno.env.get('MAILJET_FROM_EMAIL') || 'marketing@spacerstoulouse.fr'
-const FROM_NAME      = Deno.env.get('MAILJET_FROM_NAME')  || "Spacer's Toulouse Volley"
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
+const FROM_EMAIL     = Deno.env.get('FROM_EMAIL') || 'marketing@spacerstoulouse.fr'
+const FROM_NAME      = Deno.env.get('FROM_NAME')  || "Spacer's Toulouse Volley"
 const APP_URL        = Deno.env.get('APP_URL')            || 'https://benevoles.spacerstoulouse.fr'
 const SUPABASE_URL   = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE   = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -57,23 +56,20 @@ Deno.serve(async (req: Request) => {
     const mArr = await mRes.json()
     const m = Array.isArray(mArr) ? mArr[0] : null
 
-    const message = {
-      From: { Email: FROM_EMAIL, Name: FROM_NAME },
-      To: [{ Email: b.email, Name: `${b.prenom || ''} ${b.nom || ''}`.trim() || b.email }],
-      Subject: `Merci d'avoir \u00e9t\u00e9 l\u00e0${b.prenom ? ', ' + b.prenom : ''} !`,
-      HTMLPart: thankHTML(b, m),
-    }
-
-    const creds = btoa(`${MAILJET_KEY}:${MAILJET_SECRET}`)
-    const res = await fetch('https://api.mailjet.com/v3.1/send', {
+    const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${creds}` },
-      body: JSON.stringify({ Messages: [message] }),
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_API_KEY}` },
+      body: JSON.stringify({
+        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        to: [b.email],
+        subject: `Merci d'avoir \u00e9t\u00e9 l\u00e0${b.prenom ? ', ' + b.prenom : ''} !`,
+        html: thankHTML(b, m),
+      }),
     })
     const txt = await res.text()
     if (!res.ok) {
-      console.error('Mailjet error', res.status, txt)
-      return new Response(JSON.stringify({ error: 'Mailjet failed', status: res.status }), { status: 500 })
+      console.error('Resend error', res.status, txt)
+      return new Response(JSON.stringify({ error: 'Resend failed', status: res.status }), { status: 500 })
     }
 
     return new Response(
