@@ -1,7 +1,6 @@
-const MAILJET_KEY    = Deno.env.get('MAILJET_API_KEY')
-const MAILJET_SECRET = Deno.env.get('MAILJET_SECRET_KEY')
-const FROM_EMAIL     = Deno.env.get('MAILJET_FROM_EMAIL') || 'marketing@spacerstoulouse.fr'
-const FROM_NAME      = Deno.env.get('MAILJET_FROM_NAME')  || "Spacer's Toulouse Volley"
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+const FROM_EMAIL     = Deno.env.get('FROM_EMAIL') || 'marketing@spacerstoulouse.fr'
+const FROM_NAME      = Deno.env.get('FROM_NAME')  || "Spacer's Toulouse Volley"
 const APP_URL        = Deno.env.get('APP_URL')            || 'https://benevoles.spacerstoulouse.fr'
 const SUPABASE_URL   = Deno.env.get('SUPABASE_URL')
 const SERVICE_KEY    = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
@@ -93,20 +92,19 @@ Deno.serve(async function(req){
 
     const html = buildHtml(m)
     const subject = 'Appel à bénévoles : ' + (m.titre || 'coup de main')
-    const creds = btoa(MAILJET_KEY + ':' + MAILJET_SECRET)
     let sent = 0
-    for (let i = 0; i < recipients.length; i += 50){
-      const batch = recipients.slice(i, i + 50)
+    for (let i = 0; i < recipients.length; i += 100){
+      const batch = recipients.slice(i, i + 100)
       const messages = batch.map(function(b){
-        return { From: { Email: FROM_EMAIL, Name: FROM_NAME }, To: [{ Email: b.email, Name: b.prenom || b.email }], Subject: subject, HTMLPart: html }
+        return { from: FROM_NAME + ' <' + FROM_EMAIL + '>', to: [b.email], subject: subject, html: html }
       })
-      const resp = await fetch('https://api.mailjet.com/v3.1/send', {
+      const resp = await fetch('https://api.resend.com/emails/batch', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Basic ' + creds },
-        body: JSON.stringify({ Messages: messages })
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + RESEND_API_KEY },
+        body: JSON.stringify(messages)
       })
       if (resp.ok) sent += batch.length
-      else console.error('Mailjet batch error', resp.status, await resp.text())
+      else console.error('Resend batch error', resp.status, await resp.text())
     }
     return json({ sent: sent })
   } catch (e) {
