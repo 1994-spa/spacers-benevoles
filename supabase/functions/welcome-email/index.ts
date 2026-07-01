@@ -2,14 +2,13 @@
 // welcome-email - Envoi de l'email de bienvenue aux nouveaux bénévoles
 // ────────────────────────────────────────────────────────────────────
 // Déclenché par un Database Webhook Supabase sur INSERT dans `benevoles`
-// Pattern aligné sur match-emails (Mailjet Send API v3.1)
+// Transport : Resend API (https://api.resend.com/emails)
 // ────────────────────────────────────────────────────────────────────
 
-const MAILJET_KEY    = Deno.env.get('MAILJET_API_KEY')!
-const MAILJET_SECRET = Deno.env.get('MAILJET_SECRET_KEY')!
-const FROM_EMAIL     = Deno.env.get('MAILJET_FROM_EMAIL') || 'marketing@spacerstoulouse.fr'
-const FROM_NAME      = Deno.env.get('MAILJET_FROM_NAME')  || "Spacer's Toulouse Volley"
-const APP_URL        = Deno.env.get('APP_URL')            || 'https://benevoles.spacerstoulouse.fr'
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
+const FROM_EMAIL     = Deno.env.get('FROM_EMAIL') || 'marketing@spacerstoulouse.fr'
+const FROM_NAME      = Deno.env.get('FROM_NAME')  || "Spacer's Toulouse Volley"
+const APP_URL        = Deno.env.get('APP_URL')    || 'https://benevoles.spacerstoulouse.fr'
 const WEBHOOK_SECRET = Deno.env.get('WELCOME_WEBHOOK_SECRET') || null
 
 Deno.serve(async (req: Request) => {
@@ -43,36 +42,30 @@ Deno.serve(async (req: Request) => {
       return new Response('Skipped (not active)', { status: 200 })
     }
 
-    // ── Envoyer l'email via Mailjet ──
-    const message = {
-      From: { Email: FROM_EMAIL, Name: FROM_NAME },
-      To: [{
-        Email: benevole.email,
-        Name: `${benevole.prenom || ''} ${benevole.nom || ''}`.trim() || benevole.email
-      }],
-      Subject: `Bienvenue chez les Spacers, ${benevole.prenom || ''} !`,
-      HTMLPart: getWelcomeHTML(benevole),
-    }
-
-    const creds = btoa(`${MAILJET_KEY}:${MAILJET_SECRET}`)
+    // ── Envoyer l'email via Resend ──
     console.log(`Sending welcome email to ${benevole.email}...`)
 
-    const res = await fetch('https://api.mailjet.com/v3.1/send', {
+    const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${creds}`,
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
-      body: JSON.stringify({ Messages: [message] }),
+      body: JSON.stringify({
+        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        to: [benevole.email],
+        subject: `Bienvenue chez les Spacers, ${benevole.prenom || ''} !`,
+        html: getWelcomeHTML(benevole),
+      }),
     })
 
     const responseText = await res.text()
-    console.log(`Mailjet response status: ${res.status}`)
+    console.log(`Resend response status: ${res.status}`)
 
     if (!res.ok) {
-      console.error('Mailjet error:', res.status, responseText)
+      console.error('Resend error:', res.status, responseText)
       return new Response(
-        JSON.stringify({ error: 'Mailjet failed', status: res.status, detail: responseText }),
+        JSON.stringify({ error: 'Resend failed', status: res.status, detail: responseText }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       )
     }
@@ -93,7 +86,7 @@ Deno.serve(async (req: Request) => {
 })
 
 // ────────────────────────────────────────────────────────────────────
-// Template HTML
+// Template HTML  (inchangé)
 // ────────────────────────────────────────────────────────────────────
 function getWelcomeHTML(b: any): string {
   const prenom = b.prenom || 'Bénévole'
@@ -123,15 +116,17 @@ function getWelcomeHTML(b: any): string {
         <a href="${APP_URL}" style="display:block;background:#185FA5;color:white;border-radius:50px;padding:14px;text-align:center;font-weight:700;font-size:14px;text-decoration:none;margin-top:20px;">
           Accéder à mon espace →
         </a>
+
+        <!-- ── Installation PWA ── -->
         <div style="background:#FFF7E6;border:1px solid #F5D78A;border-radius:12px;padding:16px;margin:22px 0 4px;">
-          <div style="font-size:14px;font-weight:700;color:#0C447C;margin-bottom:8px;">&#128242; Installe l'appli sur ton t&eacute;l&eacute;phone</div>
+          <div style="font-size:14px;font-weight:700;color:#0C447C;margin-bottom:8px;">📲 Installe l'appli sur ton téléphone</div>
           <div style="font-size:13px;color:#5F5E5A;line-height:1.8;">
-            Pour retrouver ton espace en un seul tap, comme une vraie application&nbsp;:<br><br>
-            <strong>&#128241; iPhone / iPad (Safari)</strong><br>
-            Ouvre le site, touche le bouton <strong>Partager</strong> (&#11014;&#65039;) en bas, puis <strong>&laquo;&nbsp;Sur l'&eacute;cran d'accueil&nbsp;&raquo;</strong>.<br><br>
-            <strong>&#129302; Android (Chrome)</strong><br>
-            Ouvre le site, touche le menu <strong>&#8942;</strong> en haut &agrave; droite, puis <strong>&laquo;&nbsp;Installer l'application&nbsp;&raquo;</strong>.<br><br>
-            L'ic&ocirc;ne Spacers appara&icirc;tra sur ton &eacute;cran d'accueil. &#127952;
+            Pour retrouver ton espace en un seul tap, comme une vraie application (et recevoir les notifications) :<br><br>
+            <strong>📱 iPhone / iPad (Safari)</strong><br>
+            Ouvre le site, touche le bouton <strong>Partager</strong> (le carré avec la flèche ⬆️ en bas de l'écran), puis choisis <strong>« Sur l'écran d'accueil »</strong>.<br><br>
+            <strong>🤖 Android (Chrome)</strong><br>
+            Ouvre le site, touche le menu <strong>⋮</strong> (en haut à droite), puis <strong>« Installer l'application »</strong> (ou « Ajouter à l'écran d'accueil »).<br><br>
+            L'icône Spacers apparaîtra alors sur ton écran d'accueil. 🏐
           </div>
         </div>
 
