@@ -2,8 +2,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const MAILJET_KEY  = Deno.env.get('MAILJET_API_KEY')!
-const MAILJET_SECRET = Deno.env.get('MAILJET_SECRET_KEY')!
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
+const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'marketing@spacerstoulouse.fr'
+const FROM_NAME  = Deno.env.get('FROM_NAME')  || "Spacer's Toulouse Volley"
 
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY)
 
@@ -168,46 +169,44 @@ async function getNonRepondants(matchId: string) {
   return (tous || []).filter((b: any) => !repondantsIds.has(b.id))
 }
 
-// ── Envoi bulk Mailjet ───────────────────────────────────────
+// ── Envoi bulk Resend (endpoint batch) ───────────────────────
 async function sendBulkEmail(
   destinataires: any[],
   { subject, type, match }: { subject: string, type: string, match: any }
 ) {
   const messages = destinataires.map(b => ({
-    From: { Email: 'marketing@spacerstoulouse.fr', Name: "Spacer's Toulouse Volley" },
-    To: [{ Email: b.email, Name: `${b.prenom || ''} ${b.nom || ''}`.trim() }],
-    Subject: subject,
-    HTMLPart: getEmailHTML(type, b, match),
+    from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    to: [b.email],
+    subject: subject,
+    html: getEmailHTML(type, b, match),
   }))
 
-  // Mailjet accepte max 50 messages par appel → on découpe
+  // Resend /emails/batch accepte max 100 messages par appel → on découpe
   const chunks = []
-  for (let i = 0; i < messages.length; i += 50) {
-    chunks.push(messages.slice(i, i + 50))
+  for (let i = 0; i < messages.length; i += 100) {
+    chunks.push(messages.slice(i, i + 100))
   }
 
   for (const chunk of chunks) {
-    const creds = btoa(`${MAILJET_KEY}:${MAILJET_SECRET}`)
-    console.log(`Calling Mailjet with ${chunk.length} message(s)...`)
-    console.log(`MAILJET_KEY defined: ${!!MAILJET_KEY}, MAILJET_SECRET defined: ${!!MAILJET_SECRET}`)
+    console.log(`Calling Resend with ${chunk.length} message(s)...`)
 
     try {
-      const res = await fetch('https://api.mailjet.com/v3.1/send', {
+      const res = await fetch('https://api.resend.com/emails/batch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Basic ${creds}`
+          'Authorization': `Bearer ${RESEND_API_KEY}`
         },
-        body: JSON.stringify({ Messages: chunk })
+        body: JSON.stringify(chunk)
       })
       const responseText = await res.text()
-      console.log(`Mailjet response status: ${res.status}`)
-      console.log(`Mailjet response body: ${responseText}`)
+      console.log(`Resend response status: ${res.status}`)
+      console.log(`Resend response body: ${responseText}`)
       if (!res.ok) {
-        throw new Error(`Mailjet error ${res.status}: ${responseText}`)
+        throw new Error(`Resend error ${res.status}: ${responseText}`)
       }
     } catch (err) {
-      console.error('Mailjet fetch failed:', (err as Error).message)
+      console.error('Resend fetch failed:', (err as Error).message)
       throw err
     }
   }
