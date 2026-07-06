@@ -190,6 +190,7 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
     <div class="kpi"><div class="kpi-val a" id="kpi-p">—</div><div class="kpi-lbl">Photos en attente</div></div>
     <div class="kpi"><div class="kpi-val" id="kpi-a">—</div><div class="kpi-lbl">Accréditations</div></div>
     <div class="kpi"><div class="kpi-val r" id="kpi-r">—</div><div class="kpi-lbl">Comptes à risque</div></div>
+    <div class="kpi" style="grid-column:1 / -1;border:1px solid rgba(245,200,66,0.4);"><div class="kpi-val" id="kpi-concours" style="color:var(--c-gold);">—</div><div class="kpi-lbl">🎁 Inscrits au concours Calicéo</div></div>
   </div>
   <div class="sec">Actions rapides</div>
   <button class="btn btn-ghost btn-full" onclick="openGuide()" style="border:1px solid rgba(245,200,66,0.4);color:var(--c-gold);">&#128214; Comment &ccedil;a marche ?</button>
@@ -1042,6 +1043,7 @@ async function loadAll() {
   document.getElementById('kpi-p').textContent = att.length
   document.getElementById('kpi-a').textContent = benv.filter(b=>b.statut_accreditation==='generee').length
   document.getElementById('kpi-r').textContent = benv.filter(b=>(b.points_total||0)<50 && b.statut_compte==='actif').length
+  try { const { count: _nbC } = await sb.from('concours_participations').select('*', { count: 'exact', head: true }).eq('statut','participe'); const _elC=document.getElementById('kpi-concours'); if(_elC) _elC.textContent=(_nbC||0) } catch(e){ console.warn('kpi concours', e) }
   if (att.length>0) document.getElementById('bdg-accreds').style.display='block'
 
   const top = [...benv].sort((a,b)=>(b.points_total||0)-(a.points_total||0)).slice(0,5)
