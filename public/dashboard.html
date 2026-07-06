@@ -2662,10 +2662,17 @@ function renderConcoursSection() {
   var _jours = Math.max(0, Math.ceil((_fin - _now) / 86400000))
   var _reglement = 'https://benevoles.spacerstoulouse.fr/reglement-jeu-concours-caliceo.pdf'
   var _badge = _jours >= 1 ? ('J-' + _jours) : 'Dernier jour !'
-  var _participe = !!(CP && CP._concoursParticipe)
-  var _action = _participe
-    ? `<span style="background:var(--c-green);color:#fff;font-size:12px;font-weight:800;padding:8px 14px;border-radius:20px;">✅ Tu participes !</span>`
-    : `<button class="btn" style="background:var(--c-gold);color:var(--c-navy);font-size:13px;font-weight:800;padding:9px 18px;border-radius:20px;border:none;font-family:'Sora',sans-serif;cursor:pointer;" onclick="participerConcours()">🎁 Je participe</button>`
+  var _st = CP && CP._concoursStatut
+  var _btnP = `<button class="btn" style="background:var(--c-gold);color:var(--c-navy);font-size:13px;font-weight:800;padding:9px 18px;border-radius:20px;border:none;font-family:'Sora',sans-serif;cursor:pointer;" onclick="setConcours('participe')">🎁 Je participe</button>`
+  var _btnN = `<button class="btn" style="background:rgba(255,255,255,0.15);color:#fff;font-size:13px;font-weight:700;padding:9px 16px;border-radius:20px;border:none;font-family:'Sora',sans-serif;cursor:pointer;" onclick="setConcours('refuse')">Je ne participe pas</button>`
+  var _action
+  if (_st === 'participe') {
+    _action = `<span style="background:var(--c-green);color:#fff;font-size:12px;font-weight:800;padding:8px 14px;border-radius:20px;">✅ Tu participes !</span>` + _btnN
+  } else if (_st === 'refuse') {
+    _action = `<span style="color:rgba(255,255,255,0.75);font-size:12px;font-weight:600;">Tu ne participes pas.</span>` + _btnP
+  } else {
+    _action = _btnP + _btnN
+  }
   return `
     <div style="background:linear-gradient(135deg,var(--c-navy) 0%,var(--c-navy-2) 100%);border-radius:16px;padding:16px 18px;margin-bottom:14px;color:#fff;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -2674,9 +2681,9 @@ function renderConcoursSection() {
       </div>
       <div style="font-size:17px;font-weight:800;margin-bottom:4px;">Gagnez votre accès Calicéo</div>
       <div style="font-size:12px;opacity:0.92;line-height:1.5;margin-bottom:12px;">
-        <strong>24 lots</strong> à gagner — Pass 2h Bains, spa &amp; vitalité. Inscris-toi au tirage au sort avant le 29&nbsp;juillet.
+        <strong>24 lots</strong> à gagner — Pass 2h Bains, spa &amp; vitalité. Tirage au sort le 30 juillet parmi les inscrits.
       </div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         ${_action}
         <a href="${_reglement}" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;color:#fff;text-decoration:underline;opacity:0.9;">📜 Règlement</a>
       </div>
@@ -2685,19 +2692,22 @@ function renderConcoursSection() {
 
 async function loadConcoursParticipation() {
   if (!CP) return
-  CP._concoursParticipe = false
+  CP._concoursStatut = null
   try {
-    const { data } = await sb.from('concours_participations').select('id').eq('benevole_id', CP.id)
-    CP._concoursParticipe = !!(data && data.length)
+    const { data } = await sb.from('concours_participations').select('statut').eq('benevole_id', CP.id)
+    if (data && data.length) CP._concoursStatut = data[0].statut
   } catch (e) { console.warn('loadConcoursParticipation failed', e) }
 }
 
-async function participerConcours() {
+async function setConcours(statut) {
   if (!CU || !CP) return
-  const r = await sb.from('concours_participations').insert({ benevole_id: CP.id })
-  if (r.error && r.error.code !== '23505') { showToast('Erreur : ' + r.error.message, 'error'); return }
-  CP._concoursParticipe = true
-  showToast('🎁 Tu participes au tirage Calicéo, bonne chance !', 'success')
+  const { error } = await sb.from('concours_participations').upsert({
+    benevole_id: CP.id,
+    statut: statut
+  }, { onConflict: 'benevole_id' })
+  if (error) { showToast('Erreur : ' + error.message, 'error'); return }
+  CP._concoursStatut = statut
+  showToast(statut === 'participe' ? '🎁 Tu participes au tirage, bonne chance !' : 'Noté, tu ne participes pas.', 'success')
   renderHomeForProfil(CP)
 }
 
