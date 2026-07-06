@@ -2662,18 +2662,43 @@ function renderConcoursSection() {
   var _jours = Math.max(0, Math.ceil((_fin - _now) / 86400000))
   var _reglement = 'https://benevoles.spacerstoulouse.fr/reglement-jeu-concours-caliceo.pdf'
   var _badge = _jours >= 1 ? ('J-' + _jours) : 'Dernier jour !'
+  var _participe = !!(CP && CP._concoursParticipe)
+  var _action = _participe
+    ? `<span style="background:var(--c-green);color:#fff;font-size:12px;font-weight:800;padding:8px 14px;border-radius:20px;">✅ Tu participes !</span>`
+    : `<button class="btn" style="background:var(--c-gold);color:var(--c-navy);font-size:13px;font-weight:800;padding:9px 18px;border-radius:20px;border:none;font-family:'Sora',sans-serif;cursor:pointer;" onclick="participerConcours()">🎁 Je participe</button>`
   return `
     <div style="background:linear-gradient(135deg,var(--c-navy) 0%,var(--c-navy-2) 100%);border-radius:16px;padding:16px 18px;margin-bottom:14px;color:#fff;">
-      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-gold);margin-bottom:4px;">🎁 Jeu concours</div>
-      <div style="font-size:17px;font-weight:800;margin-bottom:4px;">Gagnez votre accès Calicéo</div>
-      <div style="font-size:12px;opacity:0.92;line-height:1.5;margin-bottom:11px;">
-        <strong>24 lots</strong> à gagner — Pass 2h Bains, spa &amp; vitalité. Tu as un compte&nbsp;? Tu participes déjà automatiquement&nbsp;! Tirage au sort parmi les bénévoles inscrits avant le 29&nbsp;juillet.
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-gold);">🎁 Jeu concours</div>
+        <span style="background:rgba(255,255,255,0.15);color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;">⏳ ${_badge}</span>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <span style="background:var(--c-gold);color:var(--c-navy);font-size:11px;font-weight:800;padding:5px 11px;border-radius:20px;">⏳ ${_badge}</span>
-        <a href="${_reglement}" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;color:#fff;text-decoration:underline;opacity:0.9;">📜 Lire le règlement</a>
+      <div style="font-size:17px;font-weight:800;margin-bottom:4px;">Gagnez votre accès Calicéo</div>
+      <div style="font-size:12px;opacity:0.92;line-height:1.5;margin-bottom:12px;">
+        <strong>24 lots</strong> à gagner — Pass 2h Bains, spa &amp; vitalité. Inscris-toi au tirage au sort avant le 29&nbsp;juillet.
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        ${_action}
+        <a href="${_reglement}" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;color:#fff;text-decoration:underline;opacity:0.9;">📜 Règlement</a>
       </div>
     </div>`
+}
+
+async function loadConcoursParticipation() {
+  if (!CP) return
+  CP._concoursParticipe = false
+  try {
+    const { data } = await sb.from('concours_participations').select('id').eq('benevole_id', CP.id)
+    CP._concoursParticipe = !!(data && data.length)
+  } catch (e) { console.warn('loadConcoursParticipation failed', e) }
+}
+
+async function participerConcours() {
+  if (!CU || !CP) return
+  const r = await sb.from('concours_participations').insert({ benevole_id: CP.id })
+  if (r.error && r.error.code !== '23505') { showToast('Erreur : ' + r.error.message, 'error'); return }
+  CP._concoursParticipe = true
+  showToast('🎁 Tu participes au tirage Calicéo, bonne chance !', 'success')
+  renderHomeForProfil(CP)
 }
 
 function renderNextMatchSection() {
@@ -3200,6 +3225,7 @@ async function showApp(p) {
   await loadEtapesData()
   await loadNextMatch()
   await loadFaqData()
+  await loadConcoursParticipation()
   renderHomeForProfil(p)
   loadProfilFields(p)
   loadInstaFeed()
