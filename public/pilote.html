@@ -463,6 +463,10 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
     <label class="input-label">Description</label>
     <textarea id="emp-desc" class="bulk-code-area" placeholder="Description du poste, missions, profil recherché..."></textarea>
 
+    <label class="input-label" style="margin-top:10px;">Visuel — URL de l'affiche (optionnel)</label>
+    <input id="emp-visuel" class="input-field" placeholder="https://benevoles.spacerstoulouse.fr/service-civique.png">
+    <div class="input-hint">Affiche montrée en grand dans la carte de l'annonce, cliquable pour l'ouvrir en plein écran.</div>
+
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 8px;">
       <div>
         <label class="input-label">Contact - Nom</label>
@@ -2587,6 +2591,7 @@ async function ajouterAnnonce() {
     partenaire_nom: partenaireNom || null,
     partenaire_logo_url: partenaireLogo || null,
     type_contrat: document.getElementById('emp-contrat').value || null,
+    visuel_url: document.getElementById('emp-visuel').value.trim() || null,
     lieu: document.getElementById('emp-lieu').value.trim() || null,
     contact_nom: document.getElementById('emp-contact-nom').value.trim() || null,
     contact_email: document.getElementById('emp-contact-email').value.trim() || null,
@@ -2603,7 +2608,7 @@ async function ajouterAnnonce() {
     return
   }
 
-  ;['emp-titre','emp-desc','emp-partenaire-nom','emp-partenaire-logo','emp-lieu',
+  ;['emp-titre','emp-desc','emp-partenaire-nom','emp-partenaire-logo','emp-lieu','emp-visuel',
     'emp-contact-nom','emp-contact-email','emp-contact-tel','emp-contact-lien','emp-expire']
     .forEach(id => { document.getElementById(id).value = '' })
   document.getElementById('emp-contrat').value = ''
