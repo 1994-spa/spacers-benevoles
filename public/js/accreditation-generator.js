@@ -129,21 +129,20 @@
         const isWhite = z.color.toLowerCase() === '#ffffff';
 
         // 1. Halo INTENSE compact autour de la pastille (rayon 1.4 × r)
-        //    Skip zone 5 blanche : halo blanc invisible + peut créer
-        //    des artefacts visuels autour du chiffre bleu foncé
-        if (!isWhite) {
-          ctx.save();
-          const gradient = ctx.createRadialGradient(z.cx, z.cy, z.r * 1.0, z.cx, z.cy, z.r * 1.4);
-          gradient.addColorStop(0,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
-          gradient.addColorStop(0.3,  'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0.9)');
-          gradient.addColorStop(0.7,  'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0.5)');
-          gradient.addColorStop(1,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
-          ctx.fillStyle = gradient;
-          ctx.beginPath();
-          ctx.arc(z.cx, z.cy, z.r * 1.4, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
+        //    Pour zone 5 blanche : halo en bleu foncé pour se voir
+        //    sur le fond blanc (au lieu de blanc invisible)
+        ctx.save();
+        const haloColor = isWhite ? { r: 0, g: 30, b: 45 } : rgb; // CHARTE.night pour zone 5
+        const gradient = ctx.createRadialGradient(z.cx, z.cy, z.r * 1.0, z.cx, z.cy, z.r * 1.4);
+        gradient.addColorStop(0,    'rgba(' + haloColor.r + ',' + haloColor.g + ',' + haloColor.b + ',0)');
+        gradient.addColorStop(0.3,  'rgba(' + haloColor.r + ',' + haloColor.g + ',' + haloColor.b + ',0.9)');
+        gradient.addColorStop(0.7,  'rgba(' + haloColor.r + ',' + haloColor.g + ',' + haloColor.b + ',0.5)');
+        gradient.addColorStop(1,    'rgba(' + haloColor.r + ',' + haloColor.g + ',' + haloColor.b + ',0)');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(z.cx, z.cy, z.r * 1.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
 
         // 2. Fill de la couleur zone opacity 0.5 pour saturer
         //    LE FOND sans écraser complètement le chiffre blanc
