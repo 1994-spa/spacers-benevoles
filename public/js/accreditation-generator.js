@@ -123,20 +123,8 @@
       const z = COORDS.zones[id];
       const isAutorisee = autoriseesSet.has(String(id));
 
-      // === EFFACEMENT PREALABLE ===
-      // On dessine un cercle CHARTE.night plein (rayon r+30) pour
-      // effacer complètement la pastille du template + son halo
-      // pastel + toutes marges. Rayon volontairement généreux pour
-      // absorber les décalages de calibrage éventuels.
-      ctx.save();
-      ctx.fillStyle = CHARTE.night;
-      ctx.beginPath();
-      ctx.arc(z.cx, z.cy, z.r + 30, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
       if (isAutorisee) {
-        // === Rendu ZONE AUTORISEE (v3 : chiffres visibles) ===
+        // === Rendu ZONE AUTORISEE ===
         const rgb = hexToRgb(z.color);
         const isWhite = z.color.toLowerCase() === '#ffffff';
 
@@ -170,25 +158,29 @@
           ctx.restore();
         }
 
-        // 2. Anneau epais (blanc ou bleu foncé si zone blanche)
+        // 3. Anneau blanc EPAIS qui couvre mécaniquement les ombres
+        //    pastels du template. lineWidth 18, positionné à r+11
+        //    → va de r+2 à r+20, couvre le halo pastel sans déborder
+        //    sur la pastille voisine (espacement ~175 px, r=73)
         ctx.save();
         ctx.strokeStyle = isWhite ? CHARTE.night : '#FFFFFF';
-        ctx.lineWidth = 10;
+        ctx.lineWidth = 18;
         ctx.beginPath();
-        ctx.arc(z.cx, z.cy, z.r + 8, 0, Math.PI * 2);
+        ctx.arc(z.cx, z.cy, z.r + 11, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
 
       } else {
         // === Rendu ZONE REFUSEE (occultation niveau 3) ===
-        // Fill noir 100% opaque : couvre totalement le chiffre du
-        // template en dessous pour éviter la superposition avec
-        // le chiffre pâle qu'on redessine ensuite
+        // Cercle noir plus large (r+18) pour couvrir la pastille
+        // du template ET son halo/ombre pastel. Reste dans les
+        // limites pour ne pas déborder sur la pastille voisine
+        // (espacement ~175 px, marge disponible ~87 px de chaque côté).
         ctx.save();
         ctx.globalAlpha = 1.0;
         ctx.fillStyle = CHARTE.night;
         ctx.beginPath();
-        ctx.arc(z.cx, z.cy, z.r + 4, 0, Math.PI * 2);
+        ctx.arc(z.cx, z.cy, z.r + 18, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
 
