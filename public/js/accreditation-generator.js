@@ -1,19 +1,19 @@
 /**
- * accreditation-generator.js — v2
+ * accreditation-generator.js — v3
  *
- * Changement v2 :
- *   - Halo autour de chaque pastille autorisée = COULEUR DE LA ZONE
- *     (au lieu d'un halo bleu DAY uniforme qui délavait tout)
- *   - Anneau blanc plus épais (10px au lieu de 6px)
- *   - Pour la zone 5 (blanche), anneau bleu foncé au lieu de blanc
- *     (sinon invisible sur fond blanc du halo)
- *   - Fill léger de la couleur zone par-dessus la pastille pour la saturer
+ * Changement v3 :
+ *   - SUPPRESSION du fill de couleur par-dessus la pastille
+ *     (qui masquait les chiffres blancs du template)
+ *   - COMPENSATION par un halo externe TRES INTENSE au bord
+ *     de la pastille (opacity 0.95 au raz de la pastille)
+ *   - Anneau blanc epais conserve (10px)
+ *   - Zone 5 (blanche) : anneau bleu foncé, halo plus léger
  *
  * API publique inchangée :
- *   - AccreditationGenerator.render(canvas, params) → Promise<void>
- *   - AccreditationGenerator.downloadPng(params)     → Promise<void>
- *   - AccreditationGenerator.downloadPdf(params)     → Promise<void>
- *   - AccreditationGenerator.renderToBlob(params)    → Promise<Blob>  (nouveau, pour batch)
+ *   - AccreditationGenerator.render(canvas, params)
+ *   - AccreditationGenerator.downloadPng(params)
+ *   - AccreditationGenerator.downloadPdf(params)
+ *   - AccreditationGenerator.renderToPdfBlob(params)
  */
 (function (global) {
   'use strict';
@@ -54,10 +54,7 @@
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        imageCache[src] = img;
-        resolve(img);
-      };
+      img.onload = () => { imageCache[src] = img; resolve(img); };
       img.onerror = () => reject(new Error('Impossible de charger : ' + src));
       img.src = src;
     });
@@ -66,11 +63,7 @@
   function hexToRgb(hex) {
     const h = hex.replace('#', '');
     const bigint = parseInt(h, 16);
-    return {
-      r: (bigint >> 16) & 255,
-      g: (bigint >> 8) & 255,
-      b: bigint & 255
-    };
+    return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
   }
 
   function fitTextSize(ctx, text, fontFamily, maxWidth, maxHeight, maxSize, minSize) {
@@ -84,34 +77,30 @@
   }
 
   function drawNomInRect(ctx, prenom, nom, rect) {
-    const w  = rect.x2 - rect.x1;
-    const h  = rect.y2 - rect.y1;
-    const cx = (rect.x1 + rect.x2) / 2;
-    const cy = (rect.y1 + rect.y2) / 2;
+    const w = rect.x2 - rect.x1, h = rect.y2 - rect.y1;
+    const cx = (rect.x1 + rect.x2) / 2, cy = (rect.y1 + rect.y2) / 2;
     const maxSize = Math.min(h * 0.42, 100);
     const size1 = fitTextSize(ctx, prenom, 'Sansation', w * 0.92, maxSize, maxSize);
-    const size2 = fitTextSize(ctx, nom,    'Sansation', w * 0.92, maxSize, maxSize);
+    const size2 = fitTextSize(ctx, nom, 'Sansation', w * 0.92, maxSize, maxSize);
     const finalSize = Math.min(size1, size2);
-    ctx.fillStyle    = CHARTE.night;
-    ctx.textAlign    = 'center';
+    ctx.fillStyle = CHARTE.night;
+    ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font         = 'bold ' + finalSize + 'px "Sansation"';
+    ctx.font = 'bold ' + finalSize + 'px "Sansation"';
     const gap = finalSize * 0.15;
     ctx.fillText(prenom, cx, cy - (finalSize + gap) / 2);
-    ctx.fillText(nom,    cx, cy + (finalSize + gap) / 2);
+    ctx.fillText(nom, cx, cy + (finalSize + gap) / 2);
   }
 
   function drawRoleInRect(ctx, role, rect) {
-    const w  = rect.x2 - rect.x1;
-    const h  = rect.y2 - rect.y1;
-    const cx = (rect.x1 + rect.x2) / 2;
-    const cy = (rect.y1 + rect.y2) / 2;
+    const w = rect.x2 - rect.x1, h = rect.y2 - rect.y1;
+    const cx = (rect.x1 + rect.x2) / 2, cy = (rect.y1 + rect.y2) / 2;
     const maxSize = Math.min(h * 1.4, 110);
     const size = fitTextSize(ctx, role, 'Heaters', w * 0.85, h * 1.4, maxSize);
-    ctx.fillStyle    = CHARTE.night;
-    ctx.textAlign    = 'center';
+    ctx.fillStyle = CHARTE.night;
+    ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font         = size + 'px "Heaters"';
+    ctx.font = size + 'px "Heaters"';
     ctx.fillText(role, cx, cy);
   }
 
@@ -122,8 +111,7 @@
     ctx.closePath();
     ctx.clip();
     const scale = Math.max((spec.r * 2) / img.width, (spec.r * 2) / img.height);
-    const w = img.width * scale;
-    const h = img.height * scale;
+    const w = img.width * scale, h = img.height * scale;
     ctx.drawImage(img, spec.cx - w / 2, spec.cy - h / 2, w, h);
     ctx.restore();
   }
@@ -136,39 +124,26 @@
       const isAutorisee = autoriseesSet.has(String(id));
 
       if (isAutorisee) {
-        // === Rendu ZONE AUTORISEE (v2 : plus vif, halo dans la couleur de la zone) ===
+        // === Rendu ZONE AUTORISEE (v3 : chiffres visibles) ===
         const rgb = hexToRgb(z.color);
         const isWhite = z.color.toLowerCase() === '#ffffff';
 
-        // 1. Halo LARGE dans la couleur de la zone (au lieu de bleu uniforme)
+        // 1. Halo INTENSE au bord de la pastille (opacity 0.95 juste
+        //    au raz de la pastille, decroit vers l'exterieur)
+        //    PAS de fill par-dessus la pastille -> les chiffres blancs
+        //    du template restent parfaitement visibles
         ctx.save();
-        const gradient = ctx.createRadialGradient(z.cx, z.cy, z.r * 0.9, z.cx, z.cy, z.r * 2.0);
-        // Halo plus dense (opacity 0.85 au centre au lieu de 0.6)
-        gradient.addColorStop(0,   'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0.85)');
-        gradient.addColorStop(0.4, 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0.4)');
-        gradient.addColorStop(1,   'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
+        const gradient = ctx.createRadialGradient(z.cx, z.cy, z.r * 0.95, z.cx, z.cy, z.r * 2.1);
+        gradient.addColorStop(0,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + (isWhite ? 0.6 : 0.95) + ')');
+        gradient.addColorStop(0.25, 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + (isWhite ? 0.3 : 0.6) + ')');
+        gradient.addColorStop(1,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(z.cx, z.cy, z.r * 2.0, 0, Math.PI * 2);
+        ctx.arc(z.cx, z.cy, z.r * 2.1, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
 
-        // 2. Renforcement de la pastille : fill couleur zone opacity 0.55 par-dessus
-        //    (donne un aspect plus saturé aux couleurs pastels du template)
-        //    Sauf pour zone 5 (blanche) où on ne fait rien
-        if (!isWhite) {
-          ctx.save();
-          ctx.globalAlpha = 0.55;
-          ctx.fillStyle = z.color;
-          ctx.beginPath();
-          ctx.arc(z.cx, z.cy, z.r, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-
-        // 3. Anneau EPAIS autour de la pastille
-        //    Blanc par défaut, mais bleu foncé pour la zone 5 (blanche)
-        //    car sinon anneau blanc invisible sur halo blanc
+        // 2. Anneau epais (blanc ou bleu foncé si zone blanche)
         ctx.save();
         ctx.strokeStyle = isWhite ? CHARTE.night : '#FFFFFF';
         ctx.lineWidth = 10;
@@ -178,7 +153,7 @@
         ctx.restore();
 
       } else {
-        // === Rendu ZONE REFUSEE (inchangé : occultation niveau 3) ===
+        // === Rendu ZONE REFUSEE (occultation niveau 3) ===
         ctx.save();
         ctx.globalAlpha = 0.92;
         ctx.fillStyle = CHARTE.night;
@@ -238,18 +213,12 @@
     const canvas = document.createElement('canvas');
     await render(canvas, params);
     const filename = buildFileName(params, 'png');
-    canvas.toBlob((blob) => {
-      triggerDownload(blob, filename);
-    }, 'image/png');
+    canvas.toBlob((blob) => triggerDownload(blob, filename), 'image/png');
   }
 
-  /**
-   * NOUVEAU v2 : rend l'accréditation en Blob PDF (2 pages A4).
-   * Utilisé pour le batch ZIP côté pilote sans déclencher de téléchargement.
-   */
   async function renderToPdfBlob(params) {
     if (!global.jspdf || !global.jspdf.jsPDF) {
-      throw new Error('jsPDF non chargé');
+      throw new Error('jsPDF non charge');
     }
     const canvas = document.createElement('canvas');
     await render(canvas, params);
@@ -263,7 +232,7 @@
     pdf.addImage(rectoData, 'PNG', r.x, r.y, r.w, r.h);
 
     const vCanvas = document.createElement('canvas');
-    vCanvas.width  = versoImg.naturalWidth;
+    vCanvas.width = versoImg.naturalWidth;
     vCanvas.height = versoImg.naturalHeight;
     vCanvas.getContext('2d').drawImage(versoImg, 0, 0);
     const versoData = vCanvas.toDataURL('image/png');
@@ -281,11 +250,10 @@
 
   function fitImageToA4(imgW, imgH) {
     const pdfW = 210, pdfH = 297;
-    const canvasRatio = imgW / imgH;
-    const pdfRatio    = pdfW / pdfH;
+    const canvasRatio = imgW / imgH, pdfRatio = pdfW / pdfH;
     let w, h;
     if (canvasRatio > pdfRatio) { w = pdfW; h = pdfW / canvasRatio; }
-    else                        { h = pdfH; w = pdfH * canvasRatio; }
+    else { h = pdfH; w = pdfH * canvasRatio; }
     return { x: (pdfW - w) / 2, y: (pdfH - h) / 2, w: w, h: h };
   }
 
@@ -310,8 +278,8 @@
     render: render,
     downloadPng: downloadPng,
     downloadPdf: downloadPdf,
-    renderToPdfBlob: renderToPdfBlob,   // nouveau, pour batch
-    buildFileName: buildFileName,       // exposé pour cohérence des noms
+    renderToPdfBlob: renderToPdfBlob,
+    buildFileName: buildFileName,
     _COORDS: COORDS,
     _CHARTE: CHARTE,
     _ASSETS: ASSETS
