@@ -22,7 +22,7 @@
     version: '2627',
     template_width: 1240,
     template_height: 1754,
-    photo: { cx: 619, cy: 539, r: 163 },
+    photo: { cx: 619, cy: 539, r: 172 },
     nom:   { x1: 300, y1: 784,  x2: 912, y2: 919  },
     role:  { x1: 293, y1: 1084, x2: 921, y2: 1145 },
     zones: {
@@ -129,17 +129,21 @@
         const isWhite = z.color.toLowerCase() === '#ffffff';
 
         // 1. Halo INTENSE compact autour de la pastille (rayon 1.4 × r)
-        ctx.save();
-        const gradient = ctx.createRadialGradient(z.cx, z.cy, z.r * 1.0, z.cx, z.cy, z.r * 1.4);
-        gradient.addColorStop(0,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
-        gradient.addColorStop(0.3,  'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + (isWhite ? 0.6 : 0.9) + ')');
-        gradient.addColorStop(0.7,  'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + (isWhite ? 0.3 : 0.5) + ')');
-        gradient.addColorStop(1,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(z.cx, z.cy, z.r * 1.4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        //    Skip zone 5 blanche : halo blanc invisible + peut créer
+        //    des artefacts visuels autour du chiffre bleu foncé
+        if (!isWhite) {
+          ctx.save();
+          const gradient = ctx.createRadialGradient(z.cx, z.cy, z.r * 1.0, z.cx, z.cy, z.r * 1.4);
+          gradient.addColorStop(0,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
+          gradient.addColorStop(0.3,  'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0.9)');
+          gradient.addColorStop(0.7,  'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0.5)');
+          gradient.addColorStop(1,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(z.cx, z.cy, z.r * 1.4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
 
         // 2. Fill de la couleur zone opacity 0.5 pour saturer
         //    LE FOND sans écraser complètement le chiffre blanc
