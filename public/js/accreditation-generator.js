@@ -141,29 +141,19 @@
         ctx.fill();
         ctx.restore();
 
-        // 2. Fill saturé de la couleur zone pour couleurs vives
-        //    Opacity 1.0 pour couvrir TOTALEMENT le chiffre du template
-        //    en dessous (sinon effet de superposition délavé)
+        // 2. Fill de la couleur zone opacity 0.5 pour saturer
+        //    LE FOND sans écraser complètement le chiffre blanc
+        //    du template en dessous (qui reste bien visible)
         //    Skip zone 5 blanche qu'on préserve
         if (!isWhite) {
           ctx.save();
-          ctx.globalAlpha = 1.0;
+          ctx.globalAlpha = 0.5;
           ctx.fillStyle = z.color;
           ctx.beginPath();
           ctx.arc(z.cx, z.cy, z.r, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
         }
-
-        // 3. REDESSINE le chiffre en blanc pur (ou bleu foncé pour zone 5)
-        //    Taille et poids augmentés pour meilleure lisibilité
-        ctx.save();
-        ctx.fillStyle = isWhite ? CHARTE.night : '#FFFFFF';
-        ctx.font = '900 ' + Math.round(z.r * 1.35) + 'px Arial, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(id, z.cx, z.cy);
-        ctx.restore();
 
         // 2. Anneau epais (blanc ou bleu foncé si zone blanche)
         ctx.save();
