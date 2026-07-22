@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard Pilote — Spacers</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="/js/accreditation-generator.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -209,7 +211,10 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
   <div class="sec">Photos à valider</div>
   <div id="photos-att"></div>
   <div class="sec">Accréditations générées</div>
-  <div id="accreds-gen"></div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <button class="btn btn-green" style="font-size:11px;padding:8px 14px;width:auto;" onclick="downloadAllAccredsZip()">Telecharger tout (ZIP)</button>
+    </div>
+    <div id="accreds-gen"></div>
 </div>
 
 <!-- MATCH -->
@@ -1229,6 +1234,7 @@ async function renderAccredsGen(list) {
         '<div style="margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' + roleTxt + ' ' + pretIcon + '</div>' +
         '<div style="margin-top:3px;">' + zonesTxt + '</div>' +
       '</div>' +
+      '<button class="btn btn-green" style="font-size:10px;padding:6px 12px;flex-shrink:0;margin-right:6px;" onclick="downloadPiloteAccredPdf(\'' + b.id + '\')">PDF</button>' +
       '<button class="btn btn-blue" style="font-size:10px;padding:6px 12px;flex-shrink:0;" onclick="openConfigAccred(\'' + b.id + '\')">Configurer</button>' +
     '</div>'
   }).join('')
@@ -1308,6 +1314,108 @@ async function saveConfigAccred() {
   } catch (err) {
     console.error('[accred] saveConfigAccred', err)
     showAlert('alert-accreds', 'Erreur : ' + (err.message || err), 'e')
+  }
+}
+
+// -----------------------------------------------------------
+// TELECHARGEMENT ACCREDITATION PILOTE (unite + batch ZIP)
+// -----------------------------------------------------------
+
+async function fetchAccredData(benevoleId) {
+  const { data, error } = await sb
+    .from('v_benevole_accreditation')
+    .select('*')
+    .eq('benevole_id', benevoleId)
+    .single()
+  if (error) throw error
+  if (!data || !data.accreditation_prete) {
+    throw new Error('Accr\u00e9ditation non pr\u00eate pour ce b\u00e9n\u00e9vole')
+  }
+  return data
+}
+
+async function downloadPiloteAccredPdf(benevoleId) {
+  try {
+    showAlert('alert-accreds', 'G\u00e9n\u00e9ration du PDF...', 'i')
+    const data = await fetchAccredData(benevoleId)
+    const photoUrl = await getSignedPhotoUrl(data.photo_path)
+    if (!photoUrl) throw new Error('Photo introuvable')
+    await AccreditationGenerator.downloadPdf({
+      prenom: data.prenom,
+      nom: data.nom,
+      roleLibelle: data.role_libelle,
+      zonesAutorisees: data.zones_ids,
+      photoUrl: photoUrl,
+    })
+    showAlert('alert-accreds', 'PDF t\u00e9l\u00e9charg\u00e9 pour ' + data.prenom + ' ' + data.nom, 's')
+  } catch (err) {
+    console.error('[accred] downloadPiloteAccredPdf', err)
+    showAlert('alert-accreds', 'Erreur : ' + (err.message || err), 'e')
+  }
+}
+
+async function downloadAllAccredsZip() {
+  try {
+    if (!window.JSZip) {
+      showAlert('alert-accreds', 'JSZip non charg\u00e9 (rafraichir la page)', 'e')
+      return
+    }
+    showAlert('alert-accreds', 'Pr\u00e9paration du ZIP...', 'i')
+
+    const { data: rows, error } = await sb
+      .from('v_benevole_accreditation')
+      .select('*')
+      .eq('accreditation_prete', true)
+    if (error) throw error
+    if (!rows || rows.length === 0) {
+      showAlert('alert-accreds', 'Aucune accr\u00e9ditation pr\u00eate pour l\'instant', 'i')
+      return
+    }
+
+    const paths = rows.map(r => r.photo_path).filter(Boolean)
+    const urlMap = await getSignedPhotoUrls(paths)
+
+    const zip = new JSZip()
+    let ok = 0
+    let ko = 0
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i]
+      const url = urlMap[r.photo_path]
+      showAlert('alert-accreds', 'G\u00e9n\u00e9ration ' + (i+1) + ' / ' + rows.length + '...', 'i')
+      if (!url) { ko++; continue }
+      try {
+        const blob = await AccreditationGenerator.renderToPdfBlob({
+          prenom: r.prenom,
+          nom: r.nom,
+          roleLibelle: r.role_libelle,
+          zonesAutorisees: r.zones_ids,
+          photoUrl: url,
+        })
+        const name = AccreditationGenerator.buildFileName({ prenom: r.prenom, nom: r.nom }, 'pdf')
+        zip.file(name, blob)
+        ok++
+      } catch (e) {
+        console.warn('[zip] echec pour', r.prenom, r.nom, e)
+        ko++
+      }
+    }
+
+    const zipBlob = await zip.generateAsync({ type: 'blob' })
+    const stamp = new Date().toISOString().slice(0,10)
+    const url = URL.createObjectURL(zipBlob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'accreditations_spacers_' + stamp + '.zip'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 2000)
+
+    const msg = 'ZIP g\u00e9n\u00e9r\u00e9 : ' + ok + ' r\u00e9ussi(s)' + (ko > 0 ? ', ' + ko + ' \u00e9chec(s)' : '')
+    showAlert('alert-accreds', msg, ok > 0 ? 's' : 'e')
+  } catch (err) {
+    console.error('[accred] downloadAllAccredsZip', err)
+    showAlert('alert-accreds', 'Erreur ZIP : ' + (err.message || err), 'e')
   }
 }
 
