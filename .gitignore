@@ -40,3 +40,10 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Fichiers exports SQL locaux (ne pas versionner)
+schema.sql
+schema-public.sql
+
+# Ancien Worker Cloudflare, remplace par Resend
+spacers-emails-worker/
