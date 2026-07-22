@@ -128,14 +128,15 @@
         const rgb = hexToRgb(z.color);
         const isWhite = z.color.toLowerCase() === '#ffffff';
 
-        // 1. Halo INTENSE au bord de la pastille (opacity 0.95 juste
-        //    au raz de la pastille, decroit vers l'exterieur)
-        //    PAS de fill par-dessus la pastille -> les chiffres blancs
-        //    du template restent parfaitement visibles
+        // 1. Halo INTENSE STRICTEMENT AUTOUR de la pastille
+        //    Le gradient commence à r (pas à 0.95*r) pour ne pas
+        //    déborder à l'intérieur et écraser les chiffres blancs
+        //    du template. Pic d'intensité juste après le bord.
         ctx.save();
-        const gradient = ctx.createRadialGradient(z.cx, z.cy, z.r * 0.95, z.cx, z.cy, z.r * 2.1);
-        gradient.addColorStop(0,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + (isWhite ? 0.6 : 0.95) + ')');
-        gradient.addColorStop(0.25, 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + (isWhite ? 0.3 : 0.6) + ')');
+        const gradient = ctx.createRadialGradient(z.cx, z.cy, z.r * 1.0, z.cx, z.cy, z.r * 2.1);
+        gradient.addColorStop(0,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
+        gradient.addColorStop(0.15, 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + (isWhite ? 0.6 : 0.95) + ')');
+        gradient.addColorStop(0.4,  'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + (isWhite ? 0.3 : 0.6) + ')');
         gradient.addColorStop(1,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
         ctx.fillStyle = gradient;
         ctx.beginPath();
