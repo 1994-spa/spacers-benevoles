@@ -170,26 +170,31 @@
 
       } else {
         // === Rendu ZONE REFUSEE (occultation niveau 3) ===
+        // Fill noir 100% opaque : couvre totalement le chiffre du
+        // template en dessous pour éviter la superposition avec
+        // le chiffre pâle qu'on redessine ensuite
         ctx.save();
-        ctx.globalAlpha = 0.92;
+        ctx.globalAlpha = 1.0;
         ctx.fillStyle = CHARTE.night;
         ctx.beginPath();
         ctx.arc(z.cx, z.cy, z.r + 4, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
 
+        // Silhouette pâle de la couleur zone pour rester lisible
         ctx.save();
-        ctx.globalAlpha = 0.10;
+        ctx.globalAlpha = 0.15;
         ctx.fillStyle = z.color;
         ctx.beginPath();
-        ctx.arc(z.cx, z.cy, z.r * 0.55, 0, Math.PI * 2);
+        ctx.arc(z.cx, z.cy, z.r * 0.7, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
 
+        // Chiffre pâle bien centré
         ctx.save();
-        ctx.globalAlpha = 0.25;
+        ctx.globalAlpha = 0.35;
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold ' + (z.r * 0.9) + 'px Arial';
+        ctx.font = 'bold ' + Math.round(z.r * 0.95) + 'px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(id, z.cx, z.cy);
