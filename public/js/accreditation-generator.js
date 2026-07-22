@@ -124,13 +124,14 @@
       const isAutorisee = autoriseesSet.has(String(id));
 
       // === EFFACEMENT PREALABLE ===
-      // On dessine un cercle CHARTE.night plein (rayon r+18) pour
-      // effacer complètement la pastille du template + son ombre
-      // pastel. Ensuite on redessine tout depuis zéro.
+      // On dessine un cercle CHARTE.night plein (rayon r+30) pour
+      // effacer complètement la pastille du template + son halo
+      // pastel + toutes marges. Rayon volontairement généreux pour
+      // absorber les décalages de calibrage éventuels.
       ctx.save();
       ctx.fillStyle = CHARTE.night;
       ctx.beginPath();
-      ctx.arc(z.cx, z.cy, z.r + 18, 0, Math.PI * 2);
+      ctx.arc(z.cx, z.cy, z.r + 30, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
