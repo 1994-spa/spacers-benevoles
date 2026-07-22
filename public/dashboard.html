@@ -684,7 +684,7 @@ body{font-family:'Sora',sans-serif;background:var(--c-navy);min-height:100vh;}
 
     <!-- MON ACCREDITATION -->
     <div class="accred-card" id="accred-card" style="background:white;border-radius:16px;padding:16px;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:700;color:var(--c-navy-2);margin-bottom:4px;">ðŸŽ« Mon accrÃ©ditation</div>
+      <div style="font-size:13px;font-weight:700;color:var(--c-navy-2);margin-bottom:4px;">🎫 Mon accréditation</div>
       <div style="font-size:11px;color:var(--c-muted);margin-bottom:14px;">Badge officiel pour les jours de match.</div>
       <div id="accred-card-content"><div style="text-align:center;color:var(--c-muted);padding:20px;font-size:12px;">Chargement...</div></div>
     </div>
@@ -1996,13 +1996,13 @@ async function renderEventPhotosSection(eventId) {
     _evPhotosCache[eventId] = photos || []
 
     let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:700;color:var(--c-navy-2);">ðŸ“¸ Photos de l'Ã©vÃ©nement</div>
+      <div style="font-size:13px;font-weight:700;color:var(--c-navy-2);">ðŸ“¸ Photos de l'événement</div>
       <button class="btn btn-blue" style="font-size:11px;padding:6px 12px;width:auto;margin-top:0;" onclick="triggerEventPhotoUpload('${eventId}')">ðŸ“· Ajouter</button>
     </div>`
 
     if (!photos || photos.length === 0) {
       html += `<div style="background:var(--c-cream);border-radius:10px;padding:14px;text-align:center;font-size:11px;color:var(--c-muted);line-height:1.6;">
-        Aucune photo pour l'instant.<br>Sois le premier Ã  partager tes photos !
+        Aucune photo pour l'instant.<br>Sois le premier à partager tes photos !
       </div>`
     } else {
       html += `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">`
@@ -2040,7 +2040,7 @@ async function onEventPhotosSelected(ev, eventId) {
   const valid = []
   const errors = []
   for (const f of files) {
-    if (!validTypes.includes(f.type)) { errors.push(`${f.name} : format non supportÃ©`); continue }
+    if (!validTypes.includes(f.type)) { errors.push(`${f.name} : format non supporté`); continue }
     if (f.size > maxSize) { errors.push(`${f.name} : > 10 Mo`); continue }
     valid.push(f)
   }
@@ -2050,7 +2050,7 @@ async function onEventPhotosSelected(ev, eventId) {
   const ok = await confirmModal({
     icon: 'ðŸ“·',
     title: `Uploader ${valid.length} photo${valid.length>1?'s':''} ?`,
-    message: `Tes photos seront examinÃ©es par un pilote avant publication.\nElles apparaÃ®tront dans la galerie une fois validÃ©es.`,
+    message: `Tes photos seront examinées par un pilote avant publication.\nElles apparaÃ®tront dans la galerie une fois validées.`,
     confirmText: 'Uploader',
     confirmStyle: 'blue',
   })
@@ -2091,11 +2091,11 @@ async function onEventPhotosSelected(ev, eventId) {
   }
 
   if (failed === 0) {
-    showToast(`âœ“ ${sent} photo${sent>1?'s':''} envoyÃ©e${sent>1?'s':''} ! En attente de validation.`, 'success')
+    showToast(`âœ“ ${sent} photo${sent>1?'s':''} envoyée${sent>1?'s':''} ! En attente de validation.`, 'success')
   } else if (sent === 0) {
-    showToast(`âŒ ${failed} Ã©chec${failed>1?'s':''} d'envoi`, 'error')
+    showToast(`âŒ ${failed} échec${failed>1?'s':''} d'envoi`, 'error')
   } else {
-    showToast(`âš ï¸ ${sent} envoyÃ©e${sent>1?'s':''}, ${failed} Ã©chec${failed>1?'s':''}`, 'error')
+    showToast(`âš ï¸ ${sent} envoyée${sent>1?'s':''}, ${failed} échec${failed>1?'s':''}`, 'error')
   }
   renderEventPhotosSection(eventId)
 }
@@ -2523,7 +2523,7 @@ function renderMyAccredCard() {
   if (!el) return
   const s = _accredState
   if (!s) {
-    el.innerHTML = '<div style="text-align:center;color:var(--c-muted);padding:20px;font-size:12px;">Aucune donnÃ©e disponible.</div>'
+    el.innerHTML = '<div style="text-align:center;color:var(--c-muted);padding:20px;font-size:12px;">Aucune donnée disponible.</div>'
     return
   }
 
@@ -2536,12 +2536,12 @@ function renderMyAccredCard() {
           <div style="font-weight:700;font-size:13px;">${escapeHtml(s.prenom)} ${escapeHtml(s.nom)}</div>
           <div style="background:#facc15;color:#001E2D;padding:3px 8px;border-radius:8px;font-size:10px;font-weight:700;">${escapeHtml(s.role_libelle || 'CLUB')}</div>
         </div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:6px;">Zones autorisÃ©es : <strong style="color:#91BEE6;">${zonesTxt || 'aucune'}</strong></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:6px;">Zones autorisées : <strong style="color:#91BEE6;">${zonesTxt || 'aucune'}</strong></div>
         <div style="font-size:10px;color:rgba(145,190,230,0.6);">SAISON 2026 / 2027</div>
       </div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-blue" style="flex:1;font-size:12px;" onclick="downloadMyAccredPng()">ðŸ“¥ PNG</button>
-        <button class="btn btn-blue" style="flex:1;font-size:12px;" onclick="downloadMyAccredPdf()">ðŸ“¥ PDF RÂ°/VÂ°</button>
+        <button class="btn btn-blue" style="flex:1;font-size:12px;" onclick="downloadMyAccredPdf()">ðŸ“¥ PDF R°/V°</button>
       </div>
     `
     return
@@ -2549,10 +2549,10 @@ function renderMyAccredCard() {
 
   // Cas 2 : photo rejetee â†’ afficher le motif + inviter a re-uploader
   if (s.photo_statut === 'refusee') {
-    const motif = s.photo_rejet_motif ? escapeHtml(s.photo_rejet_motif) : 'Aucun motif prÃ©cisÃ©'
+    const motif = s.photo_rejet_motif ? escapeHtml(s.photo_rejet_motif) : 'Aucun motif précisé'
     el.innerHTML = `
       <div style="background:var(--c-red-50);color:var(--c-red);border-radius:8px;padding:12px;font-size:12px;line-height:1.5;margin-bottom:12px;">
-        âŒ <strong>Ta photo a Ã©tÃ© refusÃ©e</strong><br>
+        âŒ <strong>Ta photo a été refusée</strong><br>
         <span style="font-size:11px;">Motif : ${motif}</span><br>
         <span style="font-size:11px;">Envoie une nouvelle photo depuis la carte "Photo de profil" ci-dessus.</span>
       </div>
@@ -2564,7 +2564,7 @@ function renderMyAccredCard() {
   if (s.photo_statut === 'en_attente') {
     el.innerHTML = `
       <div style="background:var(--c-gold-50);color:var(--c-amber);border-radius:8px;padding:12px;font-size:12px;line-height:1.5;">
-        â³ Photo envoyÃ©e, en attente de validation par un pilote.
+        â³ Photo envoyée, en attente de validation par un pilote.
       </div>
     `
     return
@@ -2573,11 +2573,11 @@ function renderMyAccredCard() {
   // Cas 4 : photo validee mais role ou zones manquants
   if (s.photo_statut === 'generee' && !s.accreditation_prete) {
     const manque = []
-    if (!s.role_code) manque.push('ton rÃ´le')
-    if (!s.zones_ids || s.zones_ids.length === 0) manque.push('tes zones d\'accÃ¨s')
+    if (!s.role_code) manque.push('ton rôle')
+    if (!s.zones_ids || s.zones_ids.length === 0) manque.push('tes zones d\'accès')
     el.innerHTML = `
       <div style="background:var(--c-blue-50);color:var(--c-navy-2);border-radius:8px;padding:12px;font-size:12px;line-height:1.5;">
-        âœ… Photo validÃ©e !<br>
+        âœ… Photo validée !<br>
         En attente que le pilote t'attribue ${manque.join(' et ')}.
       </div>
     `
@@ -2587,19 +2587,19 @@ function renderMyAccredCard() {
   // Cas 5 : par defaut (sans_photo, aucune)
   el.innerHTML = `
     <div style="background:var(--c-line);color:var(--c-ink);border-radius:8px;padding:12px;font-size:12px;line-height:1.5;">
-      ðŸ“¸ Envoie ta photo depuis la carte "Photo de profil" ci-dessus pour dÃ©marrer.
+      ðŸ“¸ Envoie ta photo depuis la carte "Photo de profil" ci-dessus pour démarrer.
     </div>
   `
 }
 
 async function downloadMyAccredPng() {
   if (!_accredState || !_accredState.accreditation_prete) {
-    return showToast('AccrÃ©ditation non prÃªte', 'error')
+    return showToast('Accréditation non prête', 'error')
   }
   const photoUrl = await getSignedPhotoUrl(_accredState.photo_path)
   if (!photoUrl) return showToast('Photo introuvable', 'error')
   try {
-    showToast('GÃ©nÃ©ration en cours...', 'info')
+    showToast('Génération en cours...', 'info')
     await AccreditationGenerator.downloadPng({
       prenom: _accredState.prenom,
       nom: _accredState.nom,
@@ -2609,18 +2609,18 @@ async function downloadMyAccredPng() {
     })
   } catch (err) {
     console.error('[accred] downloadPng', err)
-    showToast('Erreur gÃ©nÃ©ration : ' + (err.message || err), 'error')
+    showToast('Erreur génération : ' + (err.message || err), 'error')
   }
 }
 
 async function downloadMyAccredPdf() {
   if (!_accredState || !_accredState.accreditation_prete) {
-    return showToast('AccrÃ©ditation non prÃªte', 'error')
+    return showToast('Accréditation non prête', 'error')
   }
   const photoUrl = await getSignedPhotoUrl(_accredState.photo_path)
   if (!photoUrl) return showToast('Photo introuvable', 'error')
   try {
-    showToast('GÃ©nÃ©ration en cours...', 'info')
+    showToast('Génération en cours...', 'info')
     await AccreditationGenerator.downloadPdf({
       prenom: _accredState.prenom,
       nom: _accredState.nom,
@@ -2630,7 +2630,7 @@ async function downloadMyAccredPdf() {
     })
   } catch (err) {
     console.error('[accred] downloadPdf', err)
-    showToast('Erreur gÃ©nÃ©ration : ' + (err.message || err), 'error')
+    showToast('Erreur génération : ' + (err.message || err), 'error')
   }
 }
 
@@ -3580,7 +3580,7 @@ function renderDecouverteSection() {
       </div>
       <div style="flex:1;min-width:0">
         <div style="color:#fff;font-weight:700;font-size:14px;line-height:1.3;margin-bottom:4px">Rejoins le groupe WhatsApp</div>
-        <div style="color:rgba(255,255,255,0.85);font-size:11px;line-height:1.4">Communication rapide entre bÃ©nÃ©voles, infos de derniÃ¨re minute avant chaque match</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:11px;line-height:1.4">Communication rapide entre bénévoles, infos de dernière minute avant chaque match</div>
       </div>
       <div style="flex-shrink:0;background:rgba(255,255,255,0.2);color:#fff;font-weight:600;font-size:12px;padding:8px 12px;border-radius:8px;white-space:nowrap">Rejoindre â†’</div>
     </div>
