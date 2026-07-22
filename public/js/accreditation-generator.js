@@ -128,12 +128,7 @@
         const rgb = hexToRgb(z.color);
         const isWhite = z.color.toLowerCase() === '#ffffff';
 
-        // 1. Halo INTENSE STRICTEMENT AUTOUR de la pastille
-        //    Rayon limité à 1.4 × r pour ne pas déborder sur la
-        //    pastille voisine (espacement centre-à-centre ≈ 175px,
-        //    r = 73, donc marge disponible ≈ 87 px de chaque côté).
-        //    Le gradient commence à r pour ne pas mordre à l'intérieur
-        //    de la pastille et écraser les chiffres blancs.
+        // 1. Halo INTENSE compact autour de la pastille (rayon 1.4 × r)
         ctx.save();
         const gradient = ctx.createRadialGradient(z.cx, z.cy, z.r * 1.0, z.cx, z.cy, z.r * 1.4);
         gradient.addColorStop(0,    'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',0)');
@@ -146,19 +141,28 @@
         ctx.fill();
         ctx.restore();
 
-        // 2. Fill NOIR semi-transparent SUR la pastille pour assombrir
-        //    le fond pastel et faire ressortir les chiffres blancs
-        //    du template. Skip pour la zone 5 (blanche, chiffre déjà en
-        //    bleu foncé sur fond blanc).
+        // 2. Fill saturé de la couleur zone pour couleurs vives
+        //    (sauf zone 5 blanche qu'on préserve)
         if (!isWhite) {
           ctx.save();
-          ctx.globalAlpha = 0.35;
-          ctx.fillStyle = '#000000';
+          ctx.globalAlpha = 0.85;
+          ctx.fillStyle = z.color;
           ctx.beginPath();
           ctx.arc(z.cx, z.cy, z.r, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
         }
+
+        // 3. REDESSINE le chiffre en blanc pur par-dessus le fill
+        //    (garantit la visibilité indépendamment du template)
+        //    Pour zone 5 blanche, on redessine en bleu foncé
+        ctx.save();
+        ctx.fillStyle = isWhite ? CHARTE.night : '#FFFFFF';
+        ctx.font = 'bold ' + Math.round(z.r * 1.15) + 'px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(id, z.cx, z.cy);
+        ctx.restore();
 
         // 2. Anneau epais (blanc ou bleu foncé si zone blanche)
         ctx.save();
