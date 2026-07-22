@@ -472,6 +472,8 @@ body{font-family:'Sora',sans-serif;background:var(--c-navy);min-height:100vh;}
     <meta name="apple-mobile-web-app-title" content="Spacers">
     <meta name="mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="/theme.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="/js/accreditation-generator.js"></script>
 </head>
 <body>
 
@@ -679,6 +681,13 @@ body{font-family:'Sora',sans-serif;background:var(--c-navy);min-height:100vh;}
 
     <!-- -- MON COMPTE / RGPD (livrable 4) -- -->
     <div id="account-card-wrap"></div>
+
+    <!-- MON ACCREDITATION -->
+    <div class="accred-card" id="accred-card" style="background:white;border-radius:16px;padding:16px;margin-bottom:10px;">
+      <div style="font-size:13px;font-weight:700;color:var(--c-navy-2);margin-bottom:4px;">ðŸŽ« Mon accrÃ©ditation</div>
+      <div style="font-size:11px;color:var(--c-muted);margin-bottom:14px;">Badge officiel pour les jours de match.</div>
+      <div id="accred-card-content"><div style="text-align:center;color:var(--c-muted);padding:20px;font-size:12px;">Chargement...</div></div>
+    </div>
   </div>
   <!-- -- POSTES (chantier découverte) -- -->
   <div class="bscreen" id="bs-postes">
@@ -2488,6 +2497,143 @@ async function loadInstaFeed() {
   }
 }
 
+// -----------------------------------------------------------
+// MON ACCREDITATION (chantier accreditation)
+// -----------------------------------------------------------
+let _accredState = null
+
+async function loadMyAccreditation() {
+  if (!CP || !CP.id) return
+  try {
+    const { data, error } = await sb
+      .from('v_benevole_accreditation')
+      .select('*')
+      .eq('benevole_id', CP.id)
+      .single()
+    if (error) { console.warn('[accred] load error', error); return }
+    _accredState = data
+    renderMyAccredCard()
+  } catch (err) {
+    console.error('[accred] loadMyAccreditation', err)
+  }
+}
+
+function renderMyAccredCard() {
+  const el = document.getElementById('accred-card-content')
+  if (!el) return
+  const s = _accredState
+  if (!s) {
+    el.innerHTML = '<div style="text-align:center;color:var(--c-muted);padding:20px;font-size:12px;">Aucune donnÃ©e disponible.</div>'
+    return
+  }
+
+  // Cas 1 : accreditation prete â†’ apercu + boutons telechargement
+  if (s.accreditation_prete) {
+    const zonesTxt = (s.zones_ids || []).sort((a,b)=>a-b).join(', ')
+    el.innerHTML = `
+      <div style="background:linear-gradient(135deg,#001E2D,#001217);border-radius:12px;padding:14px;color:white;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-weight:700;font-size:13px;">${escapeHtml(s.prenom)} ${escapeHtml(s.nom)}</div>
+          <div style="background:#facc15;color:#001E2D;padding:3px 8px;border-radius:8px;font-size:10px;font-weight:700;">${escapeHtml(s.role_libelle || 'CLUB')}</div>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:6px;">Zones autorisÃ©es : <strong style="color:#91BEE6;">${zonesTxt || 'aucune'}</strong></div>
+        <div style="font-size:10px;color:rgba(145,190,230,0.6);">SAISON 2026 / 2027</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-blue" style="flex:1;font-size:12px;" onclick="downloadMyAccredPng()">ðŸ“¥ PNG</button>
+        <button class="btn btn-blue" style="flex:1;font-size:12px;" onclick="downloadMyAccredPdf()">ðŸ“¥ PDF RÂ°/VÂ°</button>
+      </div>
+    `
+    return
+  }
+
+  // Cas 2 : photo rejetee â†’ afficher le motif + inviter a re-uploader
+  if (s.photo_statut === 'rejetee') {
+    const motif = s.photo_rejet_motif ? escapeHtml(s.photo_rejet_motif) : 'Aucun motif prÃ©cisÃ©'
+    el.innerHTML = `
+      <div style="background:var(--c-red-50);color:var(--c-red);border-radius:8px;padding:12px;font-size:12px;line-height:1.5;margin-bottom:12px;">
+        âŒ <strong>Ta photo a Ã©tÃ© refusÃ©e</strong><br>
+        <span style="font-size:11px;">Motif : ${motif}</span><br>
+        <span style="font-size:11px;">Envoie une nouvelle photo depuis la carte "Photo de profil" ci-dessus.</span>
+      </div>
+    `
+    return
+  }
+
+  // Cas 3 : photo en attente
+  if (s.photo_statut === 'en_attente') {
+    el.innerHTML = `
+      <div style="background:var(--c-gold-50);color:var(--c-amber);border-radius:8px;padding:12px;font-size:12px;line-height:1.5;">
+        â³ Photo envoyÃ©e, en attente de validation par un pilote.
+      </div>
+    `
+    return
+  }
+
+  // Cas 4 : photo validee mais role ou zones manquants
+  if (s.photo_statut === 'generee' && !s.accreditation_prete) {
+    const manque = []
+    if (!s.role_code) manque.push('ton rÃ´le')
+    if (!s.zones_ids || s.zones_ids.length === 0) manque.push('tes zones d\'accÃ¨s')
+    el.innerHTML = `
+      <div style="background:var(--c-blue-50);color:var(--c-navy-2);border-radius:8px;padding:12px;font-size:12px;line-height:1.5;">
+        âœ… Photo validÃ©e !<br>
+        En attente que le pilote t'attribue ${manque.join(' et ')}.
+      </div>
+    `
+    return
+  }
+
+  // Cas 5 : par defaut (sans_photo, aucune)
+  el.innerHTML = `
+    <div style="background:var(--c-line);color:var(--c-ink);border-radius:8px;padding:12px;font-size:12px;line-height:1.5;">
+      ðŸ“¸ Envoie ta photo depuis la carte "Photo de profil" ci-dessus pour dÃ©marrer.
+    </div>
+  `
+}
+
+async function downloadMyAccredPng() {
+  if (!_accredState || !_accredState.accreditation_prete) {
+    return showToast('AccrÃ©ditation non prÃªte', 'error')
+  }
+  const photoUrl = await getSignedPhotoUrl(_accredState.photo_path)
+  if (!photoUrl) return showToast('Photo introuvable', 'error')
+  try {
+    showToast('GÃ©nÃ©ration en cours...', 'info')
+    await AccreditationGenerator.downloadPng({
+      prenom: _accredState.prenom,
+      nom: _accredState.nom,
+      roleLibelle: _accredState.role_libelle,
+      zonesAutorisees: _accredState.zones_ids,
+      photoUrl: photoUrl
+    })
+  } catch (err) {
+    console.error('[accred] downloadPng', err)
+    showToast('Erreur gÃ©nÃ©ration : ' + (err.message || err), 'error')
+  }
+}
+
+async function downloadMyAccredPdf() {
+  if (!_accredState || !_accredState.accreditation_prete) {
+    return showToast('AccrÃ©ditation non prÃªte', 'error')
+  }
+  const photoUrl = await getSignedPhotoUrl(_accredState.photo_path)
+  if (!photoUrl) return showToast('Photo introuvable', 'error')
+  try {
+    showToast('GÃ©nÃ©ration en cours...', 'info')
+    await AccreditationGenerator.downloadPdf({
+      prenom: _accredState.prenom,
+      nom: _accredState.nom,
+      roleLibelle: _accredState.role_libelle,
+      zonesAutorisees: _accredState.zones_ids,
+      photoUrl: photoUrl
+    })
+  } catch (err) {
+    console.error('[accred] downloadPdf', err)
+    showToast('Erreur gÃ©nÃ©ration : ' + (err.message || err), 'error')
+  }
+}
+
 // -- INIT -----------------------------------------------------
 async function init() {
   const { data: { session } } = await sb.auth.getSession()
@@ -3231,6 +3377,10 @@ function closeGuideBenev(){ var ov=document.getElementById('gb-ov'); if(ov) ov.s
 function maybeOpenGuideBenev(){ try{ if(!localStorage.getItem('benev_guide_v1')){ setTimeout(openGuideBenev, 700); } }catch(e){} }
 
 async function showApp(p) {
+  loadMyAccreditation()
+  return showAppImpl(p)
+}
+async function showAppImpl(p) {
   document.getElementById('app').style.display = 'block'
   renderTopbar(p)
   await loadMyReferent()
