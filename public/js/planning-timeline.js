@@ -116,6 +116,7 @@
   }
 
   var LABEL_W = 148; // largeur colonne de gauche (nom du poste + jauge)
+  var UI = { collapsed: false }; // état de repli (persistant entre re-rendus)
 
   // ── Bande "Tous postes" : créneaux transversaux (poste_id null) ──
   function bandeTousHtml(globalCr, dom) {
@@ -150,6 +151,18 @@
                st === STATUS.nomin ? 'Pas de minimum' :
                aff === 0 ? 'Personne d\'affecté' : (manque + ' manquant' + (manque > 1 ? 's' : ''));
 
+    // heure de présence propre au poste (si créneaux spécifiques définis) — heures exactes
+    var timeBadge = '';
+    if (posteCr.length) {
+      var rLo = null, rHi = null;
+      posteCr.forEach(function (c) {
+        var d = toMin(c.heure_debut), f = toMin(c.heure_fin);
+        if (d != null) { rLo = (rLo == null) ? d : Math.min(rLo, d); rHi = (rHi == null) ? d : Math.max(rHi, d); }
+        if (f != null) { rHi = (rHi == null) ? f : Math.max(rHi, f); }
+      });
+      if (rLo != null) timeBadge = '<span style="font-size:10px;font-weight:700;color:#fff;background:rgba(0,0,0,0.32);border-radius:20px;padding:2px 8px;white-space:nowrap;flex-shrink:0;">&#128336; ' + fmtH(rLo) + '&ndash;' + fmtH(rHi) + '</span>';
+    }
+
     // segments de créneaux spécifiques au poste (au-dessus de la barre)
     var segs = posteCr.map(function (c) {
       var d = toMin(c.heure_debut), f = toMin(c.heure_fin) || (d + 45);
@@ -174,9 +187,10 @@
         gridHtml(dom) +
         '<div class="thermo-bar" data-poste="' + idx + '" style="position:absolute;top:0;bottom:0;left:' + left + '%;width:' + w + '%;background:' + st.bg + ';border:1px solid ' + st.c + ';border-left:4px solid ' + st.c + ';border-radius:6px;cursor:pointer;display:flex;align-items:center;padding:0 9px;overflow:hidden;">' +
           segs +
-          '<div style="display:flex;align-items:baseline;gap:7px;min-width:0;">' +
+          '<div style="display:flex;align-items:center;gap:7px;min-width:0;">' +
             '<span style="font-size:13px;font-weight:800;color:#fff;">' + badgeTxt + '</span>' +
             '<span style="font-size:10px;font-weight:600;color:' + st.c + ';white-space:nowrap;filter:brightness(1.4);">' + note + '</span>' +
+            timeBadge +
           '</div>' +
         '</div>' +
       '</div>';
@@ -230,26 +244,53 @@
       // stocke les affectés pour le toggle détail
       container._thermoData = postes.map(function (p) { return { poste: p, aff: (affMap[p.id] || []) }; });
 
-      var html = '';
-      html += legendHtml();
+      // ── récap global (compteur en tête) ──
+      var totAff = 0, totBesoin = 0, incomplets = 0;
+      postes.forEach(function (p) {
+        var a = (affMap[p.id] || []).length;
+        var b = (besMap[p.id] !== undefined) ? besMap[p.id] : (p.benevoles_max_match || 0);
+        totAff += a;
+        if (b > 0) { totBesoin += b; if (a < b) incomplets++; }
+      });
+      var recapTxt = '<span style="color:#fff;">' + totAff + '/' + totBesoin + ' bénévoles affectés</span>'
+        + ' <span style="color:rgba(255,255,255,0.3);">·</span> '
+        + (incomplets === 0
+            ? '<span style="color:#A7D77C;">tous les postes complets ✓</span>'
+            : '<span style="color:#FAC775;">' + incomplets + ' poste' + (incomplets > 1 ? 's' : '') + ' à compléter</span>');
+
+      var chevron = UI.collapsed ? '▸' : '▾';
+
+      var body = '';
+      body += legendHtml();
       if (noTime) {
-        html += '<div style="font-size:10px;color:var(--c-gold-2,#FAC775);margin-bottom:8px;">Aucun créneau défini — ajoute des créneaux ci-dessous pour caler la timeline sur les vraies heures.</div>';
+        body += '<div style="font-size:10px;color:var(--c-gold-2,#FAC775);margin-bottom:8px;">Aucun créneau défini — ajoute des créneaux ci-dessous pour caler la timeline sur les vraies heures.</div>';
       }
-      html += '<div style="overflow-x:auto;">';
-      html += '<div style="min-width:520px;">';
-      // axe
-      html += '<div style="display:flex;"><div style="width:' + LABEL_W + 'px;flex-shrink:0;"></div><div style="flex:1;">' + axisHtml(dom) + '</div></div>';
-      // bande tous postes
-      html += bandeTousHtml(globalCr, dom);
-      // lignes postes
-      html += postes.map(function (p, idx) {
+      body += '<div style="overflow-x:auto;"><div style="min-width:520px;">';
+      body += '<div style="display:flex;"><div style="width:' + LABEL_W + 'px;flex-shrink:0;"></div><div style="flex:1;">' + axisHtml(dom) + '</div></div>';
+      body += bandeTousHtml(globalCr, dom);
+      body += postes.map(function (p, idx) {
         var aff = (affMap[p.id] || []).length;
         var besoin = (besMap[p.id] !== undefined) ? besMap[p.id] : (p.benevoles_max_match || 0);
         return posteRowHtml(p, aff, besoin, dom, crByPoste[p.id] || [], idx);
       }).join('');
-      html += '</div></div>';
+      body += '</div></div>';
 
-      container.innerHTML = html;
+      container.innerHTML =
+        '<div class="thermo-head" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;padding:2px 0 10px;" title="Cliquer pour replier / déplier">' +
+          '<span class="thermo-chevron" style="font-size:12px;color:rgba(255,255,255,0.6);width:12px;text-align:center;">' + chevron + '</span>' +
+          '<span style="font-size:12px;font-weight:700;">' + recapTxt + '</span>' +
+        '</div>' +
+        '<div class="thermo-body" style="display:' + (UI.collapsed ? 'none' : 'block') + ';">' + body + '</div>';
+
+      // repli / dépli au clic sur l'en-tête
+      var head = container.querySelector('.thermo-head');
+      if (head) head.addEventListener('click', function () {
+        UI.collapsed = !UI.collapsed;
+        var b = container.querySelector('.thermo-body');
+        var ch = container.querySelector('.thermo-chevron');
+        if (b) b.style.display = UI.collapsed ? 'none' : 'block';
+        if (ch) ch.textContent = UI.collapsed ? '▸' : '▾';
+      });
 
       // toggle détail des bénévoles affectés au clic sur une barre
       container.querySelectorAll('.thermo-bar').forEach(function (bar) {
