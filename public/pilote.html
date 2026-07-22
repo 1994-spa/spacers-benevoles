@@ -613,6 +613,30 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
   </div>
 </div>
 
+<!-- MODAL ATTRIBUTION ACCREDITATION -->
+<div class="modal-overlay" id="modal-attrib-accred" style="display:none;">
+  <div class="modal" style="max-width:420px;">
+    <h2 style="margin-bottom:14px;">Configurer l'accreditation</h2>
+    <div id="attrib-accred-benv" style="text-align:center;margin-bottom:14px;"></div>
+
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:6px;font-weight:600;">Role</label>
+      <select id="attrib-role" style="width:100%;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:10px;color:white;font-family:'Sora',sans-serif;font-size:13px;">
+        <option value="">-- Aucun --</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:8px;font-weight:600;">Zones d'acces</label>
+      <div id="attrib-zones" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-green" style="flex:1;font-size:13px;" onclick="saveConfigAccred()">Sauvegarder</button>
+      <button class="btn btn-ghost" style="flex:1;font-size:13px;" onclick="closeConfigAccred()">Annuler</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-confirm" style="display:none;">
   <div class="modal">
     <div id="modal-confirm-icon" style="text-align:center;font-size:42px;margin-bottom:6px;line-height:1;"></div>
@@ -1157,7 +1181,131 @@ function renderPhotosAtt(list) {
       </div>`).join('')
 }
 
-function renderAccredsGen(list) {
+async function loadAttribAccredData() {
+  // Charge la liste des roles + zones pour la modale (mis en cache)
+  if (window._accredRoles && window._accredZonesRef) return
+  const [rolesRes, zonesRes] = await Promise.all([
+    sb.from('accreditation_roles').select('*').eq('actif', true).order('ordre'),
+    sb.from('accreditation_zones_ref').select('*').order('zone_id'),
+  ])
+  window._accredRoles = rolesRes.data || []
+  window._accredZonesRef = zonesRes.data || []
+}
+
+async function renderAccredsGen(list) {
+  const el = document.getElementById('accreds-gen')
+  if (!el) return
+  if (list.length === 0) {
+    el.innerHTML = '<div style="background:rgba(24,95,165,0.1);border:1px solid rgba(24,95,165,0.2);border-radius:10px;padding:12px;font-size:12px;color:#B5D4F4;">Aucune accreditation generee pour l\'instant.</div>'
+    return
+  }
+
+  // Charge en batch les infos accreditation de tous les benevoles listes
+  const ids = list.map(b => b.id)
+  const { data: accreds } = await sb
+    .from('v_benevole_accreditation')
+    .select('benevole_id, role_code, role_libelle, zones_ids, accreditation_prete')
+    .in('benevole_id', ids)
+  const accredMap = {}
+  ;(accreds || []).forEach(a => { accredMap[a.benevole_id] = a })
+
+  el.innerHTML = list.map(b => {
+    const a = accredMap[b.id] || {}
+    const roleTxt = a.role_libelle ? `<â€‹span style="background:#facc15;color:#001E2D;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;">${a.role_libelle}<â€‹/span>` : '<â€‹span style="color:#F4B8CE;font-size:10px;">Role non attribue<â€‹/span>'
+    const zonesTxt = (a.zones_ids && a.zones_ids.length > 0)
+      ? `<â€‹span style="font-size:10px;color:rgba(255,255,255,0.6);">Zones : <strong style="color:#91BEE6;">${a.zones_ids.sort((x,y)=>x-y).join(', ')}<â€‹/strong><â€‹/span>`
+      : '<â€‹span style="font-size:10px;color:#F4B8CE;">Aucune zone<â€‹/span>'
+    const pretIcon = a.accreditation_prete ? '<â€‹span style="color:#C0DD97;font-size:10px;">âœ“ Prete<â€‹/span>' : '<â€‹span style="color:#FAC775;font-size:10px;">â³ En cours<â€‹/span>'
+
+    return `
+      <div class="photo-card">
+        ${b._signedUrl ? `<img src="${b._signedUrl}" class="thumb">` : `<div class="thumb-ph">${ini(b)}</div>`}
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:white;">${escapeHtmlPilote(b.prenom||'')} ${escapeHtmlPilote(b.nom||'')}</div>
+          <div style="margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            ${roleTxt}
+            ${pretIcon}
+          </div>
+          <div style="margin-top:3px;">${zonesTxt}</div>
+        </div>
+        <button class="btn btn-blue" style="font-size:10px;padding:6px 12px;flex-shrink:0;" onclick="openConfigAccred('${b.id}')">Configurer</button>
+      </div>`
+  }).join('')
+}
+
+async function openConfigAccred(benevoleId) {
+  await loadAttribAccredData()
+  const b = allBenv.find(x => x.id === benevoleId)
+  if (!b) return
+
+  // Fetch etat actuel
+  const { data: current } = await sb
+    .from('v_benevole_accreditation')
+    .select('role_code, zones_ids')
+    .eq('benevole_id', benevoleId)
+    .single()
+
+  window._attribBenv = b
+  const currentRole = current?.role_code || ''
+  const currentZones = new Set((current?.zones_ids || []).map(String))
+
+  // Header : photo + nom
+  document.getElementById('attrib-accred-benv').innerHTML = `
+    ${b._signedUrl ? `<img src="${b._signedUrl}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;margin-bottom:6px;">` : `<div style="width:56px;height:56px;border-radius:50%;background:#444441;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:white;margin:0 auto 6px;">${ini(b)}<â€‹/div>`}
+    <div style="font-weight:700;font-size:14px;color:white;">${escapeHtmlPilote(b.prenom||'')} ${escapeHtmlPilote(b.nom||'')}<â€‹/div>
+    <div style="font-size:10px;color:rgba(255,255,255,0.4);">${escapeHtmlPilote(b.email||'')}<â€‹/div>
+  `
+
+  // Populate roles
+  const roleSel = document.getElementById('attrib-role')
+  roleSel.innerHTML = '<option value="">-- Aucun --<â€‹/option>' +
+    window._accredRoles.map(r => `<option value="${r.code}" ${r.code === currentRole ? 'selected' : ''}>${escapeHtmlPilote(r.libelle)}<â€‹/option>`).join('')
+
+  // Populate zones (6 checkboxes colorees)
+  const zonesEl = document.getElementById('attrib-zones')
+  zonesEl.innerHTML = window._accredZonesRef.map(z => {
+    const checked = currentZones.has(String(z.zone_id)) ? 'checked' : ''
+    return `
+      <label style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.2);border-radius:6px;padding:8px;cursor:pointer;">
+        <input type="checkbox" data-zone="${z.zone_id}" ${checked} style="cursor:pointer;">
+        <â€‹span style="width:16px;height:16px;border-radius:50%;background:${z.couleur_hex};border:1px solid rgba(255,255,255,0.2);flex-shrink:0;"><â€‹/span>
+        <â€‹span style="font-size:11px;color:white;">${z.zone_id}. ${escapeHtmlPilote(z.libelle)}<â€‹/span>
+      </label>`
+  }).join('')
+
+  document.getElementById('modal-attrib-accred').style.display = 'flex'
+}
+
+function closeConfigAccred() {
+  document.getElementById('modal-attrib-accred').style.display = 'none'
+  window._attribBenv = null
+}
+
+async function saveConfigAccred() {
+  const b = window._attribBenv
+  if (!b) return
+
+  const roleCode = document.getElementById('attrib-role').value || null
+  const zones = Array.from(document.querySelectorAll('#attrib-zones input[type=checkbox]:checked'))
+    .map(cb => parseInt(cb.dataset.zone))
+
+  try {
+    const { error } = await sb.rpc('accred_set_role_and_zones', {
+      p_benevole_id: b.id,
+      p_role_code: roleCode,
+      p_zones: zones,
+    })
+    if (error) throw error
+    closeConfigAccred()
+    showAlert('alert-accreds', `Accreditation configuree pour ${b.prenom} ${b.nom}`, 's')
+    await loadAll()
+  } catch (err) {
+    console.error('[accred] saveConfigAccred', err)
+    showAlert('alert-accreds', 'Erreur : ' + (err.message || err), 'e')
+  }
+}
+
+function renderAccredsGen_deprecated(list) {
   document.getElementById('accreds-gen').innerHTML = list.length===0
     ? '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:8px 0;">Aucune accréditation générée.</div>'
     : list.map((b,i)=>`
