@@ -1,3 +1,21 @@
+/* ============================================================
+   POLICES ACCREDITATION (charte 2026-27)
+   ============================================================ */
+@font-face {
+  font-family: 'Sansation';
+  font-weight: 700;
+  font-style: normal;
+  src: url('/fonts/Sansation_Bold.ttf') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Heaters';
+  font-weight: 400;
+  font-style: normal;
+  src: url('/fonts/Heaters.otf') format('opentype');
+  font-display: swap;
+}
+
 :root{
   --c-navy: #042C53;
   --c-navy-2: #0C447C;
