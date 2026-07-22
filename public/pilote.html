@@ -233,25 +233,6 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
   <div class="sec">&#128336; Planning thermom&egrave;tre</div>
   <div class="card"><div id="thermo-planning"></div></div>
 
-  <div class="sec">Bénévoles disponibles — affecter un poste</div>
-  <div id="dispos-match"></div>
-
-  <div class="sec">&#9888;&#65039; Indispos signal&eacute;es</div>
-  <div id="indispo-match"></div>
-
-  <div class="sec">Bénévoles non-répondants</div>
-  <div id="non-rep-match"></div>
-
-  <button class="btn btn-blue btn-full" style="margin-top:8px;" onclick="openModalNotif()">📲 Notifier les bénévoles affectés</button>
-  <button class="btn btn-orange btn-full" onclick="relancer()">⚡ Relancer tous les non-répondants</button>
-
-  <!-- VALIDATION PRÉSENCE (chantier 5) -->
-  <div class="sec">✅ Validation présence (jour J)</div>
-  <div id="validation-section">
-    <div id="validation-kpis"></div>
-    <div id="validation-list"></div>
-  </div>
-
   <div class="sec">&#128336; Planning du match</div>
   <div class="card">
     <div id="creneaux-list" style="margin-bottom:12px;"></div>
@@ -274,6 +255,25 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
       <select id="cr-poste" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;"><option value="">Tous les postes</option></select>
       <button class="btn btn-blue btn-full" onclick="addCreneau()">+ Ajouter le cr&eacute;neau</button>
     </div>
+  </div>
+
+  <div class="sec">Bénévoles disponibles — affecter un poste</div>
+  <div id="dispos-match"></div>
+
+  <div class="sec">&#9888;&#65039; Indispos signal&eacute;es</div>
+  <div id="indispo-match"></div>
+
+  <div class="sec">Bénévoles non-répondants</div>
+  <div id="non-rep-match"></div>
+
+  <button class="btn btn-blue btn-full" style="margin-top:8px;" onclick="openModalNotif()">📲 Notifier les bénévoles affectés</button>
+  <button class="btn btn-orange btn-full" onclick="relancer()">⚡ Relancer tous les non-répondants</button>
+
+  <!-- VALIDATION PRÉSENCE (chantier 5) -->
+  <div class="sec">✅ Validation présence (jour J)</div>
+  <div id="validation-section">
+    <div id="validation-kpis"></div>
+    <div id="validation-list"></div>
   </div>
 
   <div class="sec">Note pilote sur ce match</div>
