@@ -602,18 +602,18 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
 <!-- MODAL ATTRIBUTION ACCREDITATION -->
 <div class="modal-overlay" id="modal-attrib-accred" style="display:none;">
   <div class="modal" style="max-width:420px;">
-    <h2 style="margin-bottom:14px;">Configurer l'accrÃ©ditation</h2>
+    <h2 style="margin-bottom:14px;">Configurer l'accr&eacute;ditation</h2>
     <div id="attrib-accred-benv" style="text-align:center;margin-bottom:14px;"></div>
 
     <div style="margin-bottom:14px;">
-      <label style="display:block;font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:6px;font-weight:600;">RÃ´le</label>
+      <label style="display:block;font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:6px;font-weight:600;">R&ocirc;le</label>
       <select id="attrib-role" style="width:100%;background:#2a2a28;border:1px solid #444441;border-radius:8px;padding:10px;color:white;font-family:'Sora',sans-serif;font-size:13px;">
         <option value="">-- Aucun --</option>
       </select>
     </div>
 
     <div style="margin-bottom:14px;">
-      <label style="display:block;font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:8px;font-weight:600;">Zones d'accÃ¨s</label>
+      <label style="display:block;font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:8px;font-weight:600;">Zones d'acc&egrave;s</label>
       <div id="attrib-zones" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
     </div>
 
@@ -1195,7 +1195,7 @@ async function renderAccredsGen(list) {
   const el = document.getElementById('accreds-gen')
   if (!el) return
   if (!list || list.length === 0) {
-    el.innerHTML = '<div style="background:rgba(24,95,165,0.1);border:1px solid rgba(24,95,165,0.2);border-radius:10px;padding:12px;font-size:12px;color:#B5D4F4;">Aucune accrÃ©ditation gÃ©nÃ©rÃ©e pour l\'instant.</div>'
+    el.innerHTML = '<div style="background:rgba(24,95,165,0.1);border:1px solid rgba(24,95,165,0.2);border-radius:10px;padding:12px;font-size:12px;color:#B5D4F4;">Aucune accr\u00e9ditation g\u00e9n\u00e9r\u00e9e pour l\'instant.</div>'
     return
   }
 
@@ -1211,13 +1211,13 @@ async function renderAccredsGen(list) {
     const a = accredMap[b.id] || {}
     const roleTxt = a.role_libelle
       ? '<span style="background:#facc15;color:#001E2D;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;">' + escapeHtmlPilote(a.role_libelle) + '</span>'
-      : '<span style="color:#F4B8CE;font-size:10px;">RÃ´le non attribuÃ©</span>'
+      : '<span style="color:#F4B8CE;font-size:10px;">R\u00f4le non attribu\u00e9</span>'
     const zonesTxt = (a.zones_ids && a.zones_ids.length > 0)
       ? '<span style="font-size:10px;color:rgba(255,255,255,0.6);">Zones : <strong style="color:#91BEE6;">' + a.zones_ids.slice().sort((x,y)=>x-y).join(', ') + '</strong></span>'
       : '<span style="font-size:10px;color:#F4B8CE;">Aucune zone</span>'
     const pretIcon = a.accreditation_prete
-      ? '<span style="color:#C0DD97;font-size:10px;">âœ“ PrÃªte</span>'
-      : '<span style="color:#FAC775;font-size:10px;">â³ En cours</span>'
+      ? '<span style="color:#C0DD97;font-size:10px;">\u2713 Pr\u00eate</span>'
+      : '<span style="color:#FAC775;font-size:10px;">\u23f3 En cours</span>'
     const thumb = b._signedUrl
       ? '<img src="' + b._signedUrl + '" class="thumb">'
       : '<div class="thumb-ph">' + ini(b) + '</div>'
@@ -1249,7 +1249,6 @@ async function openConfigAccred(benevoleId) {
   const currentRole = (current && current.role_code) || ''
   const currentZones = new Set(((current && current.zones_ids) || []).map(String))
 
-  // Header photo + nom + email
   const photoHtml = b._signedUrl
     ? '<img src="' + b._signedUrl + '" style="width:56px;height:56px;border-radius:50%;object-fit:cover;margin-bottom:6px;">'
     : '<div style="width:56px;height:56px;border-radius:50%;background:#444441;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:white;margin:0 auto 6px;">' + ini(b) + '</div>'
@@ -1259,7 +1258,6 @@ async function openConfigAccred(benevoleId) {
     '<div style="font-weight:700;font-size:14px;color:white;">' + escapeHtmlPilote(b.prenom||'') + ' ' + escapeHtmlPilote(b.nom||'') + '</div>' +
     '<div style="font-size:10px;color:rgba(255,255,255,0.4);">' + escapeHtmlPilote(b.email||'') + '</div>'
 
-  // Populate roles
   const roleSel = document.getElementById('attrib-role')
   let roleOpts = '<option value="">-- Aucun --</option>'
   window._accredRoles.forEach(r => {
@@ -1268,7 +1266,6 @@ async function openConfigAccred(benevoleId) {
   })
   roleSel.innerHTML = roleOpts
 
-  // Populate zones (6 checkboxes)
   const zonesEl = document.getElementById('attrib-zones')
   let zonesHtml = ''
   window._accredZonesRef.forEach(z => {
@@ -1306,7 +1303,7 @@ async function saveConfigAccred() {
     })
     if (error) throw error
     closeConfigAccred()
-    showAlert('alert-accreds', 'AccrÃ©ditation configurÃ©e pour ' + b.prenom + ' ' + b.nom, 's')
+    showAlert('alert-accreds', 'Accr\u00e9ditation configur\u00e9e pour ' + b.prenom + ' ' + b.nom, 's')
     await loadAll()
   } catch (err) {
     console.error('[accred] saveConfigAccred', err)
