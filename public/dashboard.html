@@ -2548,7 +2548,7 @@ function renderMyAccredCard() {
   }
 
   // Cas 2 : photo rejetee â†’ afficher le motif + inviter a re-uploader
-  if (s.photo_statut === 'rejetee') {
+  if (s.photo_statut === 'refusee') {
     const motif = s.photo_rejet_motif ? escapeHtml(s.photo_rejet_motif) : 'Aucun motif prÃ©cisÃ©'
     el.innerHTML = `
       <div style="background:var(--c-red-50);color:var(--c-red);border-radius:8px;padding:12px;font-size:12px;line-height:1.5;margin-bottom:12px;">
