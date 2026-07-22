@@ -144,6 +144,20 @@
         ctx.fill();
         ctx.restore();
 
+        // 2. Fill NOIR semi-transparent SUR la pastille pour assombrir
+        //    le fond pastel et faire ressortir les chiffres blancs
+        //    du template. Skip pour la zone 5 (blanche, chiffre déjà en
+        //    bleu foncé sur fond blanc).
+        if (!isWhite) {
+          ctx.save();
+          ctx.globalAlpha = 0.35;
+          ctx.fillStyle = '#000000';
+          ctx.beginPath();
+          ctx.arc(z.cx, z.cy, z.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
         // 2. Anneau epais (blanc ou bleu foncé si zone blanche)
         ctx.save();
         ctx.strokeStyle = isWhite ? CHARTE.night : '#FFFFFF';
