@@ -287,6 +287,8 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
 <!-- BÉNÉVOLES -->
 <div class="screen" id="screen-benevoles">
   <input id="search" placeholder="Rechercher un bénévole..." style="width:100%;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:50px;padding:9px 14px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:12px;" oninput="filterBenv()">
+  <div id="tshirt-recap"></div>
+  <div id="size-filter"></div>
   <div id="benv-list"></div>
 </div>
 
@@ -1166,6 +1168,8 @@ async function loadAll() {
 
   renderPhotosAtt(att)
   renderAccredsGen(benv.filter(b=>b.statut_accreditation==='generee'))
+  renderTshirtRecap()
+  renderSizeFilter()
   renderBenv(benv)
   await loadMatch()
   await loadSuggestions()
@@ -1437,6 +1441,59 @@ function renderAccredsGen_deprecated(list) {
       </div>`).join('')
 }
 
+// ── Infos inscription : taille t-shirt / postes préférés ──
+const _TSHIRT_SIZES = ['XS','S','M','L','XL','XXL','XXXL']
+let _sizeFilter = ''  // '' = toutes ; '?' = non renseignée
+
+function tailleBadge(b){
+  if(!b.taille_tshirt) return ''
+  return `<span class="s-badge" style="background:rgba(245,200,66,0.18);color:var(--c-gold-light);">👕 ${escapeHtml(b.taille_tshirt)}</span>`
+}
+function prefsList(b){ return (b.postes_preferes||'').split(',').map(s=>s.trim()).filter(Boolean) }
+function prefsHtml(b){
+  const p = prefsList(b)
+  if(!p.length) return ''
+  return `<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:3px;">❤️ ${p.map(escapeHtml).join(' · ')}</div>`
+}
+
+function renderTshirtRecap(){
+  const el = document.getElementById('tshirt-recap'); if(!el) return
+  const actifs = allBenv.filter(b=>b.statut_compte==='actif')
+  const counts = {}; _TSHIRT_SIZES.forEach(s=>counts[s]=0); let inconnu=0
+  actifs.forEach(b=>{ const t=b.taille_tshirt; if(t && counts[t]!==undefined) counts[t]++; else inconnu++ })
+  const cell = (n,lab,danger)=>`<div style="text-align:center;padding:6px 10px;background:${danger?'rgba(226,75,74,0.12)':'rgba(255,255,255,0.05)'};border-radius:8px;min-width:44px;"><div style="font-size:15px;font-weight:800;color:${danger?'var(--c-danger-soft)':'white'};">${n}</div><div style="font-size:9px;color:rgba(255,255,255,0.45);">${lab}</div></div>`
+  const cells = _TSHIRT_SIZES.map(s=>cell(counts[s],s,false)).join('') + (inconnu?cell(inconnu,'?',true):'')
+  el.innerHTML = `<div style="background:var(--c-ink-2);border-radius:12px;padding:12px;margin-bottom:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.55);">👕 Tailles t-shirt · ${actifs.length} actifs</div>
+      <button class="btn btn-sm" style="background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.15);" onclick="exportTaillesCSV()">&#11015; Export CSV</button>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">${cells}</div>
+  </div>`
+}
+
+function renderSizeFilter(){
+  const el = document.getElementById('size-filter'); if(!el) return
+  const mk=(val,lab)=>{ const on=_sizeFilter===val; return `<div style="cursor:pointer;font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;${on?'background:var(--c-gold);color:var(--c-navy);':'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);'}" onclick="setSizeFilter('${val}')">${lab}</div>` }
+  el.innerHTML = `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">${mk('','Toutes')}${_TSHIRT_SIZES.map(s=>mk(s,s)).join('')}${mk('?','?')}</div>`
+}
+function setSizeFilter(v){ _sizeFilter=(_sizeFilter===v?'':v); renderSizeFilter(); filterBenv() }
+
+function exportTaillesCSV(){
+  const rows = allBenv.filter(b=>b.statut_compte==='actif')
+    .sort((a,b)=>(a.taille_tshirt||'zz').localeCompare(b.taille_tshirt||'zz')||(a.nom||'').localeCompare(b.nom||''))
+  if(!rows.length){ showAlert('alert-benv','Aucun bénévole actif à exporter','e'); return }
+  const head = ['Prénom','Nom','Taille','Email','Téléphone','Ville','Postes préférés']
+  const q = s => '"'+String(s==null?'':s).replace(/"/g,'""')+'"'
+  const lines = [head.map(q).join(';')]
+  rows.forEach(b=>lines.push([b.prenom,b.nom,b.taille_tshirt,b.email,b.telephone,b.ville,b.postes_preferes].map(q).join(';')))
+  const csv = '﻿'+lines.join('\r\n')  // BOM UTF-8 pour Excel (accents)
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'})
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a'); a.href=url; a.download='tailles-tshirt-spacers.csv'; document.body.appendChild(a); a.click(); a.remove()
+  setTimeout(()=>URL.revokeObjectURL(url),1500)
+}
+
 function renderBenv(list) {
   document.getElementById('benv-list').innerHTML = list.map(b=>`
     <div class="benv-row">
@@ -1446,10 +1503,12 @@ function renderBenv(list) {
         <div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;">
           <span class="s-badge" style="background:rgba(24,95,165,0.2);color:var(--c-blue-100);">${b.niveau||'Bronze'}</span>
           <span class="s-badge" style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.4);">${b.points_total||0} pts</span>
+          ${tailleBadge(b)}
           ${getAccBadge(b.statut_accreditation)}
           ${b.statut_compte==='pending_deletion'?`<span class="s-badge" style="background:rgba(153,53,86,0.25);color:var(--c-accent-100);">🗑️ Suppression</span>`:''}
           ${b.statut_compte==='supprime'?`<span class="s-badge" style="background:rgba(95,94,90,0.3);color:rgba(255,255,255,0.5);">⚫ Supprimé</span>`:''}
         </div>
+        ${prefsHtml(b)}
       </div>
       <button class="btn btn-green btn-sm" title="WhatsApp" style="flex-shrink:0;" onclick="whatsAppLibre('${b.id}')" ${b.statut_compte==='supprime'?'disabled style="opacity:0.3;cursor:not-allowed;flex-shrink:0;"':''}>📱</button>
       <button class="btn btn-sm" title="RGPD" style="flex-shrink:0;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" onclick="openRgpdMenu('${b.id}')" ${b.statut_compte==='supprime'?'disabled':''}>🛡️</button>
@@ -1459,7 +1518,11 @@ function renderBenv(list) {
 
 function filterBenv() {
   const q = document.getElementById('search').value.toLowerCase()
-  renderBenv(allBenv.filter(b=>(b.prenom||'').toLowerCase().includes(q)||(b.nom||'').toLowerCase().includes(q)||(b.email||'').toLowerCase().includes(q)))
+  renderBenv(allBenv.filter(b=>{
+    const okQ = (b.prenom||'').toLowerCase().includes(q)||(b.nom||'').toLowerCase().includes(q)||(b.email||'').toLowerCase().includes(q)
+    const okSize = !_sizeFilter || (_sizeFilter==='?' ? !b.taille_tshirt : b.taille_tshirt===_sizeFilter)
+    return okQ && okSize
+  }))
 }
 
 function getAccBadge(s) {
@@ -1639,7 +1702,7 @@ async function loadMatch() {
 
   // Inscriptions disponibles (CHANTIER 11 : on récupère photo_path au lieu de photo_url)
   const { data: insc } = await sb.from('inscriptions')
-    .select('id, benevole_id, poste_id, statut, statut_jour_match, benevoles!inscriptions_benevole_id_fkey(prenom, nom, photo_path, matchs_joues)')
+    .select('id, benevole_id, poste_id, statut, statut_jour_match, benevoles!inscriptions_benevole_id_fkey(prenom, nom, photo_path, matchs_joues, taille_tshirt, postes_preferes)')
     .eq('match_id', m.id)
     .eq('statut', 'disponible')
 
@@ -1714,9 +1777,10 @@ async function loadMatch() {
       return `
         <div class="benv-row">
           ${b._signedUrl?`<img src="${b._signedUrl}" class="bav">`:`<div class="bav-ph">${ini(b)}</div>`}
-          <div style="flex:1;">
-            <div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:700;color:white;">${b.prenom||''} ${b.nom||''} ${tailleBadge(b)}</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.4);">${b.matchs_joues||0} matchs</div>
+            ${prefsHtml(b)}
           </div>
           <select class="${selClass}" onchange="affecterPoste('${i.id}', this.value, this)">
             <option value="">-- Poste --</option>
