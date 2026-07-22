@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="/js/accreditation-generator.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/accreditation-generator.js"></script><script src="/js/planning-timeline.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -229,6 +229,9 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
       <tr><th>Poste</th><th>Besoin</th><th>Dispo</th><th>Statut</th></tr>
     </table>
   </div>
+
+  <div class="sec">&#128336; Planning thermom&egrave;tre</div>
+  <div class="card"><div id="thermo-planning"></div></div>
 
   <div class="sec">Bénévoles disponibles — affecter un poste</div>
   <div id="dispos-match"></div>
@@ -1772,7 +1775,9 @@ async function loadCreneaux(){
   var listEl=document.getElementById('creneaux-list');
   if(!listEl) return;
   var posteSel=document.getElementById('cr-poste');
-  if(!curMatch){ listEl.innerHTML=''; return; }
+  var thermoEl=document.getElementById('thermo-planning');
+  if(!curMatch){ listEl.innerHTML=''; if(thermoEl) thermoEl.innerHTML=''; return; }
+  if(thermoEl && window.SpacersPlanning) window.SpacersPlanning.renderThermoPilote(thermoEl, sb, curMatch.id);
   if(posteSel) posteSel.innerHTML='<option value="">Tous les postes</option>'+(curPostes||[]).map(p=>'<option value="'+p.id+'">'+p.nom+'</option>').join('');
   var r=await sb.from('match_creneaux').select('*').eq('match_id',curMatch.id).order('ordre').order('heure_debut');
   var list=r.data||[];

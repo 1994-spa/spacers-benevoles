@@ -473,7 +473,7 @@ body{font-family:'Sora',sans-serif;background:var(--c-navy);min-height:100vh;}
     <meta name="mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="/theme.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="/js/accreditation-generator.js"></script>
+<script src="/js/accreditation-generator.js"></script><script src="/js/planning-timeline.js"></script>
 </head>
 <body>
 
@@ -3667,6 +3667,11 @@ function toggleFaq(el) {
 function _crCol(c){ return ({arrivee:'#3B82F6',mise_en_place:'#8B5CF6',en_position:'#22C55E',match:'var(--c-navy)',repas:'var(--c-gold)',desinstallation:'#F97316'})[c]||'#9CA3AF'; }
 function _crLab(c){ return ({arrivee:'Arriv&eacute;e / accueil',mise_en_place:'Mise en place',en_position:'En position',match:'Match',repas:'Repas',desinstallation:'D&eacute;sinstallation'})[c]||'Autre'; }
 function friseHtml(creneaux, monPoste){
+  // Timeline horizontale (module planning-timeline.js) si disponible
+  if(window.SpacersPlanning && window.SpacersPlanning.friseHtml){
+    return window.SpacersPlanning.friseHtml(creneaux, monPoste);
+  }
+  // Repli : frise verticale historique
   if(!creneaux || creneaux.length===0) return '';
   const list = creneaux.filter(c => !c.poste_id || c.poste_id===monPoste);
   if(list.length===0) return '';
