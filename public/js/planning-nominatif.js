@@ -80,9 +80,9 @@
       blocks.forEach(function(b,i){
         var c=colOf(b);
         steps+='<div style="display:flex;gap:11px;">'
-          + '<div style="width:78px;flex-shrink:0;text-align:right;padding-top:2px;"><div style="font-size:14px;font-weight:800;color:var(--c-navy,#042C53);">'+fmtH(toMin(b.heure_debut))+'</div>'+(b.heure_fin?'<div style="font-size:10px;color:#8A9BAD;">→ '+fmtH(toMin(b.heure_fin))+'</div>':'')+'</div>'
+          + '<div style="width:86px;flex-shrink:0;text-align:right;padding-top:2px;"><div style="font-size:15px;font-weight:800;color:var(--c-navy,#042C53);">'+fmtH(toMin(b.heure_debut))+'</div>'+(b.heure_fin?'<div style="font-size:10px;color:#8A9BAD;">→ '+fmtH(toMin(b.heure_fin))+'</div>':'')+'</div>'
           + '<div style="position:relative;width:18px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;">'+(i<blocks.length-1?'<div style="position:absolute;top:10px;bottom:-14px;width:2px;background:#e0e7f0;"></div>':'')+'<div style="width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px '+c+';margin-top:3px;z-index:2;"></div></div>'
-          + '<div style="flex:1;padding-bottom:14px;min-width:0;"><div style="border-radius:12px;padding:10px 12px;color:#fff;background:'+c+';">'
+          + '<div style="flex:1;padding-bottom:16px;min-width:0;"><div style="border-radius:12px;padding:12px 14px;color:#fff;background:'+c+';">'
           +   '<div style="font-size:14px;font-weight:800;">'+esc(b.libelle)+(i===0?' <span style="font-size:9px;font-weight:800;background:rgba(0,0,0,0.25);border-radius:20px;padding:2px 7px;margin-left:4px;">1er poste</span>':'')+'</div>'
           +   '<div style="font-size:11px;opacity:0.95;margin-top:1px;">'+fmtH(toMin(b.heure_debut))+(b.heure_fin?' – '+fmtH(toMin(b.heure_fin)):'')+'</div>'
           +   (b.consigne?'<div style="font-size:11px;background:rgba(255,255,255,0.2);border-radius:8px;padding:5px 9px;margin-top:6px;">📋 '+esc(b.consigne)+'</div>':'')
@@ -138,21 +138,22 @@
 
       var anySeg=bens.some(function(b){ return segmentsFor(b).length; });
       if(anySeg){
-        html+='<div style="overflow-x:auto;margin-bottom:12px;"><div style="min-width:560px;">';
+        html+='<div style="overflow-x:auto;margin-bottom:14px;"><div style="min-width:620px;">';
         var ticks='';
-        for(var t=dom[0];t<=dom[1];t+=60){ var l=pos(t,dom); ticks+='<div style="position:absolute;top:0;left:'+l+'%;font-size:9px;color:rgba(255,255,255,0.4);font-weight:600;transform:translateX(-2px);">'+fmtH(t)+'</div>'; if(t<dom[1])ticks+='<div style="position:absolute;top:0;bottom:0;left:'+l+'%;width:1px;background:rgba(255,255,255,0.06);"></div>'; }
-        if(ke!=null) ticks+='<div style="position:absolute;top:0;bottom:0;left:'+pos(ke,dom)+'%;width:2px;background:#E24B4A;"></div><div style="position:absolute;top:-2px;left:'+pos(ke,dom)+'%;transform:translateX(-50%);background:#E24B4A;color:#fff;font-size:8px;font-weight:800;padding:1px 6px;border-radius:20px;white-space:nowrap;">🏐 '+fmtH(ke)+'</div>';
-        html+='<div style="display:flex;"><div style="width:120px;flex-shrink:0;"></div><div style="position:relative;flex:1;height:16px;">'+ticks+'</div></div>';
-        bens.forEach(function(bn){
+        for(var t=dom[0];t<=dom[1];t+=60){ var l=pos(t,dom); ticks+='<div style="position:absolute;top:0;left:'+l+'%;font-size:10px;color:rgba(255,255,255,0.45);font-weight:600;transform:translateX(-2px);">'+fmtH(t)+'</div>'; if(t<dom[1])ticks+='<div style="position:absolute;top:0;bottom:0;left:'+l+'%;width:1px;background:rgba(255,255,255,0.06);"></div>'; }
+        if(ke!=null) ticks+='<div style="position:absolute;top:0;bottom:0;left:'+pos(ke,dom)+'%;width:2px;background:#E24B4A;"></div><div style="position:absolute;top:-2px;left:'+pos(ke,dom)+'%;transform:translateX(-50%);background:#E24B4A;color:#fff;font-size:9px;font-weight:800;padding:1px 7px;border-radius:20px;white-space:nowrap;">🏐 '+fmtH(ke)+'</div>';
+        html+='<div style="display:flex;"><div style="width:150px;flex-shrink:0;"></div><div style="position:relative;flex:1;height:18px;">'+ticks+'</div></div>';
+        bens.forEach(function(bn,idx){
           var segs=segmentsFor(bn); if(!segs.length) return;
           var lane='';
           for(var tt=dom[0];tt<=dom[1];tt+=60){ lane+='<div style="position:absolute;top:0;bottom:0;left:'+pos(tt,dom)+'%;width:1px;background:rgba(255,255,255,0.05);"></div>'; }
           segs.forEach(function(s,j){
-            var left=pos(s.d,dom), w=Math.max(4,pos(s.f,dom)-left);
-            lane+='<div title="'+esc(s.lib)+' '+fmtH(s.d)+'–'+fmtH(s.f)+'" style="position:absolute;top:4px;bottom:4px;left:'+left+'%;width:'+w+'%;background:'+s.col+';border-radius:6px;display:flex;align-items:center;padding:0 7px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.3);'+(s.timed?'':'opacity:0.92;')+'"><span style="font-size:10px;font-weight:700;color:#fff;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,0.4);">'+esc(s.lib)+'</span></div>';
-            if(j<segs.length-1){ lane+='<div style="position:absolute;top:8px;left:calc('+pos(s.f,dom)+'% - 5px);font-size:11px;color:#fff;z-index:3;">➜</div>'; }
+            var left=pos(s.d,dom), w=Math.max(5,pos(s.f,dom)-left);
+            lane+='<div title="'+esc(s.lib)+' '+fmtH(s.d)+'–'+fmtH(s.f)+'" style="position:absolute;top:6px;bottom:6px;left:'+left+'%;width:'+w+'%;background:'+s.col+';border-radius:8px;display:flex;flex-direction:column;justify-content:center;padding:0 10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.28);border:1px solid rgba(255,255,255,0.28);'+(s.timed?'':'opacity:0.94;')+'"><span style="font-size:11px;font-weight:800;color:#fff;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,0.45);line-height:1.15;">'+esc(s.lib)+'</span><span style="font-size:9px;color:#fff;opacity:0.9;white-space:nowrap;line-height:1.1;">'+fmtH(s.d)+'–'+fmtH(s.f)+'</span></div>';
+            if(j<segs.length-1){ lane+='<div style="position:absolute;top:20px;left:calc('+pos(s.f,dom)+'% - 5px);font-size:12px;color:#fff;z-index:3;text-shadow:0 1px 2px rgba(0,0,0,0.5);">➜</div>'; }
           });
-          html+='<div style="display:flex;align-items:center;border-top:1px solid rgba(255,255,255,0.06);"><div style="width:120px;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;padding:6px 8px 6px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(bn.nom)+'</div><div style="position:relative;flex:1;height:34px;">'+lane+'</div></div>';
+          var rowBg=(idx%2===0)?'rgba(255,255,255,0.02)':'transparent';
+          html+='<div style="display:flex;align-items:center;background:'+rowBg+';border-radius:6px;"><div style="width:150px;flex-shrink:0;display:flex;align-items:center;gap:7px;padding:5px 8px 5px 4px;"><div style="width:26px;height:26px;border-radius:50%;background:var(--c-navy-2,#0C447C);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">'+ini(bn.nom)+'</div><div style="font-size:11px;font-weight:700;color:#fff;line-height:1.1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(bn.nom)+'</div></div><div style="position:relative;flex:1;height:48px;">'+lane+'</div></div>';
         });
         html+='</div></div>';
         html+=coverageHtml(bens, segmentsFor, dom);
@@ -195,8 +196,8 @@
     var keys=Object.keys(groups); if(!keys.length) return '';
     var rows=keys.sort().map(function(k){
       var g=groups[k], cells='';
-      for(var t=dom[0];t<dom[1];t+=30){ var n=0; g.segs.forEach(function(s){ if(s.d<=t&&s.f>t)n++; }); if(n>0){ var op=0.35+Math.min(n,5)*0.13; cells+='<div style="position:absolute;top:2px;height:14px;left:'+pos(t,dom)+'%;width:'+(pos(t+30,dom)-pos(t,dom))+'%;background:'+g.col+';opacity:'+op+';display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;">'+n+'</div>'; } }
-      return '<div style="display:flex;align-items:center;margin-bottom:4px;"><div style="width:120px;flex-shrink:0;font-size:10px;font-weight:700;color:#fff;display:flex;align-items:center;gap:5px;"><span style="width:9px;height:9px;border-radius:2px;background:'+g.col+';"></span>'+esc(g.lab)+'</div><div style="position:relative;flex:1;height:18px;background:rgba(255,255,255,0.04);border-radius:5px;">'+cells+'</div></div>';
+      for(var t=dom[0];t<dom[1];t+=30){ var n=0; g.segs.forEach(function(s){ if(s.d<=t&&s.f>t)n++; }); if(n>0){ var op=0.4+Math.min(n,5)*0.12; cells+='<div style="position:absolute;top:3px;height:18px;left:'+pos(t,dom)+'%;width:'+(pos(t+30,dom)-pos(t,dom))+'%;background:'+g.col+';opacity:'+op+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;">'+n+'</div>'; } }
+      return '<div style="display:flex;align-items:center;margin-bottom:5px;"><div style="width:150px;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:'+g.col+';flex-shrink:0;"></span>'+esc(g.lab)+'</div><div style="position:relative;flex:1;height:24px;background:rgba(255,255,255,0.04);border-radius:6px;">'+cells+'</div></div>';
     }).join('');
     return '<div style="margin:6px 0 4px;"><div style="font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:6px;">📊 Couverture par poste (nb de bénévoles présents)</div>'+rows+'</div>';
   }
