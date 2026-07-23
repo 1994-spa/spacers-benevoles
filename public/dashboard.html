@@ -3690,8 +3690,8 @@ function friseHtml(creneaux, monPoste){
 }
 async function loadPlanning() {
   const el = document.getElementById('planning-list')
-  const { data: matchs } = await sb.from('matchs').select('*').order('date_match',{ascending:true})
-  if (!matchs||matchs.length===0){el.innerHTML='<div style="text-align:center;color:rgba(181,212,244,0.4);padding:30px;font-size:12px;">Aucun match programmé pour l\'instant.</div>';return}
+  const { data: matchs } = await sb.from('matchs').select('*').eq('statut_inscriptions','ouvert').order('date_match',{ascending:true})
+  if (!matchs||matchs.length===0){el.innerHTML='<div style="text-align:center;color:rgba(181,212,244,0.4);padding:30px;font-size:12px;">Aucun match ouvert pour l\'instant.</div>';return}
   const { data: ins } = await sb.from('inscriptions').select('match_id,statut,poste_id').eq('benevole_id',CU.id)
   const insMap={}; if(ins) ins.forEach(i=>insMap[i.match_id]=i)
   const _mids = matchs.map(m=>m.id)
