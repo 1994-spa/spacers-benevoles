@@ -21,8 +21,10 @@
     buvette:'Buvette', dota:'Dotations + Repas', securite:'Sécurité', autre:'Autre'
   };
   var PALETTE = ['#3B82F6','#22C55E','#F97316','#8B5CF6','#EC4899','#14B8A6','#F5C842','#EF4444','#0EA5E9','#84CC16'];
-  var UI = { ganttOpen: false }; // timeline repliée par défaut (persiste entre re-rendus)
+  var UI = { ganttOpen: true, selBlk: null }; // timeline ouverte par défaut + bloc sélectionné (persistent entre re-rendus)
   var ARRIVEE_AVANT = 180;       // heure d'arrivée par défaut = coup d'envoi − 3h (ex. 15h pour 18h)
+  // Catégories proposées dans l'éditeur de bloc (constructeur pilote)
+  var CAT_ORDER = ['guichet','accueil','scan','placement','buvette','dota','securite'];
 
   var TEMPLATES = [
     { key:'accueil_scan',  label:'Accueil → Scan', blocks:[
@@ -57,6 +59,8 @@
     return 'autre';
   }
   function posteColor(nom){ var c=guessCat(nom); if(c!=='autre') return CATCOL[c]; var h=0,s=nom||''; for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0; return PALETTE[h%PALETTE.length]; }
+  function isNoyau(role){ role=(role||'').toLowerCase(); return role==='referent'||role==='pilote'||role==='admin'; }
+  function nowMin(){ try{ var d=new Date(); return d.getHours()*60+d.getMinutes(); }catch(e){ return null; } }
 
   function domainFrom(blocks, ke){
     var lo=null,hi=null;
@@ -74,26 +78,48 @@
     opts=opts||{}; var mid=opts.matchId, bid=opts.benevoleId;
     if(!sb||!mid||!bid){ container.innerHTML=''; return; }
     try{
-      var r=await sb.from('match_planning').select('*').eq('match_id',mid).eq('benevole_id',bid).order('heure_debut');
-      var blocks=(r.data||[]).slice().sort(function(a,b){ return (toMin(a.heure_debut)||0)-(toMin(b.heure_debut)||0); });
+      var rb=await Promise.all([
+        sb.from('match_planning').select('*').eq('match_id',mid).eq('benevole_id',bid).order('heure_debut'),
+        sb.from('matchs').select('heure').eq('id',mid).maybeSingle()
+      ]);
+      var blocks=((rb[0]&&rb[0].data)||[]).slice().sort(function(a,b){ return (toMin(a.heure_debut)||0)-(toMin(b.heure_debut)||0); });
       if(!blocks.length){ await renderBenevoleSimple(container, sb, mid, bid); return; }
+      var ke=toMin(rb[1]&&rb[1].data&&rb[1].data.heure);
       var firstH=fmtH(toMin(blocks[0].heure_debut));
+      var lastFin=toMin(blocks[blocks.length-1].heure_fin);
+      var now=nowMin();
+      // en-tête façon maquette : coup d'envoi + heure d'arrivée
+      var head='<div style="background:linear-gradient(135deg,var(--c-navy,#042C53),var(--c-navy-2,#0C447C));border-radius:12px;padding:11px 13px;margin-bottom:12px;color:#fff;">'
+        + '<div style="font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-gold,#F5C842);margin-bottom:3px;">🕐 Ton déroulé de la journée</div>'
+        + '<div style="font-size:12px;font-weight:600;">'+(ke!=null?'🏐 Coup d\'envoi <b>'+fmtH(ke)+'</b> · ':'')+'tu es attendu dès <b style="color:var(--c-gold,#F5C842);">'+firstH+'</b></div>'
+        + '</div>';
       var steps='';
       blocks.forEach(function(b,i){
         var c=colOf(b);
+        var d=toMin(b.heure_debut), f=toMin(b.heure_fin);
+        var actif=(now!=null && d!=null && f!=null && now>=d && now<f);
         steps+='<div style="display:flex;gap:11px;">'
-          + '<div style="width:86px;flex-shrink:0;text-align:right;padding-top:2px;"><div style="font-size:15px;font-weight:800;color:var(--c-navy,#042C53);">'+fmtH(toMin(b.heure_debut))+'</div>'+(b.heure_fin?'<div style="font-size:10px;color:#8A9BAD;">→ '+fmtH(toMin(b.heure_fin))+'</div>':'')+'</div>'
-          + '<div style="position:relative;width:18px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;">'+(i<blocks.length-1?'<div style="position:absolute;top:10px;bottom:-14px;width:2px;background:#e0e7f0;"></div>':'')+'<div style="width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px '+c+';margin-top:3px;z-index:2;"></div></div>'
-          + '<div style="flex:1;padding-bottom:16px;min-width:0;"><div style="border-radius:12px;padding:12px 14px;color:#fff;background:'+c+';">'
-          +   '<div style="font-size:14px;font-weight:800;">'+esc(b.libelle)+(i===0?' <span style="font-size:9px;font-weight:800;background:rgba(0,0,0,0.25);border-radius:20px;padding:2px 7px;margin-left:4px;">1er poste</span>':'')+'</div>'
-          +   '<div style="font-size:11px;opacity:0.95;margin-top:1px;">'+fmtH(toMin(b.heure_debut))+(b.heure_fin?' – '+fmtH(toMin(b.heure_fin)):'')+'</div>'
+          + '<div style="width:86px;flex-shrink:0;text-align:right;padding-top:2px;"><div style="font-size:15px;font-weight:800;color:var(--c-navy,#042C53);">'+fmtH(d)+'</div>'+(b.heure_fin?'<div style="font-size:10px;color:#8A9BAD;">→ '+fmtH(f)+'</div>':'')+'</div>'
+          + '<div style="position:relative;width:18px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;"><div style="position:absolute;top:10px;bottom:-14px;width:2px;background:#e0e7f0;"></div><div style="width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px '+c+';margin-top:3px;z-index:2;"></div></div>'
+          + '<div style="flex:1;padding-bottom:16px;min-width:0;"><div style="border-radius:12px;padding:12px 14px;color:#fff;background:'+c+';'+(actif?'box-shadow:0 0 0 3px rgba(226,75,74,0.55);':'')+'">'
+          +   '<div style="font-size:14px;font-weight:800;">'+esc(b.libelle)
+          +     (actif?' <span style="font-size:9px;font-weight:800;background:#E24B4A;border-radius:20px;padding:2px 8px;margin-left:4px;">MAINTENANT</span>':(i===0?' <span style="font-size:9px;font-weight:800;background:rgba(0,0,0,0.25);border-radius:20px;padding:2px 7px;margin-left:4px;">1er poste</span>':''))
+          +   '</div>'
+          +   '<div style="font-size:11px;opacity:0.95;margin-top:1px;">'+fmtH(d)+(b.heure_fin?' – '+fmtH(f):'')+'</div>'
           +   (b.consigne?'<div style="font-size:11px;background:rgba(255,255,255,0.2);border-radius:8px;padding:5px 9px;margin-top:6px;">📋 '+esc(b.consigne)+'</div>':'')
           + '</div></div></div>';
-        if(i<blocks.length-1){ steps+='<div style="font-size:10px;color:#8A9BAD;font-style:italic;margin:0 0 4px 96px;">↓ puis tu bascules à '+fmtH(toMin(b.heure_fin))+'</div>'; }
+        if(i<blocks.length-1){ steps+='<div style="font-size:10px;color:#8A9BAD;font-style:italic;margin:0 0 4px 96px;">↓ puis tu bascules à '+fmtH(f)+'</div>'; }
       });
+      // nœud final "Fin de ta mission"
+      if(lastFin!=null){
+        steps+='<div style="display:flex;gap:11px;">'
+          + '<div style="width:86px;flex-shrink:0;text-align:right;padding-top:2px;"><div style="font-size:15px;font-weight:800;color:var(--c-navy,#042C53);">'+fmtH(lastFin)+'</div><div style="font-size:10px;color:#8A9BAD;">fin</div></div>'
+          + '<div style="position:relative;width:18px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;"><div style="width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px #64748B;margin-top:3px;z-index:2;"></div></div>'
+          + '<div style="flex:1;min-width:0;"><div style="border-radius:12px;padding:12px 14px;color:#fff;background:#64748B;"><div style="font-size:14px;font-weight:800;">Fin de ta mission 🙌</div><div style="font-size:11px;opacity:0.95;margin-top:2px;">Merci ! Récupère ton repas et tes dotations à l\'espace bénévoles.</div></div></div></div>';
+      }
       container.innerHTML='<div style="background:#F4F7FB;border-radius:12px;padding:12px 14px;margin-top:8px;">'
-        + '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8A9BAD;margin-bottom:4px;">🕐 Ton planning du match</div>'
-        + '<div style="font-size:11px;color:#5A7291;margin-bottom:12px;">Tu es attendu dès <b>'+firstH+'</b>. Tu enchaînes '+blocks.length+' poste'+(blocks.length>1?'s':'')+' — tout est indiqué ci-dessous.</div>'
+        + head
+        + '<div style="font-size:11px;color:#5A7291;margin-bottom:12px;">Tu enchaînes <b>'+blocks.length+' poste'+(blocks.length>1?'s':'')+'</b> — tout est indiqué ci-dessous, tu n\'as rien à retenir.</div>'
         + steps + '</div>';
     }catch(e){ console.error('[PN] benevole',e); container.innerHTML=''; }
   }
@@ -129,11 +155,13 @@
     if(!container) return;
     opts=opts||{}; var mid=opts.matchId;
     if(!sb||!mid){ container.innerHTML=''; return; }
+    // conserve le bloc sélectionné entre deux rendus
+    var prevSel=(container._pn&&container._pn.selBlk)||UI.selBlk||null;
     container.innerHTML='<div style="color:rgba(255,255,255,0.4);font-size:12px;padding:6px 0;">Chargement…</div>';
     try{
       var res=await Promise.all([
         sb.from('matchs').select('heure,heure_arrivee').eq('id',mid).maybeSingle(),
-        sb.from('inscriptions').select('benevole_id, poste_id, benevoles!inscriptions_benevole_id_fkey(prenom,nom,postes_preferes)').eq('match_id',mid).eq('statut','disponible'),
+        sb.from('inscriptions').select('benevole_id, poste_id, benevoles!inscriptions_benevole_id_fkey(prenom,nom,postes_preferes,role)').eq('match_id',mid).eq('statut','disponible'),
         sb.from('postes').select('id,nom').eq('actif',true).order('nom'),
         sb.from('match_planning').select('*').eq('match_id',mid)
       ]);
@@ -145,20 +173,22 @@
 
       var posteMap={}; postes.forEach(function(p){ posteMap[p.id]={nom:p.nom,col:posteColor(p.nom)}; });
       var benMap={};
-      insc.forEach(function(i){ if(i.benevole_id && !benMap[i.benevole_id]){ var b=i.benevoles||{}; benMap[i.benevole_id]={id:i.benevole_id, nom:((b.prenom||'')+' '+(b.nom||'')).trim()||'Bénévole', posteId:i.poste_id||null, prefs:b.postes_preferes||''}; } });
+      insc.forEach(function(i){ if(i.benevole_id && !benMap[i.benevole_id]){ var b=i.benevoles||{}; benMap[i.benevole_id]={id:i.benevole_id, nom:((b.prenom||'')+' '+(b.nom||'')).trim()||'Bénévole', posteId:i.poste_id||null, prefs:b.postes_preferes||'', noyau:isNoyau(b.role)}; } });
       var bens=Object.keys(benMap).map(function(k){return benMap[k];}).sort(function(a,b){return a.nom.localeCompare(b.nom);});
-      var blkByBen={}; blocks.forEach(function(b){ (blkByBen[b.benevole_id]=blkByBen[b.benevole_id]||[]).push(b); });
+      var blkByBen={}; var blkById={}; blocks.forEach(function(b){ (blkByBen[b.benevole_id]=blkByBen[b.benevole_id]||[]).push(b); blkById[b.id]=b; });
       Object.keys(blkByBen).forEach(function(k){ blkByBen[k].sort(function(a,b){return (toMin(a.heure_debut)||0)-(toMin(b.heure_debut)||0);}); });
+      // le bloc sélectionné n'existe plus (supprimé) → on désélectionne
+      var selBlk=(prevSel && blkById[prevSel])?prevSel:null; UI.selBlk=selBlk;
 
-      container._pn={ sb:sb, mid:mid, ke:ke };
+      container._pn={ sb:sb, mid:mid, ke:ke, selBlk:selBlk };
       var dom=domainFrom(blocks, ke);
       var haStr=(match.heure_arrivee||'').slice(0,5); // "" si non réglée
       var haAuto=(ke!=null)?fmtH(ke-ARRIVEE_AVANT):null;
 
       function segmentsFor(bn){
         var bl=blkByBen[bn.id];
-        if(bl && bl.length) return bl.map(function(b){ return { lib:b.libelle, col:colOf(b), d:toMin(b.heure_debut), f:toMin(b.heure_fin)||(toMin(b.heure_debut)+30), group:CATLAB[b.categorie]||b.libelle, timed:true }; });
-        if(bn.posteId && posteMap[bn.posteId]) return [{ lib:posteMap[bn.posteId].nom, col:posteMap[bn.posteId].col, d:dom[0], f:dom[1], group:posteMap[bn.posteId].nom, timed:false }];
+        if(bl && bl.length) return bl.map(function(b){ return { id:b.id, lib:b.libelle, col:colOf(b), d:toMin(b.heure_debut), f:toMin(b.heure_fin)||(toMin(b.heure_debut)+30), group:CATLAB[b.categorie]||b.libelle, timed:true }; });
+        if(bn.posteId && posteMap[bn.posteId]) return [{ id:null, lib:posteMap[bn.posteId].nom, col:posteMap[bn.posteId].col, d:dom[0], f:dom[1], group:posteMap[bn.posteId].nom, timed:false }];
         return [];
       }
 
@@ -195,13 +225,19 @@
           for(var tt=dom[0];tt<=dom[1];tt+=60){ lane+='<div style="position:absolute;top:0;bottom:0;left:'+pos(tt,dom)+'%;width:1px;background:rgba(255,255,255,0.05);"></div>'; }
           segs.forEach(function(s,j){
             var left=pos(s.d,dom), w=Math.max(5,pos(s.f,dom)-left);
-            lane+='<div title="'+esc(s.lib)+' '+fmtH(s.d)+'–'+fmtH(s.f)+'" style="position:absolute;top:6px;bottom:6px;left:'+left+'%;width:'+w+'%;background:'+s.col+';border-radius:8px;display:flex;flex-direction:column;justify-content:center;padding:0 10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.28);border:1px solid rgba(255,255,255,0.28);'+(s.timed?'':'opacity:0.94;')+'"><span style="font-size:11px;font-weight:800;color:#fff;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,0.45);line-height:1.15;">'+esc(s.lib)+'</span><span style="font-size:9px;color:#fff;opacity:0.9;white-space:nowrap;line-height:1.1;">'+fmtH(s.d)+'–'+fmtH(s.f)+'</span></div>';
+            var isSel=(s.id && s.id===selBlk);
+            var clickable=s.timed?'cursor:pointer;':'';
+            var selRing=isSel?'box-shadow:0 0 0 3px var(--c-gold,#F5C842),0 2px 6px rgba(0,0,0,0.28);border-color:var(--c-gold,#F5C842);':'box-shadow:0 2px 6px rgba(0,0,0,0.28);';
+            lane+='<div '+(s.timed?'data-blk="'+s.id+'" ':'')+'title="'+esc(s.lib)+' '+fmtH(s.d)+'–'+fmtH(s.f)+(s.timed?' — clic pour éditer':'')+'" style="position:absolute;top:6px;bottom:6px;left:'+left+'%;width:'+w+'%;background:'+s.col+';border-radius:8px;display:flex;flex-direction:column;justify-content:center;padding:0 10px;overflow:hidden;'+selRing+'border:1px solid rgba(255,255,255,0.28);'+clickable+(s.timed?'':'opacity:0.94;')+'"><span style="font-size:11px;font-weight:800;color:#fff;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,0.45);line-height:1.15;">'+esc(s.lib)+'</span><span style="font-size:9px;color:#fff;opacity:0.9;white-space:nowrap;line-height:1.1;">'+fmtH(s.d)+'–'+fmtH(s.f)+'</span></div>';
             if(j<segs.length-1){ lane+='<div style="position:absolute;top:20px;left:calc('+pos(s.f,dom)+'% - 5px);font-size:12px;color:#fff;z-index:3;text-shadow:0 1px 2px rgba(0,0,0,0.5);">➜</div>'; }
           });
           var rowBg=(idx%2===0)?'rgba(255,255,255,0.02)':'transparent';
-          html+='<div style="display:flex;align-items:center;background:'+rowBg+';border-radius:6px;"><div style="width:150px;flex-shrink:0;display:flex;align-items:center;gap:7px;padding:5px 8px 5px 4px;"><div style="width:26px;height:26px;border-radius:50%;background:var(--c-navy-2,#0C447C);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">'+ini(bn.nom)+'</div><div style="font-size:11px;font-weight:700;color:#fff;line-height:1.1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(bn.nom)+'</div></div><div style="position:relative;flex:1;height:48px;">'+lane+'</div></div>';
+          var noyauTag=bn.noyau?'<span style="font-size:7px;font-weight:800;letter-spacing:0.5px;background:var(--c-gold,#F5C842);color:#042C53;border-radius:4px;padding:1px 4px;margin-top:1px;display:inline-block;">NOYAU DUR</span>':'';
+          html+='<div style="display:flex;align-items:center;background:'+rowBg+';border-radius:6px;"><div style="width:150px;flex-shrink:0;display:flex;align-items:center;gap:7px;padding:5px 8px 5px 4px;"><div style="width:26px;height:26px;border-radius:50%;background:var(--c-navy-2,#0C447C);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;">'+ini(bn.nom)+'</div><div style="min-width:0;overflow:hidden;"><div style="font-size:11px;font-weight:700;color:#fff;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(bn.nom)+'</div>'+noyauTag+'</div></div><div style="position:relative;flex:1;height:'+(bn.noyau?54:48)+'px;">'+lane+'</div></div>';
         });
         html+='</div></div>';
+        // ── Panneau "Bloc sélectionné" (constructeur) ──
+        html+=editorHtml(selBlk, blkById, blkByBen, benMap);
         html+=coverageHtml(bens, segmentsFor, dom);
         html+='</div>';
       }
@@ -217,7 +253,7 @@
         var tplOpts=TEMPLATES.map(function(t){ return '<option value="'+t.key+'">'+esc(t.label)+'</option>'; }).join('');
         var manualPosteOpts='<option value="">— Poste / rôle —</option>'+postes.map(function(p){ return '<option value="'+p.id+'|'+esc(p.nom)+'">'+esc(p.nom)+'</option>'; }).join('')+'<option value="|Accueil des bénévoles">Accueil des bénévoles</option><option value="|Guichet — accréditations">Guichet — accréditations</option><option value="|Dotations + Repas">Dotations + Repas</option>';
         html+='<div class="pn-ben" data-ben="'+bn.id+'" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px;margin-bottom:8px;">'
-          + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--c-navy-2,#0C447C);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">'+ini(bn.nom)+'</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:#fff;">'+esc(bn.nom)+'</div>'+prefsHtml+'</div></div>'
+          + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div style="width:28px;height:28px;border-radius:50%;background:var(--c-navy-2,#0C447C);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;">'+ini(bn.nom)+'</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;color:#fff;">'+esc(bn.nom)+(bn.noyau?' <span style="font-size:7px;font-weight:800;letter-spacing:0.5px;background:var(--c-gold,#F5C842);color:#042C53;border-radius:4px;padding:1px 4px;vertical-align:middle;">NOYAU DUR</span>':'')+'</div>'+prefsHtml+'</div></div>'
           + (hasTimed
               ? '<div style="margin-bottom:6px;">'+chips+'</div><div style="font-size:10px;color:var(--c-gold-2,#FAC775);margin-bottom:6px;">⏱ Planning détaillé actif (remplace le poste principal).</div>'
               : '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="font-size:11px;color:rgba(255,255,255,0.6);white-space:nowrap;">Poste :</span><select class="pn-poste-main" style="flex:1;background:var(--c-ink-2,#2A2A28);border:1px solid var(--c-ink-3,#444441);border-radius:8px;padding:7px 9px;color:#fff;font-size:12px;">'+posteOpts+'</select></div>')
@@ -235,6 +271,42 @@
       container.innerHTML=html;
       wirePilote(container);
     }catch(e){ console.error('[PN] pilote',e); container.innerHTML='<div style="color:#F09595;font-size:12px;">Planning indisponible : '+esc(e.message||e)+'</div>'; }
+  }
+
+  // Panneau d'édition d'un bloc (clic sur un bloc du planning)
+  function editorHtml(selBlk, blkById, blkByBen, benMap){
+    if(!selBlk || !blkById[selBlk]){
+      return '<div style="background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.14);border-radius:10px;padding:11px 13px;margin:4px 0 12px;font-size:11px;color:rgba(255,255,255,0.5);">✎ <b style="color:rgba(255,255,255,0.75);">Clique un bloc coloré du planning</b> pour l\'éditer ici (poste, horaires, consigne). Pour affecter un bénévole non placé, utilise la liste plus bas.</div>';
+    }
+    var b=blkById[selBlk];
+    var ben=benMap[b.benevole_id]||{nom:'Bénévole'};
+    var deb=(b.heure_debut||'').slice(0,5), fin=(b.heure_fin||'').slice(0,5);
+    // bascule suivante
+    var arr=blkByBen[b.benevole_id]||[]; var nxt=null;
+    for(var i=0;i<arr.length;i++){ if(arr[i].id===selBlk){ nxt=arr[i+1]||null; break; } }
+    var basc=nxt?('→ '+esc(nxt.libelle)+' ('+fmtH(toMin(nxt.heure_debut))+(nxt.heure_fin?' → '+fmtH(toMin(nxt.heure_fin)):'')+')'):'— dernier poste de la journée —';
+    var chips=CAT_ORDER.map(function(c){
+      var on=(b.categorie===c);
+      return '<span class="pn-e-cat" data-cat="'+c+'" style="cursor:pointer;font-size:11px;font-weight:700;border-radius:20px;padding:5px 11px;'+(on?'background:'+CATCOL[c]+';color:#fff;':'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.12);')+'">'+esc(CATLAB[c])+'</span>';
+    }).join(' ');
+    var inp='background:var(--c-ink-2,#2A2A28);border:1px solid var(--c-ink-3,#444441);border-radius:8px;padding:8px 10px;color:#fff;font-size:12px;font-family:inherit;';
+    return '<div class="pn-editor" data-blk="'+selBlk+'" data-cat="'+esc(b.categorie||'autre')+'" style="background:rgba(255,255,255,0.05);border:1px solid var(--c-gold,#F5C842);border-radius:12px;padding:12px 14px;margin:4px 0 12px;">'
+      + '<div style="font-size:12px;font-weight:800;color:#fff;margin-bottom:2px;">✎ Bloc sélectionné — '+esc(ben.nom)+'</div>'
+      + '<div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:10px;">Bascule ensuite : '+basc+'</div>'
+      + '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.55);margin-bottom:5px;">POSTE</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">'+chips+'</div>'
+      + '<input class="pn-e-lib" value="'+esc(b.libelle||'')+'" placeholder="Libellé (ex. Scan — Porte A)" style="width:100%;'+inp+'margin-bottom:8px;">'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">'
+      +   '<div style="flex:1;min-width:110px;"><div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.55);margin-bottom:3px;">DÉBUT</div><input class="pn-e-deb" type="time" value="'+deb+'" style="width:100%;'+inp+'"></div>'
+      +   '<div style="flex:1;min-width:110px;"><div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.55);margin-bottom:3px;">FIN</div><input class="pn-e-fin" type="time" value="'+fin+'" style="width:100%;'+inp+'"></div>'
+      + '</div>'
+      + '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.55);margin-bottom:3px;">CONSIGNE (visible du bénévole)</div>'
+      + '<input class="pn-e-cons" value="'+esc(b.consigne||'')+'" placeholder="ex. Accueillir et pointer les bénévoles, distribuer les gilets." style="width:100%;'+inp+'margin-bottom:10px;">'
+      + '<div style="display:flex;gap:8px;">'
+      +   '<button class="pn-e-save" style="flex:1;background:#1f6f43;color:#fff;border:none;border-radius:8px;padding:9px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">✓ Enregistrer</button>'
+      +   '<button class="pn-e-del" style="background:transparent;border:1px solid rgba(226,75,74,0.6);color:#F09595;border-radius:8px;padding:9px 14px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;">Supprimer</button>'
+      + '</div>'
+      + '</div>';
   }
 
   function coverageHtml(bens, segmentsFor, dom){
@@ -274,6 +346,50 @@
       if(error){ if(window.showAlert) window.showAlert('alert-match','Erreur : '+error.message,'e'); return; }
       refresh();
     });
+    // sélection d'un bloc du planning (ouvre l'éditeur)
+    container.querySelectorAll('.pn-gantt-body [data-blk]').forEach(function(el){
+      el.addEventListener('click', function(){
+        var id=el.getAttribute('data-blk'); if(!id) return;
+        UI.selBlk=id; if(container._pn) container._pn.selBlk=id;
+        refresh();
+      });
+    });
+    // éditeur de bloc : chips catégorie
+    var ed=container.querySelector('.pn-editor');
+    if(ed){
+      ed.querySelectorAll('.pn-e-cat').forEach(function(chip){
+        chip.addEventListener('click', function(){
+          var cat=chip.getAttribute('data-cat'); ed.setAttribute('data-cat',cat);
+          ed.querySelectorAll('.pn-e-cat').forEach(function(c){
+            var on=(c===chip); var cc=c.getAttribute('data-cat');
+            c.style.cssText='cursor:pointer;font-size:11px;font-weight:700;border-radius:20px;padding:5px 11px;'+(on?'background:'+(CATCOL[cc]||CATCOL.autre)+';color:#fff;':'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.12);');
+          });
+        });
+      });
+      var saveB=ed.querySelector('.pn-e-save');
+      if(saveB) saveB.addEventListener('click', async function(){
+        var id=ed.getAttribute('data-blk'); var cat=ed.getAttribute('data-cat')||'autre';
+        var lib=ed.querySelector('.pn-e-lib').value.trim();
+        var deb=ed.querySelector('.pn-e-deb').value, fin=ed.querySelector('.pn-e-fin').value;
+        var cons=ed.querySelector('.pn-e-cons').value.trim();
+        if(!lib){ if(window.showAlert) window.showAlert('alert-match','Indique un libellé','e'); return; }
+        if(!deb){ if(window.showAlert) window.showAlert('alert-match','Indique l\'heure de début','e'); return; }
+        var upd={ libelle:lib, categorie:cat, couleur:CATCOL[cat]||CATCOL.autre, heure_debut:(deb.length===5?deb+':00':deb), heure_fin:fin?(fin.length===5?fin+':00':fin):null, consigne:cons||null };
+        saveB.textContent='...'; saveB.disabled=true;
+        var { error } = await st.sb.from('match_planning').update(upd).eq('id',id);
+        if(error){ saveB.textContent='✓ Enregistrer'; saveB.disabled=false; if(window.showAlert) window.showAlert('alert-match','Erreur : '+error.message,'e'); return; }
+        refresh();
+      });
+      var delB=ed.querySelector('.pn-e-del');
+      if(delB) delB.addEventListener('click', async function(){
+        var id=ed.getAttribute('data-blk');
+        delB.textContent='...'; delB.disabled=true;
+        var { error } = await st.sb.from('match_planning').delete().eq('id',id);
+        if(error){ delB.textContent='Supprimer'; delB.disabled=false; if(window.showAlert) window.showAlert('alert-match','Erreur : '+error.message,'e'); return; }
+        UI.selBlk=null; if(container._pn) container._pn.selBlk=null;
+        refresh();
+      });
+    }
     container.querySelectorAll('.pn-poste-main').forEach(function(sel){
       var bid=sel.closest('.pn-ben').getAttribute('data-ben');
       sel.addEventListener('change', async function(){
