@@ -234,30 +234,6 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
   <div class="sec">&#128336; Planning thermom&egrave;tre</div>
   <div class="card"><div id="thermo-planning"></div></div>
 
-  <div class="sec">&#128336; Planning du match</div>
-  <div class="card">
-    <div id="creneaux-list" style="margin-bottom:12px;"></div>
-    <div style="display:flex;flex-direction:column;gap:7px;">
-      <select id="cr-cat" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
-        <option value="arrivee">Arriv&eacute;e / accueil</option>
-        <option value="mise_en_place">Mise en place / briefing</option>
-        <option value="en_position">En position &ndash; ouverture</option>
-        <option value="match">Match</option>
-        <option value="repas">Repas</option>
-        <option value="desinstallation">D&eacute;sinstallation</option>
-        <option value="autre">Autre</option>
-      </select>
-      <input id="cr-lib" placeholder="Libell&eacute; (optionnel, ex. Mise en place buvette)" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
-      <div style="font-size:10px;color:rgba(255,255,255,0.4);">Heure de d&eacute;but / fin (fin optionnelle)</div>
-      <div style="display:flex;gap:7px;">
-        <input id="cr-deb" type="time" style="flex:1;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
-        <input id="cr-fin" type="time" style="flex:1;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
-      </div>
-      <select id="cr-poste" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;"><option value="">Tous les postes</option></select>
-      <button class="btn btn-blue btn-full" onclick="addCreneau()">+ Ajouter le cr&eacute;neau</button>
-    </div>
-  </div>
-
   <div class="sec">Bénévoles disponibles — affecter un poste</div>
   <div id="dispos-match"></div>
 
@@ -1957,16 +1933,17 @@ const CR_CATS = [
 function crColor(c){ var f=CR_CATS.find(x=>x[0]===c); return f?f[2]:'#9CA3AF'; }
 function crLabel(c){ var f=CR_CATS.find(x=>x[0]===c); return f?f[1]:'Autre'; }
 async function loadCreneaux(){
-  var listEl=document.getElementById('creneaux-list');
-  if(!listEl) return;
-  var posteSel=document.getElementById('cr-poste');
+  // Rend le thermometre, le covoiturage et le planning nominatif (independamment de l'ancienne section creneaux)
   var thermoEl=document.getElementById('thermo-planning');
-  if(!curMatch){ listEl.innerHTML=''; if(thermoEl) thermoEl.innerHTML=''; var _ce=document.getElementById('covoit-pilote'); if(_ce) _ce.innerHTML=''; var _pe=document.getElementById('pn-pilote'); if(_pe) _pe.innerHTML=''; return; }
-  if(thermoEl && window.SpacersPlanning) window.SpacersPlanning.renderThermoPilote(thermoEl, sb, curMatch.id);
   var covoitEl=document.getElementById('covoit-pilote');
-  if(covoitEl && window.SpacersCovoit) window.SpacersCovoit.renderPilote(covoitEl, sb, { matchId: curMatch.id });
   var pnEl=document.getElementById('pn-pilote');
+  var listEl=document.getElementById('creneaux-list');
+  var posteSel=document.getElementById('cr-poste');
+  if(!curMatch){ if(listEl) listEl.innerHTML=''; if(thermoEl) thermoEl.innerHTML=''; if(covoitEl) covoitEl.innerHTML=''; if(pnEl) pnEl.innerHTML=''; return; }
+  if(thermoEl && window.SpacersPlanning) window.SpacersPlanning.renderThermoPilote(thermoEl, sb, curMatch.id);
+  if(covoitEl && window.SpacersCovoit) window.SpacersCovoit.renderPilote(covoitEl, sb, { matchId: curMatch.id });
   if(pnEl && window.SpacersPN) window.SpacersPN.renderPilote(pnEl, sb, { matchId: curMatch.id });
+  if(!listEl) return; // ancienne section "Planning du match" retiree
   if(posteSel) posteSel.innerHTML='<option value="">Tous les postes</option>'+(curPostes||[]).map(p=>'<option value="'+p.id+'">'+p.nom+'</option>').join('');
   var r=await sb.from('match_creneaux').select('*').eq('match_id',curMatch.id).order('ordre').order('heure_debut');
   var list=r.data||[];
