@@ -2789,7 +2789,7 @@ async function loadNextMatch() {
   CP._nextMatchInscription = null
   try {
     const { data: matchs } = await sb.from('matchs')
-      .select('id, adversaire, date_match, heure, lieu, statut_inscriptions')
+      .select('id, adversaire, date_match, heure, heure_arrivee, lieu, statut_inscriptions')
       .eq('statut_inscriptions', 'ouvert')
       .order('date_match', { ascending: true })
       .limit(1)
@@ -2936,8 +2936,13 @@ function renderNextMatchSection() {
       if (_pl.detailed) {
         planLine = `<div style="background:rgba(255,255,255,0.55);border-radius:8px;padding:6px 10px;margin-bottom:8px;font-size:12px;font-weight:700;color:${fg};">🕐 Ton planning · arrivée ${escapeHtml((_pl.arrival||'').replace(':','h'))} · ${_pl.nb} poste${_pl.nb>1?'s':''} <span style="opacity:0.7;font-weight:600;">(détail dans Planning)</span></div>`
       } else {
-        const _hm = (m.heure||'').split(':'); let _arr = ''
-        if (_hm.length >= 2) { const _min = parseInt(_hm[0],10)*60 + parseInt(_hm[1],10) - 180; if (_min >= 0) { const _h=Math.floor(_min/60), _mn=_min%60; _arr = _h+'h'+(_mn?(_mn<10?'0'+_mn:_mn):''); } }
+        let _arr = ''
+        if (m.heure_arrivee) {
+          const _ha = m.heure_arrivee.split(':'); if (_ha.length >= 2) _arr = _ha[0].replace(/^0/,'')+'h'+(_ha[1]!=='00'?_ha[1]:'')
+        } else {
+          const _hm = (m.heure||'').split(':')
+          if (_hm.length >= 2) { const _min = parseInt(_hm[0],10)*60 + parseInt(_hm[1],10) - 180; if (_min >= 0) { const _h=Math.floor(_min/60), _mn=_min%60; _arr = _h+'h'+(_mn?(_mn<10?'0'+_mn:_mn):''); } }
+        }
         planLine = `<div style="background:rgba(255,255,255,0.55);border-radius:8px;padding:6px 10px;margin-bottom:8px;font-size:12px;font-weight:700;color:${fg};">📍 Poste : ${escapeHtml(_pl.posteNom)}${_arr?` · RDV ${_arr}`:''}</div>`
       }
     }

@@ -103,14 +103,16 @@
     try{
       var r2=await Promise.all([
         sb.from('inscriptions').select('poste_id').eq('match_id',mid).eq('benevole_id',bid).maybeSingle(),
-        sb.from('matchs').select('heure').eq('id',mid).maybeSingle()
+        sb.from('matchs').select('heure,heure_arrivee').eq('id',mid).maybeSingle()
       ]);
       var posteId=(r2[0]&&r2[0].data&&r2[0].data.poste_id)||null;
       if(!posteId){ container.innerHTML=''; return; } // pas encore affecté par le pilote
       var pr=await sb.from('postes').select('nom').eq('id',posteId).maybeSingle();
       var posteNom=(pr&&pr.data&&pr.data.nom)||'ton poste';
-      var ke=toMin(r2[1]&&r2[1].data&&r2[1].data.heure);
-      var arr=(ke!=null)?ke-ARRIVEE_AVANT:null;
+      var mrow=r2[1]&&r2[1].data;
+      var ke=toMin(mrow&&mrow.heure);
+      var ha=toMin(mrow&&mrow.heure_arrivee);
+      var arr=(ha!=null)?ha:((ke!=null)?ke-ARRIVEE_AVANT:null);
       var col=posteColor(posteNom);
       container.innerHTML='<div style="background:#F4F7FB;border-radius:12px;padding:12px 14px;margin-top:8px;">'
         + '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8A9BAD;margin-bottom:8px;">🕐 Ton poste du match</div>'
@@ -130,7 +132,7 @@
     container.innerHTML='<div style="color:rgba(255,255,255,0.4);font-size:12px;padding:6px 0;">Chargement…</div>';
     try{
       var res=await Promise.all([
-        sb.from('matchs').select('heure').eq('id',mid).maybeSingle(),
+        sb.from('matchs').select('heure,heure_arrivee').eq('id',mid).maybeSingle(),
         sb.from('inscriptions').select('benevole_id, poste_id, benevoles!inscriptions_benevole_id_fkey(prenom,nom,postes_preferes)').eq('match_id',mid).eq('statut','disponible'),
         sb.from('postes').select('id,nom').eq('actif',true).order('nom'),
         sb.from('match_planning').select('*').eq('match_id',mid)
@@ -150,6 +152,8 @@
 
       container._pn={ sb:sb, mid:mid, ke:ke };
       var dom=domainFrom(blocks, ke);
+      var haStr=(match.heure_arrivee||'').slice(0,5); // "" si non réglée
+      var haAuto=(ke!=null)?fmtH(ke-ARRIVEE_AVANT):null;
 
       function segmentsFor(bn){
         var bl=blkByBen[bn.id];
@@ -161,6 +165,19 @@
       var nbAff=bens.filter(function(b){ return b.posteId || (blkByBen[b.id]&&blkByBen[b.id].length); }).length;
       var html='';
       html+='<div style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:10px;">'+nbAff+' / '+bens.length+' bénévole'+(bens.length>1?'s':'')+' affecté'+(nbAff>1?'s':'')+(ke!=null?' · coup d\'envoi '+fmtH(ke):'')+'. Choisis un <b style="color:#fff;">poste</b> pour chacun (1 clic = tout le match). Découpe en horaires seulement pour les cas particuliers.</div>';
+
+      // Heure d'arrivée par défaut (RDV affiché aux bénévoles sur poste plein match)
+      html+='<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:9px 11px;margin-bottom:12px;">'
+        + '<span style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.8);">🕐 Heure d\'arrivée par défaut</span>'
+        + '<input type="time" class="pn-arrivee" value="'+haStr+'" style="background:var(--c-ink-2,#2A2A28);border:1px solid var(--c-ink-3,#444441);border-radius:8px;padding:6px 9px;color:#fff;font-size:12px;font-family:inherit;">'
+        + (haStr
+            ? '<button class="pn-arrivee-auto" style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);border-radius:8px;padding:5px 10px;font-family:inherit;font-size:10px;font-weight:700;cursor:pointer;">↺ Auto</button>'
+            : '')
+        + '<span style="font-size:10px;color:rgba(255,255,255,0.45);flex-basis:100%;">'
+        +   (haStr
+              ? 'Réglée manuellement. Vide (bouton Auto) = coup d\'envoi − 3h'+(haAuto?' (soit '+haAuto+')':'')+'.'
+              : 'Auto : '+(haAuto?haAuto+' (coup d\'envoi − 3h)':'coup d\'envoi − 3h')+'. Modifie pour la fixer manuellement (ex. 14h30).')
+        + '</span></div>';
 
       var anySeg=bens.some(function(b){ return segmentsFor(b).length; });
       if(anySeg){
@@ -242,6 +259,20 @@
       var body=container.querySelector('.pn-gantt-body');
       if(body) body.style.display=UI.ganttOpen?'block':'none';
       gt.textContent=(UI.ganttOpen?'▾':'▸')+' Vue d\'ensemble (timeline + couverture des postes)';
+    });
+    // heure d'arrivée par défaut
+    var arrIn=container.querySelector('.pn-arrivee');
+    if(arrIn) arrIn.addEventListener('change', async function(){
+      var v=arrIn.value; var val=v?(v.length===5?v+':00':v):null;
+      var { error } = await st.sb.from('matchs').update({ heure_arrivee: val }).eq('id',st.mid);
+      if(error){ if(window.showAlert) window.showAlert('alert-match','Erreur : '+error.message,'e'); return; }
+      refresh();
+    });
+    var arrAuto=container.querySelector('.pn-arrivee-auto');
+    if(arrAuto) arrAuto.addEventListener('click', async function(){
+      var { error } = await st.sb.from('matchs').update({ heure_arrivee: null }).eq('id',st.mid);
+      if(error){ if(window.showAlert) window.showAlert('alert-match','Erreur : '+error.message,'e'); return; }
+      refresh();
     });
     container.querySelectorAll('.pn-poste-main').forEach(function(sel){
       var bid=sel.closest('.pn-ben').getAttribute('data-ben');
