@@ -22,6 +22,7 @@
   };
   var PALETTE = ['#3B82F6','#22C55E','#F97316','#8B5CF6','#EC4899','#14B8A6','#F5C842','#EF4444','#0EA5E9','#84CC16'];
   var UI = { ganttOpen: false }; // timeline repliée par défaut (persiste entre re-rendus)
+  var ARRIVEE_AVANT = 180;       // heure d'arrivée par défaut = coup d'envoi − 3h (ex. 15h pour 18h)
 
   var TEMPLATES = [
     { key:'accueil_scan',  label:'Accueil → Scan', blocks:[
@@ -109,13 +110,14 @@
       var pr=await sb.from('postes').select('nom').eq('id',posteId).maybeSingle();
       var posteNom=(pr&&pr.data&&pr.data.nom)||'ton poste';
       var ke=toMin(r2[1]&&r2[1].data&&r2[1].data.heure);
+      var arr=(ke!=null)?ke-ARRIVEE_AVANT:null;
       var col=posteColor(posteNom);
       container.innerHTML='<div style="background:#F4F7FB;border-radius:12px;padding:12px 14px;margin-top:8px;">'
         + '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8A9BAD;margin-bottom:8px;">🕐 Ton poste du match</div>'
         + '<div style="display:flex;align-items:center;gap:10px;">'
         +   '<div style="width:14px;height:14px;border-radius:4px;background:'+col+';flex-shrink:0;"></div>'
         +   '<div style="min-width:0;"><div style="font-size:15px;font-weight:800;color:var(--c-navy,#042C53);">'+esc(posteNom)+'</div>'
-        +   '<div style="font-size:11px;color:#5A7291;">Sur toute la durée du match'+(ke!=null?' · coup d\'envoi '+fmtH(ke):'')+'</div></div>'
+        +   '<div style="font-size:11px;color:#5A7291;">'+(arr!=null?'📍 Rendez-vous à <b style="color:var(--c-navy,#042C53);">'+fmtH(arr)+'</b> · ':'')+'jusqu\'à la fin du match'+(ke!=null?' (coup d\'envoi '+fmtH(ke)+')':'')+'</div></div>'
         + '</div></div>';
     }catch(e){ console.error('[PN] benevole simple',e); container.innerHTML=''; }
   }
