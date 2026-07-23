@@ -170,10 +170,13 @@
       return '<div title="' + fmtH(d) + ' · ' + (c.libelle ? esc(c.libelle) : crLabel(c.categorie)) + '" style="position:absolute;top:2px;height:5px;left:' + l + '%;width:' + sw + '%;background:' + crColor(c.categorie) + ';border-radius:3px;"></div>';
     }).join('');
 
-    // colonne gauche : nom + mini-jauge
+    // colonne gauche : nom + besoin editable + mini-jauge
     var labelCol =
       '<div style="width:' + LABEL_W + 'px;flex-shrink:0;padding-right:10px;">' +
-        '<div style="font-size:12px;font-weight:700;color:#fff;line-height:1.2;">' + esc(p.nom) + '</div>' +
+        '<div style="display:flex;align-items:center;gap:5px;">' +
+          '<div style="flex:1;font-size:12px;font-weight:700;color:#fff;line-height:1.15;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(p.nom) + '</div>' +
+          '<input type="number" min="0" value="' + besoin + '" class="thermo-besoin" data-poste="' + p.id + '" onclick="event.stopPropagation()" title="Besoin (nb de bénévoles requis)" style="width:34px;flex-shrink:0;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.22);border-radius:5px;padding:2px 3px;color:#fff;font-size:10px;text-align:center;font-family:inherit;">' +
+        '</div>' +
         '<div style="display:flex;align-items:center;gap:6px;margin-top:3px;">' +
           '<div style="flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,0.1);overflow:hidden;">' +
             '<div style="height:100%;width:' + pctFill + '%;background:' + st.c + ';border-radius:99px;"></div></div>' +
@@ -290,6 +293,23 @@
         var ch = container.querySelector('.thermo-chevron');
         if (b) b.style.display = UI.collapsed ? 'none' : 'block';
         if (ch) ch.textContent = UI.collapsed ? '▸' : '▾';
+      });
+
+      // édition du besoin directement dans le thermomètre → RPC set_besoin_match_poste
+      container.querySelectorAll('.thermo-besoin').forEach(function (inp) {
+        inp.addEventListener('change', async function () {
+          var pid = inp.getAttribute('data-poste');
+          var v = parseInt(inp.value, 10);
+          if (isNaN(v) || v < 0) { renderThermoPilote(container, sb, matchId); return; }
+          try {
+            var res = await sb.rpc('set_besoin_match_poste', { p_match_id: matchId, p_poste_id: pid, p_besoin: v });
+            if (res && res.error) throw res.error;
+            renderThermoPilote(container, sb, matchId);
+          } catch (e) {
+            console.error('[thermo] besoin', e);
+            if (window.showAlert) window.showAlert('alert-match', 'Erreur besoin : ' + (e.message || e), 'e');
+          }
+        });
       });
 
       // toggle détail des bénévoles affectés au clic sur une barre
