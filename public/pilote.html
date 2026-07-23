@@ -176,6 +176,7 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
   <button class="tab on" id="tab-accueil"     onclick="switchTab('accueil')">📊 Accueil</button>
   <button class="tab"    id="tab-accreds"     onclick="switchTab('accreds')">🪪 Accréds<span class="bdg" id="bdg-accreds" style="display:none;"></span></button>
   <button class="tab"    id="tab-match"       onclick="switchTab('match')">🏐 Match</button>
+  <button class="tab"    id="tab-calendrier"  onclick="switchTab('calendrier')">📅 Calendrier</button>
   <button class="tab"    id="tab-benevoles"   onclick="switchTab('benevoles')">👥 Bénévoles</button>
   <button class="tab"    id="tab-suggestions" onclick="switchTab('suggestions')">💡 Suggestions<span class="bdg-num" id="bdg-suggestions" style="display:none;"></span></button>
   <button class="tab"    id="tab-reward"      onclick="switchTab('reward')">🎁 Cadeaux<span class="bdg-num" id="bdg-reward" style="display:none;"></span></button>
@@ -285,6 +286,32 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
     <textarea class="note-area" id="note-match" placeholder="Points d'attention, retours d'expérience, infos logistiques..."></textarea>
     <button class="btn btn-blue btn-full" style="margin-top:10px;" onclick="saveNote()">💾 Sauvegarder la note</button>
   </div>
+</div>
+
+<!-- CALENDRIER -->
+<div class="screen" id="screen-calendrier">
+  <div id="alert-cal"></div>
+  <div class="sec">📅 Calendrier saison 2026-27</div>
+  <div class="card" style="display:flex;flex-direction:column;gap:8px;">
+    <button class="btn btn-blue btn-full" onclick="calImport()">📥 Importer les matchs à domicile</button>
+    <div style="font-size:11px;color:rgba(255,255,255,0.4);">Ajoute les 13 matchs à domicile de la saison. Les matchs déjà présents (même date) sont ignorés.</div>
+  </div>
+
+  <div class="sec">Ajouter un match (coupe, play-off...)</div>
+  <div class="card">
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      <input id="cal-adv" placeholder="Adversaire" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+      <div style="display:flex;gap:7px;">
+        <input id="cal-date" type="date" style="flex:1;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+        <input id="cal-heure" type="time" style="width:120px;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
+      </div>
+      <input id="cal-lieu" placeholder="Lieu (défaut : Palais des Sports)" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
+      <button class="btn btn-blue btn-full" onclick="calCreate()">+ Créer le match</button>
+    </div>
+  </div>
+
+  <div class="sec">Tous les matchs</div>
+  <div id="cal-list"></div>
 </div>
 
 <!-- BÉNÉVOLES -->
@@ -1670,6 +1697,94 @@ async function saveBesoinMatch(posteId, value) {
     console.error('[besoin] save', err)
     showAlert('alert-match', 'Erreur : ' + (err.message || err), 'e')
   }
+}
+
+// ─────────────────────────────────────────────────
+// CALENDRIER — gestion des matchs (creation, date/heure, publier/depublier)
+// ─────────────────────────────────────────────────
+const SEASON_2627_DOMICILE = [
+  { adversaire:'Arago de Sète',                 date_match:'2026-10-17', heure:'18:00:00' },
+  { adversaire:'AS Cannes',                     date_match:'2026-10-24', heure:'18:00:00' },
+  { adversaire:'Le Plessis-Robinson VB',        date_match:'2026-11-07', heure:'18:00:00' },
+  { adversaire:'Tours VB',                      date_match:'2026-11-21', heure:'18:00:00' },
+  { adversaire:'Paris Volley',                  date_match:'2026-11-28', heure:'18:00:00' },
+  { adversaire:'Nice VB',                       date_match:'2026-12-05', heure:'18:00:00' },
+  { adversaire:'Alterna Stade Poitevin VB',     date_match:'2026-12-19', heure:'18:00:00' },
+  { adversaire:'Chaumont VB 52',                date_match:'2027-01-12', heure:'19:00:00' },
+  { adversaire:'Saint-Nazaire VBA',             date_match:'2027-01-16', heure:'18:00:00' },
+  { adversaire:'Montpellier HSC',               date_match:'2027-01-30', heure:'18:00:00' },
+  { adversaire:'Tourcoing-Lille Métropole VB',  date_match:'2027-02-06', heure:'18:00:00' },
+  { adversaire:'Royan Atlantique',              date_match:'2027-02-27', heure:'18:00:00' },
+  { adversaire:'Narbonne Volley',               date_match:'2027-03-13', heure:'19:30:00' }
+]
+
+async function loadCalendrier() {
+  const el = document.getElementById('cal-list'); if (!el) return
+  el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:12px;padding:6px 0;">Chargement...</div>'
+  const { data: matchs, error } = await sb.from('matchs').select('*').order('date_match')
+  if (error) { el.innerHTML = '<div class="card"><div style="color:var(--c-gold-2);font-size:12px;">Erreur : ' + error.message + '</div></div>'; return }
+  if (!matchs || !matchs.length) { el.innerHTML = '<div class="card"><div style="color:rgba(255,255,255,0.35);font-size:12px;">Aucun match. Importe le calendrier ou ajoute un match ci-dessus.</div></div>'; return }
+  el.innerHTML = matchs.map(m => {
+    const pub = m.statut_inscriptions === 'ouvert'
+    const d = (m.date_match || '').slice(0, 10)
+    const h = (m.heure || '').slice(0, 5)
+    return `<div class="card" style="margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+        <div style="flex:1;font-size:14px;font-weight:800;color:white;">Spacers vs ${escapeHtml(m.adversaire || '?')}</div>
+        <span class="s-badge" style="background:${pub ? 'rgba(59,109,17,0.28);color:var(--c-green-light)' : 'rgba(255,255,255,0.08);color:rgba(255,255,255,0.4)'};">${pub ? '🟢 Publié' : '⚪ Dépublié'}</span>
+      </div>
+      <div style="display:flex;gap:7px;margin-bottom:7px;flex-wrap:wrap;">
+        <input type="date" value="${d}" onchange="calSaveField('${m.id}','date_match',this.value)" style="flex:1;min-width:135px;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:8px 10px;color:white;font-family:inherit;font-size:12px;">
+        <input type="time" value="${h}" onchange="calSaveField('${m.id}','heure',this.value)" style="width:110px;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:8px 10px;color:white;font-family:inherit;font-size:12px;">
+      </div>
+      <button class="btn btn-sm btn-full" style="background:${pub ? 'rgba(255,255,255,0.1);color:white' : '#1f6f43;color:white'};" onclick="calTogglePublish('${m.id}',${pub})">${pub ? 'Dépublier (fermer les inscriptions)' : '📣 Publier (ouvrir les inscriptions)'}</button>
+    </div>`
+  }).join('')
+}
+
+async function calSaveField(id, field, value) {
+  let v = value || null
+  if (field === 'heure' && v && v.length === 5) v = v + ':00'
+  const patch = {}; patch[field] = v
+  const { error } = await sb.from('matchs').update(patch).eq('id', id)
+  if (error) { showAlert('alert-cal', 'Erreur : ' + error.message, 'e'); return }
+  showAlert('alert-cal', 'Mis à jour ✓', 's')
+}
+
+async function calTogglePublish(id, isPub) {
+  const next = isPub ? 'ferme' : 'ouvert'
+  const { error } = await sb.from('matchs').update({ statut_inscriptions: next }).eq('id', id)
+  if (error) { showAlert('alert-cal', 'Erreur : ' + error.message, 'e'); return }
+  showAlert('alert-cal', next === 'ouvert' ? 'Match publié' : 'Match dépublié', 's')
+  loadCalendrier()
+}
+
+async function calCreate() {
+  const adv = document.getElementById('cal-adv').value.trim()
+  const date = document.getElementById('cal-date').value
+  let heure = document.getElementById('cal-heure').value
+  const lieu = document.getElementById('cal-lieu').value.trim() || 'Palais des Sports'
+  if (!adv) { showAlert('alert-cal', 'Indique l\'adversaire', 'e'); return }
+  if (!date) { showAlert('alert-cal', 'Indique la date', 'e'); return }
+  if (heure && heure.length === 5) heure = heure + ':00'
+  const { error } = await sb.from('matchs').insert({ adversaire: adv, date_match: date, heure: heure || null, lieu: lieu, statut_inscriptions: 'ferme' })
+  if (error) { showAlert('alert-cal', 'Erreur : ' + error.message, 'e'); return }
+  ;['cal-adv', 'cal-date', 'cal-heure', 'cal-lieu'].forEach(i => { document.getElementById(i).value = '' })
+  showAlert('alert-cal', 'Match créé (dépublié)', 's')
+  loadCalendrier()
+}
+
+async function calImport() {
+  const { data: existing, error: e0 } = await sb.from('matchs').select('date_match')
+  if (e0) { showAlert('alert-cal', 'Erreur : ' + e0.message, 'e'); return }
+  const have = new Set((existing || []).map(m => (m.date_match || '').slice(0, 10)))
+  const toAdd = SEASON_2627_DOMICILE.filter(m => !have.has(m.date_match))
+    .map(m => ({ adversaire: m.adversaire, date_match: m.date_match, heure: m.heure, lieu: 'Palais des Sports', statut_inscriptions: 'ferme' }))
+  if (!toAdd.length) { showAlert('alert-cal', 'Tous les matchs à domicile sont déjà présents.', 's'); loadCalendrier(); return }
+  const { error } = await sb.from('matchs').insert(toAdd)
+  if (error) { showAlert('alert-cal', 'Erreur import : ' + error.message, 'e'); return }
+  showAlert('alert-cal', toAdd.length + ' match' + (toAdd.length > 1 ? 's' : '') + ' ajouté' + (toAdd.length > 1 ? 's' : '') + ' (dépubliés)', 's')
+  loadCalendrier()
 }
 
 async function loadMatch() {
@@ -3676,6 +3791,7 @@ function switchTab(n) {
   document.getElementById('tab-'+n).classList.add('on')
   document.getElementById('screen-'+n).classList.add('on')
   if (n === 'notes') loadNotesHistory()
+  if (n === 'calendrier') loadCalendrier()
   if (n === 'suggestions') loadSuggestions()
   if (n === 'reward') loadReward()
   if (n === 'emploi') loadEmploi()
