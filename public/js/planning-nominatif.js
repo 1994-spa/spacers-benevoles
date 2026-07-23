@@ -75,7 +75,7 @@
     try{
       var r=await sb.from('match_planning').select('*').eq('match_id',mid).eq('benevole_id',bid).order('heure_debut');
       var blocks=(r.data||[]).slice().sort(function(a,b){ return (toMin(a.heure_debut)||0)-(toMin(b.heure_debut)||0); });
-      if(!blocks.length){ container.innerHTML=''; return; }
+      if(!blocks.length){ await renderBenevoleSimple(container, sb, mid, bid); return; }
       var firstH=fmtH(toMin(blocks[0].heure_debut));
       var steps='';
       blocks.forEach(function(b,i){
@@ -95,6 +95,29 @@
         + '<div style="font-size:11px;color:#5A7291;margin-bottom:12px;">Tu es attendu dès <b>'+firstH+'</b>. Tu enchaînes '+blocks.length+' poste'+(blocks.length>1?'s':'')+' — tout est indiqué ci-dessous.</div>'
         + steps + '</div>';
     }catch(e){ console.error('[PN] benevole',e); container.innerHTML=''; }
+  }
+
+  // Cas simple : pas de planning détaillé → affiche le poste principal (tout le match)
+  async function renderBenevoleSimple(container, sb, mid, bid){
+    try{
+      var r2=await Promise.all([
+        sb.from('inscriptions').select('poste_id').eq('match_id',mid).eq('benevole_id',bid).maybeSingle(),
+        sb.from('matchs').select('heure').eq('id',mid).maybeSingle()
+      ]);
+      var posteId=(r2[0]&&r2[0].data&&r2[0].data.poste_id)||null;
+      if(!posteId){ container.innerHTML=''; return; } // pas encore affecté par le pilote
+      var pr=await sb.from('postes').select('nom').eq('id',posteId).maybeSingle();
+      var posteNom=(pr&&pr.data&&pr.data.nom)||'ton poste';
+      var ke=toMin(r2[1]&&r2[1].data&&r2[1].data.heure);
+      var col=posteColor(posteNom);
+      container.innerHTML='<div style="background:#F4F7FB;border-radius:12px;padding:12px 14px;margin-top:8px;">'
+        + '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8A9BAD;margin-bottom:8px;">🕐 Ton poste du match</div>'
+        + '<div style="display:flex;align-items:center;gap:10px;">'
+        +   '<div style="width:14px;height:14px;border-radius:4px;background:'+col+';flex-shrink:0;"></div>'
+        +   '<div style="min-width:0;"><div style="font-size:15px;font-weight:800;color:var(--c-navy,#042C53);">'+esc(posteNom)+'</div>'
+        +   '<div style="font-size:11px;color:#5A7291;">Sur toute la durée du match'+(ke!=null?' · coup d\'envoi '+fmtH(ke):'')+'</div></div>'
+        + '</div></div>';
+    }catch(e){ console.error('[PN] benevole simple',e); container.innerHTML=''; }
   }
 
   // ════════════ VUE PILOTE : hub d'affectation ════════════

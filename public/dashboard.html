@@ -2922,7 +2922,7 @@ function renderNextMatchSection() {
       <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${fg};opacity:0.7;margin-bottom:3px;">PROCHAIN MATCH</div>
       <div style="font-size:14px;font-weight:800;color:${fg};margin-bottom:4px;">Spacers vs ${escapeHtml(m.adversaire)}</div>
       <div style="font-size:11px;color:${fg};opacity:0.85;margin-bottom:8px;">📅 ${escapeHtml(dateStr)}${heureStr ? ' · ' + escapeHtml(heureStr) : ''} · ${escapeHtml(lieuStr)}</div>
-      ${isDispo?friseHtml(CP._nextMatchCreneaux, insc.poste_id):''}<div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:${fg};">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:${fg};">
         <span>${icon} ${escapeHtml(label)}</span>
         <span style="margin-left:auto;font-size:10px;opacity:0.7;">Modifier ›</span>
       </div>
@@ -3704,7 +3704,7 @@ async function loadPlanning() {
       ${m.statut_inscriptions==='ouvert'
         ? insMap[m.id]
           ? insMap[m.id].statut==='disponible'
-            ? `<span class="s-dispo">✓ Disponible</span><div id="pn-plan-${m.id}"></div>${friseHtml(creMap[m.id],insMap[m.id].poste_id)}<div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne peux plus venir</button></div><div id="covoit-plan-${m.id}"></div>`
+            ? `<span class="s-dispo">✓ Disponible</span><div id="pn-plan-${m.id}"></div><div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne peux plus venir</button></div><div id="covoit-plan-${m.id}"></div>`
             : `<span class="s-dispo">✗ Indisponible</span><div class="match-actions"><button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Je redeviens dispo</button></div>`
           : `<span class="s-open">✅ Ouvert</span>
              <div class="match-actions">
