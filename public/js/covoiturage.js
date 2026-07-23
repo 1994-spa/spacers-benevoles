@@ -76,7 +76,7 @@
           + (on?'background:var(--c-green,#3B6D11);color:#fff;':'background:#fff;color:#1B3A5B;border:1px solid #CFE0F5;')+'">'+m[1]+' '+m[2]+'</div>';
       }).join('');
 
-      var showForm = (mine.transport_mode==='voiture' || mine.transport_mode==='covoiturage');
+      var showForm = (mine.transport_mode==='covoiturage');
       var isCond = mine.covoit_role==='conducteur';
       var form = !showForm ? '' :
         '<div style="margin-top:10px;background:#fff;border-radius:10px;padding:10px 12px;border:1px solid #E1E9F2;">'
@@ -136,7 +136,10 @@
     container.querySelectorAll('.covoit-mode').forEach(function(el){
       el.addEventListener('click', async function(){
         var m = el.getAttribute('data-m');
-        await saveField({ transport_mode:m });
+        var patch = { transport_mode:m };
+        // Changer pour un mode autre que covoiturage retire de la bourse
+        if(m !== 'covoiturage'){ patch.covoit_role=null; patch.covoit_secteur=null; patch.covoit_places=null; patch.covoit_note=null; }
+        await saveField(patch);
         renderBenevole(container, st.sb, { matchId:st.mid, benevoleId:st.bid });
       });
     });
@@ -199,17 +202,52 @@
           + (link?'<a href="'+link+'" target="_blank" rel="noopener" style="flex-shrink:0;background:#25D366;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;text-decoration:none;">📱</a>':'')
           + '</div>';
       }
-      container.innerHTML = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">'+recap+'</div>'
+      container.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap;">'
+          + '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:rgba(255,255,255,0.5);">Comment viennent les bénévoles</div>'
+          + '<button id="covoit-export" style="background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:5px 10px;font-family:inherit;font-weight:700;font-size:11px;cursor:pointer;">&#11015; Export mobilité (saison)</button>'
+        + '</div>'
+        + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">'+recap+'</div>'
         + '<div style="font-size:11px;font-weight:700;color:var(--c-green-light,#C0DD97);margin:4px 0 2px;">🚗 Conducteurs ('+cond.length+')</div>'
         + (cond.length?cond.map(function(x){return row(x,true);}).join(''):'<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:3px 0;">Aucun.</div>')
         + '<div style="font-size:11px;font-weight:700;color:var(--c-gold-2,#FAC775);margin:8px 0 2px;">🙋 Cherchent une place ('+pass.length+')</div>'
         + (pass.length?pass.map(function(x){return row(x,false);}).join(''):'<div style="font-size:11px;color:rgba(255,255,255,0.4);padding:3px 0;">Aucun.</div>')
         + '<div style="margin-top:10px;">'+tisseoBlock('dark')+'</div>';
+      var expBtn = container.querySelector('#covoit-export');
+      if(expBtn) expBtn.addEventListener('click', function(){ exportSaisonCSV(sb); });
     } catch(e){
       console.error('[covoit] pilote', e);
       container.innerHTML = '<div style="font-size:12px;color:#F09595;">Covoiturage indisponible : '+esc(e.message||e)+'</div>';
     }
   }
 
-  window.SpacersCovoit = { renderBenevole: renderBenevole, renderPilote: renderPilote };
+  // ── Export CSV mobilité sur toute la saison (tous les matchs) ──
+  async function exportSaisonCSV(sb){
+    try {
+      var r = await sb.from('inscriptions')
+        .select('transport_mode,covoit_role,covoit_secteur,covoit_places,matchs(adversaire,date_match),benevoles!inscriptions_benevole_id_fkey(prenom,nom)')
+        .not('transport_mode','is',null);
+      var rows = (r.data||[]).slice();
+      if(!rows.length){ if(window.showAlert) window.showAlert('alert-match','Aucune donnée de mobilité à exporter pour l\'instant.','e'); return; }
+      rows.sort(function(a,b){ var da=(a.matchs&&a.matchs.date_match)||''; var db=(b.matchs&&b.matchs.date_match)||''; return da<db?-1:(da>db?1:0); });
+      var modeMap = {tisseo:'Tisséo',velo:'Vélo',pied:'À pied',voiture:'Voiture',covoiturage:'Covoiturage'};
+      var roleMap = {conducteur:'Conducteur',passager:'Passager'};
+      var q = function(s){ return '"'+String(s==null?'':s).replace(/"/g,'""')+'"'; };
+      var head = ['Date match','Adversaire','Prénom','Nom','Mode de transport','Rôle covoiturage','Secteur','Places'];
+      var lines = [head.map(q).join(';')];
+      rows.forEach(function(x){
+        var m=x.matchs||{}, b=x.benevoles||{};
+        lines.push([m.date_match, m.adversaire, b.prenom, b.nom, (modeMap[x.transport_mode]||x.transport_mode||''), (roleMap[x.covoit_role]||''), x.covoit_secteur||'', x.covoit_places||''].map(q).join(';'));
+      });
+      var csv = '﻿'+lines.join('\r\n');
+      var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a'); a.href=url; a.download='mobilite-benevoles-saison.csv'; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+    } catch(e){
+      console.error('[covoit] export', e);
+      if(window.showAlert) window.showAlert('alert-match','Erreur export : '+(e.message||e),'e');
+    }
+  }
+
+  window.SpacersCovoit = { renderBenevole: renderBenevole, renderPilote: renderPilote, exportSaisonCSV: exportSaisonCSV };
 })();
