@@ -2926,8 +2926,7 @@ function renderNextMatchSection() {
         <span>${icon} ${escapeHtml(label)}</span>
         <span style="margin-left:auto;font-size:10px;opacity:0.7;">Modifier ›</span>
       </div>
-    </div>
-    ${isDispo?'<div id="covoit-home"></div>':''}`
+    </div>`
   }
 
   return `
@@ -3484,12 +3483,6 @@ function renderHomeForProfil(p) {
   if (profil === 'hugo') renderHugoHome(home, p, pts, niveau, pct)
   else if (profil === 'virginie') renderVirginieHome(home, p)
   else renderJoelHome(home, p, pts)
-
-  // Covoiturage + mobilité douce (si dispo pour le prochain match)
-  if (window.SpacersCovoit && CP && CP._nextMatch && CP._nextMatchInscription && CP._nextMatchInscription.statut === 'disponible') {
-    const _cc = document.getElementById('covoit-home')
-    if (_cc) window.SpacersCovoit.renderBenevole(_cc, sb, { matchId: CP._nextMatch.id, benevoleId: CP.id })
-  }
 }
 
 function renderHugoHome(el, p, pts, niveau, pct) { const _pi = palierInfo(pts);
@@ -3711,7 +3704,7 @@ async function loadPlanning() {
       ${m.statut_inscriptions==='ouvert'
         ? insMap[m.id]
           ? insMap[m.id].statut==='disponible'
-            ? `<span class="s-dispo">✓ Disponible</span>${friseHtml(creMap[m.id],insMap[m.id].poste_id)}<div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne peux plus venir</button></div>`
+            ? `<span class="s-dispo">✓ Disponible</span>${friseHtml(creMap[m.id],insMap[m.id].poste_id)}<div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne peux plus venir</button></div><div id="covoit-plan-${m.id}"></div>`
             : `<span class="s-dispo">✗ Indisponible</span><div class="match-actions"><button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Je redeviens dispo</button></div>`
           : `<span class="s-open">✅ Ouvert</span>
              <div class="match-actions">
@@ -3720,6 +3713,17 @@ async function loadPlanning() {
              </div>`
         : `<span class="s-closed">Fermé</span>`}
     </div>`).join('')
+
+  // Covoiturage + mobilité douce : rendu par match ouvert où le bénévole est disponible
+  if (window.SpacersCovoit) {
+    matchs.forEach(m => {
+      const im = insMap[m.id]
+      if (m.statut_inscriptions === 'ouvert' && im && im.statut === 'disponible') {
+        const c = document.getElementById('covoit-plan-' + m.id)
+        if (c) window.SpacersCovoit.renderBenevole(c, sb, { matchId: m.id, benevoleId: CU.id })
+      }
+    })
+  }
 }
 
 async function setDispo(matchId,statut,btn) {

@@ -29,17 +29,29 @@
   // ── Bloc info Tisséo (mobilité douce) ──
   function tisseoBlock(theme){
     var dark = theme==='dark';
-    var itin = 'https://www.tisseo.fr/se-deplacer/itineraires';
+    var calc = 'https://www.tisseo.fr/calculateur';
+    var qpark = 'https://www.q-park.fr/fr-fr/events/palais-des-sports-toulouse/';
     var card = dark ? 'background:rgba(24,95,165,0.12);border:1px solid rgba(24,95,165,0.3);' : 'background:#EAF2FB;border:1px solid #CFE0F5;';
-    var txt = dark ? 'color:rgba(255,255,255,0.85);' : 'color:#1B3A5B;';
-    var sub = dark ? 'color:rgba(255,255,255,0.55);' : 'color:#5A7291;';
+    var txt = dark ? 'color:rgba(255,255,255,0.9);' : 'color:#1B3A5B;';
+    var sub = dark ? 'color:rgba(255,255,255,0.6);' : 'color:#5A7291;';
+    var linkC = dark ? 'var(--c-blue-100,#B5D4F4)' : '#185FA5';
+    var head = function(t){ return '<div style="font-size:10px;font-weight:800;letter-spacing:0.5px;'+txt+'margin-top:9px;">'+t+'</div>'; };
+    var line = function(t){ return '<div style="font-size:11px;'+sub+'line-height:1.5;">'+t+'</div>'; };
+    var detail = head('🚇 MÉTRO')
+      + line('Ligne <b>B</b>, station <b>Compans-Caffarelli</b> (~5 min à pied) ou <b>Canal du Midi</b> (devant le Conseil départemental). Accessible aux personnes à mobilité réduite.')
+      + head('🚌 BUS')
+      + line('Lignes <b>L1, 16, 45, 70, 71</b> — arrêt Compans Caffarelli. Pensez à vérifier vos horaires de retour.')
+      + head('🚗 VOITURE & PARKING')
+      + line('Sortie rocade <b>Ponts Jumeaux</b>, direction centre-ville. Parking <b>Q-Park Compans Caffarelli</b> (3 min à pied). Forfait Sport : <b>5 €</b> de 18h30 à 23h30 les soirs de match. <a href="'+qpark+'" target="_blank" rel="noopener" style="color:'+linkC+';font-weight:700;">Réserver →</a>')
+      + head('🚲 VÉLO')
+      + line('VélÔToulouse : <b>Station 20</b> (M° Canal du Midi) · <b>Station 12</b> (M° Compans).');
     return '<div style="'+card+'border-radius:12px;padding:12px 14px;">'
       + '<div style="font-size:12px;font-weight:800;'+txt+'display:flex;align-items:center;gap:6px;">🌿 Venir en mobilité douce</div>'
-      + '<div style="font-size:11px;'+sub+'margin-top:5px;line-height:1.5;">'
-      +   'Palais des Sports André-Brouat · 3 rue Pierre Laplace<br>'
-      +   '🚇 Métro <b>ligne B</b> — station <b>Compans-Caffarelli</b> · 🚆 à 1,6 km de Matabiau'
-      + '</div>'
-      + '<a href="'+itin+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:11px;font-weight:700;'+(dark?'color:var(--c-blue-100,#B5D4F4);':'color:#185FA5;')+'text-decoration:underline;">🚌 Calculer mon itinéraire Tisséo →</a>'
+      + '<div style="font-size:11px;'+sub+'margin-top:5px;line-height:1.5;">Un soir de match, privilégiez le <b>métro</b> : le plus simple, et pas de galère de stationnement.<br>Palais des Sports André-Brouat · 3 rue Pierre Laplace</div>'
+      + '<details style="margin-top:8px;"><summary style="cursor:pointer;font-size:11px;font-weight:700;color:'+linkC+';list-style:none;">➕ Voir tous les accès (métro, bus, parking, vélo)</summary>'
+      +   '<div style="margin-top:4px;">'+detail+'</div>'
+      + '</details>'
+      + '<a href="'+calc+'" target="_blank" rel="noopener" style="display:inline-block;margin-top:9px;font-size:11px;font-weight:700;color:'+linkC+';text-decoration:underline;">🚌 Calculer mon itinéraire Tisséo →</a>'
       + '</div>';
   }
 
