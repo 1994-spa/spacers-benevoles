@@ -21,6 +21,7 @@
     buvette:'Buvette', dota:'Dotations + Repas', securite:'Sécurité', autre:'Autre'
   };
   var PALETTE = ['#3B82F6','#22C55E','#F97316','#8B5CF6','#EC4899','#14B8A6','#F5C842','#EF4444','#0EA5E9','#84CC16'];
+  var UI = { ganttOpen: false }; // timeline repliée par défaut (persiste entre re-rendus)
 
   var TEMPLATES = [
     { key:'accueil_scan',  label:'Accueil → Scan', blocks:[
@@ -138,6 +139,9 @@
 
       var anySeg=bens.some(function(b){ return segmentsFor(b).length; });
       if(anySeg){
+        var gchev=UI.ganttOpen?'▾':'▸';
+        html+='<div class="pn-gantt-toggle" style="cursor:pointer;user-select:none;font-size:11px;font-weight:700;color:var(--c-blue-100,#B5D4F4);margin-bottom:8px;display:inline-block;">'+gchev+' Vue d\'ensemble (timeline + couverture des postes)</div>';
+        html+='<div class="pn-gantt-body" style="display:'+(UI.ganttOpen?'block':'none')+';">';
         html+='<div style="overflow-x:auto;margin-bottom:14px;"><div style="min-width:620px;">';
         var ticks='';
         for(var t=dom[0];t<=dom[1];t+=60){ var l=pos(t,dom); ticks+='<div style="position:absolute;top:0;left:'+l+'%;font-size:10px;color:rgba(255,255,255,0.45);font-weight:600;transform:translateX(-2px);">'+fmtH(t)+'</div>'; if(t<dom[1])ticks+='<div style="position:absolute;top:0;bottom:0;left:'+l+'%;width:1px;background:rgba(255,255,255,0.06);"></div>'; }
@@ -157,6 +161,7 @@
         });
         html+='</div></div>';
         html+=coverageHtml(bens, segmentsFor, dom);
+        html+='</div>';
       }
 
       html+='<div style="font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin:14px 0 8px;">Affectation des bénévoles</div>';
@@ -205,6 +210,14 @@
   function wirePilote(container){
     var st=container._pn;
     async function refresh(){ renderPilote(container, st.sb, { matchId:st.mid }); }
+    // repli / dépli de la vue d'ensemble (timeline + couverture)
+    var gt=container.querySelector('.pn-gantt-toggle');
+    if(gt) gt.addEventListener('click', function(){
+      UI.ganttOpen=!UI.ganttOpen;
+      var body=container.querySelector('.pn-gantt-body');
+      if(body) body.style.display=UI.ganttOpen?'block':'none';
+      gt.textContent=(UI.ganttOpen?'▾':'▸')+' Vue d\'ensemble (timeline + couverture des postes)';
+    });
     container.querySelectorAll('.pn-poste-main').forEach(function(sel){
       var bid=sel.closest('.pn-ben').getAttribute('data-ben');
       sel.addEventListener('change', async function(){
