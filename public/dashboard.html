@@ -473,7 +473,7 @@ body{font-family:'Sora',sans-serif;background:var(--c-navy);min-height:100vh;}
     <meta name="mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="/theme.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="/js/accreditation-generator.js"></script><script src="/js/planning-timeline.js"></script><script src="/js/covoiturage.js"></script>
+<script src="/js/accreditation-generator.js"></script><script src="/js/planning-timeline.js"></script><script src="/js/covoiturage.js"></script><script src="/js/planning-nominatif.js"></script>
 </head>
 <body>
 
@@ -3704,7 +3704,7 @@ async function loadPlanning() {
       ${m.statut_inscriptions==='ouvert'
         ? insMap[m.id]
           ? insMap[m.id].statut==='disponible'
-            ? `<span class="s-dispo">✓ Disponible</span>${friseHtml(creMap[m.id],insMap[m.id].poste_id)}<div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne peux plus venir</button></div><div id="covoit-plan-${m.id}"></div>`
+            ? `<span class="s-dispo">✓ Disponible</span><div id="pn-plan-${m.id}"></div>${friseHtml(creMap[m.id],insMap[m.id].poste_id)}<div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne peux plus venir</button></div><div id="covoit-plan-${m.id}"></div>`
             : `<span class="s-dispo">✗ Indisponible</span><div class="match-actions"><button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Je redeviens dispo</button></div>`
           : `<span class="s-open">✅ Ouvert</span>
              <div class="match-actions">
@@ -3721,6 +3721,8 @@ async function loadPlanning() {
       if (m.statut_inscriptions === 'ouvert' && im && im.statut === 'disponible') {
         const c = document.getElementById('covoit-plan-' + m.id)
         if (c) window.SpacersCovoit.renderBenevole(c, sb, { matchId: m.id, benevoleId: CU.id })
+        const pn = document.getElementById('pn-plan-' + m.id)
+        if (pn && window.SpacersPN) window.SpacersPN.renderBenevole(pn, sb, { matchId: m.id, benevoleId: CU.id })
       }
     })
   }
