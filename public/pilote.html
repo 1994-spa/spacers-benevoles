@@ -224,6 +224,9 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
   <div class="sec">Prochain match ouvert</div>
   <div class="card" id="match-info"><div style="color:rgba(255,255,255,0.4);font-size:12px;">Aucun match ouvert.</div></div>
 
+  <div class="sec">&#128197; Planning nominatif — affectation &amp; cr&eacute;neaux</div>
+  <div class="card"><div id="pn-pilote"></div></div>
+
   <div class="sec">&#128202; Postes &amp; couverture (besoin &eacute;ditable)</div>
   <div class="card"><div id="thermo-planning"></div></div>
 
@@ -242,9 +245,6 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
     <div id="validation-kpis"></div>
     <div id="validation-list"></div>
   </div>
-
-  <div class="sec">&#128197; Planning nominatif (cr&eacute;neaux par b&eacute;n&eacute;vole)</div>
-  <div class="card"><div id="pn-pilote"></div></div>
 
   <div class="sec">&#127807; Covoiturage &amp; mobilit&eacute;</div>
   <div class="card"><div id="covoit-pilote"></div></div>
@@ -966,7 +966,7 @@ function promptModal(opts) {
 // ============================================================
 const GUIDE_STEPS = [
   { center:true, ic:'&#127916;', tt:'Bienvenue dans l\'espace pilote !', quoi:'C\'est ici que tu fais vivre l\'équipe de bénévoles. En quelques étapes, je te montre &agrave; l\'écran où se trouve chaque chose &mdash; et pourquoi elle compte.', pourquoi:'' },
-  { tab:'match', sel:'#thermo-planning', ic:'&#127952;', tt:'Gérer le match', quoi:'La couverture des postes et l\'affectation des bénévoles se font ici : tu vois qui manque et où, et tu affectes chacun dans le Planning nominatif juste en dessous.', pourquoi:'Tant qu\'un match n\'est pas géré, les bénévoles n\'ont rien &agrave; réserver : c\'est ton point de départ.' },
+  { tab:'match', sel:'#thermo-planning', ic:'&#127952;', tt:'Gérer le match', quoi:'La couverture des postes et l\'affectation des bénévoles se font ici : tu affectes chacun dans le Planning nominatif juste au-dessus, et la couverture des postes s\'affiche ici.', pourquoi:'Tant qu\'un match n\'est pas géré, les bénévoles n\'ont rien &agrave; réserver : c\'est ton point de départ.' },
   { tab:'match', sel:'#validation-section', ic:'&#9989;', tt:'Valider les présences', quoi:'Le jour du match, coche ici qui était bien présent. C\'est ce geste qui attribue les points et fait monter les niveaux (Bronze, Argent, Or).', pourquoi:'La reconnaissance, c\'est le carburant : des points qui montent, c\'est l\'envie de revenir.' },
   { tab:'appels', sel:'#ap-competence', ic:'&#128588;', tt:'Lancer un appel ciblé', quoi:'Crée un appel hors-match (montage, événement, régie&hellip;). Avec &laquo; Réservé &agrave; &raquo;, tu peux le limiter &agrave; une compétence : seuls les bénévoles formés le verront et seront notifiés.', pourquoi:'Tu mobilises les bonnes personnes sans solliciter tout le monde &mdash; on répond plus volontiers quand c\'est pertinent.' },
   { tab:'appels', sel:'#comp-select', ic:'&#127891;', tt:'Gérer les compétences', quoi:'Choisis une compétence ici, puis coche les bénévoles formés. C\'est ce qui rend possible le ciblage des appels juste au-dessus.', pourquoi:'Tu le fais une fois, et tous les futurs appels concernés cibleront automatiquement les bonnes personnes.' },
