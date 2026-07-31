@@ -194,13 +194,11 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
     <div class="kpi"><div class="kpi-val a" id="kpi-p">—</div><div class="kpi-lbl">Photos en attente</div></div>
     <div class="kpi"><div class="kpi-val" id="kpi-a">—</div><div class="kpi-lbl">Accréditations</div></div>
     <div class="kpi"><div class="kpi-val r" id="kpi-r">—</div><div class="kpi-lbl">Comptes à risque</div></div>
-    <div class="kpi" style="grid-column:1 / -1;border:1px solid rgba(245,200,66,0.4);"><div class="kpi-val" id="kpi-concours" style="color:var(--c-gold);">—</div><div class="kpi-lbl">🎁 Inscrits au concours Calicéo</div></div>
   </div>
   <div class="sec">Actions rapides</div>
   <button class="btn btn-ghost btn-full" onclick="openGuide()" style="border:1px solid rgba(245,200,66,0.4);color:var(--c-gold);">&#128214; Comment &ccedil;a marche ?</button>
   <button class="btn btn-orange btn-full" id="btn-acc-sug" onclick="switchTab('suggestions')" style="display:none;">💡 <span id="acc-sug-msg"></span></button>
   <button class="btn btn-blue btn-full" onclick="switchTab('accreds')">🪪 Valider les photos</button>
-  <button class="btn btn-full" onclick="openConcoursList()" style="background:rgba(245,200,66,0.15);color:var(--c-gold);border:1px solid rgba(245,200,66,0.4);">🎁 Voir les inscrits au concours</button>
   <button class="btn btn-ghost btn-full" onclick="switchTab('match')">🏐 Gérer le match</button>
   <button class="btn btn-ghost btn-full" onclick="switchTab('benevoles')">👥 Tous les bénévoles</button>
   <div class="sec">Top 5 bénévoles</div>
@@ -663,18 +661,6 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
   </div>
 </div>
 <!-- MODAL CONFIRMATION UNIFIÉE -->
-<div class="modal-overlay" id="modal-concours" style="display:none;" onclick="if(event.target===this)closeConcoursList()">
-  <div class="modal" style="max-width:520px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;position:relative;">
-    <button onclick="closeConcoursList()" aria-label="Fermer" style="position:absolute;top:10px;right:12px;background:rgba(255,255,255,0.1);color:#fff;border:none;width:30px;height:30px;border-radius:50%;font-size:16px;line-height:1;cursor:pointer;z-index:2;">&times;</button>
-    <h2 style="flex-shrink:0;margin-right:34px;">🎁 Inscrits au concours Calicéo</h2>
-    <div id="modal-concours-sub" style="flex-shrink:0;text-align:center;font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:14px;"></div>
-    <div id="modal-concours-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;min-height:0;"></div>
-    <div style="flex-shrink:0;display:flex;gap:8px;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);">
-      <button class="btn btn-ghost" style="flex:1;" onclick="closeConcoursList()">Fermer</button>
-      <button class="btn btn-blue" style="flex:1;" onclick="copierParticipantsConcours()">📋 Copier la liste</button>
-    </div>
-  </div>
-</div>
 
 <div class="modal-overlay" id="modal-confirm" style="display:none;">
   <div class="modal">
@@ -1112,62 +1098,6 @@ async function init() {
   maybeOpenGuide()
 }
 
-let _concoursRows = []
-
-function closeConcoursList() {
-  const el = document.getElementById('modal-concours')
-  if (el) el.style.display = 'none'
-}
-document.addEventListener('keydown', function(e){
-  if (e.key === 'Escape') {
-    const el = document.getElementById('modal-concours')
-    if (el && el.style.display !== 'none') closeConcoursList()
-  }
-})
-
-async function openConcoursList() {
-  const el = document.getElementById('modal-concours')
-  const list = document.getElementById('modal-concours-list')
-  const sub = document.getElementById('modal-concours-sub')
-  el.style.display = 'flex'
-  list.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.5);font-size:12px;padding:14px;">Chargement...</div>'
-  sub.textContent = ''
-  try {
-    const { data, error } = await sb.from('concours_participations').select('benevole_id, statut, created_at').order('created_at')
-    if (error) throw error
-    const parts = (data || []).filter(r => r.statut === 'participe')
-    const refus = (data || []).filter(r => r.statut === 'refuse').length
-    _concoursRows = parts.map(r => {
-      const b = allBenv.find(x => x.id === r.benevole_id)
-      return { nom: b ? ((b.prenom||'') + ' ' + (b.nom||'')).trim() : '(inconnu)', email: b ? (b.email||'') : '', date: r.created_at }
-    })
-    sub.textContent = _concoursRows.length + ' participant(s) — ' + refus + ' refus'
-    if (!_concoursRows.length) {
-      list.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.5);font-size:12px;padding:14px;">Aucun inscrit pour l\u2019instant.</div>'
-      return
-    }
-    list.innerHTML = _concoursRows.map((r,i) => `
-      <div class="benv-row" style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:11px;color:rgba(255,255,255,0.4);width:24px;">${i+1}</span>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:700;color:white;">${escapeHtml(r.nom)}</div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.5);overflow:hidden;text-overflow:ellipsis;">${escapeHtml(r.email)}</div>
-        </div>
-      </div>`).join('')
-  } catch (e) {
-    list.innerHTML = '<div style="text-align:center;color:var(--c-accent-100);font-size:12px;padding:14px;">Erreur : ' + (e.message || e) + '</div>'
-  }
-}
-
-function copierParticipantsConcours() {
-  const sub = document.getElementById('modal-concours-sub')
-  if (!_concoursRows.length) { if (sub) sub.textContent = 'Aucun participant à copier'; return }
-  const txt = _concoursRows.map((r,i) => (i+1) + '. ' + r.nom + ' <' + r.email + '>').join('\n')
-  navigator.clipboard.writeText(txt).then(function(){
-    if (sub) { const _o = sub.textContent; sub.textContent = '✅ Liste copiée !'; setTimeout(function(){ sub.textContent = _o }, 1800) }
-  })
-}
-
 async function loadAll() {
   const { data: benv } = await sb.from('benevoles').select('*').order('nom')
   if (!benv) return
@@ -1181,7 +1111,6 @@ async function loadAll() {
   document.getElementById('kpi-p').textContent = att.length
   document.getElementById('kpi-a').textContent = benv.filter(b=>b.statut_accreditation==='generee').length
   document.getElementById('kpi-r').textContent = benv.filter(b=>(b.points_total||0)<50 && b.statut_compte==='actif').length
-  try { const { count: _nbC } = await sb.from('concours_participations').select('*', { count: 'exact', head: true }).eq('statut','participe'); const _elC=document.getElementById('kpi-concours'); if(_elC) _elC.textContent=(_nbC||0) } catch(e){ console.warn('kpi concours', e) }
   if (att.length>0) document.getElementById('bdg-accreds').style.display='block'
 
   const top = [...benv].sort((a,b)=>(b.points_total||0)-(a.points_total||0)).slice(0,5)
