@@ -12,19 +12,38 @@
 (function () {
   'use strict';
 
+  // Palette officielle des postes (1 poste = 1 couleur, partout : timeline, couverture, vue bénévole)
   var CATCOL = {
-    accueil:'#F5C842', guichet:'#8B5CF6', scan:'#3B82F6', placement:'#22C55E',
-    buvette:'#F97316', dota:'#EC4899', securite:'#64748B', autre:'#64748B'
+    accueil:'#F5C842',     // Accueil bénévole — jaune
+    dota:'#C9920E',        // Dotations + Repas — jaune moutarde (dérivé du jaune)
+    accueil_vip:'#DC2626', // Accueil VIP — rouge
+    secu_vip:'#8B1E2D',    // Sécu VIP — bordeaux (dérivé du rouge)
+    buvette:'#F97316',     // Buvette — orange
+    scan:'#3B82F6',        // Scan entrée — bleu
+    placement:'#22C55E',   // Placement — vert
+    animation:'#EC4899',   // Animations — rose
+    regie:'#0A0A0A',       // Régie vidéo — noir
+    volant:'#8A94A6',      // Volant — gris
+    boutique:'#8B5CF6',    // Boutique — violet
+    guichet:'#14B8A6',     // Guichet billetterie — turquoise
+    referent:'#0C447C',    // Référent — bleu nuit (couleur club)
+    rangement:'#8D6E63',   // Rangement — marron
+    autre:'#52525B'        // Poste non reconnu — anthracite
   };
   var CATLAB = {
-    accueil:'Accueil', guichet:'Guichet', scan:'Scan entrée', placement:'Placement',
-    buvette:'Buvette', dota:'Dotations + Repas', securite:'Sécurité', autre:'Autre'
+    accueil:'Accueil bénévole', dota:'Dotations + Repas', accueil_vip:'Accueil VIP', secu_vip:'Sécu VIP',
+    buvette:'Buvette', scan:'Scan entrée', placement:'Placement', animation:'Animations',
+    regie:'Régie vidéo', volant:'Volant', boutique:'Boutique', guichet:'Guichet billetterie',
+    referent:'Référent', rangement:'Rangement', autre:'Autre'
   };
-  var PALETTE = ['#3B82F6','#22C55E','#F97316','#8B5CF6','#EC4899','#14B8A6','#F5C842','#EF4444','#0EA5E9','#84CC16'];
+  // Clés historiques ambiguës : le libellé du bloc prime pour retrouver le bon poste
+  var LEGACY_CAT = { accueil:1, securite:1, autre:1 };
+  // Si la base refuse une nouvelle clé (contrainte CHECK), on stocke la clé historique ; le libellé porte la couleur
+  var STORE_FALLBACK = { accueil_vip:'accueil', secu_vip:'securite', boutique:'autre', animation:'autre', regie:'autre', volant:'autre', referent:'autre', rangement:'autre' };
   var UI = { ganttOpen: true, selBlk: null }; // timeline ouverte par défaut + bloc sélectionné (persistent entre re-rendus)
   var ARRIVEE_AVANT = 180;       // heure d'arrivée par défaut = coup d'envoi − 3h (ex. 15h pour 18h)
   // Catégories proposées dans l'éditeur de bloc (constructeur pilote)
-  var CAT_ORDER = ['guichet','accueil','scan','placement','buvette','dota','securite'];
+  var CAT_ORDER = ['accueil','guichet','scan','placement','buvette','boutique','animation','regie','accueil_vip','secu_vip','volant','referent','dota','rangement'];
 
   var TEMPLATES = [
     { key:'accueil_scan',  label:'Accueil → Scan', blocks:[
@@ -45,20 +64,46 @@
   function toMin(hhmm){ if(!hhmm) return null; var p=String(hhmm).split(':'); var h=parseInt(p[0],10),m=parseInt(p[1]||'0',10); if(isNaN(h))return null; return h*60+(isNaN(m)?0:m); }
   function fmtH(min){ if(min==null)return ''; var h=Math.floor(min/60),m=((min%60)+60)%60; return h+'h'+(m<10?'0'+m:m); }
   function minToTime(min){ var h=Math.floor(min/60),m=((min%60)+60)%60; return (h<10?'0'+h:h)+':'+(m<10?'0'+m:m)+':00'; }
-  function colOf(b){ return b.couleur || CATCOL[b.categorie] || CATCOL.autre; }
+  // Catégorie effective d'un bloc : clé précise en base, sinon déduite du libellé (rétro-compatible)
+  function catOf(b){
+    var c=b&&b.categorie;
+    if(c && CATCOL[c] && !LEGACY_CAT[c]) return c;
+    var g=guessCat(b&&b.libelle); if(g!=='autre') return g;
+    if(c==='securite') return 'secu_vip';
+    return (c && CATCOL[c]) ? c : 'autre';
+  }
+  // Couleur toujours issue de la palette (la colonne "couleur" stockée est ignorée → les anciens blocs suivent la nouvelle charte)
+  function colOf(b){ return CATCOL[catOf(b)] || CATCOL.autre; }
+  function isDark(hex){ var m=/^#([0-9a-f]{6})$/i.exec(hex||''); if(!m) return false; var n=parseInt(m[1],16); return (0.299*((n>>16)&255)+0.587*((n>>8)&255)+0.114*(n&255)) < 40; }
+  function isCheckErr(err){ return !!err && (err.code==='23514' || /check constraint/i.test(err.message||'')); }
+  async function writeWithCatFallback(doWrite, rec){
+    var r=await doWrite(rec);
+    if(r && isCheckErr(r.error) && STORE_FALLBACK[rec.categorie]){ r=await doWrite(Object.assign({}, rec, { categorie:STORE_FALLBACK[rec.categorie] })); }
+    return r;
+  }
   function ini(n){ n=(n||'').trim(); var p=n.split(' '); return ((p[0]||'?')[0]+(p[1]?p[1][0]:'')).toUpperCase(); }
   function guessCat(lib){
-    var l=(lib||'').toLowerCase();
-    if(l.indexOf('accueil')>=0) return 'accueil';
-    if(l.indexOf('guichet')>=0) return 'guichet';
-    if(l.indexOf('scan')>=0) return 'scan';
-    if(l.indexOf('placement')>=0||l.indexOf('placem')>=0) return 'placement';
-    if(l.indexOf('buvette')>=0) return 'buvette';
-    if(l.indexOf('dotation')>=0||l.indexOf('repas')>=0) return 'dota';
-    if(l.indexOf('sécu')>=0||l.indexOf('secu')>=0||l.indexOf('surveil')>=0) return 'securite';
+    var l=String(lib||'').toLowerCase();
+    try{ l=l.normalize('NFD').replace(/[\u0300-\u036f]/g,''); }catch(e){}
+    function has(){ for(var i=0;i<arguments.length;i++){ if(l.indexOf(arguments[i])>=0) return true; } return false; }
+    // ordre = du plus spécifique au plus générique (ex. « Sécu VIP » avant « VIP », « Accueil VIP » avant « Accueil »)
+    if(has('secu','surveil')) return 'secu_vip';
+    if(has('vip')) return 'accueil_vip';
+    if(has('dotation','repas')) return 'dota';
+    if(has('accueil')) return 'accueil';
+    if(has('guichet','billetterie')) return 'guichet';
+    if(has('scan')) return 'scan';
+    if(has('placem')) return 'placement';
+    if(has('buvette')) return 'buvette';
+    if(has('boutique','merch')) return 'boutique';
+    if(has('anim','mascotte')) return 'animation';
+    if(has('regie','video')) return 'regie';
+    if(has('referent')) return 'referent';
+    if(has('rangement','desinstall')) return 'rangement';
+    if(has('volant','renfort')) return 'volant';
     return 'autre';
   }
-  function posteColor(nom){ var c=guessCat(nom); if(c!=='autre') return CATCOL[c]; var h=0,s=nom||''; for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0; return PALETTE[h%PALETTE.length]; }
+  function posteColor(nom){ return CATCOL[guessCat(nom)] || CATCOL.autre; }
   function isNoyau(role){ role=(role||'').toLowerCase(); return role==='referent'||role==='pilote'||role==='admin'; }
   function nowMin(){ try{ var d=new Date(); return d.getHours()*60+d.getMinutes(); }catch(e){ return null; } }
 
@@ -171,7 +216,7 @@
       var blocks=(res[3]&&res[3].data)||[];
       var ke=toMin(match.heure);
 
-      var posteMap={}; postes.forEach(function(p){ posteMap[p.id]={nom:p.nom,col:posteColor(p.nom)}; });
+      var posteMap={}; postes.forEach(function(p){ posteMap[p.id]={nom:p.nom,col:posteColor(p.nom),cat:guessCat(p.nom)}; });
       var benMap={};
       insc.forEach(function(i){ if(i.benevole_id && !benMap[i.benevole_id]){ var b=i.benevoles||{}; benMap[i.benevole_id]={id:i.benevole_id, nom:((b.prenom||'')+' '+(b.nom||'')).trim()||'Bénévole', posteId:i.poste_id||null, prefs:b.postes_preferes||'', noyau:isNoyau(b.role)}; } });
       var bens=Object.keys(benMap).map(function(k){return benMap[k];}).sort(function(a,b){return a.nom.localeCompare(b.nom);});
@@ -187,8 +232,8 @@
 
       function segmentsFor(bn){
         var bl=blkByBen[bn.id];
-        if(bl && bl.length) return bl.map(function(b){ return { id:b.id, lib:b.libelle, col:colOf(b), d:toMin(b.heure_debut), f:toMin(b.heure_fin)||(toMin(b.heure_debut)+30), group:CATLAB[b.categorie]||b.libelle, timed:true }; });
-        if(bn.posteId && posteMap[bn.posteId]) return [{ id:null, lib:posteMap[bn.posteId].nom, col:posteMap[bn.posteId].col, d:dom[0], f:dom[1], group:posteMap[bn.posteId].nom, timed:false }];
+        if(bl && bl.length) return bl.map(function(b){ return { id:b.id, lib:b.libelle, col:colOf(b), d:toMin(b.heure_debut), f:toMin(b.heure_fin)||(toMin(b.heure_debut)+30), group:(catOf(b)!=='autre'?CATLAB[catOf(b)]:(b.libelle||'Autre')), cat:catOf(b), timed:true }; });
+        if(bn.posteId && posteMap[bn.posteId]) return [{ id:null, lib:posteMap[bn.posteId].nom, col:posteMap[bn.posteId].col, d:dom[0], f:dom[1], group:(posteMap[bn.posteId].cat!=='autre'?CATLAB[posteMap[bn.posteId].cat]:posteMap[bn.posteId].nom), cat:posteMap[bn.posteId].cat, timed:false }];
         return [];
       }
 
@@ -286,11 +331,11 @@
     for(var i=0;i<arr.length;i++){ if(arr[i].id===selBlk){ nxt=arr[i+1]||null; break; } }
     var basc=nxt?('→ '+esc(nxt.libelle)+' ('+fmtH(toMin(nxt.heure_debut))+(nxt.heure_fin?' → '+fmtH(toMin(nxt.heure_fin)):'')+')'):'— dernier poste de la journée —';
     var chips=CAT_ORDER.map(function(c){
-      var on=(b.categorie===c);
-      return '<span class="pn-e-cat" data-cat="'+c+'" style="cursor:pointer;font-size:11px;font-weight:700;border-radius:20px;padding:5px 11px;'+(on?'background:'+CATCOL[c]+';color:#fff;':'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.12);')+'">'+esc(CATLAB[c])+'</span>';
+      var on=(catOf(b)===c);
+      return '<span class="pn-e-cat" data-cat="'+c+'" style="cursor:pointer;font-size:11px;font-weight:700;border-radius:20px;padding:5px 11px;'+(on?'background:'+CATCOL[c]+';color:#fff;border:1px solid rgba(255,255,255,0.35);':'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.12);')+'">'+esc(CATLAB[c])+'</span>';
     }).join(' ');
     var inp='background:var(--c-ink-2,#2A2A28);border:1px solid var(--c-ink-3,#444441);border-radius:8px;padding:8px 10px;color:#fff;font-size:12px;font-family:inherit;';
-    return '<div class="pn-editor" data-blk="'+selBlk+'" data-cat="'+esc(b.categorie||'autre')+'" style="background:rgba(255,255,255,0.05);border:1px solid var(--c-gold,#F5C842);border-radius:12px;padding:12px 14px;margin:4px 0 12px;">'
+    return '<div class="pn-editor" data-blk="'+selBlk+'" data-cat="'+esc(catOf(b))+'" style="background:rgba(255,255,255,0.05);border:1px solid var(--c-gold,#F5C842);border-radius:12px;padding:12px 14px;margin:4px 0 12px;">'
       + '<div style="font-size:12px;font-weight:800;color:#fff;margin-bottom:2px;">✎ Bloc sélectionné — '+esc(ben.nom)+'</div>'
       + '<div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:10px;">Bascule ensuite : '+basc+'</div>'
       + '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.55);margin-bottom:5px;">POSTE</div>'
@@ -311,12 +356,13 @@
 
   function coverageHtml(bens, segmentsFor, dom){
     var groups={};
-    bens.forEach(function(bn){ segmentsFor(bn).forEach(function(s){ if(!groups[s.group])groups[s.group]={col:s.col,lab:s.group,segs:[]}; groups[s.group].segs.push(s); }); });
+    bens.forEach(function(bn){ segmentsFor(bn).forEach(function(s){ if(!groups[s.group])groups[s.group]={col:s.col,lab:s.group,cat:s.cat,segs:[]}; groups[s.group].segs.push(s); }); });
     var keys=Object.keys(groups); if(!keys.length) return '';
-    var rows=keys.sort().map(function(k){
-      var g=groups[k], cells='';
-      for(var t=dom[0];t<dom[1];t+=30){ var n=0; g.segs.forEach(function(s){ if(s.d<=t&&s.f>t)n++; }); if(n>0){ var op=0.4+Math.min(n,5)*0.12; cells+='<div style="position:absolute;top:3px;height:18px;left:'+pos(t,dom)+'%;width:'+(pos(t+30,dom)-pos(t,dom))+'%;background:'+g.col+';opacity:'+op+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;">'+n+'</div>'; } }
-      return '<div style="display:flex;align-items:center;margin-bottom:5px;"><div style="width:150px;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:'+g.col+';flex-shrink:0;"></span>'+esc(g.lab)+'</div><div style="position:relative;flex:1;height:24px;background:rgba(255,255,255,0.04);border-radius:6px;">'+cells+'</div></div>';
+    var rank=function(k){ var i=CAT_ORDER.indexOf(groups[k].cat); return i<0?99:i; };
+    var rows=keys.sort(function(a,b){ return (rank(a)-rank(b)) || a.localeCompare(b); }).map(function(k){
+      var g=groups[k], cells='', dk=isDark(g.col), ring=dk?'box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35);':'';
+      for(var t=dom[0];t<dom[1];t+=30){ var n=0; g.segs.forEach(function(s){ if(s.d<=t&&s.f>t)n++; }); if(n>0){ var op=dk?1:0.4+Math.min(n,5)*0.12; cells+='<div style="position:absolute;top:3px;height:18px;left:'+pos(t,dom)+'%;width:'+(pos(t+30,dom)-pos(t,dom))+'%;background:'+g.col+';opacity:'+op+';'+ring+'display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;">'+n+'</div>'; } }
+      return '<div style="display:flex;align-items:center;margin-bottom:5px;"><div style="width:150px;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:'+g.col+';flex-shrink:0;'+ring+'"></span>'+esc(g.lab)+'</div><div style="position:relative;flex:1;height:24px;background:rgba(255,255,255,0.04);border-radius:6px;">'+cells+'</div></div>';
     }).join('');
     return '<div style="margin:6px 0 4px;"><div style="font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:6px;">📊 Couverture par poste (nb de bénévoles présents)</div>'+rows+'</div>';
   }
@@ -360,9 +406,11 @@
       ed.querySelectorAll('.pn-e-cat').forEach(function(chip){
         chip.addEventListener('click', function(){
           var cat=chip.getAttribute('data-cat'); ed.setAttribute('data-cat',cat);
+          // libellé vide ou contradictoire avec le poste choisi → on le remplace par le nom du poste
+          var li=ed.querySelector('.pn-e-lib'); if(li){ var cur=li.value.trim(), gc=guessCat(cur); if(!cur || (gc!=='autre' && gc!==cat)) li.value=CATLAB[cat]||cur; }
           ed.querySelectorAll('.pn-e-cat').forEach(function(c){
             var on=(c===chip); var cc=c.getAttribute('data-cat');
-            c.style.cssText='cursor:pointer;font-size:11px;font-weight:700;border-radius:20px;padding:5px 11px;'+(on?'background:'+(CATCOL[cc]||CATCOL.autre)+';color:#fff;':'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.12);');
+            c.style.cssText='cursor:pointer;font-size:11px;font-weight:700;border-radius:20px;padding:5px 11px;'+(on?'background:'+(CATCOL[cc]||CATCOL.autre)+';color:#fff;border:1px solid rgba(255,255,255,0.35);':'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.12);');
           });
         });
       });
@@ -376,7 +424,7 @@
         if(!deb){ if(window.showAlert) window.showAlert('alert-match','Indique l\'heure de début','e'); return; }
         var upd={ libelle:lib, categorie:cat, couleur:CATCOL[cat]||CATCOL.autre, heure_debut:(deb.length===5?deb+':00':deb), heure_fin:fin?(fin.length===5?fin+':00':fin):null, consigne:cons||null };
         saveB.textContent='...'; saveB.disabled=true;
-        var { error } = await st.sb.from('match_planning').update(upd).eq('id',id);
+        var { error } = await writeWithCatFallback(function(x){ return st.sb.from('match_planning').update(x).eq('id',id); }, upd);
         if(error){ saveB.textContent='✓ Enregistrer'; saveB.disabled=false; if(window.showAlert) window.showAlert('alert-match','Erreur : '+error.message,'e'); return; }
         refresh();
       });
@@ -429,7 +477,7 @@
         var cat=guessCat(lib);
         var rec={ match_id:st.mid, benevole_id:bid, poste_id:posteId||null, libelle:lib, categorie:cat, couleur:CATCOL[cat]||CATCOL.autre, heure_debut:(deb.length===5?deb+':00':deb), heure_fin:fin?(fin.length===5?fin+':00':fin):null, consigne:cons||null, ordre:0 };
         addBtn.textContent='...'; addBtn.disabled=true;
-        var { error } = await st.sb.from('match_planning').insert(rec);
+        var { error } = await writeWithCatFallback(function(x){ return st.sb.from('match_planning').insert(x); }, rec);
         if(error){ addBtn.textContent='+ Ajouter un créneau horaire'; addBtn.disabled=false; if(window.showAlert) window.showAlert('alert-match','Erreur : '+error.message,'e'); return; }
         refresh();
       });
