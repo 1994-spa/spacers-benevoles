@@ -3727,7 +3727,7 @@ async function loadPlanning() {
   const { data: _cre } = await sb.from('match_creneaux').select('*').in('match_id', _mids).order('ordre').order('heure_debut')
   const creMap={}; (_cre||[]).forEach(c=>{ (creMap[c.match_id]=creMap[c.match_id]||[]).push(c) })
   el.innerHTML = matchs.map(m=>`
-    <div class="match-item">
+    <div class="match-item" id="match-${m.id}">
       <div class="match-vs">Spacers vs ${m.adversaire}</div>
       <div class="match-info">📅 ${formatDate(m.date_match)} · ${m.heure||''} · ${m.lieu||'Palais des Sports'}</div>
       ${m.statut_inscriptions==='ouvert'
@@ -3742,6 +3742,9 @@ async function loadPlanning() {
              </div>`
         : `<span class="s-closed">Fermé</span>`}
     </div>`).join('')
+
+  // Deep link depuis un email de relance : ?match=<id> ou #match-<id>
+  focusMatchFromUrl()
 
   // Covoiturage + mobilité douce : rendu par match ouvert où le bénévole est disponible
   if (window.SpacersCovoit) {
@@ -4787,6 +4790,28 @@ async function cancelDeletion() {
 }
 
 // -- NAVIGATION ------------------------------------------------
+// Ouvre le planning sur le match cible quand l'utilisateur arrive
+// depuis un email de relance (…/dashboard?match=<uuid>).
+function focusMatchFromUrl() {
+  let id = ''
+  try { id = new URLSearchParams(location.search).get('match') || '' } catch (e) {}
+  if (!id && location.hash.indexOf('#match-') === 0) id = location.hash.slice(7)
+  if (!id) return
+  const card = document.getElementById('match-' + id)
+  if (!card) return
+  const screen = document.getElementById('bs-planning')
+  if (screen && !screen.classList.contains('on') && typeof bSwitch === 'function') {
+    // bSwitch rappelle loadPlanning : on laisse le rendu se faire, le focus suivra
+    bSwitch('planning')
+    return
+  }
+  card.style.transition = 'box-shadow .4s ease, transform .4s ease'
+  card.style.boxShadow = '0 0 0 3px var(--c-action, #185FA5)'
+  card.style.transform = 'scale(1.01)'
+  setTimeout(() => { card.style.boxShadow = ''; card.style.transform = '' }, 2600)
+  setTimeout(() => card.scrollIntoView({ block: 'center', behavior: 'smooth' }), 120)
+}
+
 function bSwitch(name) {
   document.querySelectorAll('.bscreen').forEach(s=>s.classList.remove('on'))
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'))

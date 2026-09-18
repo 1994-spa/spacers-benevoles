@@ -9,6 +9,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const FROM_EMAIL = 'marketing@spacerstoulouse.fr'
 const FROM_NAME = "Spacer's Toulouse Volley"
+const APP_URL = 'https://benevoles.spacerstoulouse.fr'
 
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
@@ -22,6 +23,29 @@ function fmtDate(d: string): string {
   return new Date(d).toLocaleDateString('fr-FR', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   })
+}
+
+// Version courte pour les objets d'email : "sam. 10 oct."
+function fmtDateCourte(d: string): string {
+  return new Date(d).toLocaleDateString('fr-FR', {
+    weekday: 'short', day: 'numeric', month: 'short'
+  })
+}
+
+// Bandeau match commun aux 3 modes : plusieurs matchs peuvent etre ouverts
+// en meme temps, le benevole doit voir immediatement DE QUEL match on parle.
+function blocMatch(match: any): string {
+  return `
+          <div style="background:white;border-left:4px solid #185FA5;border-radius:12px;padding:18px 20px;margin:18px 0;">
+            <p style="margin:0 0 8px 0;font-size:17px;font-weight:800;color:#0C447C;">Spacers vs ${match.adversaire}</p>
+            <p style="margin:4px 0;font-size:14px;color:#1a1a18;">📅 ${fmtDate(match.date_match)}${match.heure ? ` · ${match.heure}` : ''}</p>
+            <p style="margin:4px 0;font-size:14px;color:#1a1a18;">📍 ${match.lieu || 'Palais des Sports'}</p>
+          </div>`
+}
+
+// Lien direct vers CE match dans le planning du dashboard
+function lienMatch(match: any): string {
+  return `${APP_URL}/dashboard?match=${match.id}`
 }
 
 async function sendEmail(to: { Email: string; Name: string }[], subject: string, html: string) {
@@ -90,19 +114,20 @@ Deno.serve(async (req) => {
         poste_nom: i.postes?.nom || 'Poste à confirmer',
       })).filter(r => r.email)
 
-      subject = `📢 Infos pratiques — Match vs ${match.adversaire} ${fmtDate(match.date_match)}`
+      subject = `📢 Infos pratiques — Spacers vs ${match.adversaire} · ${fmtDateCourte(match.date_match)}`
 
       buildHtml = (r) => `
         <div style="font-family:Sora,Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f7f7f5;">
           <h2 style="color:#0C447C;">Bonjour ${r.prenom},</h2>
           <p style="color:#1a1a18;font-size:14px;line-height:1.7;">
-            Voici les infos pratiques pour le match à venir :
+            Voici les infos pratiques pour ce match :
           </p>
-          <div style="background:white;border-radius:12px;padding:20px;margin:18px 0;">
-            <p style="margin:6px 0;"><strong>🏐 Match :</strong> Spacers vs ${match.adversaire}</p>
-            <p style="margin:6px 0;"><strong>📍 Lieu :</strong> ${match.lieu || 'Palais des Sports'}</p>
-            <p style="margin:6px 0;"><strong>🕐 Heure de RDV :</strong> ${heure_rdv || (match.heure || '')}</p>
-            <p style="margin:6px 0;"><strong>🎯 Ton poste :</strong> ${r.poste_nom}</p>
+          <div style="background:white;border-left:4px solid #185FA5;border-radius:12px;padding:18px 20px;margin:18px 0;">
+            <p style="margin:0 0 8px 0;font-size:17px;font-weight:800;color:#0C447C;">Spacers vs ${match.adversaire}</p>
+            <p style="margin:4px 0;font-size:14px;"><strong>📅 Date :</strong> ${fmtDate(match.date_match)}</p>
+            <p style="margin:4px 0;font-size:14px;"><strong>📍 Lieu :</strong> ${match.lieu || 'Palais des Sports'}</p>
+            <p style="margin:4px 0;font-size:14px;"><strong>🕐 Heure de RDV :</strong> ${heure_rdv || (match.heure || '')}</p>
+            <p style="margin:4px 0;font-size:14px;"><strong>🎯 Ton poste :</strong> ${r.poste_nom}</p>
           </div>
           ${point_particulier ? `
           <div style="background:#FAC775;border-radius:12px;padding:16px;margin:18px 0;">
@@ -130,25 +155,22 @@ Deno.serve(async (req) => {
       recipients = (actifs || []).filter((b: any) => !inscritsSet.has(b.id) && b.email)
         .map((b: any) => ({ email: b.email, prenom: b.prenom || '', nom: b.nom || '' }))
 
-      subject = `⚡ Tu n'as pas encore répondu — Match vs ${match.adversaire}`
+      subject = `⚡ Spacers vs ${match.adversaire}, ${fmtDateCourte(match.date_match)} — tu n'as pas encore répondu`
 
       buildHtml = (r) => `
         <div style="font-family:Sora,Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f7f7f5;">
           <h2 style="color:#993556;">Bonjour ${r.prenom},</h2>
           <p style="color:#1a1a18;font-size:14px;line-height:1.7;">
-            On manque encore de bénévoles pour le prochain match :
+            Il nous manque encore des bénévoles sur ce match :
           </p>
-          <div style="background:white;border-radius:12px;padding:20px;margin:18px 0;">
-            <p style="margin:6px 0;"><strong>📅 ${fmtDate(match.date_match)}</strong></p>
-            <p style="margin:6px 0;"><strong>🏐 Spacers vs ${match.adversaire}</strong></p>
-            <p style="margin:6px 0;"><strong>📍 ${match.lieu || 'Palais des Sports'}</strong></p>
-          </div>
+          ${blocMatch(match)}
           <p style="color:#1a1a18;font-size:14px;line-height:1.7;">
-            Connecte-toi pour indiquer ta disponibilité. Merci d'avance pour ton retour.
+            Le bouton ci-dessous t'ouvre directement ce match dans ton planning.
+            D'autres matchs sont peut-être ouverts : cette relance ne concerne que celui-ci.
           </p>
-          <a href="https://spacers-benevoles.spacersytb.workers.dev/dashboard" 
+          <a href="${lienMatch(match)}" 
              style="display:inline-block;background:#185FA5;color:white;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;margin-top:12px;">
-            👉 Répondre au match
+            👉 Répondre pour le ${fmtDateCourte(match.date_match)}
           </a>
           <p style="color:#5F5E5A;font-size:12px;margin-top:30px;">L'équipe Spacer's Toulouse Volley</p>
         </div>`
@@ -172,18 +194,21 @@ Deno.serve(async (req) => {
       }
       recipients = [{ email: b.email, prenom: b.prenom || '', nom: b.nom || '' }]
 
-      subject = `⚡ Petit rappel personnel — Match vs ${match.adversaire}`
+      subject = `⚡ Spacers vs ${match.adversaire}, ${fmtDateCourte(match.date_match)} — petit rappel`
 
       buildHtml = (r) => `
         <div style="font-family:Sora,Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f7f7f5;">
           <h2 style="color:#0C447C;">Bonjour ${r.prenom},</h2>
           <p style="color:#1a1a18;font-size:14px;line-height:1.7;">
-            On compte sur toi pour le match du <strong>${fmtDate(match.date_match)}</strong> 
-            (Spacers vs ${match.adversaire}). Tu peux te positionner en 1 clic :
+            On compte sur toi pour ce match :
           </p>
-          <a href="https://spacers-benevoles.spacersytb.workers.dev/dashboard" 
+          ${blocMatch(match)}
+          <p style="color:#1a1a18;font-size:14px;line-height:1.7;">
+            Tu peux te positionner en 1 clic :
+          </p>
+          <a href="${lienMatch(match)}" 
              style="display:inline-block;background:#185FA5;color:white;padding:12px 28px;border-radius:50px;text-decoration:none;font-weight:700;margin-top:12px;">
-            👉 Répondre au match
+            👉 Répondre pour le ${fmtDateCourte(match.date_match)}
           </a>
           <p style="color:#5F5E5A;font-size:12px;margin-top:30px;">L'équipe Spacer's Toulouse Volley</p>
         </div>`
