@@ -220,7 +220,8 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
 <!-- MATCH -->
 <div class="screen" id="screen-match">
   <div id="alert-match"></div>
-  <div class="sec">Prochain match ouvert</div>
+  <div class="sec">Match en cours de gestion</div>
+  <select id="match-select" onchange="loadMatch(this.value)" style="display:none;width:100%;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:10px;"></select>
   <div class="card" id="match-info"><div style="color:rgba(255,255,255,0.4);font-size:12px;">Aucun match ouvert.</div></div>
 
   <div class="sec">&#128197; Planning nominatif — affectation &amp; cr&eacute;neaux</div>
@@ -1715,14 +1716,20 @@ async function calImport() {
   loadCalendrier()
 }
 
-async function loadMatch() {
+// Match actuellement gere dans l'ecran Match. Plusieurs matchs peuvent etre
+// ouverts en meme temps : le selecteur decide sur lequel portent les envois.
+let selectedMatchId = null
+
+async function loadMatch(matchId) {
+  if (matchId) selectedMatchId = matchId
   const { data: matchs } = await sb.from('matchs')
     .select('*')
     .eq('statut_inscriptions','ouvert')
     .order('date_match')
-    .limit(1)
   const el = document.getElementById('match-info')
+  const sel = document.getElementById('match-select')
   if (!matchs || matchs.length === 0) {
+    if (sel) { sel.innerHTML = ''; sel.style.display = 'none' }
     el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:12px;">Aucun match ouvert.</div>'
     document.getElementById('non-rep-match').innerHTML = ''
     { const _ie = document.getElementById('indispo-match'); if (_ie) _ie.innerHTML = '' }
@@ -1733,7 +1740,14 @@ async function loadMatch() {
     loadCreneaux()
     return
   }
-  const m = matchs[0]
+  if (!selectedMatchId || !matchs.some(x => x.id === selectedMatchId)) selectedMatchId = matchs[0].id
+  if (sel) {
+    sel.innerHTML = matchs.map(x =>
+      `<option value="${x.id}"${x.id === selectedMatchId ? ' selected' : ''}>Spacers vs ${escapeHtml(x.adversaire)} &mdash; ${formatDate(x.date_match)}</option>`
+    ).join('')
+    sel.style.display = matchs.length > 1 ? '' : 'none'
+  }
+  const m = matchs.find(x => x.id === selectedMatchId) || matchs[0]
   curMatch = m
   el.innerHTML = `
     <div style="font-size:16px;font-weight:800;color:white;">${m.adversaire}</div>
@@ -2134,7 +2148,7 @@ async function relancer() {
   const ok = await confirmModal({
     icon: '⚡',
     title: 'Relancer les non-répondants ?',
-    message: 'Un email de relance sera envoyé à tous les bénévoles qui n\'ont pas encore répondu pour ce match.',
+    message: `Un email de relance sera envoyé aux bénévoles qui n'ont pas encore répondu pour Spacers vs ${curMatch.adversaire} du ${formatDate(curMatch.date_match)}.`,
     confirmText: 'Envoyer la relance',
     confirmStyle: 'blue',
   })
