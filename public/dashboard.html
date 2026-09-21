@@ -2858,6 +2858,44 @@ function renderAccredCTA() {
   return ''
 }
 
+function renderSoireeSection() {
+  // Soiree abonnes & benevoles du 6 octobre — meme gabarit que la carte Caliceo.
+  // Phase 1 : invitation + lien vers le questionnaire (jusqu'a la cloture du 2/10 23h59)
+  // Phase 2 : rappel "c'est bientot" jusqu'a la fin de soiree, puis masquage auto.
+  var _cloture = new Date('2026-10-02T23:59:59+02:00')
+  var _fin = new Date('2026-10-06T20:00:00+02:00')
+  var _now = new Date()
+  if (_now > _fin) return ''
+  var _form = 'https://docs.google.com/forms/d/1h3aeY6PfrBT4bz-QvmutsjjAaYCWuw0UjQluLguVdbI/viewform'
+  var _ouvert = _now <= _cloture
+  // Jours calendaires jusqu'a l'echeance (cloture tant que c'est ouvert, puis la soiree)
+  var _d0 = new Date(_now); _d0.setHours(0, 0, 0, 0)
+  var _cible = new Date(_ouvert ? '2026-10-02T00:00:00+02:00' : '2026-10-06T00:00:00+02:00')
+  var _jours = Math.max(0, Math.round((_cible - _d0) / 86400000))
+  var _badge = _ouvert
+    ? (_jours >= 1 ? ('Réponse J-' + _jours) : 'Dernier jour !')
+    : (_jours >= 1 ? ('J-' + _jours) : "C'est aujourd'hui !")
+  var _action = _ouvert
+    ? `<a href="${_form}" target="_blank" rel="noopener" style="display:inline-block;background:var(--c-gold);color:var(--c-navy);font-size:13px;font-weight:800;padding:9px 18px;border-radius:20px;text-decoration:none;font-family:'Sora',sans-serif;">🎟️ Je confirme ma présence</a>`
+    : `<span style="font-size:12px;opacity:0.92;line-height:1.5;">Les inscriptions sont closes. Si tu t'es inscrit·e, ton nom est sur le listing de l'entrée C.</span>`
+  return `
+    <div style="background:linear-gradient(135deg,var(--c-navy) 0%,var(--c-navy-2) 100%);border-radius:16px;padding:16px 18px;margin-bottom:14px;color:#fff;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-gold);">🥂 Soirée abonnés &amp; bénévoles</div>
+        <span style="background:rgba(255,255,255,0.15);color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;">⏳ ${_badge}</span>
+      </div>
+      <div style="font-size:17px;font-weight:800;margin-bottom:4px;">Mardi 6 octobre au Palais</div>
+      <div style="font-size:12px;opacity:0.92;line-height:1.6;margin-bottom:12px;">
+        <strong>16h–18h</strong> · entraînement de l'équipe pro, ouvert en tribune<br>
+        <strong>18h–20h</strong> · pot de l'amitié au Salon VIP avec les joueurs, le staff et les dirigeants<br>
+        📍 Accès par l'<strong>entrée C</strong> · gratuit, un accompagnant possible
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        ${_action}
+      </div>
+    </div>`
+}
+
 function renderConcoursSection() {
   // Jeu-concours Calicéo — auto-masqué après la date de fin
   var _fin = new Date('2026-07-29T23:59:59')
@@ -3526,7 +3564,7 @@ function renderHugoHome(el, p, pts, niveau, pct) { const _pi = palierInfo(pts);
         <span>${_pi.nxt?_pi.avant+' pts avant '+_pi.nxt.l:'Palier max'}</span>
       </div>
     </div>
-    ${renderAccredCTA()}${renderConcoursSection()}${renderNextMatchSection()}
+    ${renderAccredCTA()}${renderSoireeSection()}${renderConcoursSection()}${renderNextMatchSection()}
     ${renderAppelsSection()}
     ${renderFilleulsCard()}
     ${renderEventsAVenirSection()}
@@ -3569,7 +3607,7 @@ function renderVirginieHome(el, p) {
       <div style="font-size:12px;color:#6D5DAA;margin-top:4px;line-height:1.6;">Vous faites partie des Spacers — voici comment tout se passe ici.</div>
     </div>
 
-    ${renderAccredCTA()}${renderConcoursSection()}${renderNextMatchSection()}
+    ${renderAccredCTA()}${renderSoireeSection()}${renderConcoursSection()}${renderNextMatchSection()}
     ${renderAppelsSection()}
     ${renderFilleulsCard()}
     ${renderReferentCard()}
@@ -3592,7 +3630,7 @@ function renderJoelHome(el, p, pts) {
       <div style="font-size:12px;color:rgba(192,221,151,0.7);">${p.matchs_joues||0} matchs · ${pts} pts · ${p.niveau||'Comète'}</div>
     </div>
 
-    ${renderAccredCTA()}${renderConcoursSection()}${renderNextMatchSection()}
+    ${renderAccredCTA()}${renderSoireeSection()}${renderConcoursSection()}${renderNextMatchSection()}
     ${renderAppelsSection()}
     ${renderFilleulsCard()}
     ${renderEventsAVenirSection()}
