@@ -2860,10 +2860,10 @@ function renderAccredCTA() {
 
 function renderSoireeSection() {
   // Soiree abonnes & benevoles du 6 octobre — meme gabarit que la carte Caliceo.
-  // Phase 1 : invitation + lien vers le questionnaire (jusqu'a la cloture du 2/10 23h59)
-  // Phase 2 : rappel "c'est bientot" jusqu'a la fin de soiree, puis masquage auto.
+  // Invitation + lien vers le questionnaire jusqu'a la cloture du 2/10 23h59,
+  // puis masquage automatique de la carte le 3/10 a 1h du matin.
   var _cloture = new Date('2026-10-02T23:59:59+02:00')
-  var _fin = new Date('2026-10-06T20:00:00+02:00')
+  var _fin = new Date('2026-10-03T01:00:00+02:00')
   var _now = new Date()
   if (_now > _fin) return ''
   var _form = 'https://docs.google.com/forms/d/1h3aeY6PfrBT4bz-QvmutsjjAaYCWuw0UjQluLguVdbI/viewform'
