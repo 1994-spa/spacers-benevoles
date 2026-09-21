@@ -2879,7 +2879,9 @@ function renderSoireeSection() {
     ? `<a href="${_form}" target="_blank" rel="noopener" style="display:inline-block;background:var(--c-gold);color:var(--c-navy);font-size:13px;font-weight:800;padding:9px 18px;border-radius:20px;text-decoration:none;font-family:'Sora',sans-serif;">🎟️ Je confirme ma présence</a>`
     : `<span style="font-size:12px;opacity:0.92;line-height:1.5;">Les inscriptions sont closes. Si tu t'es inscrit·e, ton nom est sur le listing de l'entrée C.</span>`
   return `
-    <div style="background:linear-gradient(135deg,var(--c-navy) 0%,var(--c-navy-2) 100%);border-radius:16px;padding:16px 18px;margin-bottom:14px;color:#fff;">
+    <div style="background:linear-gradient(135deg,var(--c-navy) 0%,var(--c-navy-2) 100%);border-radius:16px;margin-bottom:14px;color:#fff;overflow:hidden;">
+      <img src="/img/soiree-6-octobre.jpg" alt="Soirée abonné(e)s et bénévoles — mardi 6 octobre, 16h/20h, Palais des Sports" style="display:block;width:100%;height:auto;" onerror="this.remove()">
+      <div style="padding:16px 18px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
         <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-gold);">🥂 Soirée abonnés &amp; bénévoles</div>
         <span style="background:rgba(255,255,255,0.15);color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;">⏳ ${_badge}</span>
@@ -2892,6 +2894,7 @@ function renderSoireeSection() {
       </div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         ${_action}
+      </div>
       </div>
     </div>`
 }
