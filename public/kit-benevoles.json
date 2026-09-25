@@ -1,23 +1,40 @@
 {
   "saison": "26-27",
   "maj": "2026-09-25",
-  "genere_par": "Cockpit Billetterie V6 · module 76 v3.9",
+  "genere_par": "Cockpit Billetterie V6 · module 76 v3.9.1",
   "receptions": [
     {
-      "cle": "evreux",
-      "titre": "France Avenir vs Évreux",
+      "cle": "narbonne",
+      "titre": "Match de gala vs Narbonne",
       "competition": "Match de gala",
-      "date": "2026-10-03",
-      "dateTexte": "samedi 3 octobre",
-      "heure": "14h00",
+      "date": "2026-10-10",
+      "dateTexte": "samedi 10 octobre",
+      "heure": "18h00",
       "lieu": "Palais des Sports André-Brouat, Toulouse",
       "tarifs": "8 € tarif unique · gratuit -8 ans",
-      "lien": "",
-      "visuels": {},
+      "lien": "https://billetterie.spacerstoulouse.fr/s/xHJp5EIb",
+      "visuels": {
+        "post": {
+          "url": "https://img.spacerstoulouse.fr/26-27/narbonne/post.jpg",
+          "libelle": "Post 1080×1350"
+        },
+        "story": {
+          "url": "https://img.spacerstoulouse.fr/26-27/narbonne/story.jpg",
+          "libelle": "Story 1080×1920"
+        },
+        "carrousel": {
+          "url": "https://img.spacerstoulouse.fr/26-27/narbonne/carrousel.jpg",
+          "libelle": "Carrousel"
+        },
+        "banniere": {
+          "url": "https://img.spacerstoulouse.fr/26-27/narbonne/banniere.jpg",
+          "libelle": "Bannière"
+        }
+      },
       "textes": {
-        "post": "",
-        "story": "",
-        "relance": ""
+        "post": "🏐 Fiers d'être partenaires du Spacer's Toulouse Volley !\nSamedi 10 octobre, le club présente son effectif 2026-2027 lors d'un match de gala face à Narbonne, au Palais des Sports André-Brouat. Portes à 17h, coup d'envoi à 18h.\nEntrée à 8 € seulement, gratuit pour les moins de 8 ans.\n🎟️ Billets : {{lien}}\nOn compte sur vous !",
+        "story": "🏐 Ce samedi, on va au volley !\nSpacer's vs Narbonne — 10 octobre, 18h\nPalais des Sports André-Brouat\nBillets 8 € : {{lien}}",
+        "relance": "⏳ Plus qu'une semaine !\r\nSpacer's vs Narbonne, samedi 10 octobre à 18h : venez découvrir l'équipe 2026-2027.\r\n🎟️ 8 €, gratuit pour les moins de 8 ans : {{lien}}"
       }
     }
   ]
