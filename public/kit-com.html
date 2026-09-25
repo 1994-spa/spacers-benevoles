@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kit de com bénévoles — Spacer's Toulouse Volley</title>
+<style>
+  :root{--night:#001E2D;--day:#91BEE6;--pale:#EAF3FA;--muted:#4B6272;--white:#fff;--ok:#1E7A4B}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--pale);color:var(--night);
+       font-family:Arial,Helvetica,sans-serif;line-height:1.5;-webkit-text-size-adjust:100%}
+  .wrap{max-width:720px;margin:0 auto;padding:0 16px 56px}
+  header{background:var(--night);color:var(--white);padding:26px 16px 22px;margin-bottom:22px}
+  header .in{max-width:720px;margin:0 auto}
+  .kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--day);margin:0 0 6px}
+  h1{font-size:25px;margin:0 0 10px;line-height:1.2}
+  header p{margin:0;font-size:14.5px;color:#C8D2EB}
+  .role{background:var(--white);border-left:4px solid var(--day);padding:14px 16px;margin:0 0 22px;font-size:14.5px}
+  .role b{display:block;margin-bottom:4px}
+  .match{background:var(--white);border-radius:10px;margin-bottom:22px;overflow:hidden;
+         box-shadow:0 1px 3px rgba(0,30,45,.12)}
+  .match > .head{background:var(--night);color:var(--white);padding:14px 18px}
+  .match .comp{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--day)}
+  .match h2{font-size:19px;margin:3px 0 4px}
+  .match .quand{font-size:14px;color:#C8D2EB;margin:0}
+  .body{padding:16px 18px 20px}
+  .accroche{font-size:15px;font-weight:bold;margin:0 0 14px}
+  .tarifs{font-size:13.5px;color:var(--muted);margin:0 0 18px}
+  h3{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
+     margin:20px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--pale)}
+  .fichiers{display:flex;flex-wrap:wrap;gap:8px}
+  .fichiers a{display:inline-block;background:var(--pale);color:var(--night);text-decoration:none;
+    padding:9px 13px;border-radius:5px;font-size:13.5px;font-weight:bold;border:1px solid #D3E2F0}
+  .fichiers a:active{background:var(--day)}
+  .bloc{background:var(--pale);border-radius:6px;padding:12px 14px;margin-bottom:10px}
+  .bloc .t{font-size:12px;font-weight:bold;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.04em;margin-bottom:7px}
+  .bloc pre{margin:0 0 10px;white-space:pre-wrap;word-break:break-word;
+    font-family:inherit;font-size:14px;line-height:1.5}
+  button.copy{background:var(--night);color:var(--white);border:0;border-radius:5px;
+    padding:9px 16px;font-size:13.5px;font-weight:bold;cursor:pointer;font-family:inherit}
+  button.copy.done{background:var(--ok)}
+  .lien{font-size:13px;color:var(--muted);word-break:break-all;margin:14px 0 0}
+  .lien a{color:#0B5FA5}
+  .partage{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .partage button{flex:1 1 auto;min-width:140px;background:var(--day);color:var(--night);border:0;
+    border-radius:5px;padding:12px;font-size:14px;font-weight:bold;cursor:pointer;font-family:inherit}
+  .avert{background:#FDEFD9;border-left:4px solid #E8A33D;padding:11px 14px;font-size:13.5px;margin:0 0 18px}
+  footer{text-align:center;color:var(--muted);font-size:12.5px;padding:10px 16px 0}
+  .vide{background:var(--white);padding:22px 18px;border-radius:10px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <p class="kicker">Spacer's Toulouse Volley · saison 2026-2027</p>
+  <h1>Kit de com bénévoles</h1>
+  <p>Les visuels, les textes et le lien à partager pour les prochaines réceptions.</p>
+</div></header>
+
+<div class="wrap">
+  <div class="role">
+    <b>Vous êtes les premiers ambassadeurs du club.</b>
+    Un post d'un bénévole touche des gens qu'aucune newsletter n'atteindra jamais : vos proches, votre
+    club, vos collègues. Prenez un visuel, copiez le texte, publiez. Trente secondes.
+  </div>
+
+  <div id="liste"><div class="vide">Chargement du kit…</div></div>
+
+  <footer>Une question, un visuel qui manque : répondez dans l'app, rubrique Contact.<br>
+    Spacer's Toulouse Volley — « Décrochons les étoiles »</footer>
+</div>
+
+<script>
+var IMG = 'https://img.spacerstoulouse.fr/';
+var SAISON = '26-27';
+
+/* Les DONNÉES sont dans le dépôt, à côté de cette page : chemin relatif, donc
+   aucun problème de CORS et un seul endroit à tenir. Les VISUELS restent sur
+   img.spacerstoulouse.fr, là où ils sont déjà déposés — la page ne fait que
+   pointer dessus, elle ne les héberge pas.
+   Pour piloter le kit sans passer par un push Git, remplacer la ligne par :
+   var SOURCE = IMG + SAISON + '/kit-benevoles.json';
+   — à condition que ce domaine renvoie Access-Control-Allow-Origin. */
+var SOURCE = 'kit-benevoles.json';
+
+/* Repli embarqué : si le JSON n'est pas encore déposé, la page reste utile. */
+var REPLI = {"saison":"26-27","receptions":[]};
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function visuel(cle,f){return IMG+SAISON+'/'+cle+'/'+f;}
+
+/* Les visuels viennent du fichier, qui ne liste QUE ceux réellement présents
+   dans le bucket — tous les matchs n'ont pas les mêmes formats. À défaut, on
+   retombe sur le motif d'adresse habituel. */
+var FORMATS_DEFAUT = [['post.jpg','Post 1080×1350'],['story.jpg','Story 1080×1920'],
+                      ['carrousel.jpg','Carrousel'],['banniere.jpg','Bannière']];
+function boutonsVisuels(r){
+  var v = r.visuels;
+  if(v && typeof v === 'object'){
+    return Object.keys(v).map(function(k){
+      var o = v[k]; if(!o || !o.url) return '';
+      return '<a href="' + o.url + '" download>' + esc(o.libelle || k) + '</a>';
+    }).join('');
+  }
+  return FORMATS_DEFAUT.map(function(f){
+    return '<a href="' + visuel(r.cle, f[0]) + '" download>' + f[1] + '</a>';
+  }).join('');
+}
+
+function rendre(data){
+  var recs = (data && data.receptions) || [];
+  var auj = new Date().toISOString().slice(0,10);
+  recs = recs.filter(function(r){return !r.date || r.date >= auj;});
+  var box = document.getElementById('liste');
+  if(!recs.length){
+    box.innerHTML = '<div class="vide">Aucune réception à relayer pour le moment.<br>' +
+      'Le kit se remplit une semaine avant chaque match.</div>';
+    return;
+  }
+  box.innerHTML = recs.map(function(r,i){
+    var lien = r.lien || '';
+    var aCreer = /A_CREER/.test(lien);
+    /* Tant que le lien de suivi n'existe pas, la LIGNE qui le porte disparaît.
+       Un bénévole ne doit jamais pouvoir copier une URL qui ne marche pas —
+       c'est la même règle que les marqueurs du kit partenaires. */
+    function txt(s){
+      var t = String(s||'');
+      if(!lien || aCreer){
+        return t.split('\n').filter(function(l){return l.indexOf('{lien}') === -1;})
+                .join('\n').replace(/\n{3,}/g,'\n\n').trim();
+      }
+      return t.split('{lien}').join(lien);
+    }
+    var blocs = [
+      ['Post Instagram / Facebook', txt(r.textes && r.textes.post)],
+      ['Story', txt(r.textes && r.textes.story)],
+      ['WhatsApp / SMS', txt(r.textes && (r.textes.relance || r.textes.whatsapp))]
+    ].filter(function(b){return b[1];});
+    return '<section class="match">' +
+      '<div class="head">' +
+        '<div class="comp">' + esc(r.competition||'') + '</div>' +
+        '<h2>' + esc(r.titre||'') + '</h2>' +
+        '<p class="quand">' + esc(r.dateTexte||'') + ' · ' + esc(r.heure||'') +
+          (r.portes ? ' · portes ' + esc(r.portes) : '') + '</p>' +
+      '</div>' +
+      '<div class="body">' +
+        (aCreer ? '<div class="avert">Le lien de suivi de cette réception n\'est pas encore créé : ' +
+                  'partagez les visuels, le lien arrivera.</div>' : '') +
+        (r.accroche ? '<p class="accroche">' + esc(r.accroche) + '</p>' : '') +
+        '<p class="tarifs">' + esc(r.tarifs||'') + '</p>' +
+        '<h3>Les visuels</h3>' +
+        '<div class="fichiers">' + boutonsVisuels(r) + '</div>' +
+        '<h3>Les textes, prêts à copier</h3>' +
+        blocs.map(function(b,j){
+          return '<div class="bloc"><div class="t">' + esc(b[0]) + '</div>' +
+            '<pre id="t' + i + '_' + j + '">' + esc(b[1]) + '</pre>' +
+            '<button class="copy" data-cible="t' + i + '_' + j + '">Copier le texte</button></div>';
+        }).join('') +
+        (aCreer ? '' : '<p class="lien">Lien à partager : <a href="' + esc(lien) + '">' + esc(lien) + '</a></p>') +
+        '<div class="partage">' +
+          '<button data-partage="' + i + '">Partager…</button>' +
+          '<button data-whatsapp="' + i + '">Envoyer sur WhatsApp</button>' +
+        '</div>' +
+      '</div></section>';
+  }).join('');
+
+  box.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    if(b.dataset.cible){
+      var el = document.getElementById(b.dataset.cible);
+      copier(el ? el.textContent : '', b);
+    } else if(b.dataset.partage !== undefined){
+      var r = recs[+b.dataset.partage];
+      var t = String((r.textes && r.textes.post) || '').split('{lien}').join(r.lien || '');
+      if(navigator.share){ navigator.share({title:r.titre, text:t}).catch(function(){}); }
+      else copier(t, b);
+    } else if(b.dataset.whatsapp !== undefined){
+      var r2 = recs[+b.dataset.whatsapp];
+      var t2 = String((r2.textes && (r2.textes.relance || r2.textes.whatsapp)) || '').split('{lien}').join(r2.lien || '');
+      window.open('https://wa.me/?text=' + encodeURIComponent(t2), '_blank');
+    }
+  });
+}
+
+function copier(texte, bouton){
+  function ok(){
+    var avant = bouton.textContent;
+    bouton.textContent = 'Copié'; bouton.classList.add('done');
+    setTimeout(function(){ bouton.textContent = avant; bouton.classList.remove('done'); }, 1800);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texte).then(ok, function(){ repli(texte, ok); });
+  } else repli(texte, ok);
+}
+function repli(texte, ok){
+  var z = document.createElement('textarea');
+  z.value = texte; z.setAttribute('readonly','');
+  z.style.position='fixed'; z.style.opacity='0';
+  document.body.appendChild(z); z.select();
+  try{ document.execCommand('copy'); ok(); }catch(e){}
+  document.body.removeChild(z);
+}
+
+fetch(SOURCE, {cache:'no-cache'})
+  .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+  .then(rendre)
+  .catch(function(){ rendre(REPLI); });
+</script>
+</body>
+</html>
