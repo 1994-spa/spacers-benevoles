@@ -1,39 +1,23 @@
 {
   "saison": "26-27",
   "maj": "2026-09-25",
+  "genere_par": "Cockpit Billetterie V6 · module 76 v3.9",
   "receptions": [
     {
-      "cle": "sete",
-      "titre": "Spacer's – Sète",
-      "competition": "J1 · Ligue A Masculine",
-      "date": "2026-10-17",
-      "dateTexte": "samedi 17 octobre",
-      "heure": "18h00",
-      "portes": "17h00",
-      "tarifs": "13 € · 8 € tarif réduit · gratuit -8 ans",
-      "lien": "https://billetterie.spacerstoulouse.fr/s/A_CREER_benevoles-sete",
-      "accroche": "Premier match de la saison, et premier match de Zago sur le banc.",
+      "cle": "evreux",
+      "titre": "France Avenir vs Évreux",
+      "competition": "Match de gala",
+      "date": "2026-10-03",
+      "dateTexte": "samedi 3 octobre",
+      "heure": "14h00",
+      "lieu": "Palais des Sports André-Brouat, Toulouse",
+      "tarifs": "8 € tarif unique · gratuit -8 ans",
+      "lien": "",
+      "visuels": {},
       "textes": {
-        "post": "Samedi 17 octobre, 18h00 — les Spacer's ouvrent la saison face à Sète, au Palais des Sports André-Brouat.\n\nDerby de l'Occitanie, nouvelle équipe, et le tout premier match de Zago sur le banc. Ça commence fort.\n\n13 € la place, 8 € en tarif réduit, gratuit pour les moins de 8 ans.\nBilletterie : {lien}",
-        "story": "🏐 SAMEDI 17/10 · 18h00\nSpacer's – Sète\nPalais des Sports André-Brouat\nLien en bio",
-        "whatsapp": "Salut ! Samedi 17 octobre 18h, les Spacer's reçoivent Sète au Palais. Première de la saison, ça vaut le coup. 13 € la place, 8 € réduit. Tu viens ? {lien}"
-      }
-    },
-    {
-      "cle": "cannes",
-      "titre": "France Avenir – Bordeaux, puis Spacer's – Cannes",
-      "competition": "Double affiche · J3",
-      "date": "2026-10-24",
-      "dateTexte": "samedi 24 octobre",
-      "heure": "14h00 puis 18h00",
-      "portes": "13h00",
-      "tarifs": "13 € · 8 € tarif réduit · gratuit -8 ans — un seul billet pour les deux matchs",
-      "lien": "https://billetterie.spacerstoulouse.fr/s/A_CREER_benevoles-cannes",
-      "accroche": "Un seul billet, deux matchs. C'est la journée la plus facile à vendre de la saison.",
-      "textes": {
-        "post": "Samedi 24 octobre, deux matchs pour le prix d'un au Palais des Sports André-Brouat.\n\n14h00 — France Avenir 2027 – Bordeaux, Ligue A Féminine.\n18h00 — Spacer's – Cannes, J3 de Ligue A Masculine.\n\nUne seule place, deux rencontres. 13 €, 8 € en tarif réduit, gratuit pour les moins de 8 ans.\nBilletterie : {lien}",
-        "story": "🏐 SAMEDI 24/10\nDEUX MATCHS, UN BILLET\n14h Volley féminin · 18h Spacer's – Cannes\nLien en bio",
-        "whatsapp": "Samedi 24 octobre au Palais : deux matchs avec la même place. Volley féminin à 14h, Spacer's – Cannes à 18h. 13 € la place, 8 € réduit. Ça te dit ? {lien}"
+        "post": "",
+        "story": "",
+        "relance": ""
       }
     }
   ]
