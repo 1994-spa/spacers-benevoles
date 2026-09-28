@@ -28,10 +28,16 @@
   .tarifs{font-size:13.5px;color:var(--muted);margin:0 0 18px}
   h3{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);
      margin:20px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--pale)}
-  .fichiers{display:flex;flex-wrap:wrap;gap:8px}
-  .fichiers a{display:inline-block;background:var(--pale);color:var(--night);text-decoration:none;
-    padding:9px 13px;border-radius:5px;font-size:13.5px;font-weight:bold;border:1px solid #D3E2F0}
+  .fichiers{display:grid;grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:10px}
+  .fichiers a{display:block;background:var(--pale);color:var(--night);text-decoration:none;
+    border-radius:8px;overflow:hidden;border:1px solid #D3E2F0;font-size:12px;font-weight:bold;
+    text-align:center;line-height:1.3}
+  .fichiers a img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;background:var(--pale)}
+  .fichiers a span{display:block;padding:7px 6px 9px}
+  .fichiers a.sansapercu img{display:none}
+  .fichiers a.sansapercu span{padding:14px 8px}
   .fichiers a:active{background:var(--day)}
+  .astuce{font-size:12px;color:var(--muted);margin:8px 0 0}
   .bloc{background:var(--pale);border-radius:6px;padding:12px 14px;margin-bottom:10px}
   .bloc .t{font-size:12px;font-weight:bold;color:var(--muted);text-transform:uppercase;
     letter-spacing:.04em;margin-bottom:7px}
@@ -94,16 +100,24 @@ function visuel(cle,f){return IMG+SAISON+'/'+cle+'/'+f;}
    retombe sur le motif d'adresse habituel. */
 var FORMATS_DEFAUT = [['post.jpg','Post 1080×1350'],['story.jpg','Story 1080×1920'],
                       ['carrousel.jpg','Carrousel'],['banniere.jpg','Bannière']];
+function vignette(url, libelle){
+  /* L'aperçu compte : un bénévole ne partage pas un visuel qu'il n'a pas vu.
+     Si l'image manque du bucket, la tuile retombe sur son seul libellé. */
+  return '<a href="' + url + '" target="_blank" rel="noopener">' +
+         '<img src="' + url + '" alt="' + esc(libelle) + '" loading="lazy" ' +
+         'onerror="this.parentNode.className=\'sansapercu\'">' +
+         '<span>' + esc(libelle) + '</span></a>';
+}
 function boutonsVisuels(r){
   var v = r.visuels;
   if(v && typeof v === 'object'){
     return Object.keys(v).map(function(k){
       var o = v[k]; if(!o || !o.url) return '';
-      return '<a href="' + o.url + '" download>' + esc(o.libelle || k) + '</a>';
+      return vignette(o.url, o.libelle || k);
     }).join('');
   }
   return FORMATS_DEFAUT.map(function(f){
-    return '<a href="' + visuel(r.cle, f[0]) + '" download>' + f[1] + '</a>';
+    return vignette(visuel(r.cle, f[0]), f[1]);
   }).join('');
 }
 
@@ -111,6 +125,15 @@ function rendre(data){
   var recs = (data && data.receptions) || [];
   var auj = new Date().toISOString().slice(0,10);
   recs = recs.filter(function(r){return !r.date || r.date >= auj;});
+  /* Une réception sans AUCUN visuel ni AUCUN texte n'a rien à relayer : la
+     montrer donnerait une carte vide avec deux boutons qui ne font rien. Le
+     générateur écarte déjà ces réceptions ; cette garde vaut pour un fichier
+     resté en place trop longtemps. */
+  recs = recs.filter(function(r){
+    var v = r.visuels && Object.keys(r.visuels).length;
+    var t = r.textes && (r.textes.post || r.textes.story || r.textes.relance || r.textes.whatsapp);
+    return v || t;
+  });
   var box = document.getElementById('liste');
   if(!recs.length){
     box.innerHTML = '<div class="vide">Aucune réception à relayer pour le moment.<br>' +
@@ -150,6 +173,8 @@ function rendre(data){
         '<p class="tarifs">' + esc(r.tarifs||'') + '</p>' +
         '<h3>Les visuels</h3>' +
         '<div class="fichiers">' + boutonsVisuels(r) + '</div>' +
+        '<p class="astuce">Touchez un visuel pour l\'ouvrir, puis appui long pour '
+        + 'l\'enregistrer dans vos photos.</p>' +
         '<h3>Les textes, prêts à copier</h3>' +
         blocs.map(function(b,j){
           return '<div class="bloc"><div class="t">' + esc(b[0]) + '</div>' +
