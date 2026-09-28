@@ -2899,6 +2899,27 @@ function renderSoireeSection() {
     </div>`
 }
 
+function renderKitComSection() {
+  // Kit de communication benevoles — visuels + textes prets a poster.
+  // La page kit-com.html lit public/kit-benevoles.json, regenere par le
+  // module 76 du Cockpit Billetterie a chaque reception.
+  return `
+    <div style="background:linear-gradient(135deg,var(--c-navy) 0%,var(--c-navy-2) 100%);border-radius:16px;padding:16px 18px;margin-bottom:14px;color:#fff;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div style="font-size:26px;line-height:1;">\u{1F4E3}</div>
+        <div style="flex:1;">
+          <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-gold);">Kit de com b\u00e9n\u00e9voles</div>
+          <div style="font-size:16px;font-weight:800;">Nos meilleurs ambassadeurs, c'est vous</div>
+        </div>
+      </div>
+      <div style="font-size:12px;opacity:0.92;line-height:1.6;margin-bottom:12px;">
+        Visuels et textes du prochain match, pr\u00eats \u00e0 partager sur vos r\u00e9seaux.
+        Un clic pour copier, un clic pour publier.
+      </div>
+      <a href="kit-com.html" style="display:inline-block;background:var(--c-gold);color:var(--c-navy);font-size:13px;font-weight:800;padding:9px 18px;border-radius:20px;text-decoration:none;font-family:'Sora',sans-serif;">\u{1F4F2} Ouvrir le kit</a>
+    </div>`
+}
+
 function renderConcoursSection() {
   // Jeu-concours Calicéo — auto-masqué après la date de fin
   var _fin = new Date('2026-07-29T23:59:59')
@@ -3567,7 +3588,7 @@ function renderHugoHome(el, p, pts, niveau, pct) { const _pi = palierInfo(pts);
         <span>${_pi.nxt?_pi.avant+' pts avant '+_pi.nxt.l:'Palier max'}</span>
       </div>
     </div>
-    ${renderAccredCTA()}${renderSoireeSection()}${renderConcoursSection()}${renderNextMatchSection()}
+    ${renderAccredCTA()}${renderSoireeSection()}${renderConcoursSection()}${renderNextMatchSection()}${renderKitComSection()}
     ${renderAppelsSection()}
     ${renderFilleulsCard()}
     ${renderEventsAVenirSection()}
@@ -3610,7 +3631,7 @@ function renderVirginieHome(el, p) {
       <div style="font-size:12px;color:#6D5DAA;margin-top:4px;line-height:1.6;">Vous faites partie des Spacers — voici comment tout se passe ici.</div>
     </div>
 
-    ${renderAccredCTA()}${renderSoireeSection()}${renderConcoursSection()}${renderNextMatchSection()}
+    ${renderAccredCTA()}${renderSoireeSection()}${renderConcoursSection()}${renderNextMatchSection()}${renderKitComSection()}
     ${renderAppelsSection()}
     ${renderFilleulsCard()}
     ${renderReferentCard()}
@@ -3633,7 +3654,7 @@ function renderJoelHome(el, p, pts) {
       <div style="font-size:12px;color:rgba(192,221,151,0.7);">${p.matchs_joues||0} matchs · ${pts} pts · ${p.niveau||'Comète'}</div>
     </div>
 
-    ${renderAccredCTA()}${renderSoireeSection()}${renderConcoursSection()}${renderNextMatchSection()}
+    ${renderAccredCTA()}${renderSoireeSection()}${renderConcoursSection()}${renderNextMatchSection()}${renderKitComSection()}
     ${renderAppelsSection()}
     ${renderFilleulsCard()}
     ${renderEventsAVenirSection()}
