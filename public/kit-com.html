@@ -104,7 +104,7 @@ function vignette(url, libelle){
   /* L'aperçu compte : un bénévole ne partage pas un visuel qu'il n'a pas vu.
      Si l'image manque du bucket, la tuile retombe sur son seul libellé. */
   return '<a href="' + url + '" target="_blank" rel="noopener">' +
-         '<img src="' + url + '" alt="' + esc(libelle) + '" loading="lazy" ' +
+         '<img src="' + url + '" alt="' + esc(libelle) + '" decoding="async" ' +
          'onerror="this.parentNode.className=\'sansapercu\'">' +
          '<span>' + esc(libelle) + '</span></a>';
 }
