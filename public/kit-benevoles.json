@@ -1,7 +1,7 @@
 {
   "saison": "26-27",
-  "maj": "2026-09-25",
-  "genere_par": "Cockpit Billetterie V6 · module 76 v3.9.1",
+  "maj": "2026-09-28",
+  "genere_par": "Cockpit Billetterie V6 · module 76 v3.9.2",
   "receptions": [
     {
       "cle": "narbonne",
@@ -32,9 +32,9 @@
         }
       },
       "textes": {
-        "post": "🏐 Fiers d'être partenaires du Spacer's Toulouse Volley !\nSamedi 10 octobre, le club présente son effectif 2026-2027 lors d'un match de gala face à Narbonne, au Palais des Sports André-Brouat. Portes à 17h, coup d'envoi à 18h.\nEntrée à 8 € seulement, gratuit pour les moins de 8 ans.\n🎟️ Billets : {{lien}}\nOn compte sur vous !",
-        "story": "🏐 Ce samedi, on va au volley !\nSpacer's vs Narbonne — 10 octobre, 18h\nPalais des Sports André-Brouat\nBillets 8 € : {{lien}}",
-        "relance": "⏳ Plus qu'une semaine !\r\nSpacer's vs Narbonne, samedi 10 octobre à 18h : venez découvrir l'équipe 2026-2027.\r\n🎟️ 8 €, gratuit pour les moins de 8 ans : {{lien}}"
+        "post": "🏐 Samedi 10 octobre, la saison reprend au Palais des Sports !\nLe Spacer's Toulouse Volley reçoit Narbonne pour le match de gala d'ouverture.\n8 € l'entrée, gratuit pour les moins de 8 ans.\n🎟️ Billets : https://billetterie.spacerstoulouse.fr/s/xHJp5EIb\nVenez remplir le Palais avec nous 💙",
+        "story": "🏐 Ce samedi, on va au volley !\nSpacer's vs Narbonne — 10 octobre, 18h\nPalais des Sports André-Brouat\nBillets 8 € : https://billetterie.spacerstoulouse.fr/s/xHJp5EIb",
+        "relance": "⏳ Plus qu'une semaine !\nSpacer's vs Narbonne, samedi 10 octobre à 18h : venez découvrir l'équipe 2026-2027.\n🎟️ 8 €, gratuit pour les moins de 8 ans : https://billetterie.spacerstoulouse.fr/s/xHJp5EIb"
       }
     }
   ]
