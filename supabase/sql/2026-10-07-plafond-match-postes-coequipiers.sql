@@ -4,6 +4,7 @@
 --   B. Minimum / maximum de bénévoles par poste
 --   C. RPC mes_coequipiers : qui est avec moi sur mon poste
 -- A coller tel quel dans le SQL Editor Supabase (idempotent).
+-- v2 : affectations par := uniquement (compatibilite editeur Supabase).
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
@@ -61,13 +62,13 @@ begin
   if public.is_admin_or_pilote() then return new; end if;
 
   -- verrou sur le match : deux inscriptions simultanées ne dépassent pas le plafond
-  select benevoles_max into v_max from public.matchs where id = new.match_id for update;
+  perform 1 from public.matchs where id = new.match_id for update;
+  v_max := (select m.benevoles_max from public.matchs m where m.id = new.match_id);
   if v_max is null or v_max <= 0 then return new; end if;
 
-  select count(*) into v_n
-  from public.inscriptions
-  where match_id = new.match_id and statut = 'disponible'
-    and benevole_id <> new.benevole_id;
+  v_n := (select count(*) from public.inscriptions x
+           where x.match_id = new.match_id and x.statut = 'disponible'
+             and x.benevole_id <> new.benevole_id);
 
   if v_n >= v_max then
     new.statut := 'liste_attente';
@@ -112,12 +113,14 @@ begin
   if tg_op = 'UPDATE' and new.poste_id is not distinct from old.poste_id
      and old.statut = 'disponible' then return new; end if;
 
-  select benevoles_max_match, nom into v_max, v_nom from public.postes where id = new.poste_id for update;
+  perform 1 from public.postes where id = new.poste_id for update;
+  v_max := (select p.benevoles_max_match from public.postes p where p.id = new.poste_id);
+  v_nom := (select p.nom from public.postes p where p.id = new.poste_id);
   if v_max is null or v_max <= 0 then return new; end if;
 
-  select count(*) into v_n from public.inscriptions
-  where match_id = new.match_id and poste_id = new.poste_id
-    and statut = 'disponible' and id <> new.id;
+  v_n := (select count(*) from public.inscriptions x
+           where x.match_id = new.match_id and x.poste_id = new.poste_id
+             and x.statut = 'disponible' and x.id <> new.id);
 
   if v_n >= v_max then
     raise exception 'Poste complet : % a deja % benevole(s) (maximum %). Augmente le maximum dans l''onglet Postes si besoin.', v_nom, v_n, v_max
@@ -144,10 +147,12 @@ declare v_uid uuid := auth.uid(); v_poste uuid;
 begin
   if v_uid is null then return; end if;
 
-  select i.poste_id into v_poste
-  from public.inscriptions i
-  where i.match_id = p_match_id and i.benevole_id = v_uid and i.statut = 'disponible';
-  if not found then return; end if;
+  if not exists (select 1 from public.inscriptions i
+                 where i.match_id = p_match_id and i.benevole_id = v_uid and i.statut = 'disponible') then
+    return;
+  end if;
+  v_poste := (select i.poste_id from public.inscriptions i
+              where i.match_id = p_match_id and i.benevole_id = v_uid limit 1);
 
   if exists (select 1 from public.match_planning mp where mp.match_id = p_match_id and mp.benevole_id = v_uid) then
     return query
