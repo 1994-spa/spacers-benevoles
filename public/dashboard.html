@@ -473,6 +473,7 @@ body{font-family:'Sora',sans-serif;background:var(--c-navy);min-height:100vh;}
     <meta name="mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="/theme.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script src="/js/accreditation-generator.js"></script><script src="/js/planning-timeline.js"></script><script src="/js/covoiturage.js"></script><script src="/js/planning-nominatif.js"></script>
 </head>
 <body>
@@ -2609,7 +2610,8 @@ async function downloadMyAccredPng() {
       nom: _accredState.nom,
       roleLibelle: _accredState.role_libelle,
       zonesAutorisees: _accredState.zones_ids,
-      photoUrl: photoUrl
+      photoUrl: photoUrl,
+      qrToken: CP && CP.qr_token
     })
   } catch (err) {
     console.error('[accred] downloadPng', err)
@@ -2630,12 +2632,51 @@ async function downloadMyAccredPdf() {
       nom: _accredState.nom,
       roleLibelle: _accredState.role_libelle,
       zonesAutorisees: _accredState.zones_ids,
-      photoUrl: photoUrl
+      photoUrl: photoUrl,
+      qrToken: CP && CP.qr_token
     })
   } catch (err) {
     console.error('[accred] downloadPdf', err)
     showToast('Erreur génération : ' + (err.message || err), 'error')
   }
+}
+
+// -----------------------------------------------------------
+// QR D'ARRIVEE (pointage jour J)
+// -----------------------------------------------------------
+function showMonQr() {
+  if (!CP || !CP.qr_token) { showToast('QR indisponible, recharge l\'app', 'error'); return }
+  if (typeof qrcode !== 'function') { showToast('Module QR non chargé, recharge l\'app', 'error'); return }
+  const qr = qrcode(0, 'M'); qr.addData('SPB:' + String(CP.qr_token).toUpperCase(), 'Alphanumeric'); qr.make()
+  const n = qr.getModuleCount(), cell = 8, pad = 16, size = n * cell + pad * 2
+  const c = document.createElement('canvas'); c.width = size; c.height = size
+  const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, size, size); x.fillStyle = '#001E2D'
+  for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) if (qr.isDark(r, k)) x.fillRect(pad + k * cell, pad + r * cell, cell, cell)
+  const ov = document.createElement('div')
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(4,44,83,0.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;font-family:Sora,sans-serif;color:white;text-align:center;'
+  ov.innerHTML = '<div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-gold,#F5C842);font-weight:700;">Mon QR d\'arrivée</div>'
+    + '<div style="font-size:18px;font-weight:800;margin:4px 0 14px;">' + escapeHtml((CP.prenom || '') + ' ' + (CP.nom || '')) + '</div>'
+    + '<img src="' + c.toDataURL() + '" style="width:min(78vw,320px);height:auto;border-radius:14px;image-rendering:pixelated;">'
+    + '<div style="font-size:12px;opacity:0.8;margin-top:14px;max-width:320px;line-height:1.5;">Présente ce QR au pilote à ton arrivée : ta présence (et tes points) sont validés en une seconde. Monte la luminosité de ton écran.</div>'
+    + '<button style="margin-top:18px;background:white;color:#042C53;border:none;border-radius:50px;padding:11px 26px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;">Fermer</button>'
+  ov.querySelector('button').onclick = () => ov.remove()
+  document.body.appendChild(ov)
+}
+
+async function confirmerPlace(matchId) {
+  const { data, error } = await sb.rpc('confirmer_place', { p_match_id: matchId })
+  if (error) { showToast('Erreur : ' + error.message, 'error'); return }
+  if (data === 'ok') showToast('🎉 Place confirmée : tu fais partie de l\'équipe !', 'success')
+  else showToast('Le délai de confirmation est dépassé, la place est passée au suivant', 'error')
+  if (typeof loadNextMatch === 'function') { await loadNextMatch(); if (CP) renderHomeForProfil(CP) }
+  if (document.getElementById('planning-list')) loadPlanning()
+}
+async function declinerPlace(matchId) {
+  const { error } = await sb.rpc('decliner_place', { p_match_id: matchId })
+  if (error) { showToast('Erreur : ' + error.message, 'error'); return }
+  showToast('Noté : tu restes remplaçant, la place passe au suivant', 'success')
+  if (typeof loadNextMatch === 'function') { await loadNextMatch(); if (CP) renderHomeForProfil(CP) }
+  if (document.getElementById('planning-list')) loadPlanning()
 }
 
 // -----------------------------------------------------------
@@ -2661,6 +2702,17 @@ function remplacantHtml(matchId, st, opts) {
         ? `<div style="background:rgba(255,255,255,0.65);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:12px;font-weight:700;">🎟️ Ton billet d'invitation t'a été envoyé par e-mail (pense à vérifier tes spams).</div>`
         : `<div style="background:rgba(255,255,255,0.65);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:12px;font-weight:700;">🎟️ Le club t'offre ta place en tribune : ton billet t'arrive par e-mail au plus tard la veille du match.</div>`)
     : ''
+  if (st && st.proposition_expire) {
+    const lim = new Date(st.proposition_expire).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
+    return `<div style="background:linear-gradient(135deg,#E6F1FB,#CFE3F7);border:2px solid #185FA5;border-radius:12px;padding:14px;margin-top:8px;color:#042C53;">
+      <div style="font-size:15px;font-weight:800;">🔔 Une place s'est libérée pour toi !</div>
+      <div style="font-size:12px;line-height:1.5;margin-top:4px;">Elle t'est réservée jusqu'au <b>${lim}</b>. Sans réponse, elle passera au remplaçant suivant.</div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button onclick="event.stopPropagation();confirmerPlace('${matchId}')" style="flex:1;background:var(--c-green,#3B6D11);color:white;border:none;border-radius:50px;padding:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;">✅ Je confirme ma place</button>
+        <button onclick="event.stopPropagation();declinerPlace('${matchId}')" style="flex:1;background:white;color:#042C53;border:1px solid #B5D4F4;border-radius:50px;padding:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;">Je ne peux pas</button>
+      </div>
+    </div>`
+  }
   const surPlace = st && st.sur_place
   const btnSurPlace = `<button onclick="event.stopPropagation();toggleSurPlace('${matchId}', ${surPlace ? 'false' : 'true'})" style="margin-top:8px;background:${surPlace ? 'var(--c-green,#3B6D11)' : 'rgba(255,255,255,0.7)'};color:${surPlace ? 'white' : '#7A5410'};border:none;border-radius:50px;padding:8px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;">${surPlace ? '📍 Je viens en tribune ✓' : '📍 Je viens en tribune (remplaçant sur place)'}</button>`
   return `<div style="background:linear-gradient(135deg,#FEF6E0,#FBEFD2);border-radius:12px;padding:12px 14px;margin-top:8px;color:#7A5410;">
@@ -3088,7 +3140,7 @@ function renderNextMatchSection() {
       <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${fg};opacity:0.7;margin-bottom:3px;">PROCHAIN MATCH</div>
       <div style="font-size:14px;font-weight:800;color:${fg};margin-bottom:4px;">Spacers vs ${escapeHtml(m.adversaire)}</div>
       <div style="font-size:11px;color:${fg};opacity:0.85;margin-bottom:8px;">📅 ${escapeHtml(dateStr)}${heureStr ? ' · ' + escapeHtml(heureStr) : ''} · ${escapeHtml(lieuStr)}</div>
-      ${planLine}<div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:${fg};">
+      ${planLine}${isDispo ? `<button onclick="event.stopPropagation();showMonQr()" style="width:100%;margin-bottom:8px;background:white;color:var(--c-navy,#042C53);border:none;border-radius:50px;padding:9px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;">📲 Mon QR d'arrivée (jour de match)</button>` : ''}<div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:${fg};">
         <span>${icon} ${escapeHtml(label)}</span>
         <span style="margin-left:auto;font-size:10px;opacity:0.7;">Modifier ›</span>
       </div>
@@ -3884,7 +3936,7 @@ async function loadPlanning() {
           ? insMap[m.id].statut==='liste_attente'
             ? `<span class="s-dispo" style="background:#FEF6E0;color:#B7791F;">🪑 Remplaçant</span><div id="remp-${m.id}"></div><div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne suis plus dispo</button></div>`
           : insMap[m.id].statut==='disponible'
-            ? `<span class="s-dispo">✓ Disponible</span><div id="pn-plan-${m.id}"></div><div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne peux plus venir</button></div><div id="covoit-plan-${m.id}"></div>`
+            ? `<span class="s-dispo">✓ Disponible</span><div id="pn-plan-${m.id}"></div><div class="match-actions"><button class="btn-sm btn-sm-green" onclick="showMonQr()">📲 Mon QR d'arrivée</button><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne peux plus venir</button></div><div id="covoit-plan-${m.id}"></div>`
             : `<span class="s-dispo">✗ Indisponible</span><div class="match-actions"><button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Je redeviens dispo</button></div>`
           : `<span class="s-open">✅ Ouvert</span>
              <div class="match-actions">

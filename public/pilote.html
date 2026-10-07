@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script src="/js/accreditation-generator.js"></script><script src="/js/planning-timeline.js"></script><script src="/js/covoiturage.js"></script><script src="/js/planning-nominatif.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -224,6 +225,11 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
   <div class="sec">Match en cours de gestion</div>
   <select id="match-select" onchange="loadMatch(this.value)" style="display:none;width:100%;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:10px;"></select>
   <div class="card" id="match-info"><div style="color:rgba(255,255,255,0.4);font-size:12px;">Aucun match ouvert.</div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0 4px;">
+    <button class="btn btn-green btn-sm" style="padding:10px 4px;line-height:1.3;" onclick="openScanner()">📷 Scanner<br>les arrivées</button>
+    <button class="btn btn-blue btn-sm" style="padding:10px 4px;line-height:1.3;" onclick="feuilleDeMatchPdf()">🖨️ Feuille<br>de match</button>
+    <button class="btn btn-orange btn-sm" style="padding:10px 4px;line-height:1.3;" onclick="proposerAffectations()">✨ Proposer les<br>affectations</button>
+  </div>
 
   <div class="sec">&#128197; Planning nominatif — affectation &amp; cr&eacute;neaux</div>
   <div class="card"><div id="pn-pilote"></div></div>
@@ -325,6 +331,13 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
   <input id="search" placeholder="Rechercher un bénévole..." style="width:100%;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:50px;padding:9px 14px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;margin-bottom:12px;" oninput="filterBenv()">
   <div id="tshirt-recap"></div>
   <div id="size-filter"></div>
+  <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;font-size:11px;color:rgba(255,255,255,0.5);">Trier :
+    <select onchange="setBenvSort(this.value)" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:6px 8px;color:white;font-family:inherit;font-size:11px;">
+      <option value="nom">Par nom</option>
+      <option value="solliciter">💡 À solliciter en priorité</option>
+      <option value="actifs">🏐 Les plus présents</option>
+    </select>
+  </div>
   <div id="benv-list"></div>
 </div>
 
@@ -1136,6 +1149,7 @@ async function loadAll() {
   renderPhotosAtt(att)
   renderAccredsGen(benv.filter(b=>b.statut_accreditation==='generee'))
   renderTshirtRecap()
+  loadRotation()
   renderSizeFilter()
   renderBenv(benv)
   await loadMatch()
@@ -1321,6 +1335,7 @@ async function downloadPiloteAccredPdf(benevoleId) {
       roleLibelle: data.role_libelle,
       zonesAutorisees: data.zones_ids,
       photoUrl: photoUrl,
+      qrToken: _qrTokenOf(benevoleId),
     })
     showAlert('alert-accreds', 'PDF t\u00e9l\u00e9charg\u00e9 pour ' + data.prenom + ' ' + data.nom, 's')
   } catch (err) {
@@ -1341,6 +1356,7 @@ async function downloadPiloteAccredPng(benevoleId) {
       roleLibelle: data.role_libelle,
       zonesAutorisees: data.zones_ids,
       photoUrl: photoUrl,
+      qrToken: _qrTokenOf(benevoleId),
     })
     showAlert('alert-accreds', 'PNG t\u00e9l\u00e9charg\u00e9 pour ' + data.prenom + ' ' + data.nom, 's')
   } catch (err) {
@@ -1348,6 +1364,8 @@ async function downloadPiloteAccredPng(benevoleId) {
     showAlert('alert-accreds', 'Erreur : ' + (err.message || err), 'e')
   }
 }
+
+function _qrTokenOf(benevoleId) { const b = (allBenv || []).find(x => x.id === benevoleId); return b ? b.qr_token : null }
 
 async function downloadAllAccredsZip(format) {
   const fmt = format === 'png' ? 'png' : 'pdf'
@@ -1387,6 +1405,7 @@ async function downloadAllAccredsZip(format) {
           roleLibelle: r.role_libelle,
           zonesAutorisees: r.zones_ids,
           photoUrl: url,
+          qrToken: _qrTokenOf(r.benevole_id),
         })
         const name = AccreditationGenerator.buildFileName({ prenom: r.prenom, nom: r.nom }, fmt)
         zip.file(name, blob)
@@ -1499,6 +1518,7 @@ function renderBenv(list) {
           ${b.statut_compte==='supprime'?`<span class="s-badge" style="background:rgba(95,94,90,0.3);color:rgba(255,255,255,0.5);">⚫ Supprimé</span>`:''}
         </div>
         ${prefsHtml(b)}
+        ${rotationHtml(b)}
       </div>
       <button class="btn btn-green btn-sm" title="WhatsApp" style="flex-shrink:0;" onclick="whatsAppLibre('${b.id}')" ${b.statut_compte==='supprime'?'disabled style="opacity:0.3;cursor:not-allowed;flex-shrink:0;"':''}>📱</button>
       <button class="btn btn-sm" title="RGPD" style="flex-shrink:0;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);" onclick="openRgpdMenu('${b.id}')" ${b.statut_compte==='supprime'?'disabled':''}>🛡️</button>
@@ -1508,11 +1528,11 @@ function renderBenv(list) {
 
 function filterBenv() {
   const q = document.getElementById('search').value.toLowerCase()
-  renderBenv(allBenv.filter(b=>{
+  renderBenv(sortBenvList(allBenv.filter(b=>{
     const okQ = (b.prenom||'').toLowerCase().includes(q)||(b.nom||'').toLowerCase().includes(q)||(b.email||'').toLowerCase().includes(q)
     const okSize = !_sizeFilter || (_sizeFilter==='?' ? !b.taille_tshirt : b.taille_tshirt===_sizeFilter)
     return okQ && okSize
-  }))
+  })))
 }
 
 function getAccBadge(s) {
@@ -1892,7 +1912,7 @@ async function renderListeAttente(m, nbDispos) {
     + '<div style="font-size:11px;color:rgba(255,255,255,0.5);">bénévoles dans l\'équipe' + (max > 0 ? (libres > 0 ? ' · ' + libres + ' place' + (libres > 1 ? 's' : '') + ' libre' + (libres > 1 ? 's' : '') : ' · complet') : ' · pas de plafond') + '</div>'
     + '</div>'
     + (max > 0 ? '<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;margin-bottom:10px;"><div style="height:100%;width:' + pct + '%;background:' + col + ';"></div></div>' : '')
-    + '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:10px;line-height:1.5;">Plafond réglable dans l\'onglet Calendrier. Au-delà, les bénévoles deviennent <b>remplaçants</b> (aucun refus). Un remplaçant non appelé est <b>⭐ prioritaire</b> au match suivant. Ils reçoivent un e-mail quand tu les valides ou leur offres une invitation.</div>'
+    + '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:10px;line-height:1.5;">Plafond réglable dans l\'onglet Calendrier. Au-delà, les bénévoles deviennent <b>remplaçants</b> (aucun refus). Quand une place se libère, le remplaçant suivant est <b>appelé automatiquement</b> (push + e-mail) et a jusqu\'à 24 h pour confirmer, sinon la place passe au suivant. Un remplaçant non appelé est <b>⭐ prioritaire</b> au match suivant. Ils reçoivent un e-mail quand tu les valides ou leur offres une invitation.</div>'
   if (!list.length) {
     html += '<div style="font-size:12px;color:rgba(255,255,255,0.3);">Aucun remplaçant pour ce match.</div>'
   } else {
@@ -1903,6 +1923,7 @@ async function renderListeAttente(m, nbDispos) {
       const when = r.depuis ? new Date(r.depuis).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : ''
       const tags = (r.prioritaire ? '<span style="background:rgba(250,199,117,0.18);color:#FAC775;border-radius:6px;padding:1px 6px;font-size:9px;font-weight:700;margin-left:6px;">⭐ prioritaire</span>' : '')
         + (r.sur_place ? '<span style="background:rgba(167,215,124,0.18);color:#A7D77C;border-radius:6px;padding:1px 6px;font-size:9px;font-weight:700;margin-left:6px;">📍 vient en tribune</span>' : '')
+        + (r.proposition_expire ? '<span style="background:rgba(24,95,165,0.3);color:#B5D4F4;border-radius:6px;padding:1px 6px;font-size:9px;font-weight:700;margin-left:6px;">🔔 place proposée · réponse avant ' + new Date(r.proposition_expire).toLocaleString('fr-FR',{weekday:'short',hour:'2-digit',minute:'2-digit'}) + '</span>' : '')
       return '<div class="benv-row">'
         + '<div style="width:22px;font-size:12px;font-weight:800;color:var(--c-gold-2,#FAC775);">' + (idx+1) + '</div>'
         + '<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;color:white;">' + esc(r.prenom) + ' ' + esc(r.nom) + tags + '</div>'
@@ -1971,6 +1992,323 @@ async function validerListeAttente(inscId, btn) {
   showAlert('alert-match', 'Remplaçant appelé : il rejoint l\'équipe et reçoit un e-mail', 's')
   if (curMatch) loadMatch(curMatch.id)
 }
+
+// ===========================================================
+// JOUR J : SCANNER QR, FEUILLE DE MATCH, SUGGESTIONS, ROTATION
+// ===========================================================
+const _escJ = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+
+function _loadScriptOnce(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector('script[data-src="' + src + '"]')) return resolve()
+    const s = document.createElement('script'); s.src = src; s.dataset.src = src
+    s.onload = () => resolve(); s.onerror = () => reject(new Error('Chargement impossible : ' + src))
+    document.head.appendChild(s)
+  })
+}
+
+// ---------- SCANNER QR ----------
+let _scanner = null, _scanBusy = false, _scanLast = { t: '', at: 0 }
+async function openScanner() {
+  if (!curMatch) { showAlert('alert-match', 'Aucun match sélectionné', 'e'); return }
+  let ov = document.getElementById('scan-ov')
+  if (!ov) {
+    ov = document.createElement('div'); ov.id = 'scan-ov'
+    ov.style.cssText = 'position:fixed;inset:0;background:#0C1B2E;z-index:9999;display:flex;flex-direction:column;padding:14px;gap:10px;font-family:Sora,sans-serif;overflow:auto;'
+    ov.innerHTML = '<div style="display:flex;align-items:center;gap:10px;color:white;">'
+      + '<div style="flex:1;"><div style="font-size:15px;font-weight:800;">📷 Pointage des arrivées</div><div id="scan-sub" style="font-size:11px;color:rgba(255,255,255,0.5);"></div></div>'
+      + '<button class="btn btn-ghost btn-sm" onclick="closeScanner()">Fermer</button></div>'
+      + '<div id="scan-reader" style="width:100%;max-width:480px;margin:0 auto;border-radius:14px;overflow:hidden;background:black;"></div>'
+      + '<div id="scan-result" style="max-width:480px;width:100%;margin:0 auto;"></div>'
+      + '<div id="scan-count" style="text-align:center;font-size:12px;color:rgba(255,255,255,0.6);"></div>'
+    document.body.appendChild(ov)
+  }
+  ov.style.display = 'flex'
+  document.getElementById('scan-sub').textContent = 'Spacers vs ' + (curMatch.adversaire || '') + ' · scanne le QR de l\'accréditation ou de l\'app'
+  document.getElementById('scan-result').innerHTML = ''
+  _scanCount()
+  try {
+    await _loadScriptOnce('https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js')
+    _scanner = new Html5Qrcode('scan-reader')
+    await _scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 240, height: 240 } }, _onScan, () => {})
+  } catch (e) {
+    document.getElementById('scan-result').innerHTML = '<div style="background:#5c1f2b;color:white;border-radius:12px;padding:14px;font-size:13px;">Caméra indisponible : ' + _escJ(e.message || e) + '<br><span style="font-size:11px;opacity:0.8;">Autorise l\'accès à la caméra pour ce site, puis réessaie.</span></div>'
+  }
+}
+async function closeScanner() {
+  try { if (_scanner) { await _scanner.stop(); _scanner.clear() } } catch (e) {}
+  _scanner = null
+  const ov = document.getElementById('scan-ov'); if (ov) ov.style.display = 'none'
+  if (curMatch) loadMatch(curMatch.id)
+}
+async function _scanCount() {
+  if (!curMatch) return
+  const { data } = await sb.from('inscriptions').select('statut_jour_match').eq('match_id', curMatch.id).eq('statut', 'disponible')
+  const l = data || []
+  const p = l.filter(i => i.statut_jour_match === 'present_ponctuel' || i.statut_jour_match === 'present_retard').length
+  const el = document.getElementById('scan-count'); if (el) el.textContent = p + ' / ' + l.length + ' bénévoles pointés'
+}
+async function _onScan(text) {
+  const now = Date.now()
+  if (_scanBusy || (text === _scanLast.t && now - _scanLast.at < 4000)) return
+  _scanBusy = true; _scanLast = { t: text, at: now }
+  try { await _pointer(text, false) } finally { setTimeout(() => { _scanBusy = false }, 1200) }
+}
+let _scanPending = ''
+async function _pointer(text, faireEntrer) {
+  const el = document.getElementById('scan-result')
+  const { data, error } = await sb.rpc('pointer_benevole', { p_token: text, p_match_id: curMatch.id, p_faire_entrer: !!faireEntrer })
+  if (navigator.vibrate) navigator.vibrate(120)
+  if (error) { el.innerHTML = _scanCard('#5c1f2b', '⚠️ Erreur', _escJ(error.message)); return }
+  const r = data || {}
+  const nom = _escJ((r.prenom || '') + ' ' + (r.nom || ''))
+  if (r.code === 'pointe') {
+    const ok = r.statut_jour_match === 'present_ponctuel'
+    el.innerHTML = _scanCard(ok ? '#1f6f43' : '#8a5a12', (ok ? '✅ ' : '⏰ ') + nom,
+      (r.entre_en_jeu ? '🪑 Remplaçant entré en jeu · ' : '') + (r.poste ? '📍 ' + _escJ(r.poste) + ' · ' : '')
+      + (ok ? 'À l\'heure' : 'En retard de ' + r.retard_min + ' min') + (r.heure_attendue ? ' (attendu ' + r.heure_attendue + ')' : ''))
+  } else if (r.code === 'deja') {
+    el.innerHTML = _scanCard('#1d4f7a', 'ℹ️ ' + nom, 'Déjà pointé' + (r.pointe_le ? ' à ' + new Date(r.pointe_le).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '') + (r.poste ? ' · 📍 ' + _escJ(r.poste) : ''))
+  } else if (r.code === 'remplacant') {
+    _scanPending = text
+    el.innerHTML = _scanCard('#7a5410', '🪑 ' + nom, 'Remplaçant sur ce match.'
+      + '<div style="margin-top:10px;"><button class="btn btn-green btn-sm" onclick="_pointer(_scanPending, true)">➕ Le faire entrer dans l\'équipe et le pointer</button></div>')
+  } else if (r.code === 'non_inscrit') {
+    el.innerHTML = _scanCard('#5c1f2b', '✗ ' + nom, 'Pas inscrit comme disponible pour ce match.')
+  } else {
+    el.innerHTML = _scanCard('#5c1f2b', '✗ QR non reconnu', 'Ce QR ne correspond à aucun bénévole.')
+  }
+  _scanCount()
+}
+function _scanCard(bg, title, sub) {
+  return '<div style="background:' + bg + ';color:white;border-radius:14px;padding:16px;">'
+    + '<div style="font-size:18px;font-weight:800;">' + title + '</div>'
+    + '<div style="font-size:13px;margin-top:4px;opacity:0.95;line-height:1.45;">' + sub + '</div></div>'
+}
+
+// ---------- FEUILLE DE MATCH (PDF) ----------
+async function feuilleDeMatchPdf() {
+  if (!curMatch) { showAlert('alert-match', 'Aucun match sélectionné', 'e'); return }
+  if (!window.jspdf) { showAlert('alert-match', 'jsPDF non chargé', 'e'); return }
+  showAlert('alert-match', 'Génération de la feuille de match…', 'i')
+  const m = curMatch
+  const [ri, rp, rpl, rr] = await Promise.all([
+    sb.from('inscriptions').select('benevole_id, poste_id, benevoles!inscriptions_benevole_id_fkey(prenom, nom, telephone)').eq('match_id', m.id).eq('statut', 'disponible'),
+    sb.from('postes').select('id, nom').order('nom'),
+    sb.from('match_planning').select('benevole_id, heure_debut, libelle').eq('match_id', m.id),
+    sb.rpc('remplacants_du_match', { p_match_id: m.id })
+  ])
+  const insc = ri.data || [], postes = rp.data || [], plan = rpl.data || [], remp = rr.data || []
+  const clean = s => String(s || '').replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, '').trim()
+  const hh = t => t ? String(t).slice(0, 5).replace(':', 'h') : ''
+  const firstBlock = {}
+  plan.forEach(b => { if (!firstBlock[b.benevole_id] || String(b.heure_debut) < String(firstBlock[b.benevole_id].heure_debut)) firstBlock[b.benevole_id] = b })
+  let arrDef = m.heure_arrivee ? hh(m.heure_arrivee) : ''
+  if (!arrDef && m.heure) { const p = String(m.heure).split(':'); const mm = parseInt(p[0], 10) * 60 + parseInt(p[1] || '0', 10) - 180; if (mm >= 0) arrDef = Math.floor(mm / 60) + 'h' + String(mm % 60).padStart(2, '0') }
+  const posteNom = id => clean((postes.find(p => p.id === id) || {}).nom) || 'Sans poste'
+  const groups = {}
+  insc.forEach(i => {
+    const b = i.benevoles || {}
+    const fb = firstBlock[i.benevole_id]
+    const k = i.poste_id ? posteNom(i.poste_id) : (fb ? clean(fb.libelle) : 'Sans poste')
+    ;(groups[k] = groups[k] || []).push({ nom: (b.prenom || '') + ' ' + (b.nom || ''), tel: b.telephone || '', arr: fb ? hh(fb.heure_debut) : arrDef })
+  })
+  const { jsPDF } = window.jspdf
+  const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' })
+  const W = 210, M = 12
+  let y = 0
+  const header = () => {
+    pdf.setFillColor(4, 44, 83); pdf.rect(0, 0, W, 24, 'F')
+    pdf.setTextColor(255, 255, 255); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(15)
+    pdf.text('Feuille de match - Spacers vs ' + clean(m.adversaire), M, 11)
+    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9.5)
+    const d = m.date_match ? new Date(m.date_match + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : ''
+    pdf.text(d + (m.heure ? ' - coup d\'envoi ' + hh(m.heure) : '') + (arrDef ? ' - arrivée bénévoles ' + arrDef : '') + ' - ' + insc.length + ' bénévoles', M, 18)
+    pdf.setTextColor(0, 0, 0); y = 32
+  }
+  const need = h => { if (y + h > 285) { pdf.addPage(); header() } }
+  header()
+  Object.keys(groups).sort((a, b) => a === 'Sans poste' ? 1 : b === 'Sans poste' ? -1 : a.localeCompare(b)).forEach(k => {
+    const rows = groups[k].sort((a, b) => a.nom.localeCompare(b.nom))
+    need(14)
+    pdf.setFillColor(230, 241, 251); pdf.rect(M, y - 5, W - 2 * M, 7, 'F')
+    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10.5); pdf.setTextColor(4, 44, 83)
+    pdf.text(k + '  (' + rows.length + ')', M + 2, y); pdf.setTextColor(0, 0, 0); y += 7
+    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9.5)
+    rows.forEach(r => {
+      need(7)
+      pdf.rect(M + 1, y - 3.4, 3.6, 3.6)
+      pdf.text(clean(r.nom), M + 7, y)
+      pdf.text(r.tel, M + 85, y)
+      pdf.text(r.arr ? 'Arrivée ' + r.arr : '', M + 128, y)
+      pdf.setDrawColor(220); pdf.line(M + 160, y + 0.5, W - M, y + 0.5); pdf.setDrawColor(0)
+      y += 6.5
+    })
+    y += 3
+  })
+  const sp = remp.filter(r => r.sur_place || r.invitation_tribune)
+  if (remp.length) {
+    need(16)
+    pdf.setFillColor(254, 246, 224); pdf.rect(M, y - 5, W - 2 * M, 7, 'F')
+    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10.5); pdf.setTextColor(122, 84, 16)
+    pdf.text('Remplaçants (' + remp.length + ')' + (sp.length ? ' - ' + sp.length + ' en tribune / invités' : ''), M + 2, y); pdf.setTextColor(0, 0, 0); y += 7
+    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9.5)
+    remp.forEach((r, idx) => {
+      need(7)
+      pdf.text((idx + 1) + '. ' + clean((r.prenom || '') + ' ' + (r.nom || '')), M + 3, y)
+      pdf.text((r.sur_place ? 'En tribune' : '') + (r.invitation_tribune ? (r.sur_place ? ' - ' : '') + 'invité' : ''), M + 85, y)
+      y += 6
+    })
+  }
+  pdf.setFontSize(8); pdf.setTextColor(120)
+  pdf.text('Générée le ' + new Date().toLocaleString('fr-FR') + ' - Spacers Bénévoles - données personnelles : usage interne jour de match, à détruire après le match.', M, 292)
+  pdf.save('feuille-de-match_' + clean(m.adversaire).replace(/[^A-Za-z0-9]+/g, '-') + '_' + (m.date_match || '') + '.pdf')
+  showAlert('alert-match', 'Feuille de match téléchargée', 's')
+}
+
+// ---------- SUGGESTIONS D'AFFECTATION ----------
+const _norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9 ]+/g, ' ').toLowerCase().replace(/\s+/g, ' ').trim()
+function _prefMatch(prefs, posteNom) {
+  const pn = _norm(posteNom); if (!pn) return false
+  return String(prefs || '').split(',').some(x => {
+    const p = _norm(x); if (!p) return false
+    if (pn.includes(p) || p.includes(pn)) return true
+    return p.split(' ').filter(w => w.length > 3).some(w => pn.split(' ').includes(w))
+  })
+}
+let _sugg = []
+async function proposerAffectations() {
+  if (!curMatch) { showAlert('alert-match', 'Aucun match sélectionné', 'e'); return }
+  const [ri, rp, rb] = await Promise.all([
+    sb.from('inscriptions').select('id, benevole_id, poste_id, benevoles!inscriptions_benevole_id_fkey(prenom, nom, matchs_joues, postes_preferes)').eq('match_id', curMatch.id).eq('statut', 'disponible'),
+    sb.from('postes').select('*').eq('actif', true).order('nom'),
+    sb.from('match_postes_besoins').select('poste_id, besoin').eq('match_id', curMatch.id)
+  ])
+  const insc = ri.data || [], postes = rp.data || [], bes = {}
+  ;(rb.data || []).forEach(o => { bes[o.poste_id] = o.besoin })
+  const EXP = 3
+  const P = postes.map(p => {
+    const aff = insc.filter(i => i.poste_id === p.id)
+    const max = p.benevoles_max_match || 0
+    const target = bes[p.id] !== undefined ? bes[p.id] : max
+    return { p, n: aff.length, nExp: aff.filter(i => ((i.benevoles || {}).matchs_joues || 0) >= EXP).length,
+             min: p.benevoles_min_match || 0, target: target || 0, cap: max > 0 ? max : 999 }
+  })
+  const libres = insc.filter(i => !i.poste_id).map(i => ({ i, b: i.benevoles || {} }))
+  const out = []
+  const isExp = x => (x.b.matchs_joues || 0) >= EXP
+  const score = (x, slot) => {
+    let s = 0
+    if (_prefMatch(x.b.postes_preferes, slot.p.nom)) s += 10
+    if (slot.nExp === 0) s += isExp(x) ? 6 : 0; else s += isExp(x) ? 0 : 3
+    return s
+  }
+  const reason = (x, slot) => {
+    const r = []
+    if (_prefMatch(x.b.postes_preferes, slot.p.nom)) r.push('❤️ poste préféré')
+    if (isExp(x) && slot.nExp === 0) r.push('🎓 expérimenté pour encadrer')
+    if (!isExp(x) && slot.nExp > 0) r.push('🌱 en binôme avec un expérimenté')
+    if (slot.n < slot.min) r.push('📉 complète le minimum')
+    return r.join(' · ') || '➕ complète le poste'
+  }
+  const take = (x, slot, suffix) => {
+    out.push({ inscId: x.i.id, nom: (x.b.prenom || '') + ' ' + (x.b.nom || ''), posteId: slot.p.id, posteNom: slot.p.nom, why: reason(x, slot) + (suffix || '') })
+    slot.n++; if (isExp(x)) slot.nExp++
+  }
+  const fill = (limitFn) => {
+    let progress = true
+    while (progress && libres.length) {
+      progress = false
+      const slots = P.filter(s => s.n < Math.min(limitFn(s), s.cap)).sort((a, b) => (a.n / Math.max(1, limitFn(a))) - (b.n / Math.max(1, limitFn(b))))
+      for (const slot of slots) {
+        if (!libres.length) break
+        let best = -1, bs = -1
+        libres.forEach((x, k) => { const sc = score(x, slot); if (sc > bs) { bs = sc; best = k } })
+        if (best < 0) continue
+        take(libres.splice(best, 1)[0], slot)
+        progress = true
+      }
+    }
+  }
+  fill(s => s.min)        // 1. minimums
+  fill(s => s.target)     // 2. besoins
+  // 3. reste : poste préféré non plein, sinon poste le moins rempli
+  while (libres.length) {
+    const x = libres.shift()
+    const ok = P.filter(s => s.n < s.cap)
+    if (!ok.length) break
+    const pref = ok.find(s => _prefMatch(x.b.postes_preferes, s.p.nom))
+    const slot = pref || ok.sort((a, b) => (a.n / Math.max(1, a.target)) - (b.n / Math.max(1, b.target)))[0]
+    take(x, slot, ' · renfort')
+  }
+  _sugg = out
+  const sousMin = P.filter(s => s.n < s.min)
+  let ov = document.getElementById('sugg-ov')
+  if (!ov) { ov = document.createElement('div'); ov.id = 'sugg-ov'; document.body.appendChild(ov) }
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9998;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow:auto;font-family:Sora,sans-serif;'
+  ov.innerHTML = '<div style="background:#0C1B2E;border:1px solid rgba(255,255,255,0.12);border-radius:16px;max-width:560px;width:100%;padding:16px;color:white;">'
+    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><div style="flex:1;font-size:15px;font-weight:800;">✨ Affectations proposées</div><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'sugg-ov\').remove()">Fermer</button></div>'
+    + '<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:10px;line-height:1.5;">Pour les bénévoles disponibles sans poste. Priorité : minimums, puis besoins ; postes préférés ; un expérimenté (3 matchs et +) par poste, les nouveaux en binôme avec lui. Décoche ce que tu ne veux pas.</div>'
+    + (out.length ? out.map((o, k) => '<label style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer;">'
+        + '<input type="checkbox" class="sugg-cb" data-k="' + k + '" checked style="margin-top:3px;">'
+        + '<div style="flex:1;"><div style="font-size:13px;font-weight:700;">' + _escJ(o.nom) + ' → ' + _escJ(o.posteNom) + '</div>'
+        + '<div style="font-size:11px;color:rgba(255,255,255,0.55);">' + _escJ(o.why) + '</div></div></label>').join('')
+      : '<div style="font-size:12px;color:rgba(255,255,255,0.5);padding:10px 0;">Tous les bénévoles disponibles ont déjà un poste (ou aucun poste n\'a de place).</div>')
+    + (sousMin.length ? '<div style="margin-top:10px;font-size:11px;color:#F09595;">⚠️ Encore sous le minimum après propositions : ' + sousMin.map(s => _escJ(s.p.nom) + ' (' + s.n + '/' + s.min + ')').join(', ') + '</div>' : '')
+    + (out.length ? '<button class="btn btn-green btn-full" style="margin-top:12px;" onclick="appliquerAffectations(this)">Appliquer la sélection</button>' : '')
+    + '</div>'
+}
+async function appliquerAffectations(btn) {
+  const ks = Array.from(document.querySelectorAll('.sugg-cb')).filter(c => c.checked).map(c => parseInt(c.dataset.k, 10))
+  if (!ks.length) return
+  btn.disabled = true; btn.textContent = 'Application…'
+  let ok = 0; const errs = []
+  for (const k of ks) {
+    const o = _sugg[k]
+    const { error } = await sb.from('inscriptions').update({ poste_id: o.posteId }).eq('id', o.inscId)
+    if (error) errs.push(o.nom + ' : ' + error.message); else ok++
+  }
+  document.getElementById('sugg-ov').remove()
+  showAlert('alert-match', ok + ' affectation(s) appliquée(s)' + (errs.length ? ' · ' + errs.length + ' refusée(s) : ' + errs.join(' ; ') : ''), errs.length ? 'e' : 's')
+  if (curMatch) loadMatch(curMatch.id)
+}
+
+// ---------- ÉQUITÉ DE ROTATION ----------
+window._rotMap = {}
+let _benvSort = 'nom'
+async function loadRotation() {
+  try {
+    const { data, error } = await sb.rpc('stats_rotation')
+    if (error) { console.warn('[rotation]', error); return }
+    window._rotMap = {}; (data || []).forEach(r => { window._rotMap[r.benevole_id] = r })
+    filterBenv()
+  } catch (e) { console.warn('[rotation]', e) }
+}
+function rotationHtml(b) {
+  const r = (window._rotMap || {})[b.id]; if (!r) return ''
+  let dernier = 'pas encore venu cette saison'
+  let ancien = true
+  if (r.dernier_match) {
+    const j = Math.round((Date.now() - new Date(r.dernier_match + 'T00:00:00').getTime()) / 86400000)
+    dernier = 'dernier match il y a ' + (j < 14 ? j + ' j' : Math.round(j / 7) + ' sem.')
+    ancien = j > 35
+  }
+  const alerte = ancien && r.nb_a_venir === 0
+  return '<div style="font-size:10px;margin-top:3px;color:' + (alerte ? '#FAC775' : 'rgba(255,255,255,0.45)') + ';">'
+    + '🏐 ' + r.matchs_saison + ' match(s) · ' + dernier
+    + (r.nb_remplacant ? ' · 🪑 remplaçant ×' + r.nb_remplacant : '')
+    + (r.nb_absences ? ' · <span style="color:#F09595;">✗ absent ×' + r.nb_absences + '</span>' : '')
+    + (r.nb_a_venir ? ' · 📅 inscrit à ' + r.nb_a_venir + ' match(s)' : '')
+    + (alerte ? ' · 💡 à solliciter' : '') + '</div>'
+}
+function sortBenvList(list) {
+  const R = window._rotMap || {}
+  const last = b => (R[b.id] && R[b.id].dernier_match) || '0000'
+  if (_benvSort === 'solliciter') return list.slice().sort((a, b) => last(a).localeCompare(last(b)) || ((R[a.id] || {}).matchs_saison || 0) - ((R[b.id] || {}).matchs_saison || 0))
+  if (_benvSort === 'actifs') return list.slice().sort((a, b) => ((R[b.id] || {}).matchs_saison || 0) - ((R[a.id] || {}).matchs_saison || 0))
+  return list
+}
+function setBenvSort(v) { _benvSort = v; filterBenv() }
 
 const CR_CATS = [
   ['arrivee','Arriv&eacute;e / accueil','#3B82F6'],

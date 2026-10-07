@@ -10,6 +10,10 @@
  *   - fitTextSize mesure avec la bonne graisse (Heaters n'existe qu'en 400)
  *   - Nouveau : renderToPngBlob(params) pour le batch ZIP PNG cote pilote
  *
+ * Changement v5 :
+ *   - QR code de pointage (params.qrToken) en haut a droite, contenu "SPB:<token>"
+ *     (necessite la lib qrcode-generator ; sans lib ou sans token : pas de QR)
+ *
  * Changement v3 :
  *   - SUPPRESSION du fill de couleur par-dessus la pastille
  *     (qui masquait les chiffres blancs du template)
@@ -34,6 +38,7 @@
     photo: { cx: 619, cy: 539, r: 172 },
     nom:   { x1: 280, y1: 760,  x2: 960, y2: 960  },
     role:  { x1: 260, y1: 1050, x2: 980, y2: 1180 },
+    qr:    { x: 1050, y: 14, size: 176 },
     zones: {
       1: { label: 'Terrain', color: '#8b5cf6', cx: 195,  cy: 1417, r: 73 },
       2: { label: 'Plateau / Zone mixte et m\u00e9dias', color: '#22c55e', cx: 369,  cy: 1416, r: 73 },
@@ -246,6 +251,33 @@
     });
   }
 
+  function drawQr(ctx, text, spec) {
+    if (!text || typeof global.qrcode !== 'function') return;
+    let qr;
+    try { qr = global.qrcode(0, 'M'); qr.addData(text, 'Alphanumeric'); qr.make(); } catch (e) { console.warn('[accred] QR', e); return; }
+    const n = qr.getModuleCount();
+    const pad = 12;
+    const cell = (spec.size - pad * 2) / n;
+    ctx.save();
+    ctx.fillStyle = '#FFFFFF';
+    const r = 14, x = spec.x, y = spec.y, w = spec.size, h = spec.size;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.fill();
+    ctx.fillStyle = CHARTE.night;
+    for (let row = 0; row < n; row++) {
+      for (let col = 0; col < n; col++) {
+        if (qr.isDark(row, col)) {
+          ctx.fillRect(Math.floor(x + pad + col * cell), Math.floor(y + pad + row * cell), Math.ceil(cell), Math.ceil(cell));
+        }
+      }
+    }
+    ctx.restore();
+  }
+
   async function render(canvas, params) {
     if (!canvas || typeof canvas.getContext !== 'function') {
       throw new Error('render() : canvas invalide');
@@ -272,6 +304,8 @@
     drawRoleInRect(ctx, roleUpper, COORDS.role);
 
     drawZones(ctx, params.zonesAutorisees || []);
+
+    if (params.qrToken) drawQr(ctx, 'SPB:' + String(params.qrToken).toUpperCase(), COORDS.qr);
   }
 
   async function renderToPngBlob(params) {
@@ -352,6 +386,7 @@
     renderToPdfBlob: renderToPdfBlob,
     renderToPngBlob: renderToPngBlob,
     ensureFonts: ensureFonts,
+    drawQr: drawQr,
     buildFileName: buildFileName,
     _COORDS: COORDS,
     _CHARTE: CHARTE,
