@@ -231,7 +231,7 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
   <div class="sec">&#128202; Postes &amp; couverture (besoin &eacute;ditable)</div>
   <div class="card"><div id="thermo-planning"></div></div>
 
-  <div class="sec">&#9203; Effectif &amp; liste d'attente</div>
+  <div class="sec">&#129681; Effectif &amp; rempla&ccedil;ants</div>
   <div id="attente-match"></div>
 
   <div class="sec">&#9888;&#65039; Indispos signal&eacute;es</div>
@@ -1696,7 +1696,7 @@ async function loadCalendrier() {
       <div style="display:flex;gap:7px;margin-bottom:7px;flex-wrap:wrap;">
         <input type="date" value="${d}" onchange="calSaveField('${m.id}','date_match',this.value)" style="flex:1;min-width:135px;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:8px 10px;color:white;font-family:inherit;font-size:12px;">
         <input type="time" value="${h}" onchange="calSaveField('${m.id}','heure',this.value)" style="width:110px;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:8px 10px;color:white;font-family:inherit;font-size:12px;">
-        <label title="Nombre maximum de bénévoles disponibles pour ce match (au-delà : liste d'attente)" style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.6);">👥 Max
+        <label title="Nombre maximum de bénévoles disponibles pour ce match (au-delà : remplaçants)" style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.6);">👥 Max
           <input type="number" min="0" value="${m.benevoles_max == null ? 35 : m.benevoles_max}" onchange="calSaveField('${m.id}','benevoles_max',this.value === '' ? null : parseInt(this.value,10))" style="width:60px;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:8px 6px;color:white;font-family:inherit;font-size:12px;text-align:center;">
         </label>
       </div>
@@ -1878,37 +1878,63 @@ async function renderListeAttente(m, nbDispos) {
   if (!el) return
   const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
   const max = (m.benevoles_max == null) ? 0 : m.benevoles_max
-  const { data: att } = await sb.from('inscriptions')
-    .select('id, benevole_id, liste_attente_le, created_at, benevoles!inscriptions_benevole_id_fkey(prenom, nom, matchs_joues)')
-    .eq('match_id', m.id).eq('statut', 'liste_attente')
-    .order('liste_attente_le', { ascending: true, nullsFirst: false })
+  const { data: att, error } = await sb.rpc('remplacants_du_match', { p_match_id: m.id })
+  if (error) { el.innerHTML = '<div class="card" style="color:#F09595;font-size:12px;">Erreur remplaçants : ' + esc(error.message) + '</div>'; return }
   const list = att || []
   const libres = max > 0 ? Math.max(0, max - nbDispos) : null
   const pct = max > 0 ? Math.min(100, Math.round(nbDispos / max * 100)) : 0
   const col = max > 0 && nbDispos >= max ? '#F09595' : (pct >= 85 ? '#FAC775' : '#A7D77C')
+  const nbInv = list.filter(r => r.invitation_tribune).length
+  const nbSurPlace = list.filter(r => r.sur_place).length
   let html = '<div class="card">'
     + '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px;">'
     + '<div style="font-size:20px;font-weight:800;color:' + col + ';">' + nbDispos + (max > 0 ? ' / ' + max : '') + '</div>'
-    + '<div style="font-size:11px;color:rgba(255,255,255,0.5);">bénévoles disponibles' + (max > 0 ? (libres > 0 ? ' · ' + libres + ' place' + (libres > 1 ? 's' : '') + ' libre' + (libres > 1 ? 's' : '') : ' · complet') : ' · pas de plafond') + '</div>'
+    + '<div style="font-size:11px;color:rgba(255,255,255,0.5);">bénévoles dans l\'équipe' + (max > 0 ? (libres > 0 ? ' · ' + libres + ' place' + (libres > 1 ? 's' : '') + ' libre' + (libres > 1 ? 's' : '') : ' · complet') : ' · pas de plafond') + '</div>'
     + '</div>'
     + (max > 0 ? '<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;margin-bottom:10px;"><div style="height:100%;width:' + pct + '%;background:' + col + ';"></div></div>' : '')
-    + '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:8px;">Plafond réglable dans l\'onglet Calendrier. Au-delà, les bénévoles passent automatiquement en liste d\'attente (aucun refus).</div>'
+    + '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:10px;line-height:1.5;">Plafond réglable dans l\'onglet Calendrier. Au-delà, les bénévoles deviennent <b>remplaçants</b> (aucun refus). Un remplaçant non appelé est <b>⭐ prioritaire</b> au match suivant. Ils reçoivent un e-mail quand tu les valides ou leur offres une invitation.</div>'
   if (!list.length) {
-    html += '<div style="font-size:12px;color:rgba(255,255,255,0.3);">Personne en liste d\'attente.</div>'
+    html += '<div style="font-size:12px;color:rgba(255,255,255,0.3);">Aucun remplaçant pour ce match.</div>'
   } else {
-    html += list.map((i, idx) => {
-      const b = i.benevoles || {}
-      const when = i.liste_attente_le ? new Date(i.liste_attente_le).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : ''
+    html += '<div style="font-size:11px;font-weight:700;color:white;margin-bottom:6px;">🪑 Remplaçants : ' + list.length
+      + (nbInv ? ' · 🎟️ ' + nbInv + ' invité' + (nbInv > 1 ? 's' : '') : '')
+      + (nbSurPlace ? ' · 📍 ' + nbSurPlace + ' sur place' : '') + '</div>'
+    html += list.map((r, idx) => {
+      const when = r.depuis ? new Date(r.depuis).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : ''
+      const tags = (r.prioritaire ? '<span style="background:rgba(250,199,117,0.18);color:#FAC775;border-radius:6px;padding:1px 6px;font-size:9px;font-weight:700;margin-left:6px;">⭐ prioritaire</span>' : '')
+        + (r.sur_place ? '<span style="background:rgba(167,215,124,0.18);color:#A7D77C;border-radius:6px;padding:1px 6px;font-size:9px;font-weight:700;margin-left:6px;">📍 vient en tribune</span>' : '')
       return '<div class="benv-row">'
         + '<div style="width:22px;font-size:12px;font-weight:800;color:var(--c-gold-2,#FAC775);">' + (idx+1) + '</div>'
-        + '<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;color:white;">' + esc(b.prenom) + ' ' + esc(b.nom) + '</div>'
-        + '<div style="font-size:10px;color:rgba(255,255,255,0.4);">' + (b.matchs_joues || 0) + ' match(s) · en attente depuis le ' + when + '</div></div>'
-        + '<button class="btn btn-green btn-sm" onclick="validerListeAttente(\'' + i.id + '\', this)">✅ Valider</button>'
-        + '</div>'
+        + '<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;color:white;">' + esc(r.prenom) + ' ' + esc(r.nom) + tags + '</div>'
+        + '<div style="font-size:10px;color:rgba(255,255,255,0.4);">' + (r.matchs_joues || 0) + ' match(s) · remplaçant depuis le ' + when + '</div></div>'
+        + '<div style="display:flex;gap:5px;flex-shrink:0;">'
+        + '<button class="btn btn-sm ' + (r.invitation_tribune ? 'btn-ghost' : 'btn-orange') + '" title="' + (r.invitation_tribune ? 'Invitation offerte (cliquer pour annuler)' : 'Offrir une invitation en tribune (e-mail envoyé)') + '" onclick="toggleInvitationRemplacant(\'' + r.inscription_id + '\',' + (r.invitation_tribune ? 'false' : 'true') + ', this)">' + (r.invitation_tribune ? '🎟️ Invité ✓' : '🎟️ Inviter') + '</button>'
+        + '<button class="btn btn-green btn-sm" onclick="validerListeAttente(\'' + r.inscription_id + '\', this)">✅ Valider</button>'
+        + '</div></div>'
     }).join('')
+    html += '<button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="inviterTousRemplacants()">🎟️ Inviter tous les remplaçants</button>'
   }
   html += '</div>'
   el.innerHTML = html
+  el._remplacants = list
+}
+
+async function toggleInvitationRemplacant(inscId, val, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = '...' }
+  const { error } = await sb.from('inscriptions').update({ invitation_tribune: !!val }).eq('id', inscId)
+  if (error) { showAlert('alert-match', 'Erreur : ' + error.message, 'e'); if (btn) btn.disabled = false; return }
+  showAlert('alert-match', val ? 'Invitation offerte : le remplaçant reçoit un e-mail' : 'Invitation retirée', 's')
+  if (curMatch) loadMatch(curMatch.id)
+}
+
+async function inviterTousRemplacants() {
+  const el = document.getElementById('attente-match')
+  const ids = ((el && el._remplacants) || []).filter(r => !r.invitation_tribune).map(r => r.inscription_id)
+  if (!ids.length) { showAlert('alert-match', 'Tous les remplaçants sont déjà invités', 'i'); return }
+  const { error } = await sb.from('inscriptions').update({ invitation_tribune: true }).in('id', ids)
+  if (error) { showAlert('alert-match', 'Erreur : ' + error.message, 'e'); return }
+  showAlert('alert-match', ids.length + ' invitation(s) offerte(s), e-mails envoyés', 's')
+  if (curMatch) loadMatch(curMatch.id)
 }
 
 async function validerListeAttente(inscId, btn) {
@@ -1918,7 +1944,7 @@ async function validerListeAttente(inscId, btn) {
     if (btn) { btn.disabled = false; btn.textContent = '✅ Valider' }
     showAlert('alert-match', 'Erreur : ' + error.message, 'e'); return
   }
-  showAlert('alert-match', 'Bénévole validé : il passe en disponible', 's')
+  showAlert('alert-match', 'Remplaçant appelé : il rejoint l\'équipe et reçoit un e-mail', 's')
   if (curMatch) loadMatch(curMatch.id)
 }
 

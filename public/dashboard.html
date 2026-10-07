@@ -2638,6 +2638,68 @@ async function downloadMyAccredPdf() {
   }
 }
 
+// -----------------------------------------------------------
+// REMPLACANTS (statut technique 'liste_attente')
+// -----------------------------------------------------------
+async function fetchRemplacant(matchId) {
+  try {
+    const { data, error } = await sb.rpc('mon_statut_remplacant', { p_match_id: matchId })
+    if (error) { console.warn('[remp]', error); return null }
+    return (data && data[0]) || null
+  } catch (e) { return null }
+}
+
+function remplacantHtml(matchId, st, opts) {
+  opts = opts || {}
+  const pos = st ? st.position_attente : null
+  const nb = st ? st.nb_remplacants : null
+  const plafond = st ? st.plafond : null
+  const titre = pos ? `🪑 Tu es remplaçant n°${pos}${nb > 1 ? ' sur ' + nb : ''}` : '🪑 Tu es remplaçant'
+  const prio = st && st.prioritaire ? `<div style="font-size:11px;font-weight:700;margin-top:6px;">⭐ Tu es prioritaire : tu as déjà été remplaçant, tu passes en tête dès qu'une place se libère.</div>` : ''
+  const invit = st && st.invitation_tribune
+    ? `<div style="background:rgba(255,255,255,0.65);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:12px;font-weight:700;">🎟️ Le club t'offre ta place en tribune : invitation à ton nom à l'accueil bénévoles.</div>`
+    : ''
+  const surPlace = st && st.sur_place
+  const btnSurPlace = `<button onclick="event.stopPropagation();toggleSurPlace('${matchId}', ${surPlace ? 'false' : 'true'})" style="margin-top:8px;background:${surPlace ? 'var(--c-green,#3B6D11)' : 'rgba(255,255,255,0.7)'};color:${surPlace ? 'white' : '#7A5410'};border:none;border-radius:50px;padding:8px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;">${surPlace ? '📍 Je viens en tribune ✓' : '📍 Je viens en tribune (remplaçant sur place)'}</button>`
+  return `<div style="background:linear-gradient(135deg,#FEF6E0,#FBEFD2);border-radius:12px;padding:12px 14px;margin-top:8px;color:#7A5410;">
+      <div style="font-size:14px;font-weight:800;">${titre}</div>
+      <div style="font-size:12px;line-height:1.5;margin-top:4px;">L'équipe du match est au complet${plafond ? ' (' + plafond + ' bénévoles)' : ''}. Les désistements arrivent souvent dans la semaine : dès qu'une place se libère, un pilote t'appelle et tu reçois un e-mail.</div>
+      ${prio}${invit}
+      ${opts.noButton ? '' : btnSurPlace}
+      <div style="font-size:10px;opacity:0.75;margin-top:8px;line-height:1.45;">Pourquoi un plafond ? À ${plafond || 35}, chacun a un vrai poste et on vit mieux le match ensemble. Si tu n'es pas appelé, tu gagnes quand même des points et tu es prioritaire au match suivant.</div>
+    </div>`
+}
+
+async function toggleSurPlace(matchId, val) {
+  const { error } = await sb.rpc('remplacant_set_sur_place', { p_match_id: matchId, p_val: !!val })
+  if (error) { showToast('Erreur : ' + error.message, 'error'); return }
+  showToast(val ? '📍 Noté : tu seras en tribune, prêt à entrer en jeu' : 'Noté', 'success')
+  if (CP && CP._nextMatch && CP._nextMatch.id === matchId) { CP._nextMatchRemp = await fetchRemplacant(matchId); renderHomeForProfil(CP) }
+  const box = document.getElementById('remp-' + matchId)
+  if (box) box.innerHTML = remplacantHtml(matchId, await fetchRemplacant(matchId))
+}
+
+async function showMerciRemplacants() {
+  try {
+    const { data, error } = await sb.rpc('remercier_mes_remplacements')
+    if (error || !data || !data.length) return
+    const lignes = data.map(r => `<li style="margin-bottom:4px;"><b>Spacers vs ${escapeHtml(r.adversaire || '')}</b>${r.points ? ' · +' + r.points + ' pts' : ''}</li>`).join('')
+    const ov = document.createElement('div')
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(4,44,83,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;'
+    ov.innerHTML = `<div style="background:white;border-radius:18px;max-width:380px;width:100%;padding:22px 20px;font-family:'Sora',sans-serif;color:var(--c-navy,#042C53);">
+      <div style="font-size:34px;text-align:center;margin-bottom:6px;">🪑🙏</div>
+      <div style="font-size:17px;font-weight:800;text-align:center;margin-bottom:8px;">Merci d'avoir été notre remplaçant</div>
+      <div style="font-size:13px;line-height:1.55;color:#3B4F66;margin-bottom:10px;">L'équipe était au complet, mais tu as répondu présent et on pouvait compter sur toi. Ça compte autant qu'un match joué :</div>
+      <ul style="font-size:13px;padding-left:18px;margin:0 0 10px;">${lignes}</ul>
+      <div style="font-size:13px;line-height:1.55;color:#3B4F66;margin-bottom:14px;">🏅 Badge <b>12e homme</b> débloqué · ⭐ <b>Tu es prioritaire au prochain match</b> : inscris-toi, ta place est assurée.</div>
+      <div style="font-size:11px;color:#8A9BAD;margin-bottom:14px;">— L'équipe des pilotes Spacers</div>
+      <button style="width:100%;background:var(--c-action,#185FA5);color:white;border:none;border-radius:50px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;" id="merci-remp-ok">Avec plaisir 💙</button>
+    </div>`
+    document.body.appendChild(ov)
+    document.getElementById('merci-remp-ok').onclick = () => ov.remove()
+  } catch (e) { console.warn('[remp] merci', e) }
+}
+
 // -- INIT -----------------------------------------------------
 async function init() {
   const { data: { session } } = await sb.auth.getSession()
@@ -2802,6 +2864,7 @@ async function loadNextMatch() {
       .eq('match_id', CP._nextMatch.id)
       .maybeSingle()
     CP._nextMatchInscription = insc || null
+    CP._nextMatchRemp = (insc && insc.statut === 'liste_attente') ? await fetchRemplacant(CP._nextMatch.id) : null
 
     // Résumé du planning nominatif pour la carte d'accueil
     CP._nextMatchPlan = null
@@ -2991,7 +3054,7 @@ function renderNextMatchSection() {
       <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-amber,#B7791F);opacity:0.8;margin-bottom:3px;">PROCHAIN MATCH</div>
       <div style="font-size:14px;font-weight:800;color:var(--c-amber,#B7791F);margin-bottom:4px;">Spacers vs ${escapeHtml(m.adversaire)}</div>
       <div style="font-size:11px;color:var(--c-amber,#B7791F);opacity:0.85;margin-bottom:8px;">📅 ${escapeHtml(dateStr)}${heureStr ? ' · ' + escapeHtml(heureStr) : ''} · ${escapeHtml(lieuStr)}</div>
-      <div style="font-size:12px;font-weight:700;color:var(--c-amber,#B7791F);line-height:1.45;">⏳ Tu es sur liste d'attente : l'équipe du match est au complet. Un pilote te confirme dès qu'une place se libère.</div>
+      ${remplacantHtml(m.id, CP._nextMatchRemp)}
     </div>`
   }
 
@@ -3096,7 +3159,7 @@ async function setDispoFromHome(matchId, statut) {
     return
   }
 
-  if (_saved && _saved.statut === 'liste_attente') showToast('⏳ Match complet : tu es sur liste d\'attente, on te confirme dès qu\'une place se libère', 'info')
+  if (_saved && _saved.statut === 'liste_attente') showToast('🪑 Équipe au complet : tu es remplaçant, on t\'appelle dès qu\'une place se libère', 'info')
   else showToast(statut === 'disponible' ? '👍 Noté(e) dispo, merci !' : '👎 Indisponibilité enregistrée', 'success')
   await loadNextMatch()
   await loadEtapesData()
@@ -3198,7 +3261,7 @@ function renderFilleulsCard() {
     } else if (f.next_match_statut === 'disponible') {
       badge = '<span style="color:#34d399;font-size:12px;font-weight:600;">✓ Dispo</span>';
     } else if (f.next_match_statut === 'liste_attente') {
-      badge = '<span style="color:#fbbf24;font-size:12px;font-weight:600;">⏳ Liste d\'attente</span>';
+      badge = '<span style="color:#fbbf24;font-size:12px;font-weight:600;">🪑 Remplaçant</span>';
     } else if (f.next_match_statut === 'indisponible') {
       badge = '<span style="color:#f87171;font-size:12px;font-weight:600;">✗ Indispo</span>';
     } else {
@@ -3522,6 +3585,7 @@ function maybeOpenGuideBenev(){ try{ if(!localStorage.getItem('benev_guide_v1'))
 
 async function showApp(p) {
   loadMyAccreditation()
+  setTimeout(showMerciRemplacants, 1500)
   return showAppImpl(p)
 }
 async function showAppImpl(p) {
@@ -3804,7 +3868,7 @@ async function loadPlanning() {
   const placesTxt = m => {
     const max = m.benevoles_max||0; if (!max) return ''
     const n = dispCount[m.id]||0, libres = Math.max(0, max-n)
-    return `<div style="font-size:11px;font-weight:700;margin:4px 0 2px;color:${libres===0?'#B7791F':(libres<=5?'#B7791F':'#3B6D11')};">👥 ${n}/${max} bénévoles${libres===0?' · complet (liste d\'attente)':(' · '+libres+' place'+(libres>1?'s':'')+' restante'+(libres>1?'s':''))}</div>`
+    return `<div style="font-size:11px;font-weight:700;margin:4px 0 2px;color:${libres===0?'#B7791F':(libres<=5?'#B7791F':'#3B6D11')};">👥 ${n}/${max} bénévoles${libres===0?' · complet (remplaçants)':(' · '+libres+' place'+(libres>1?'s':'')+' restante'+(libres>1?'s':''))}</div>`
   }
   const { data: _cre } = await sb.from('match_creneaux').select('*').in('match_id', _mids).order('ordre').order('heure_debut')
   const creMap={}; (_cre||[]).forEach(c=>{ (creMap[c.match_id]=creMap[c.match_id]||[]).push(c) })
@@ -3816,7 +3880,7 @@ async function loadPlanning() {
       ${m.statut_inscriptions==='ouvert'
         ? insMap[m.id]
           ? insMap[m.id].statut==='liste_attente'
-            ? `<span class="s-dispo" style="background:#FEF6E0;color:#B7791F;">⏳ Liste d'attente</span><div style="font-size:11px;color:var(--c-muted);margin:4px 0;">Le match est complet. Un pilote te confirme dès qu'une place se libère.</div><div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne suis plus dispo</button></div>`
+            ? `<span class="s-dispo" style="background:#FEF6E0;color:#B7791F;">🪑 Remplaçant</span><div id="remp-${m.id}"></div><div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne suis plus dispo</button></div>`
           : insMap[m.id].statut==='disponible'
             ? `<span class="s-dispo">✓ Disponible</span><div id="pn-plan-${m.id}"></div><div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne peux plus venir</button></div><div id="covoit-plan-${m.id}"></div>`
             : `<span class="s-dispo">✗ Indisponible</span><div class="match-actions"><button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Je redeviens dispo</button></div>`
@@ -3827,6 +3891,14 @@ async function loadPlanning() {
              </div>`
         : `<span class="s-closed">Fermé</span>`}
     </div>`).join('')
+
+  // Remplaçants : position, invitation, "je viens en tribune"
+  matchs.forEach(async m => {
+    if (insMap[m.id] && insMap[m.id].statut === 'liste_attente') {
+      const box = document.getElementById('remp-' + m.id)
+      if (box) box.innerHTML = remplacantHtml(m.id, await fetchRemplacant(m.id))
+    }
+  })
 
   // Deep link depuis un email de relance : ?match=<id> ou #match-<id>
   focusMatchFromUrl()
@@ -3849,7 +3921,7 @@ async function setDispo(matchId,statut,btn) {
   if (statut === 'indisponible' && _within48h(await _matchDateById(matchId))) { openSignalIndispoModal(matchId); return }
   btn.textContent='...';btn.disabled=true
   const{data:_sv,error}=await sb.from('inscriptions').upsert({benevole_id:CU.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'}).select('statut').maybeSingle()
-  if(!error && _sv && _sv.statut==='liste_attente'){ showToast('⏳ Match complet : tu es sur liste d\'attente','info'); setTimeout(loadPlanning,400); return }
+  if(!error && _sv && _sv.statut==='liste_attente'){ showToast('🪑 Équipe au complet : tu es remplaçant','info'); setTimeout(loadPlanning,400); return }
   if(!error){btn.textContent=statut==='disponible'?'✓':'✗';btn.style.background=statut==='disponible'?'var(--c-green)':'#888';setTimeout(loadPlanning,800)}
   else{btn.textContent=statut==='disponible'?'👍 Dispo':'Je ne peux plus venir';btn.disabled=false;showToast('Erreur : '+error.message,'error')}
 }
