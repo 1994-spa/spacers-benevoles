@@ -212,7 +212,8 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
   <div id="photos-att"></div>
   <div class="sec">Accréditations générées</div>
   <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
-      <button class="btn btn-green" style="font-size:11px;padding:8px 14px;width:auto;" onclick="downloadAllAccredsZip()">Telecharger tout (ZIP)</button>
+      <button class="btn btn-green" style="font-size:11px;padding:8px 14px;width:auto;margin-right:6px;" onclick="downloadAllAccredsZip('png')">Tout en PNG (ZIP)</button>
+      <button class="btn btn-green" style="font-size:11px;padding:8px 14px;width:auto;" onclick="downloadAllAccredsZip('pdf')">Tout en PDF (ZIP)</button>
     </div>
     <div id="accreds-gen"></div>
 </div>
@@ -229,6 +230,9 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
 
   <div class="sec">&#128202; Postes &amp; couverture (besoin &eacute;ditable)</div>
   <div class="card"><div id="thermo-planning"></div></div>
+
+  <div class="sec">&#9203; Effectif &amp; liste d'attente</div>
+  <div id="attente-match"></div>
 
   <div class="sec">&#9888;&#65039; Indispos signal&eacute;es</div>
   <div id="indispo-match"></div>
@@ -300,8 +304,12 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
         <label class="input-label">Nom du poste</label>
         <input id="poste-add-nom" class="input-field" placeholder="ex. Accueil VIP">
       </div>
-      <div style="width:66px;">
-        <label class="input-label">Nb</label>
+      <div style="width:56px;">
+        <label class="input-label">Min</label>
+        <input id="poste-add-min" class="input-field" type="number" min="0" value="1" style="text-align:center;">
+      </div>
+      <div style="width:56px;">
+        <label class="input-label">Max</label>
         <input id="poste-add-max" class="input-field" type="number" min="0" value="2" style="text-align:center;">
       </div>
     </div>
@@ -1200,6 +1208,7 @@ async function renderAccredsGen(list) {
         '<div style="margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' + roleTxt + ' ' + pretIcon + '</div>' +
         '<div style="margin-top:3px;">' + zonesTxt + '</div>' +
       '</div>' +
+      '<button class="btn btn-green" style="font-size:10px;padding:6px 12px;flex-shrink:0;margin-right:6px;" onclick="downloadPiloteAccredPng(\'' + b.id + '\')">PNG</button>' +
       '<button class="btn btn-green" style="font-size:10px;padding:6px 12px;flex-shrink:0;margin-right:6px;" onclick="downloadPiloteAccredPdf(\'' + b.id + '\')">PDF</button>' +
       '<button class="btn btn-blue" style="font-size:10px;padding:6px 12px;flex-shrink:0;" onclick="openConfigAccred(\'' + b.id + '\')">Configurer</button>' +
     '</div>'
@@ -1320,7 +1329,28 @@ async function downloadPiloteAccredPdf(benevoleId) {
   }
 }
 
-async function downloadAllAccredsZip() {
+async function downloadPiloteAccredPng(benevoleId) {
+  try {
+    showAlert('alert-accreds', 'G\u00e9n\u00e9ration du PNG...', 'i')
+    const data = await fetchAccredData(benevoleId)
+    const photoUrl = await getSignedPhotoUrl(data.photo_path)
+    if (!photoUrl) throw new Error('Photo introuvable')
+    await AccreditationGenerator.downloadPng({
+      prenom: data.prenom,
+      nom: data.nom,
+      roleLibelle: data.role_libelle,
+      zonesAutorisees: data.zones_ids,
+      photoUrl: photoUrl,
+    })
+    showAlert('alert-accreds', 'PNG t\u00e9l\u00e9charg\u00e9 pour ' + data.prenom + ' ' + data.nom, 's')
+  } catch (err) {
+    console.error('[accred] downloadPiloteAccredPng', err)
+    showAlert('alert-accreds', 'Erreur : ' + (err.message || err), 'e')
+  }
+}
+
+async function downloadAllAccredsZip(format) {
+  const fmt = format === 'png' ? 'png' : 'pdf'
   try {
     if (!window.JSZip) {
       showAlert('alert-accreds', 'JSZip non charg\u00e9 (rafraichir la page)', 'e')
@@ -1350,14 +1380,15 @@ async function downloadAllAccredsZip() {
       showAlert('alert-accreds', 'G\u00e9n\u00e9ration ' + (i+1) + ' / ' + rows.length + '...', 'i')
       if (!url) { ko++; continue }
       try {
-        const blob = await AccreditationGenerator.renderToPdfBlob({
+        const renderFn = fmt === 'png' ? AccreditationGenerator.renderToPngBlob : AccreditationGenerator.renderToPdfBlob
+        const blob = await renderFn({
           prenom: r.prenom,
           nom: r.nom,
           roleLibelle: r.role_libelle,
           zonesAutorisees: r.zones_ids,
           photoUrl: url,
         })
-        const name = AccreditationGenerator.buildFileName({ prenom: r.prenom, nom: r.nom }, 'pdf')
+        const name = AccreditationGenerator.buildFileName({ prenom: r.prenom, nom: r.nom }, fmt)
         zip.file(name, blob)
         ok++
       } catch (e) {
@@ -1371,13 +1402,13 @@ async function downloadAllAccredsZip() {
     const url = URL.createObjectURL(zipBlob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'accreditations_spacers_' + stamp + '.zip'
+    a.download = 'accreditations_spacers_' + fmt + '_' + stamp + '.zip'
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     setTimeout(() => URL.revokeObjectURL(url), 2000)
 
-    const msg = 'ZIP g\u00e9n\u00e9r\u00e9 : ' + ok + ' r\u00e9ussi(s)' + (ko > 0 ? ', ' + ko + ' \u00e9chec(s)' : '')
+    const msg = 'ZIP ' + fmt.toUpperCase() + ' g\u00e9n\u00e9r\u00e9 : ' + ok + ' r\u00e9ussi(s)' + (ko > 0 ? ', ' + ko + ' \u00e9chec(s)' : '')
     showAlert('alert-accreds', msg, ok > 0 ? 's' : 'e')
   } catch (err) {
     console.error('[accred] downloadAllAccredsZip', err)
@@ -1665,6 +1696,9 @@ async function loadCalendrier() {
       <div style="display:flex;gap:7px;margin-bottom:7px;flex-wrap:wrap;">
         <input type="date" value="${d}" onchange="calSaveField('${m.id}','date_match',this.value)" style="flex:1;min-width:135px;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:8px 10px;color:white;font-family:inherit;font-size:12px;">
         <input type="time" value="${h}" onchange="calSaveField('${m.id}','heure',this.value)" style="width:110px;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:8px 10px;color:white;font-family:inherit;font-size:12px;">
+        <label title="Nombre maximum de bénévoles disponibles pour ce match (au-delà : liste d'attente)" style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,0.6);">👥 Max
+          <input type="number" min="0" value="${m.benevoles_max == null ? 35 : m.benevoles_max}" onchange="calSaveField('${m.id}','benevoles_max',this.value === '' ? null : parseInt(this.value,10))" style="width:60px;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:8px 6px;color:white;font-family:inherit;font-size:12px;text-align:center;">
+        </label>
       </div>
       <button class="btn btn-sm btn-full" style="background:${pub ? 'rgba(255,255,255,0.1);color:white' : '#1f6f43;color:white'};" onclick="calTogglePublish('${m.id}',${pub})">${pub ? 'Dépublier (fermer les inscriptions)' : '📣 Publier (ouvrir les inscriptions)'}</button>
     </div>`
@@ -1672,7 +1706,7 @@ async function loadCalendrier() {
 }
 
 async function calSaveField(id, field, value) {
-  let v = value || null
+  let v = (value === 0) ? 0 : (value || null)
   if (field === 'heure' && v && v.length === 5) v = v + ':00'
   const patch = {}; patch[field] = v
   const { error } = await sb.from('matchs').update(patch).eq('id', id)
@@ -1733,6 +1767,7 @@ async function loadMatch(matchId) {
     el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:12px;">Aucun match ouvert.</div>'
     document.getElementById('non-rep-match').innerHTML = ''
     { const _ie = document.getElementById('indispo-match'); if (_ie) _ie.innerHTML = '' }
+    { const _ae = document.getElementById('attente-match'); if (_ae) _ae.innerHTML = '' }
     document.getElementById('note-match').value = ''
     curMatch = null
     curInscriptionsAffectes = []
@@ -1793,6 +1828,9 @@ async function loadMatch(matchId) {
     }
   }
 
+  // Plafond du match + liste d'attente
+  renderListeAttente(m, dispos.length)
+
   // Résout les signed URLs pour les bénévoles inscrits (chantier 11)
   await resolvePhotosInList(dispos, i => i.benevoles)
 
@@ -1830,6 +1868,58 @@ async function loadMatch(matchId) {
   // VALIDATION : extrait les bénévoles affectés à un poste
   curInscriptionsAffectes = dispos.filter(i => i.poste_id)
   renderValidation(curInscriptionsAffectes)
+}
+
+// -----------------------------------------------------------
+// PLAFOND PAR MATCH + LISTE D'ATTENTE
+// -----------------------------------------------------------
+async function renderListeAttente(m, nbDispos) {
+  const el = document.getElementById('attente-match')
+  if (!el) return
+  const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+  const max = (m.benevoles_max == null) ? 0 : m.benevoles_max
+  const { data: att } = await sb.from('inscriptions')
+    .select('id, benevole_id, liste_attente_le, created_at, benevoles!inscriptions_benevole_id_fkey(prenom, nom, matchs_joues)')
+    .eq('match_id', m.id).eq('statut', 'liste_attente')
+    .order('liste_attente_le', { ascending: true, nullsFirst: false })
+  const list = att || []
+  const libres = max > 0 ? Math.max(0, max - nbDispos) : null
+  const pct = max > 0 ? Math.min(100, Math.round(nbDispos / max * 100)) : 0
+  const col = max > 0 && nbDispos >= max ? '#F09595' : (pct >= 85 ? '#FAC775' : '#A7D77C')
+  let html = '<div class="card">'
+    + '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px;">'
+    + '<div style="font-size:20px;font-weight:800;color:' + col + ';">' + nbDispos + (max > 0 ? ' / ' + max : '') + '</div>'
+    + '<div style="font-size:11px;color:rgba(255,255,255,0.5);">bénévoles disponibles' + (max > 0 ? (libres > 0 ? ' · ' + libres + ' place' + (libres > 1 ? 's' : '') + ' libre' + (libres > 1 ? 's' : '') : ' · complet') : ' · pas de plafond') + '</div>'
+    + '</div>'
+    + (max > 0 ? '<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;margin-bottom:10px;"><div style="height:100%;width:' + pct + '%;background:' + col + ';"></div></div>' : '')
+    + '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:8px;">Plafond réglable dans l\'onglet Calendrier. Au-delà, les bénévoles passent automatiquement en liste d\'attente (aucun refus).</div>'
+  if (!list.length) {
+    html += '<div style="font-size:12px;color:rgba(255,255,255,0.3);">Personne en liste d\'attente.</div>'
+  } else {
+    html += list.map((i, idx) => {
+      const b = i.benevoles || {}
+      const when = i.liste_attente_le ? new Date(i.liste_attente_le).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : ''
+      return '<div class="benv-row">'
+        + '<div style="width:22px;font-size:12px;font-weight:800;color:var(--c-gold-2,#FAC775);">' + (idx+1) + '</div>'
+        + '<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;color:white;">' + esc(b.prenom) + ' ' + esc(b.nom) + '</div>'
+        + '<div style="font-size:10px;color:rgba(255,255,255,0.4);">' + (b.matchs_joues || 0) + ' match(s) · en attente depuis le ' + when + '</div></div>'
+        + '<button class="btn btn-green btn-sm" onclick="validerListeAttente(\'' + i.id + '\', this)">✅ Valider</button>'
+        + '</div>'
+    }).join('')
+  }
+  html += '</div>'
+  el.innerHTML = html
+}
+
+async function validerListeAttente(inscId, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = '...' }
+  const { error } = await sb.from('inscriptions').update({ statut: 'disponible' }).eq('id', inscId)
+  if (error) {
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Valider' }
+    showAlert('alert-match', 'Erreur : ' + error.message, 'e'); return
+  }
+  showAlert('alert-match', 'Bénévole validé : il passe en disponible', 's')
+  if (curMatch) loadMatch(curMatch.id)
 }
 
 const CR_CATS = [
@@ -3708,8 +3798,10 @@ async function loadPostesAdmin() {
       <div style="display:flex;gap:7px;align-items:center;">
         <input class="input-field pa-emoji" style="width:48px;text-align:center;padding:9px 3px;" maxlength="4" value="${escapeHtmlPilote(emoji)}">
         <input class="input-field pa-nom" style="flex:1;" value="${escapeHtmlPilote(sp.texte)}">
-        <input class="input-field pa-max" type="number" min="0" style="width:60px;text-align:center;" value="${p.benevoles_max_match == null ? '' : p.benevoles_max_match}">
+        <input class="input-field pa-min" type="number" min="0" title="Minimum par match" placeholder="min" style="width:54px;text-align:center;" value="${p.benevoles_min_match == null ? 0 : p.benevoles_min_match}">
+        <input class="input-field pa-max" type="number" min="0" title="Maximum par match (0 = sans limite)" placeholder="max" style="width:54px;text-align:center;" value="${p.benevoles_max_match == null ? '' : p.benevoles_max_match}">
       </div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;text-align:right;">min / max bénévoles par match</div>
       <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;">
         ${p.actif ? '' : '<span style="font-size:10px;color:var(--c-amber);font-weight:700;">Désactivé</span>'}
         <button class="btn btn-blue btn-sm" onclick="posteSave('${p.id}')">💾 Enregistrer</button>
@@ -3724,10 +3816,17 @@ async function posteCreate() {
   const emoji = document.getElementById('poste-add-emoji').value.trim()
   const texte = document.getElementById('poste-add-nom').value.trim()
   const max = parseInt(document.getElementById('poste-add-max').value, 10)
+  const min = parseInt(document.getElementById('poste-add-min').value, 10) || 0
   if (!texte) { showAlert('alert-postes', 'Indique un nom de poste', 'e'); return }
   if (isNaN(max) || max < 0) { showAlert('alert-postes', 'Nombre de bénévoles invalide', 'e'); return }
-  const { error } = await sb.rpc('poste_create', { p_nom: posteFullNom(emoji, texte), p_emoji: emoji || '📋', p_max: max })
+  if (max > 0 && min > max) { showAlert('alert-postes', 'Le minimum ne peut pas dépasser le maximum', 'e'); return }
+  const fullNom = posteFullNom(emoji, texte)
+  const { error } = await sb.rpc('poste_create', { p_nom: fullNom, p_emoji: emoji || '📋', p_max: max })
   if (error) { showAlert('alert-postes', 'Erreur : ' + error.message, 'e'); return }
+  if (min > 0) {
+    const { data: np } = await sb.from('postes').select('id').eq('nom', fullNom).order('created_at', { ascending: false }).limit(1)
+    if (np && np[0]) await sb.rpc('poste_set_min', { p_id: np[0].id, p_min: min })
+  }
   document.getElementById('poste-add-emoji').value = ''
   document.getElementById('poste-add-nom').value = ''
   document.getElementById('poste-add-max').value = '2'
@@ -3741,10 +3840,14 @@ async function posteSave(id) {
   const emoji = row.querySelector('.pa-emoji').value.trim()
   const texte = row.querySelector('.pa-nom').value.trim()
   const max = parseInt(row.querySelector('.pa-max').value, 10)
+  const min = parseInt(row.querySelector('.pa-min').value, 10) || 0
   if (!texte) { showAlert('alert-postes', 'Le nom ne peut pas être vide', 'e'); return }
   if (isNaN(max) || max < 0) { showAlert('alert-postes', 'Nombre de bénévoles invalide', 'e'); return }
+  if (max > 0 && min > max) { showAlert('alert-postes', 'Le minimum ne peut pas dépasser le maximum', 'e'); return }
   const { error } = await sb.rpc('poste_update', { p_id: id, p_nom: posteFullNom(emoji, texte), p_emoji: emoji || '📋', p_max: max, p_actif: true })
   if (error) { showAlert('alert-postes', 'Erreur : ' + error.message, 'e'); return }
+  const { error: eMin } = await sb.rpc('poste_set_min', { p_id: id, p_min: min })
+  if (eMin) { showAlert('alert-postes', 'Erreur minimum : ' + eMin.message, 'e'); return }
   showAlert('alert-postes', 'Poste enregistré', 's')
   loadPostesAdmin()
 }

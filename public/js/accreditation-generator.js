@@ -1,5 +1,14 @@
 /**
- * accreditation-generator.js — v3
+ * accreditation-generator.js — v4
+ *
+ * Changement v4 :
+ *   - Chargement EXPLICITE des polices via l'API FontFace avant tout rendu
+ *     (avant : le canvas dessinait avant que le navigateur ait charge
+ *     Sansation/Heaters -> police de secours Arial/serif)
+ *       * Sansation Bold -> prenom + nom
+ *       * Heaters        -> libelle du role (BENEVOLE, etc.)
+ *   - fitTextSize mesure avec la bonne graisse (Heaters n'existe qu'en 400)
+ *   - Nouveau : renderToPngBlob(params) pour le batch ZIP PNG cote pilote
  *
  * Changement v3 :
  *   - SUPPRESSION du fill de couleur par-dessus la pastille
@@ -23,15 +32,15 @@
     template_width: 1240,
     template_height: 1754,
     photo: { cx: 619, cy: 539, r: 172 },
-    nom:   { x1: 300, y1: 784,  x2: 912, y2: 919  },
-    role:  { x1: 293, y1: 1084, x2: 921, y2: 1145 },
+    nom:   { x1: 280, y1: 760,  x2: 960, y2: 960  },
+    role:  { x1: 260, y1: 1050, x2: 980, y2: 1180 },
     zones: {
-      1: { label: 'Terrain',           color: '#8b5cf6', cx: 195,  cy: 1417, r: 73 },
-      2: { label: 'Plateau',           color: '#22c55e', cx: 369,  cy: 1416, r: 73 },
-      3: { label: 'Vestiaires',        color: '#1e3a8a', cx: 544,  cy: 1416, r: 73 },
-      4: { label: 'Zone m\u00e9dias',  color: '#ef4444', cx: 722,  cy: 1417, r: 73 },
-      5: { label: 'Salons VIP',        color: '#ffffff', cx: 897,  cy: 1419, r: 73 },
-      6: { label: 'Espace b\u00e9n\u00e9voles', color: '#facc15', cx: 1071, cy: 1417, r: 73 }
+      1: { label: 'Terrain', color: '#8b5cf6', cx: 195,  cy: 1417, r: 73 },
+      2: { label: 'Plateau / Zone mixte et m\u00e9dias', color: '#22c55e', cx: 369,  cy: 1416, r: 73 },
+      3: { label: 'Espace logistique / Vestiaires', color: '#1e3a8a', cx: 544,  cy: 1416, r: 73 },
+      4: { label: 'Tribune officielle', color: '#ef4444', cx: 722,  cy: 1417, r: 73 },
+      5: { label: 'Salon partenaires', color: '#ffffff', cx: 897,  cy: 1419, r: 73 },
+      6: { label: 'Espace b\u00e9n\u00e9vole et salon club', color: '#facc15', cx: 1071, cy: 1417, r: 73 }
     }
   };
 
@@ -46,6 +55,36 @@
     templatePath: '/img/accreditation/template-club-2627.png',
     versoPath:    '/img/accreditation/verso-plan-acces-2627.png'
   };
+
+  const FONTS = [
+    { family: 'Sansation', url: '/fonts/Sansation_Bold.ttf', descriptors: { weight: '700', style: 'normal' } },
+    { family: 'Heaters',   url: '/fonts/Heaters.otf',        descriptors: { weight: '400', style: 'normal' } }
+  ];
+
+  let fontsPromise = null;
+
+  // Charge et enregistre les polices une seule fois (memoise).
+  // Si une police echoue, on n'empeche pas le rendu mais on le signale.
+  function ensureFonts() {
+    if (fontsPromise) return fontsPromise;
+    if (!global.FontFace || !document.fonts) {
+      fontsPromise = Promise.resolve();
+      return fontsPromise;
+    }
+    fontsPromise = Promise.all(FONTS.map(function (f) {
+      const face = new FontFace(f.family, 'url("' + f.url + '")', f.descriptors);
+      return face.load().then(function (loaded) {
+        document.fonts.add(loaded);
+        return true;
+      }).catch(function (err) {
+        console.warn('[accred] police non chargee : ' + f.family, err);
+        return false;
+      });
+    })).then(function (res) {
+      if (res.indexOf(false) !== -1) fontsPromise = null; // on retentera au prochain rendu
+    });
+    return fontsPromise;
+  }
 
   const imageCache = {};
 
@@ -66,10 +105,11 @@
     return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
   }
 
-  function fitTextSize(ctx, text, fontFamily, maxWidth, maxHeight, maxSize, minSize) {
+  function fitTextSize(ctx, text, fontFamily, maxWidth, maxHeight, maxSize, minSize, weight) {
     minSize = minSize || 20;
+    const w = weight || 'bold';
     for (let size = maxSize; size >= minSize; size -= 2) {
-      ctx.font = 'bold ' + size + 'px "' + fontFamily + '"';
+      ctx.font = w + ' ' + size + 'px "' + fontFamily + '"';
       const metrics = ctx.measureText(text);
       if (metrics.width <= maxWidth && size <= maxHeight) return size;
     }
@@ -79,7 +119,7 @@
   function drawNomInRect(ctx, prenom, nom, rect) {
     const w = rect.x2 - rect.x1, h = rect.y2 - rect.y1;
     const cx = (rect.x1 + rect.x2) / 2, cy = (rect.y1 + rect.y2) / 2;
-    const maxSize = Math.min(h * 0.42, 100);
+    const maxSize = Math.min(h * 0.46, 110);
     const size1 = fitTextSize(ctx, prenom, 'Sansation', w * 0.92, maxSize, maxSize);
     const size2 = fitTextSize(ctx, nom, 'Sansation', w * 0.92, maxSize, maxSize);
     const finalSize = Math.min(size1, size2);
@@ -95,12 +135,12 @@
   function drawRoleInRect(ctx, role, rect) {
     const w = rect.x2 - rect.x1, h = rect.y2 - rect.y1;
     const cx = (rect.x1 + rect.x2) / 2, cy = (rect.y1 + rect.y2) / 2;
-    const maxSize = Math.min(h * 1.4, 110);
-    const size = fitTextSize(ctx, role, 'Heaters', w * 0.85, h * 1.4, maxSize);
+    const maxSize = Math.min(h * 1.25, 160);
+    const size = fitTextSize(ctx, role, 'Heaters', w * 0.9, h * 1.25, maxSize, 20, 'normal');
     ctx.fillStyle = CHARTE.night;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = size + 'px "Heaters"';
+    ctx.font = 'normal ' + size + 'px "Heaters"';
     ctx.fillText(role, cx, cy);
   }
 
@@ -217,7 +257,8 @@
     const templatePath = params.templatePath || ASSETS.templatePath;
     const [templateImg, photoImg] = await Promise.all([
       loadImage(templatePath),
-      loadImage(params.photoUrl)
+      loadImage(params.photoUrl),
+      ensureFonts()
     ]);
 
     ctx.drawImage(templateImg, 0, 0, canvas.width, canvas.height);
@@ -233,11 +274,17 @@
     drawZones(ctx, params.zonesAutorisees || []);
   }
 
-  async function downloadPng(params) {
+  async function renderToPngBlob(params) {
     const canvas = document.createElement('canvas');
     await render(canvas, params);
-    const filename = buildFileName(params, 'png');
-    canvas.toBlob((blob) => triggerDownload(blob, filename), 'image/png');
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Export PNG impossible')), 'image/png');
+    });
+  }
+
+  async function downloadPng(params) {
+    const blob = await renderToPngBlob(params);
+    triggerDownload(blob, buildFileName(params, 'png'));
   }
 
   async function renderToPdfBlob(params) {
@@ -303,6 +350,8 @@
     downloadPng: downloadPng,
     downloadPdf: downloadPdf,
     renderToPdfBlob: renderToPdfBlob,
+    renderToPngBlob: renderToPngBlob,
+    ensureFonts: ensureFonts,
     buildFileName: buildFileName,
     _COORDS: COORDS,
     _CHARTE: CHARTE,

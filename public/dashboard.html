@@ -2985,6 +2985,16 @@ function renderNextMatchSection() {
   const heureStr = (m.heure || '').replace(/:\d{2}$/, '')
   const lieuStr = m.lieu || 'Palais des Sports'
 
+  if (insc && insc.statut === 'liste_attente') {
+    return `
+    <div style="background:linear-gradient(135deg,var(--c-gold-50,#FEF6E0),var(--c-cream,#FBF3E4));border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;" onclick="bSwitch('planning')">
+      <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-amber,#B7791F);opacity:0.8;margin-bottom:3px;">PROCHAIN MATCH</div>
+      <div style="font-size:14px;font-weight:800;color:var(--c-amber,#B7791F);margin-bottom:4px;">Spacers vs ${escapeHtml(m.adversaire)}</div>
+      <div style="font-size:11px;color:var(--c-amber,#B7791F);opacity:0.85;margin-bottom:8px;">📅 ${escapeHtml(dateStr)}${heureStr ? ' · ' + escapeHtml(heureStr) : ''} · ${escapeHtml(lieuStr)}</div>
+      <div style="font-size:12px;font-weight:700;color:var(--c-amber,#B7791F);line-height:1.45;">⏳ Tu es sur liste d'attente : l'équipe du match est au complet. Un pilote te confirme dès qu'une place se libère.</div>
+    </div>`
+  }
+
   if (insc) {
     const isDispo = insc.statut === 'disponible'
     const bg = isDispo ? 'linear-gradient(135deg,var(--c-green-50),var(--c-green-light))' : 'linear-gradient(135deg,var(--c-cream),var(--c-line))'
@@ -3075,18 +3085,19 @@ function openSignalIndispoModal(matchId) {
 async function setDispoFromHome(matchId, statut) {
   if (!CU || !CP) return
   if (statut === 'indisponible' && _within48h(await _matchDateById(matchId))) { openSignalIndispoModal(matchId); return }
-  const { error } = await sb.from('inscriptions').upsert({
+  const { data: _saved, error } = await sb.from('inscriptions').upsert({
     benevole_id: CP.id,
     match_id: matchId,
     statut: statut
-  }, { onConflict: 'benevole_id,match_id' })
+  }, { onConflict: 'benevole_id,match_id' }).select('statut').maybeSingle()
 
   if (error) {
     showToast('Erreur : ' + error.message, 'error')
     return
   }
 
-  showToast(statut === 'disponible' ? '👍 Noté(e) dispo, merci !' : '👎 Indisponibilité enregistrée', 'success')
+  if (_saved && _saved.statut === 'liste_attente') showToast('⏳ Match complet : tu es sur liste d\'attente, on te confirme dès qu\'une place se libère', 'info')
+  else showToast(statut === 'disponible' ? '👍 Noté(e) dispo, merci !' : '👎 Indisponibilité enregistrée', 'success')
   await loadNextMatch()
   await loadEtapesData()
   renderHomeForProfil(CP)
@@ -3186,6 +3197,8 @@ function renderFilleulsCard() {
       badge = '<span style="color:rgba(255,255,255,0.4);font-size:12px;">Pas de match prévu</span>';
     } else if (f.next_match_statut === 'disponible') {
       badge = '<span style="color:#34d399;font-size:12px;font-weight:600;">✓ Dispo</span>';
+    } else if (f.next_match_statut === 'liste_attente') {
+      badge = '<span style="color:#fbbf24;font-size:12px;font-weight:600;">⏳ Liste d\'attente</span>';
     } else if (f.next_match_statut === 'indisponible') {
       badge = '<span style="color:#f87171;font-size:12px;font-weight:600;">✗ Indispo</span>';
     } else {
@@ -3786,15 +3799,25 @@ async function loadPlanning() {
   const { data: ins } = await sb.from('inscriptions').select('match_id,statut,poste_id').eq('benevole_id',CU.id)
   const insMap={}; if(ins) ins.forEach(i=>insMap[i.match_id]=i)
   const _mids = matchs.map(m=>m.id)
+  const { data: _dispAll } = await sb.from('inscriptions').select('match_id').in('match_id', _mids).eq('statut','disponible')
+  const dispCount={}; (_dispAll||[]).forEach(r=>{ dispCount[r.match_id]=(dispCount[r.match_id]||0)+1 })
+  const placesTxt = m => {
+    const max = m.benevoles_max||0; if (!max) return ''
+    const n = dispCount[m.id]||0, libres = Math.max(0, max-n)
+    return `<div style="font-size:11px;font-weight:700;margin:4px 0 2px;color:${libres===0?'#B7791F':(libres<=5?'#B7791F':'#3B6D11')};">👥 ${n}/${max} bénévoles${libres===0?' · complet (liste d\'attente)':(' · '+libres+' place'+(libres>1?'s':'')+' restante'+(libres>1?'s':''))}</div>`
+  }
   const { data: _cre } = await sb.from('match_creneaux').select('*').in('match_id', _mids).order('ordre').order('heure_debut')
   const creMap={}; (_cre||[]).forEach(c=>{ (creMap[c.match_id]=creMap[c.match_id]||[]).push(c) })
   el.innerHTML = matchs.map(m=>`
     <div class="match-item" id="match-${m.id}">
       <div class="match-vs">Spacers vs ${m.adversaire}</div>
       <div class="match-info">📅 ${formatDate(m.date_match)} · ${m.heure||''} · ${m.lieu||'Palais des Sports'}</div>
+      ${m.statut_inscriptions==='ouvert' ? placesTxt(m) : ''}
       ${m.statut_inscriptions==='ouvert'
         ? insMap[m.id]
-          ? insMap[m.id].statut==='disponible'
+          ? insMap[m.id].statut==='liste_attente'
+            ? `<span class="s-dispo" style="background:#FEF6E0;color:#B7791F;">⏳ Liste d'attente</span><div style="font-size:11px;color:var(--c-muted);margin:4px 0;">Le match est complet. Un pilote te confirme dès qu'une place se libère.</div><div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne suis plus dispo</button></div>`
+          : insMap[m.id].statut==='disponible'
             ? `<span class="s-dispo">✓ Disponible</span><div id="pn-plan-${m.id}"></div><div class="match-actions"><button class="btn-sm btn-sm-ghost" onclick="setDispo('${m.id}','indisponible',this)">Je ne peux plus venir</button></div><div id="covoit-plan-${m.id}"></div>`
             : `<span class="s-dispo">✗ Indisponible</span><div class="match-actions"><button class="btn-sm btn-sm-green" onclick="setDispo('${m.id}','disponible',this)">👍 Je redeviens dispo</button></div>`
           : `<span class="s-open">✅ Ouvert</span>
@@ -3825,9 +3848,10 @@ async function loadPlanning() {
 async function setDispo(matchId,statut,btn) {
   if (statut === 'indisponible' && _within48h(await _matchDateById(matchId))) { openSignalIndispoModal(matchId); return }
   btn.textContent='...';btn.disabled=true
-  const{error}=await sb.from('inscriptions').upsert({benevole_id:CU.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'})
+  const{data:_sv,error}=await sb.from('inscriptions').upsert({benevole_id:CU.id,match_id:matchId,statut},{onConflict:'benevole_id,match_id'}).select('statut').maybeSingle()
+  if(!error && _sv && _sv.statut==='liste_attente'){ showToast('⏳ Match complet : tu es sur liste d\'attente','info'); setTimeout(loadPlanning,400); return }
   if(!error){btn.textContent=statut==='disponible'?'✓':'✗';btn.style.background=statut==='disponible'?'var(--c-green)':'#888';setTimeout(loadPlanning,800)}
-  else{btn.textContent='Err';btn.disabled=false}
+  else{btn.textContent=statut==='disponible'?'👍 Dispo':'Je ne peux plus venir';btn.disabled=false;showToast('Erreur : '+error.message,'error')}
 }
 
 // -- POINTS ---------------------------------------------------

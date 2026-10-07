@@ -117,6 +117,41 @@
   }
   function pos(m,dom){ return (m-dom[0])/(dom[1]-dom[0])*100; }
 
+  // ════════════ MES COÉQUIPIERS (RPC mes_coequipiers) ════════════
+  async function coequipiersHtml(sb, mid){
+    try{
+      var r=await sb.rpc('mes_coequipiers',{ p_match_id: mid });
+      if(!r || r.error){ if(r&&r.error) console.warn('[PN] coequipiers',r.error); return ''; }
+      var rows=r.data||[];
+      // regroupe par poste + créneau
+      var groups=[], gMap={};
+      rows.forEach(function(x){
+        var k=(x.poste||'')+'|'+(x.bloc_debut||'')+'|'+(x.bloc_fin||'');
+        if(!gMap[k]){ gMap[k]={poste:x.poste, d:x.bloc_debut, f:x.bloc_fin, people:[]}; groups.push(gMap[k]); }
+        gMap[k].people.push(((x.prenom||'')+' '+(x.nom||'')).trim());
+      });
+      var body;
+      if(!groups.length){
+        body='<div style="font-size:12px;color:#5A7291;">Pour l\'instant tu es seul·e sur ce poste — le pilote complète l\'équipe au fil des inscriptions.</div>';
+      } else {
+        body=groups.map(function(g){
+          var when=(g.d!=null)?(' · '+fmtH(toMin(g.d))+(g.f?' – '+fmtH(toMin(g.f)):'')):'';
+          var chips=g.people.map(function(n){
+            var ini=n.split(/\s+/).map(function(w){return w.charAt(0);}).join('').slice(0,2).toUpperCase();
+            return '<div style="display:flex;align-items:center;gap:6px;background:#fff;border-radius:20px;padding:3px 10px 3px 3px;">'
+              + '<span style="width:24px;height:24px;border-radius:50%;background:'+posteColor(g.poste||'')+';color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;">'+esc(ini)+'</span>'
+              + '<span style="font-size:12px;font-weight:700;color:var(--c-navy,#042C53);">'+esc(n)+'</span></div>';
+          }).join('');
+          return '<div style="margin-bottom:8px;"><div style="font-size:11px;font-weight:700;color:#5A7291;margin-bottom:5px;">'+esc(g.poste||'Ton poste')+when+'</div>'
+            + '<div style="display:flex;flex-wrap:wrap;gap:6px;">'+chips+'</div></div>';
+        }).join('');
+      }
+      return '<div style="background:#F4F7FB;border-radius:12px;padding:12px 14px;margin-top:8px;">'
+        + '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8A9BAD;margin-bottom:8px;">🤝 Avec toi sur ton poste</div>'
+        + body + '</div>';
+    }catch(e){ console.warn('[PN] coequipiers',e); return ''; }
+  }
+
   // ════════════ VUE BÉNÉVOLE : "Mon planning" ════════════
   async function renderBenevole(container, sb, opts){
     if(!container) return;
@@ -165,7 +200,7 @@
       container.innerHTML='<div style="background:#F4F7FB;border-radius:12px;padding:12px 14px;margin-top:8px;">'
         + head
         + '<div style="font-size:11px;color:#5A7291;margin-bottom:12px;">Tu enchaînes <b>'+blocks.length+' poste'+(blocks.length>1?'s':'')+'</b> — tout est indiqué ci-dessous, tu n\'as rien à retenir.</div>'
-        + steps + '</div>';
+        + steps + '</div>' + (await coequipiersHtml(sb, mid));
     }catch(e){ console.error('[PN] benevole',e); container.innerHTML=''; }
   }
 
@@ -191,7 +226,7 @@
         +   '<div style="width:14px;height:14px;border-radius:4px;background:'+col+';flex-shrink:0;"></div>'
         +   '<div style="min-width:0;"><div style="font-size:15px;font-weight:800;color:var(--c-navy,#042C53);">'+esc(posteNom)+'</div>'
         +   '<div style="font-size:11px;color:#5A7291;">'+(arr!=null?'📍 Rendez-vous à <b style="color:var(--c-navy,#042C53);">'+fmtH(arr)+'</b> · ':'')+'jusqu\'à la fin du match'+(ke!=null?' (coup d\'envoi '+fmtH(ke)+')':'')+'</div></div>'
-        + '</div></div>';
+        + '</div></div>' + (await coequipiersHtml(sb, mid));
     }catch(e){ console.error('[PN] benevole simple',e); container.innerHTML=''; }
   }
 

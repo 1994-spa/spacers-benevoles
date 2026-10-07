@@ -150,6 +150,9 @@
                st === STATUS.over ? ('+' + (aff - besoin) + ' en renfort') :
                st === STATUS.nomin ? 'Pas de minimum' :
                aff === 0 ? 'Personne d\'affecté' : (manque + ' manquant' + (manque > 1 ? 's' : ''));
+    var pMin = p.benevoles_min_match || 0, pMax = p.benevoles_max_match || 0;
+    if (pMin > 0 && aff < pMin) note = '⚠️ Sous le minimum (' + aff + '/' + pMin + ')';
+    note += (pMin > 0 || pMax > 0) ? ' · min ' + pMin + (pMax > 0 ? ' / max ' + pMax : '') : '';
 
     // heure de présence propre au poste (si créneaux spécifiques définis) — heures exactes
     var timeBadge = '';
@@ -211,7 +214,7 @@
 
     try {
       var res = await Promise.all([
-        sb.from('postes').select('id,nom,benevoles_max_match,actif').eq('actif', true).order('nom'),
+        sb.from('postes').select('*').eq('actif', true).order('nom'),
         sb.from('inscriptions')
           .select('poste_id, benevoles!inscriptions_benevole_id_fkey(prenom,nom)')
           .eq('match_id', matchId).eq('statut', 'disponible'),
@@ -248,9 +251,10 @@
       container._thermoData = postes.map(function (p) { return { poste: p, aff: (affMap[p.id] || []) }; });
 
       // ── récap global (compteur en tête) ──
-      var totAff = 0, totBesoin = 0, incomplets = 0;
+      var totAff = 0, totBesoin = 0, incomplets = 0, sousMin = 0;
       postes.forEach(function (p) {
         var a = (affMap[p.id] || []).length;
+        if ((p.benevoles_min_match || 0) > 0 && a < p.benevoles_min_match) sousMin++;
         var b = (besMap[p.id] !== undefined) ? besMap[p.id] : (p.benevoles_max_match || 0);
         totAff += a;
         if (b > 0) { totBesoin += b; if (a < b) incomplets++; }
@@ -259,7 +263,8 @@
         + ' <span style="color:rgba(255,255,255,0.3);">·</span> '
         + (incomplets === 0
             ? '<span style="color:#A7D77C;">tous les postes complets ✓</span>'
-            : '<span style="color:#FAC775;">' + incomplets + ' poste' + (incomplets > 1 ? 's' : '') + ' à compléter</span>');
+            : '<span style="color:#FAC775;">' + incomplets + ' poste' + (incomplets > 1 ? 's' : '') + ' à compléter</span>')
+        + (sousMin > 0 ? ' <span style="color:rgba(255,255,255,0.3);">·</span> <span style="color:#F09595;">⚠️ ' + sousMin + ' sous le minimum</span>' : '');
 
       var chevron = UI.collapsed ? '▸' : '▾';
 
