@@ -1918,7 +1918,7 @@ async function renderListeAttente(m, nbDispos) {
       + '<button class="btn btn-ghost btn-sm" onclick="inviterTousRemplacants()">🎟️ Inviter tous les remplaçants</button>'
       + (nbABillet ? '<button class="btn btn-orange btn-sm" onclick="envoyerRecapBillets(this)">📧 M\'envoyer la liste des ' + nbABillet + ' billet(s) à émettre</button>' : '')
       + '</div>'
-      + '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:6px;line-height:1.5;">Les billets d\'invitation partent par e-mail via Tickie. La liste des billets à émettre t\'est envoyée automatiquement à J-2 (9h), avec un rappel à J-1 s\'il en reste. Coche « 📨 Billet envoyé » une fois parti.</div>'
+      + '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:6px;line-height:1.5;">Les billets d\'invitation partent par e-mail via Tickie. La liste des billets à émettre t\'est envoyée automatiquement la veille du match (J-1, 9h). Coche « 📨 Billet envoyé » une fois parti.</div>'
   }
   html += '</div>'
   el.innerHTML = html
