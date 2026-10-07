@@ -1909,10 +1909,16 @@ async function renderListeAttente(m, nbDispos) {
         + '<div style="font-size:10px;color:rgba(255,255,255,0.4);">' + (r.matchs_joues || 0) + ' match(s) · remplaçant depuis le ' + when + '</div></div>'
         + '<div style="display:flex;gap:5px;flex-shrink:0;">'
         + '<button class="btn btn-sm ' + (r.invitation_tribune ? 'btn-ghost' : 'btn-orange') + '" title="' + (r.invitation_tribune ? 'Invitation offerte (cliquer pour annuler)' : 'Offrir une invitation en tribune (e-mail envoyé)') + '" onclick="toggleInvitationRemplacant(\'' + r.inscription_id + '\',' + (r.invitation_tribune ? 'false' : 'true') + ', this)">' + (r.invitation_tribune ? '🎟️ Invité ✓' : '🎟️ Inviter') + '</button>'
+        + (r.invitation_tribune ? '<button class="btn btn-sm ' + (r.billet_envoye ? 'btn-ghost' : 'btn-blue') + '" title="' + (r.billet_envoye ? 'Billet envoyé (cliquer pour annuler)' : 'Cocher quand le billet Tickie est parti') + '" onclick="toggleBilletEnvoye(\'' + r.inscription_id + '\',' + (r.billet_envoye ? 'false' : 'true') + ', this)">' + (r.billet_envoye ? '📨 Billet ✓' : '📨 Billet envoyé ?') + '</button>' : '')
         + '<button class="btn btn-green btn-sm" onclick="validerListeAttente(\'' + r.inscription_id + '\', this)">✅ Valider</button>'
         + '</div></div>'
     }).join('')
-    html += '<button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="inviterTousRemplacants()">🎟️ Inviter tous les remplaçants</button>'
+    const nbABillet = list.filter(r => r.invitation_tribune && !r.billet_envoye).length
+    html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">'
+      + '<button class="btn btn-ghost btn-sm" onclick="inviterTousRemplacants()">🎟️ Inviter tous les remplaçants</button>'
+      + (nbABillet ? '<button class="btn btn-orange btn-sm" onclick="envoyerRecapBillets(this)">📧 M\'envoyer la liste des ' + nbABillet + ' billet(s) à émettre</button>' : '')
+      + '</div>'
+      + '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:6px;line-height:1.5;">Les billets d\'invitation partent par e-mail via Tickie. La liste des billets à émettre t\'est envoyée automatiquement à J-2 (9h), avec un rappel à J-1 s\'il en reste. Coche « 📨 Billet envoyé » une fois parti.</div>'
   }
   html += '</div>'
   el.innerHTML = html
@@ -1924,6 +1930,24 @@ async function toggleInvitationRemplacant(inscId, val, btn) {
   const { error } = await sb.from('inscriptions').update({ invitation_tribune: !!val }).eq('id', inscId)
   if (error) { showAlert('alert-match', 'Erreur : ' + error.message, 'e'); if (btn) btn.disabled = false; return }
   showAlert('alert-match', val ? 'Invitation offerte : le remplaçant reçoit un e-mail' : 'Invitation retirée', 's')
+  if (curMatch) loadMatch(curMatch.id)
+}
+
+async function toggleBilletEnvoye(inscId, val, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = '...' }
+  const { error } = await sb.from('inscriptions').update({ billet_envoye: !!val }).eq('id', inscId)
+  if (error) { showAlert('alert-match', 'Erreur : ' + error.message, 'e'); if (btn) btn.disabled = false; return }
+  showAlert('alert-match', val ? 'Billet marqué envoyé' : 'Billet remis à envoyer', 's')
+  if (curMatch) loadMatch(curMatch.id)
+}
+
+async function envoyerRecapBillets(btn) {
+  if (!curMatch) return
+  if (btn) { btn.disabled = true; btn.textContent = 'Envoi...' }
+  const { data, error } = await sb.rpc('recap_invitations_remplacants', { p_match_id: curMatch.id })
+  if (btn) btn.disabled = false
+  if (error) { showAlert('alert-match', 'Erreur : ' + error.message, 'e'); return }
+  showAlert('alert-match', (data || 0) + ' billet(s) à émettre : la liste part sur ta boîte mail dans les 5 minutes', 's')
   if (curMatch) loadMatch(curMatch.id)
 }
 
