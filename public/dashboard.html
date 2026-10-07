@@ -5079,7 +5079,7 @@ init()
 // NOTIFICATIONS PUSH — abonnement (etape 2)
 // ============================================================
 (function () {
-  const VAPID_PUBLIC_KEY = 'BOkGfTMtsiqrpUaw_2ISBgbR8jczKUORmQ4bEpV54_ZZn7mvv6CRbtK2hQKD_yplvCMzR4kJ9VU_VLQTMCuBZk4';
+  const VAPID_PUBLIC_KEY = 'BKvHaHqZNURKTTpGL_Lo0DKEpQSPufyCiZpt5uJJJxZuyirPFcAMPRrDMFVGVk7c_Mamc2_Vlj0XRl-xSpvPUAI';
 
   function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -5112,7 +5112,30 @@ init()
   async function currentSubscription() {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
     const reg = await navigator.serviceWorker.ready;
-    return reg.pushManager.getSubscription();
+    let sub = await reg.pushManager.getSubscription();
+    // Migration de clé VAPID (oct. 2026) : un abonnement créé avec l'ancienne clé
+    // est remplacé automatiquement, sans action du bénévole.
+    try {
+      const k = sub && sub.options && sub.options.applicationServerKey;
+      if (k) {
+        const cur = new Uint8Array(k), want = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+        const same = cur.length === want.length && cur.every((v, i) => v === want[i]);
+        if (!same) {
+          try { await sb.from('push_subscriptions').delete().eq('endpoint', sub.endpoint); } catch (e) {}
+          await sub.unsubscribe();
+          sub = null;
+          if (Notification.permission === 'granted' && typeof CP !== 'undefined' && CP && CP.id) {
+            sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
+            const json = sub.toJSON();
+            await sb.from('push_subscriptions').upsert({
+              benevole_id: CP.id, endpoint: sub.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth,
+              user_agent: navigator.userAgent, last_seen_at: new Date().toISOString(),
+            }, { onConflict: 'endpoint' });
+          }
+        }
+      }
+    } catch (e) { console.warn('[push] migration cle', e); }
+    return sub;
   }
 
   async function refreshZone() {

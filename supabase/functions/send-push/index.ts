@@ -12,7 +12,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import webpush from "npm:web-push@3.6.7"
 
 const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY") ||
-  "BOkGfTMtsiqrpUaw_2ISBgbR8jczKUORmQ4bEpV54_ZZn7mvv6CRbtK2hQKD_yplvCMzR4kJ9VU_VLQTMCuBZk4"
+  "BKvHaHqZNURKTTpGL_Lo0DKEpQSPufyCiZpt5uJJJxZuyirPFcAMPRrDMFVGVk7c_Mamc2_Vlj0XRl-xSpvPUAI"
 const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") || "mailto:contact@spacerstoulouse.fr"
 const MAX_ATTEMPTS = 3
 
