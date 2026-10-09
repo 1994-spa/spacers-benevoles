@@ -1,6 +1,6 @@
 {
   "saison": "26-27",
-  "maj": "2026-09-28",
+  "maj": "2026-10-09",
   "genere_par": "Cockpit Billetterie V6 · module 76 v3.9.2",
   "receptions": [
     {
@@ -35,6 +35,40 @@
         "post": "🏐 Samedi 10 octobre, la saison reprend au Palais des Sports !\nLe Spacer's Toulouse Volley reçoit Narbonne pour le match de gala d'ouverture.\n8 € l'entrée, gratuit pour les moins de 8 ans.\n🎟️ Billets : https://billetterie.spacerstoulouse.fr/s/xHJp5EIb\nVenez remplir le Palais avec nous 💙",
         "story": "🏐 Ce samedi, on va au volley !\nSpacer's vs Narbonne — 10 octobre, 18h\nPalais des Sports André-Brouat\nBillets 8 € : https://billetterie.spacerstoulouse.fr/s/xHJp5EIb",
         "relance": "⏳ Plus qu'une semaine !\nSpacer's vs Narbonne, samedi 10 octobre à 18h : venez découvrir l'équipe 2026-2027.\n🎟️ 8 €, gratuit pour les moins de 8 ans : https://billetterie.spacerstoulouse.fr/s/xHJp5EIb"
+      }
+    },
+    {
+      "cle": "sete",
+      "titre": "Spacer's vs Arago de Sète",
+      "competition": "Ligue A · J1",
+      "date": "2026-10-17",
+      "dateTexte": "samedi 17 octobre",
+      "heure": "18h00",
+      "lieu": "Palais des Sports André-Brouat, Toulouse",
+      "tarifs": "13 € plein tarif · 8 € demi-tarif · gratuit -8 ans",
+      "lien": "https://billetterie.spacerstoulouse.fr/event/spacers-vs-sete-samedi-17-octobre-0pfaxs",
+      "visuels": {
+        "post": {
+          "url": "https://img.spacerstoulouse.fr/26-27/sete/post.jpg",
+          "libelle": "Post 1080×1350"
+        },
+        "story": {
+          "url": "https://img.spacerstoulouse.fr/26-27/sete/story.jpg",
+          "libelle": "Story 1080×1920"
+        },
+        "carrousel": {
+          "url": "https://img.spacerstoulouse.fr/26-27/sete/carrousel.jpg",
+          "libelle": "Carrousel"
+        },
+        "banniere": {
+          "url": "https://img.spacerstoulouse.fr/26-27/sete/banniere.jpg",
+          "libelle": "Bannière"
+        }
+      },
+      "textes": {
+        "post": "🏐 Le championnat reprend au Palais des Sports !\nSamedi 17 octobre à 18h, le Spacer's Toulouse Volley reçoit Arago de Sète pour la 1re journée de Ligue A à domicile.\n13 € plein tarif, 8 € demi-tarif, gratuit pour les moins de 8 ans.\n🎟️ Billets : https://billetterie.spacerstoulouse.fr/event/spacers-vs-sete-samedi-17-octobre-0pfaxs\nOn compte sur vous pour faire vibrer le Palais 💙",
+        "story": "🏐 Samedi, on va au volley !\nSpacer's vs Sète — 17 octobre, 18h\nPalais des Sports André-Brouat\nBillets dès 8 € : https://billetterie.spacerstoulouse.fr/event/spacers-vs-sete-samedi-17-octobre-0pfaxs",
+        "relance": "⏳ Plus qu'une semaine !\nSpacer's vs Arago de Sète, samedi 17 octobre à 18h : premier match de championnat à la maison.\n🎟️ Dès 8 €, gratuit pour les moins de 8 ans : https://billetterie.spacerstoulouse.fr/event/spacers-vs-sete-samedi-17-octobre-0pfaxs"
       }
     }
   ]
