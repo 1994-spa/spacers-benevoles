@@ -303,7 +303,8 @@
     const roleUpper = (params.roleLibelle || 'CLUB').toUpperCase();
     drawRoleInRect(ctx, roleUpper, COORDS.role);
 
-    drawZones(ctx, params.zonesAutorisees || []);
+    // Zone 4 obligatoire pour tous les benevoles (2026-10-15)
+    drawZones(ctx, (params.zonesAutorisees || []).concat([4]));
 
     if (params.qrToken) drawQr(ctx, 'SPB:' + String(params.qrToken).toUpperCase(), COORDS.qr);
   }
