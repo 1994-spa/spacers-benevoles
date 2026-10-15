@@ -212,8 +212,10 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
   <div class="sec">Photos à valider</div>
   <div id="photos-att"></div>
   <div class="sec">Accréditations générées</div>
-  <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
-      <button class="btn btn-green" style="font-size:11px;padding:8px 14px;width:auto;margin-right:6px;" onclick="downloadAllAccredsZip('png')">Tout en PNG (ZIP)</button>
+  <div id="accreds-suivi-bar" style="margin-bottom:10px;"></div>
+  <div style="display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+      <button class="btn btn-orange" style="font-size:11px;padding:8px 14px;width:auto;" onclick="downloadAllAccredsZip('pdf', true)">🆕 Seulement à faire (PDF ZIP)</button>
+      <button class="btn btn-green" style="font-size:11px;padding:8px 14px;width:auto;" onclick="downloadAllAccredsZip('png')">Tout en PNG (ZIP)</button>
       <button class="btn btn-green" style="font-size:11px;padding:8px 14px;width:auto;" onclick="downloadAllAccredsZip('pdf')">Tout en PDF (ZIP)</button>
     </div>
     <div id="accreds-gen"></div>
@@ -1184,9 +1186,108 @@ async function loadAttribAccredData() {
   window._accredZonesRef = zonesRes.data || []
 }
 
-async function renderAccredsGen(list) {
+// Suivi des remises (2026-10-15) : zone 4 obligatoire + accreds deja faites
+const ACCRED_ZONE_OBLIGATOIRE = 4
+let _accredSuivi = {}
+let _accredFiltre = 'tous'
+let _accredLastList = []
+
+async function loadAccredSuivi() {
+  try {
+    const { data, error } = await sb.rpc('accred_suivi')
+    if (error) throw error
+    _accredSuivi = {}
+    ;(data || []).forEach(r => { _accredSuivi[r.benevole_id] = r })
+  } catch (e) {
+    console.warn('[accred] suivi indisponible', e)
+    _accredSuivi = {}
+  }
+}
+
+function setAccredFiltre(f) {
+  _accredFiltre = f
+  renderAccredsGen(_accredLastList, true)
+}
+
+function _accredEtatChip(s) {
+  if (!s) return ''
+  const d = s.derniere_edition_le ? new Date(s.derniere_edition_le).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) : ''
+  const ou = s.derniere_edition_match ? ' ' + escapeHtmlPilote(s.derniere_edition_match) : (d ? ' le ' + d : '')
+  if (s.etat === 'remise') return '<span style="background:rgba(192,221,151,0.15);color:#C0DD97;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;">\u2705 D\u00e9j\u00e0 faite' + ou + '</span>'
+  if (s.etat === 'a_reimprimer') return '<span style="background:rgba(250,199,117,0.15);color:#FAC775;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;" title="Zones ou r\u00f4le modifi\u00e9s depuis l\'\u00e9dition">\u26a0\ufe0f \u00c0 r\u00e9imprimer (faite' + ou + ', zones ' + ((s.zones_editees || []).join(',') || '\u2014') + ')</span>'
+  return '<span style="background:rgba(145,190,230,0.15);color:#91BEE6;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;">\ud83c\udd95 \u00c0 faire</span>'
+}
+
+function _renderAccredSuiviBar(list) {
+  const bar = document.getElementById('accreds-suivi-bar')
+  if (!bar) return
+  const st = list.map(b => _accredSuivi[b.id] || {})
+  const n = {
+    tous: list.length,
+    a_faire: st.filter(s => !s.etat || s.etat === 'a_faire').length,
+    a_reimprimer: st.filter(s => s.etat === 'a_reimprimer').length,
+    remise: st.filter(s => s.etat === 'remise').length,
+    present: st.filter(s => s.present_dernier_match).length,
+  }
+  const anyS = st.find(s => s.dernier_match_libelle)
+  const dm = anyS ? escapeHtmlPilote(anyS.dernier_match_libelle) : 'aucun match point\u00e9'
+  const chip = (k, lbl) => '<button onclick="setAccredFiltre(\'' + k + '\')" style="border:1px solid ' + (_accredFiltre === k ? '#facc15' : 'rgba(255,255,255,0.15)') + ';background:' + (_accredFiltre === k ? 'rgba(250,204,21,0.15)' : 'transparent') + ';color:white;border-radius:20px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit;">' + lbl + ' <strong>' + n[k] + '</strong></button>'
+  bar.innerHTML =
+    '<div style="font-size:11px;color:rgba(255,255,255,0.55);margin-bottom:6px;">Dernier match : <strong style="color:white;">' + dm + '</strong> \u00b7 zone ' + ACCRED_ZONE_OBLIGATOIRE + ' incluse d\'office sur toutes les accr\u00e9ditations</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
+      chip('tous', 'Toutes') + chip('a_faire', '\ud83c\udd95 \u00c0 faire') + chip('a_reimprimer', '\u26a0\ufe0f \u00c0 r\u00e9imprimer') +
+      chip('remise', '\u2705 D\u00e9j\u00e0 faites') + chip('present', '\ud83d\udc5f Pr\u00e9sents au dernier match') +
+    '</div>'
+}
+
+async function marquerAccredRemise(benevoleId) {
+  try {
+    const { error } = await sb.rpc('accred_marquer_editions', { p_benevole_ids: [benevoleId], p_source: 'remise_manuelle', p_match_id: (curMatch && curMatch.id) || null })
+    if (error) throw error
+    await loadAccredSuivi()
+    renderAccredsGen(_accredLastList, true)
+  } catch (e) { showAlert('alert-accreds', 'Erreur : ' + (e.message || e), 'e') }
+}
+
+async function annulerAccredRemise(benevoleId) {
+  try {
+    const { error } = await sb.rpc('accred_annuler_derniere_edition', { p_benevole_id: benevoleId })
+    if (error) throw error
+    await loadAccredSuivi()
+    renderAccredsGen(_accredLastList, true)
+  } catch (e) { showAlert('alert-accreds', 'Erreur : ' + (e.message || e), 'e') }
+}
+
+async function _enregistrerEditions(ids, source) {
+  if (!ids || ids.length === 0) return
+  try {
+    const { error } = await sb.rpc('accred_marquer_editions', { p_benevole_ids: ids, p_source: source, p_match_id: (curMatch && curMatch.id) || null })
+    if (error) throw error
+    await loadAccredSuivi()
+    renderAccredsGen(_accredLastList, true)
+  } catch (e) { console.warn('[accred] enregistrement edition', e) }
+}
+
+function _zonesAvec4(z) {
+  const s = new Set((z || []).map(Number))
+  s.add(ACCRED_ZONE_OBLIGATOIRE)
+  return Array.from(s).sort((a, b) => a - b)
+}
+
+async function renderAccredsGen(list, skipReload) {
   const el = document.getElementById('accreds-gen')
   if (!el) return
+  _accredLastList = list || []
+  if (!skipReload) await loadAccredSuivi()
+  _renderAccredSuiviBar(_accredLastList)
+  if (_accredFiltre !== 'tous') {
+    list = _accredLastList.filter(b => {
+      const s = _accredSuivi[b.id] || {}
+      if (_accredFiltre === 'present') return !!s.present_dernier_match
+      if (_accredFiltre === 'a_faire') return !s.etat || s.etat === 'a_faire'
+      return s.etat === _accredFiltre
+    })
+  }
   if (!list || list.length === 0) {
     el.innerHTML = '<div style="background:rgba(24,95,165,0.1);border:1px solid rgba(24,95,165,0.2);border-radius:10px;padding:12px;font-size:12px;color:#B5D4F4;">Aucune accr\u00e9ditation g\u00e9n\u00e9r\u00e9e pour l\'instant.</div>'
     return
@@ -1205,9 +1306,7 @@ async function renderAccredsGen(list) {
     const roleTxt = a.role_libelle
       ? '<span style="background:#facc15;color:#001E2D;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;">' + escapeHtmlPilote(a.role_libelle) + '</span>'
       : '<span style="color:#F4B8CE;font-size:10px;">R\u00f4le non attribu\u00e9</span>'
-    const zonesTxt = (a.zones_ids && a.zones_ids.length > 0)
-      ? '<span style="font-size:10px;color:rgba(255,255,255,0.6);">Zones : <strong style="color:#91BEE6;">' + a.zones_ids.slice().sort((x,y)=>x-y).join(', ') + '</strong></span>'
-      : '<span style="font-size:10px;color:#F4B8CE;">Aucune zone</span>'
+    const zonesTxt = '<span style="font-size:10px;color:rgba(255,255,255,0.6);">Zones : <strong style="color:#91BEE6;">' + _zonesAvec4(a.zones_ids).join(', ') + '</strong></span>'
     const pretIcon = a.accreditation_prete
       ? '<span style="color:#C0DD97;font-size:10px;">\u2713 Pr\u00eate</span>'
       : '<span style="color:#FAC775;font-size:10px;">\u23f3 En cours</span>'
@@ -1221,6 +1320,12 @@ async function renderAccredsGen(list) {
         '<div style="font-size:13px;font-weight:700;color:white;">' + escapeHtmlPilote(b.prenom||'') + ' ' + escapeHtmlPilote(b.nom||'') + '</div>' +
         '<div style="margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' + roleTxt + ' ' + pretIcon + '</div>' +
         '<div style="margin-top:3px;">' + zonesTxt + '</div>' +
+        '<div style="margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' + _accredEtatChip(_accredSuivi[b.id] || { etat: 'a_faire' }) +
+          ((_accredSuivi[b.id] || {}).present_dernier_match ? '<span style="color:rgba(255,255,255,0.55);font-size:9px;">\ud83d\udc5f pr\u00e9sent au dernier match</span>' : '') +
+          (((_accredSuivi[b.id] || {}).etat === 'remise')
+            ? '<a href="#" onclick="annulerAccredRemise(\'' + b.id + '\');return false;" style="color:rgba(255,255,255,0.4);font-size:9px;">annuler</a>'
+            : '<a href="#" onclick="marquerAccredRemise(\'' + b.id + '\');return false;" style="color:#C0DD97;font-size:9px;">\u2713 marquer comme faite</a>') +
+        '</div>' +
       '</div>' +
       '<button class="btn btn-green" style="font-size:10px;padding:6px 12px;flex-shrink:0;margin-right:6px;" onclick="downloadPiloteAccredPng(\'' + b.id + '\')">PNG</button>' +
       '<button class="btn btn-green" style="font-size:10px;padding:6px 12px;flex-shrink:0;margin-right:6px;" onclick="downloadPiloteAccredPdf(\'' + b.id + '\')">PDF</button>' +
@@ -1264,10 +1369,11 @@ async function openConfigAccred(benevoleId) {
   const zonesEl = document.getElementById('attrib-zones')
   let zonesHtml = ''
   window._accredZonesRef.forEach(z => {
-    const checked = currentZones.has(String(z.zone_id)) ? ' checked' : ''
+    const oblig = Number(z.zone_id) === ACCRED_ZONE_OBLIGATOIRE
+    const checked = (oblig || currentZones.has(String(z.zone_id))) ? ' checked' : ''
     zonesHtml +=
-      '<label style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.2);border-radius:6px;padding:8px;cursor:pointer;">' +
-        '<input type="checkbox" data-zone="' + z.zone_id + '"' + checked + ' style="cursor:pointer;">' +
+      '<label style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.2);border-radius:6px;padding:8px;cursor:' + (oblig ? 'not-allowed' : 'pointer') + ';"' + (oblig ? ' title="Zone obligatoire pour tous les b\u00e9n\u00e9voles"' : '') + '>' +
+        '<input type="checkbox" data-zone="' + z.zone_id + '"' + checked + (oblig ? ' disabled' : '') + ' style="cursor:' + (oblig ? 'not-allowed' : 'pointer') + ';">' +
         '<span style="width:16px;height:16px;border-radius:50%;background:' + z.couleur_hex + ';border:1px solid rgba(255,255,255,0.2);flex-shrink:0;"></span>' +
         '<span style="font-size:11px;color:white;">' + z.zone_id + '. ' + escapeHtmlPilote(z.libelle) + '</span>' +
       '</label>'
@@ -1287,8 +1393,8 @@ async function saveConfigAccred() {
   if (!b) return
 
   const roleCode = document.getElementById('attrib-role').value || null
-  const zones = Array.from(document.querySelectorAll('#attrib-zones input[type=checkbox]:checked'))
-    .map(cb => parseInt(cb.dataset.zone))
+  const zones = _zonesAvec4(Array.from(document.querySelectorAll('#attrib-zones input[type=checkbox]:checked'))
+    .map(cb => parseInt(cb.dataset.zone)))
 
   try {
     const { error } = await sb.rpc('accred_set_role_and_zones', {
@@ -1333,11 +1439,12 @@ async function downloadPiloteAccredPdf(benevoleId) {
       prenom: data.prenom,
       nom: data.nom,
       roleLibelle: data.role_libelle,
-      zonesAutorisees: data.zones_ids,
+      zonesAutorisees: _zonesAvec4(data.zones_ids),
       photoUrl: photoUrl,
       qrToken: _qrTokenOf(benevoleId),
     })
     showAlert('alert-accreds', 'PDF t\u00e9l\u00e9charg\u00e9 pour ' + data.prenom + ' ' + data.nom, 's')
+    _enregistrerEditions([benevoleId], 'telechargement')
   } catch (err) {
     console.error('[accred] downloadPiloteAccredPdf', err)
     showAlert('alert-accreds', 'Erreur : ' + (err.message || err), 'e')
@@ -1354,11 +1461,12 @@ async function downloadPiloteAccredPng(benevoleId) {
       prenom: data.prenom,
       nom: data.nom,
       roleLibelle: data.role_libelle,
-      zonesAutorisees: data.zones_ids,
+      zonesAutorisees: _zonesAvec4(data.zones_ids),
       photoUrl: photoUrl,
       qrToken: _qrTokenOf(benevoleId),
     })
     showAlert('alert-accreds', 'PNG t\u00e9l\u00e9charg\u00e9 pour ' + data.prenom + ' ' + data.nom, 's')
+    _enregistrerEditions([benevoleId], 'telechargement')
   } catch (err) {
     console.error('[accred] downloadPiloteAccredPng', err)
     showAlert('alert-accreds', 'Erreur : ' + (err.message || err), 'e')
@@ -1367,7 +1475,7 @@ async function downloadPiloteAccredPng(benevoleId) {
 
 function _qrTokenOf(benevoleId) { const b = (allBenv || []).find(x => x.id === benevoleId); return b ? b.qr_token : null }
 
-async function downloadAllAccredsZip(format) {
+async function downloadAllAccredsZip(format, seulementAFaire) {
   const fmt = format === 'png' ? 'png' : 'pdf'
   try {
     if (!window.JSZip) {
@@ -1376,15 +1484,21 @@ async function downloadAllAccredsZip(format) {
     }
     showAlert('alert-accreds', 'Pr\u00e9paration du ZIP...', 'i')
 
-    const { data: rows, error } = await sb
+    const { data: allRows, error } = await sb
       .from('v_benevole_accreditation')
       .select('*')
       .eq('accreditation_prete', true)
     if (error) throw error
+    let rows = allRows || []
+    if (seulementAFaire) {
+      await loadAccredSuivi()
+      rows = rows.filter(r => { const s = _accredSuivi[r.benevole_id]; return !s || s.etat !== 'remise' })
+    }
     if (!rows || rows.length === 0) {
-      showAlert('alert-accreds', 'Aucune accr\u00e9ditation pr\u00eate pour l\'instant', 'i')
+      showAlert('alert-accreds', seulementAFaire ? 'Aucune accr\u00e9ditation \u00e0 faire : toutes sont d\u00e9j\u00e0 faites et \u00e0 jour' : 'Aucune accr\u00e9ditation pr\u00eate pour l\'instant', 'i')
       return
     }
+    const okIds = []
 
     const paths = rows.map(r => r.photo_path).filter(Boolean)
     const urlMap = await getSignedPhotoUrls(paths)
@@ -1403,12 +1517,13 @@ async function downloadAllAccredsZip(format) {
           prenom: r.prenom,
           nom: r.nom,
           roleLibelle: r.role_libelle,
-          zonesAutorisees: r.zones_ids,
+          zonesAutorisees: _zonesAvec4(r.zones_ids),
           photoUrl: url,
           qrToken: _qrTokenOf(r.benevole_id),
         })
         const name = AccreditationGenerator.buildFileName({ prenom: r.prenom, nom: r.nom }, fmt)
         zip.file(name, blob)
+        okIds.push(r.benevole_id)
         ok++
       } catch (e) {
         console.warn('[zip] echec pour', r.prenom, r.nom, e)
@@ -1421,7 +1536,7 @@ async function downloadAllAccredsZip(format) {
     const url = URL.createObjectURL(zipBlob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'accreditations_spacers_' + fmt + '_' + stamp + '.zip'
+    a.download = 'accreditations_spacers_' + (seulementAFaire ? 'a-faire_' : '') + fmt + '_' + stamp + '.zip'
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -1429,6 +1544,7 @@ async function downloadAllAccredsZip(format) {
 
     const msg = 'ZIP ' + fmt.toUpperCase() + ' g\u00e9n\u00e9r\u00e9 : ' + ok + ' r\u00e9ussi(s)' + (ko > 0 ? ', ' + ko + ' \u00e9chec(s)' : '')
     showAlert('alert-accreds', msg, ok > 0 ? 's' : 'e')
+    _enregistrerEditions(okIds, 'zip')
   } catch (err) {
     console.error('[accred] downloadAllAccredsZip', err)
     showAlert('alert-accreds', 'Erreur ZIP : ' + (err.message || err), 'e')
