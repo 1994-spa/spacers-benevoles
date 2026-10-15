@@ -600,7 +600,7 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
 <div class="screen" id="screen-appels">
   <div id="alert-appels"></div>
 
-  <div class="sec">&#128588; Nouvel appel &agrave; b&eacute;n&eacute;voles</div>
+  <div class="sec" id="ap-form-title">&#128588; Nouvel appel &agrave; b&eacute;n&eacute;voles</div>
   <div class="card">
     <div style="display:flex;flex-direction:column;gap:7px;">
       <input id="ap-titre" placeholder="Titre (ex. Montage salle &ndash; match vs Tours)" style="background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;width:100%;">
@@ -619,7 +619,8 @@ body{font-family:'Sora',sans-serif;background:var(--c-ink);min-height:100vh;}
         <input id="ap-obj-input" placeholder="Ajouter une t&acirc;che" onkeydown="if(event.key==='Enter'){event.preventDefault();addObjectif();}" style="flex:1;background:var(--c-ink-2);border:1px solid var(--c-ink-3);border-radius:8px;padding:9px 12px;font-family:'Sora',sans-serif;font-size:12px;color:white;outline:none;">
         <button class="btn btn-ghost" onclick="addObjectif()">+ T&acirc;che</button>
       </div>
-      <button class="btn btn-blue btn-full" onclick="createMission()">Cr&eacute;er l'appel</button>
+      <button class="btn btn-blue btn-full" id="ap-submit" onclick="createMission()">Cr&eacute;er l'appel</button>
+      <button class="btn btn-ghost btn-full" id="ap-cancel" onclick="resetApForm()" style="display:none;">Annuler la modification</button>
     </div>
   </div>
 
@@ -2510,6 +2511,32 @@ function addObjectif(){
   if(!v) return; _apObjectifs.push(v); inp.value=''; renderApObj();
 }
 function rmObjectif(i){ _apObjectifs.splice(i,1); renderApObj(); }
+var _apEditId=null, _apList=[];
+function resetApForm(){
+  _apEditId=null;
+  ['ap-titre','ap-desc','ap-date','ap-heure','ap-lieu','ap-places'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  var c=document.getElementById('ap-competence'); if(c) c.value='';
+  _apObjectifs=[]; renderApObj();
+  document.getElementById('ap-form-title').innerHTML='&#128588; Nouvel appel &agrave; b&eacute;n&eacute;voles';
+  document.getElementById('ap-submit').innerHTML='Cr&eacute;er l\'appel';
+  document.getElementById('ap-cancel').style.display='none';
+}
+function editMission(id){
+  var m=_apList.find(function(x){ return x.id===id; }); if(!m) return;
+  _apEditId=id;
+  document.getElementById('ap-titre').value=m.titre||'';
+  document.getElementById('ap-desc').value=m.description||'';
+  document.getElementById('ap-date').value=m.date_mission||'';
+  document.getElementById('ap-heure').value=m.heure_rdv?m.heure_rdv.slice(0,5):'';
+  document.getElementById('ap-lieu').value=m.lieu||'';
+  document.getElementById('ap-places').value=m.places_max||'';
+  var c=document.getElementById('ap-competence'); if(c) c.value=m.competence_requise_id||'';
+  _apObjectifs=Array.isArray(m.objectifs)?m.objectifs.slice():[]; renderApObj();
+  document.getElementById('ap-form-title').innerHTML='&#9999;&#65039; Modifier l\'appel';
+  document.getElementById('ap-submit').innerHTML='Enregistrer les modifications';
+  document.getElementById('ap-cancel').style.display='';
+  document.getElementById('ap-form-title').scrollIntoView({behavior:'smooth',block:'start'});
+}
 async function createMission(){
   var titre=document.getElementById('ap-titre').value.trim();
   if(!titre){ showAlert('alert-appels','Indique un titre','e'); return; }
@@ -2521,11 +2548,12 @@ async function createMission(){
     objectifs:_apObjectifs,
     places_max:document.getElementById('ap-places').value?parseInt(document.getElementById('ap-places').value,10):null,
     competence_requise_id:(document.getElementById('ap-competence')?(document.getElementById('ap-competence').value||null):null), created_by:curPiloteId };
-  var r=await sb.from('missions').insert(rec);
+  var editing=_apEditId;
+  if(editing) delete rec.created_by;
+  var r=editing ? await sb.from('missions').update(rec).eq('id',editing) : await sb.from('missions').insert(rec);
   if(r.error){ showAlert('alert-appels','Erreur: '+r.error.message,'e'); return; }
-  ['ap-titre','ap-desc','ap-date','ap-heure','ap-lieu','ap-places'].forEach(function(id){ document.getElementById(id).value=''; });
-  _apObjectifs=[]; renderApObj();
-  showAlert('alert-appels','Appel cree','s');
+  resetApForm();
+  showAlert('alert-appels',editing?'Appel modifie':'Appel cree','s');
   loadAppelsPilote();
 }
 let _compMap = {};
@@ -2573,13 +2601,13 @@ async function loadAppelsPilote(){
   var r=await sb.from('missions').select('*, mission_participations(id, statut, benevole_id, benevoles(prenom, nom, telephone))').order('date_mission',{ascending:true,nullsFirst:false}).order('created_at',{ascending:false});
   var _pv={}; try{ var rv=await sb.rpc('missions_presences_validees'); (rv.data||[]).forEach(function(x){ _pv[x.mission_id+'|'+x.benevole_id]=1; }); }catch(e){ console.warn('presences validees', e); }
   if(r.error){ el.innerHTML='<div class="card"><div style="color:var(--c-gold-2);font-size:12px;">Erreur: '+r.error.message+'</div></div>'; return; }
-  var list=r.data||[];
+  var list=r.data||[]; _apList=list;
   if(list.length===0){ el.innerHTML='<div class="card"><div style="color:rgba(255,255,255,0.3);font-size:12px;font-style:italic;">Aucun appel pour le moment.</div></div>'; return; }
   el.innerHTML=list.map(function(m){
     var parts=m.mission_participations||[];
     var nb=parts.length;
     var objs=(m.objectifs||[]).map(function(o){ return '<div style="font-size:11px;color:rgba(255,255,255,0.55);">&#8226; '+escapeHtml(o)+'</div>'; }).join('');
-    var partRows=parts.length?parts.map(function(p){ var b=p.benevoles||{}; var tel=b.telephone?(' <span style="color:rgba(255,255,255,0.35);">'+escapeHtml(b.telephone)+'</span>'):''; var nomB=escapeHtml(((b.prenom||'')+' '+(b.nom||'')).trim()||'Benevole'); if(_pv[m.id+'|'+p.benevole_id]) return '<div style="font-size:12px;color:white;padding:3px 0;">&#9989; '+nomB+tel+' <span style="color:#86EFAC;font-size:10px;font-weight:700;">pr&eacute;sent &middot; points vers&eacute;s</span></div>'; return '<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:white;padding:3px 0;cursor:pointer;"><input type="checkbox" class="mp-chk" data-m="'+m.id+'" value="'+p.benevole_id+'" style="width:16px;height:16px;accent-color:#22C55E;">'+nomB+tel+'</label>'; }).join(''):'<div style="font-size:11px;color:rgba(255,255,255,0.3);">Aucun inscrit pour l\'instant.</div>';
+    var partRows=parts.length?parts.map(function(p){ var b=p.benevoles||{}; var tel=b.telephone?(' <span style="color:rgba(255,255,255,0.35);">'+escapeHtml(b.telephone)+'</span>'):''; var nomB=escapeHtml(((b.prenom||'')+' '+(b.nom||'')).trim()||'Benevole'); if(_pv[m.id+'|'+p.benevole_id]) return '<div style="font-size:12px;color:white;padding:3px 0;">&#9989; '+nomB+tel+' <span style="color:#86EFAC;font-size:10px;font-weight:700;">pr&eacute;sent &middot; points vers&eacute;s</span></div>'; return '<div style="display:flex;align-items:center;gap:8px;padding:3px 0;"><label style="flex:1;display:flex;align-items:center;gap:8px;font-size:12px;color:white;cursor:pointer;"><input type="checkbox" class="mp-chk" data-m="'+m.id+'" value="'+p.benevole_id+'" style="width:16px;height:16px;accent-color:#22C55E;">'+nomB+tel+'</label><button class="btn btn-sm" style="flex:0 0 auto;padding:3px 10px;font-size:11px;background:rgba(34,197,94,0.18);color:#86EFAC;" onclick="validerUnePresence(\''+m.id+'\',\''+p.benevole_id+'\')">&#9989; Pr&eacute;sent</button></div>'; }).join(''):'<div style="font-size:11px;color:rgba(255,255,255,0.3);">Aucun inscrit pour l\'instant.</div>';
     var dateStr=m.date_mission?new Date(m.date_mission+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}):'Date a definir';
     var heureStr=m.heure_rdv?(' &middot; '+m.heure_rdv.slice(0,5)):'';
     var isOpen=m.statut==='ouverte';
@@ -2591,12 +2619,22 @@ async function loadAppelsPilote(){
       (objs?'<div style="margin-bottom:8px;">'+objs+'</div>':'')+
       '<div style="font-size:11px;font-weight:700;color:var(--c-gold);margin-bottom:4px;">&#128101; '+nb+' inscrit'+(nb>1?'s':'')+(m.places_max?(' / '+m.places_max):'')+'</div>'+
       '<div style="margin-bottom:8px;">'+partRows+'</div>'+
-      (parts.some(function(p){ return !_pv[m.id+'|'+p.benevole_id]; })?'<button class="btn btn-sm" style="width:100%;margin-bottom:7px;background:#15803D;color:white;" onclick="validerPresences(\''+m.id+'\')">&#9989; Valider les pr&eacute;sents coch&eacute;s et attribuer les points</button>':'')+
-      '<div style="display:flex;gap:7px;">'+(isOpen?'<button class="btn btn-sm" style="flex:1;background:#1f6f43;color:white;" onclick="notifyAppel(\''+m.id+'\')">&#128227; Notifier</button>':'')+'<button class="btn btn-sm btn-ghost" style="flex:1;" onclick="toggleMission(\''+m.id+'\',\''+(isOpen?'fermee':'ouverte')+'\')">'+(isOpen?'Fermer':'Rouvrir')+'</button><button class="btn btn-sm" style="background:#7a2525;color:white;" onclick="delMission(\''+m.id+'\')">Supprimer</button></div>'+
+      (parts.some(function(p){ return !_pv[m.id+'|'+p.benevole_id]; })?'<div style="display:flex;gap:7px;margin-bottom:7px;"><button class="btn btn-sm btn-ghost" style="flex:0 0 auto;" onclick="toutCocherMission(\''+m.id+'\')">&#9745; Tout cocher</button><button class="btn btn-sm" style="flex:1;background:#15803D;color:white;" onclick="validerPresences(\''+m.id+'\')">&#9989; Valider les pr&eacute;sents coch&eacute;s et attribuer les points</button></div>':'')+
+      '<div style="display:flex;gap:7px;">'+(isOpen?'<button class="btn btn-sm" style="flex:1;background:#1f6f43;color:white;" onclick="notifyAppel(\''+m.id+'\')">&#128227; Notifier</button>':'')+'<button class="btn btn-sm btn-ghost" style="flex:1;" onclick="editMission(\''+m.id+'\')">&#9999;&#65039; Modifier</button>'+'<button class="btn btn-sm btn-ghost" style="flex:1;" onclick="toggleMission(\''+m.id+'\',\''+(isOpen?'fermee':'ouverte')+'\')">'+(isOpen?'Fermer':'Rouvrir')+'</button><button class="btn btn-sm" style="background:#7a2525;color:white;" onclick="delMission(\''+m.id+'\')">Supprimer</button></div>'+
       '</div>';
   }).join('');
 }
 async function notifyAppel(id){ if(!confirm('Envoyer un email a tous les benevoles actifs pour cet appel ?')) return; showAlert('alert-appels','Envoi en cours...','s'); var r=await sb.functions.invoke('notify-appel',{ body:{ mission_id:id } }); if(r.error){ showAlert('alert-appels','Erreur envoi','e'); return; } var n=(r.data&&r.data.sent)||0; showAlert('alert-appels','Email envoye a '+n+' benevole'+(n>1?'s':''),'s'); }
+async function validerUnePresence(mid,bid){
+  var r=await sb.rpc('valider_presences_mission',{ p_mission_id:mid, p_benevole_ids:[bid] });
+  if(r.error){ showAlert('alert-appels','Erreur: '+r.error.message,'e'); return; }
+  showAlert('alert-appels',(r.data&&r.data.valides)?'Presence validee, points attribues':'Deja valide','s');
+  loadAppelsPilote();
+}
+function toutCocherMission(mid){
+  var cs=document.querySelectorAll('.mp-chk[data-m="'+mid+'"]'); var all=Array.prototype.every.call(cs,function(c){ return c.checked; });
+  Array.prototype.forEach.call(cs,function(c){ c.checked=!all; });
+}
 async function validerPresences(mid){
   var ids=Array.prototype.slice.call(document.querySelectorAll('.mp-chk[data-m="'+mid+'"]:checked')).map(function(c){ return c.value; });
   if(ids.length===0){ showAlert('alert-appels','Coche au moins un benevole present','e'); return; }
