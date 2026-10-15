@@ -849,53 +849,60 @@ let curInscriptionsAffectes = []
 // ─────────────────────────────────────────────────────────────
 // SIGNED URLS — bucket privé (Chantier 11)
 // ─────────────────────────────────────────────────────────────
-const _signedUrlCache = new Map() // path -> {url, expiresAt}
-const SIGNED_URL_TTL = 3600 // 1h
-const SIGNED_URL_REFRESH_MS = 50 * 60 * 1000 // 50 min
-
-async function getSignedPhotoUrl(path) {
-  if (!path) return null
-  const cached = _signedUrlCache.get(path)
-  if (cached && cached.expiresAt > Date.now()) return cached.url
+// Cache persistant des URLs signees (correctif egress 15/10/2026) :
+// une URL stable plusieurs jours permet au navigateur et au CDN de reutiliser l'image
+// au lieu de la retelecharger a chaque ouverture de page.
+const SIGNED_URL_TTL = 7 * 24 * 3600
+const SIGNED_URL_REFRESH_MS = 6 * 24 * 3600 * 1000
+const _SURL_LS_KEY = 'spacers_surl_v1'
+const _signedUrlCache = (function () {
+  const mem = new Map()
   try {
-    const { data, error } = await sb.storage
-      .from(PHOTOS_BUCKET)
-      .createSignedUrl(path, SIGNED_URL_TTL)
-    if (error || !data) {
-      console.warn('signed url failed for', path, error)
-      return null
+    const raw = localStorage.getItem(_SURL_LS_KEY)
+    if (raw) {
+      const obj = JSON.parse(raw), now = Date.now()
+      for (const k in obj) if (obj[k] && obj[k].expiresAt > now) mem.set(k, obj[k])
     }
-    _signedUrlCache.set(path, {
-      url: data.signedUrl,
-      expiresAt: Date.now() + SIGNED_URL_REFRESH_MS,
-    })
-    return data.signedUrl
-  } catch (e) {
-    console.warn('signed url exception', e)
-    return null
+  } catch (e) {}
+  let timer = null
+  function persist() {
+    clearTimeout(timer)
+    timer = setTimeout(function () {
+      try {
+        const obj = {}, now = Date.now()
+        mem.forEach(function (v, k) { if (v.expiresAt > now) obj[k] = v })
+        localStorage.setItem(_SURL_LS_KEY, JSON.stringify(obj))
+      } catch (e) {}
+    }, 300)
   }
-}
+  return {
+    get: function (k) { return mem.get(k) },
+    set: function (k, v) { mem.set(k, v); persist() },
+    delete: function (k) { mem.delete(k); persist() },
+  }
+})()
 
-async function getSignedPhotoUrls(paths) {
+// opts.fresh = true : URL neuve non mise en cache (moderation, generation d'accreditation)
+async function getSignedUrlsCached(bucket, paths, opts) {
+  const fresh = !!(opts && opts.fresh)
   const result = {}
   if (!paths || paths.length === 0) return result
   const toFetch = []
+  const now = Date.now()
   for (const p of paths) {
     if (!p) continue
-    const cached = _signedUrlCache.get(p)
-    if (cached && cached.expiresAt > Date.now()) result[p] = cached.url
-    else toFetch.push(p)
+    const cached = fresh ? null : _signedUrlCache.get(bucket + '|' + p)
+    if (cached && cached.expiresAt > now) result[p] = cached.url
+    else if (toFetch.indexOf(p) < 0) toFetch.push(p)
   }
   if (toFetch.length > 0) {
     try {
-      const { data, error } = await sb.storage
-        .from(PHOTOS_BUCKET)
-        .createSignedUrls(toFetch, SIGNED_URL_TTL)
+      const { data, error } = await sb.storage.from(bucket).createSignedUrls(toFetch, SIGNED_URL_TTL)
       if (!error && data) {
         for (const item of data) {
           if (item.signedUrl && item.path) {
             result[item.path] = item.signedUrl
-            _signedUrlCache.set(item.path, {
+            if (!fresh) _signedUrlCache.set(bucket + '|' + item.path, {
               url: item.signedUrl,
               expiresAt: Date.now() + SIGNED_URL_REFRESH_MS,
             })
@@ -909,6 +916,16 @@ async function getSignedPhotoUrls(paths) {
   return result
 }
 
+async function getSignedPhotoUrl(path, opts) {
+  if (!path) return null
+  const m = await getSignedUrlsCached(PHOTOS_BUCKET, [path], opts)
+  return m[path] || null
+}
+
+async function getSignedPhotoUrls(paths, opts) {
+  return getSignedUrlsCached(PHOTOS_BUCKET, paths, opts)
+}
+
 // Wrapper générique : prend une liste (benevoles, inscriptions, demandes...) et
 // y attache un `_signedUrl` à chaque entrée selon la photo_path du bénévole.
 // `getBenevole` est une fonction pour extraire le bénévole depuis chaque item.
@@ -918,6 +935,8 @@ async function resolvePhotosInList(list, getBenevole) {
   const paths = list.map(item => accessor(item)?.photo_path).filter(Boolean)
   if (paths.length === 0) return list
   const urlMap = await getSignedPhotoUrls(paths)
+  const pending = list.map(item => accessor(item)).filter(b => b && b.photo_path && b.statut_accreditation === 'en_attente').map(b => b.photo_path)
+  if (pending.length) Object.assign(urlMap, await getSignedPhotoUrls(pending, { fresh: true }))
   list.forEach(item => {
     const b = accessor(item)
     if (b && b.photo_path && urlMap[b.photo_path]) {
@@ -1433,7 +1452,7 @@ async function downloadPiloteAccredPdf(benevoleId) {
   try {
     showAlert('alert-accreds', 'G\u00e9n\u00e9ration du PDF...', 'i')
     const data = await fetchAccredData(benevoleId)
-    const photoUrl = await getSignedPhotoUrl(data.photo_path)
+    const photoUrl = await getSignedPhotoUrl(data.photo_path, { fresh: true })
     if (!photoUrl) throw new Error('Photo introuvable')
     await AccreditationGenerator.downloadPdf({
       prenom: data.prenom,
@@ -1455,7 +1474,7 @@ async function downloadPiloteAccredPng(benevoleId) {
   try {
     showAlert('alert-accreds', 'G\u00e9n\u00e9ration du PNG...', 'i')
     const data = await fetchAccredData(benevoleId)
-    const photoUrl = await getSignedPhotoUrl(data.photo_path)
+    const photoUrl = await getSignedPhotoUrl(data.photo_path, { fresh: true })
     if (!photoUrl) throw new Error('Photo introuvable')
     await AccreditationGenerator.downloadPng({
       prenom: data.prenom,
@@ -1669,7 +1688,7 @@ async function openModalPh(id) {
   // Régénère une signed URL fraîche au moment de l'ouverture (sécurité expiration)
   let photoUrl = b._signedUrl
   if (b.photo_path) {
-    photoUrl = await getSignedPhotoUrl(b.photo_path)
+    photoUrl = await getSignedPhotoUrl(b.photo_path, { fresh: true })
     if (photoUrl) b._signedUrl = photoUrl
   }
   document.getElementById('modal-ph-content').innerHTML=`
@@ -1721,7 +1740,7 @@ async function printAccred(id, prenom, nom, num) {
   // Régénère une signed URL fraîche pour la photo dans le PDF
   let photoUrl = null
   if (b?.photo_path) {
-    photoUrl = await getSignedPhotoUrl(b.photo_path)
+    photoUrl = await getSignedPhotoUrl(b.photo_path, { fresh: true })
   }
 
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
@@ -3902,7 +3921,7 @@ async function loadPhotosPending() {
   const paths = photoList.map(p => p.storage_path).filter(Boolean)
   if (paths.length > 0) {
     try {
-      const { data: signed } = await sb.storage.from(EVENTS_PHOTOS_BUCKET).createSignedUrls(paths, 600)
+      const signed = Object.entries(await getSignedUrlsCached(EVENTS_PHOTOS_BUCKET, paths)).map(([path, signedUrl]) => ({ path, signedUrl }))
       const urlMap = {}
       if (signed) signed.forEach(s => { if (s.signedUrl && s.path) urlMap[s.path] = s.signedUrl })
       photoList.forEach(p => { p._signedUrl = urlMap[p.storage_path] })
@@ -4058,7 +4077,7 @@ async function loadReportsPending() {
   const urlMap = {}
   if (paths.length > 0) {
     try {
-      const { data: signed } = await sb.storage.from(EVENTS_PHOTOS_BUCKET).createSignedUrls(paths, 600)
+      const signed = Object.entries(await getSignedUrlsCached(EVENTS_PHOTOS_BUCKET, paths)).map(([path, signedUrl]) => ({ path, signedUrl }))
       if (signed) signed.forEach(s => { if (s.signedUrl && s.path) urlMap[s.path] = s.signedUrl })
     } catch (e) { console.warn('signed urls failed', e) }
   }
