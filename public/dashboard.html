@@ -1108,53 +1108,60 @@ let pendingPhotoFile = null
 // -------------------------------------------------------------
 // SIGNED URLS — bucket privé (Chantier 11)
 // -------------------------------------------------------------
-const _signedUrlCache = new Map()
-const SIGNED_URL_TTL = 3600
-const SIGNED_URL_REFRESH_MS = 50 * 60 * 1000
-
-async function getSignedPhotoUrl(path) {
-  if (!path) return null
-  const cached = _signedUrlCache.get(path)
-  if (cached && cached.expiresAt > Date.now()) return cached.url
+// Cache persistant des URLs signees (correctif egress 15/10/2026) :
+// une URL stable plusieurs jours permet au navigateur et au CDN de reutiliser l'image
+// au lieu de la retelecharger a chaque ouverture de page.
+const SIGNED_URL_TTL = 7 * 24 * 3600
+const SIGNED_URL_REFRESH_MS = 6 * 24 * 3600 * 1000
+const _SURL_LS_KEY = 'spacers_surl_v1'
+const _signedUrlCache = (function () {
+  const mem = new Map()
   try {
-    const { data, error } = await sb.storage
-      .from(PHOTOS_BUCKET)
-      .createSignedUrl(path, SIGNED_URL_TTL)
-    if (error || !data) {
-      console.warn('signed url failed for', path, error)
-      return null
+    const raw = localStorage.getItem(_SURL_LS_KEY)
+    if (raw) {
+      const obj = JSON.parse(raw), now = Date.now()
+      for (const k in obj) if (obj[k] && obj[k].expiresAt > now) mem.set(k, obj[k])
     }
-    _signedUrlCache.set(path, {
-      url: data.signedUrl,
-      expiresAt: Date.now() + SIGNED_URL_REFRESH_MS,
-    })
-    return data.signedUrl
-  } catch (e) {
-    console.warn('signed url exception', e)
-    return null
+  } catch (e) {}
+  let timer = null
+  function persist() {
+    clearTimeout(timer)
+    timer = setTimeout(function () {
+      try {
+        const obj = {}, now = Date.now()
+        mem.forEach(function (v, k) { if (v.expiresAt > now) obj[k] = v })
+        localStorage.setItem(_SURL_LS_KEY, JSON.stringify(obj))
+      } catch (e) {}
+    }, 300)
   }
-}
+  return {
+    get: function (k) { return mem.get(k) },
+    set: function (k, v) { mem.set(k, v); persist() },
+    delete: function (k) { mem.delete(k); persist() },
+  }
+})()
 
-async function getSignedPhotoUrls(paths) {
+// opts.fresh = true : URL neuve non mise en cache (moderation, generation d'accreditation)
+async function getSignedUrlsCached(bucket, paths, opts) {
+  const fresh = !!(opts && opts.fresh)
   const result = {}
   if (!paths || paths.length === 0) return result
   const toFetch = []
+  const now = Date.now()
   for (const p of paths) {
     if (!p) continue
-    const cached = _signedUrlCache.get(p)
-    if (cached && cached.expiresAt > Date.now()) result[p] = cached.url
-    else toFetch.push(p)
+    const cached = fresh ? null : _signedUrlCache.get(bucket + '|' + p)
+    if (cached && cached.expiresAt > now) result[p] = cached.url
+    else if (toFetch.indexOf(p) < 0) toFetch.push(p)
   }
   if (toFetch.length > 0) {
     try {
-      const { data, error } = await sb.storage
-        .from(PHOTOS_BUCKET)
-        .createSignedUrls(toFetch, SIGNED_URL_TTL)
+      const { data, error } = await sb.storage.from(bucket).createSignedUrls(toFetch, SIGNED_URL_TTL)
       if (!error && data) {
         for (const item of data) {
           if (item.signedUrl && item.path) {
             result[item.path] = item.signedUrl
-            _signedUrlCache.set(item.path, {
+            if (!fresh) _signedUrlCache.set(bucket + '|' + item.path, {
               url: item.signedUrl,
               expiresAt: Date.now() + SIGNED_URL_REFRESH_MS,
             })
@@ -1166,6 +1173,45 @@ async function getSignedPhotoUrls(paths) {
     }
   }
   return result
+}
+
+async function getSignedPhotoUrl(path, opts) {
+  if (!path) return null
+  const m = await getSignedUrlsCached(PHOTOS_BUCKET, [path], opts)
+  return m[path] || null
+}
+
+async function getSignedPhotoUrls(paths, opts) {
+  return getSignedUrlsCached(PHOTOS_BUCKET, paths, opts)
+}
+
+// Redimensionne une image cote navigateur avant upload (correctif egress 15/10/2026).
+// Renvoie le fichier d'origine si le format n'est pas gere ou si rien n'est gagne.
+async function compressImage(file, maxDim, quality) {
+  try {
+    if (!file || !/^image\/(jpeg|jpg|png|webp)$/i.test(file.type || '')) return file
+    const img = await new Promise(function (res, rej) {
+      const u = URL.createObjectURL(file)
+      const im = new Image()
+      im.onload = function () { URL.revokeObjectURL(u); res(im) }
+      im.onerror = function (e) { URL.revokeObjectURL(u); rej(e) }
+      im.src = u
+    })
+    const r = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight))
+    const w = Math.max(1, Math.round(img.naturalWidth * r))
+    const h = Math.max(1, Math.round(img.naturalHeight * r))
+    const c = document.createElement('canvas')
+    c.width = w; c.height = h
+    const ctx = c.getContext('2d')
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h)
+    ctx.drawImage(img, 0, 0, w, h)
+    const blob = await new Promise(function (res) { c.toBlob(res, 'image/jpeg', quality) })
+    if (!blob || blob.size >= file.size) return file
+    return new File([blob], (file.name || 'photo').replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' })
+  } catch (e) {
+    console.warn('compressImage failed, upload original', e)
+    return file
+  }
 }
 
 // -------------------------------------------------
@@ -1989,7 +2035,7 @@ async function renderEventPhotosSection(eventId) {
     const urlMap = {}
     if (paths.length > 0) {
       try {
-        const { data: signed } = await sb.storage.from(EVENTS_PHOTOS_BUCKET).createSignedUrls(paths, 600)
+        const signed = Object.entries(await getSignedUrlsCached(EVENTS_PHOTOS_BUCKET, paths)).map(([path, signedUrl]) => ({ path, signedUrl }))
         if (signed) signed.forEach(s => { if (s.signedUrl && s.path) urlMap[s.path] = s.signedUrl })
       } catch (e) { console.warn('signed urls failed', e) }
     }
@@ -2061,15 +2107,16 @@ async function onEventPhotosSelected(ev, eventId) {
 
   let sent = 0
   let failed = 0
-  for (const file of valid) {
+  for (const rawFile of valid) {
     try {
+      const file = await compressImage(rawFile, 1600, 0.82)
       const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
       const uniqueId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2, 9)
       const path = `ev_${eventId}/${uniqueId}.${ext}`
 
       const { error: upErr } = await sb.storage.from(EVENTS_PHOTOS_BUCKET).upload(path, file, {
         contentType: file.type,
-        cacheControl: '3600',
+        cacheControl: '604800',
       })
       if (upErr) throw upErr
 
@@ -2249,14 +2296,14 @@ async function soumettreEvenement() {
 
   // Etape 2 : upload de la photo de couverture si presente, puis maj du cover_path
   if (pendingEvCoverFile && created?.id) {
-    const file = pendingEvCoverFile
+    const file = await compressImage(pendingEvCoverFile, 1600, 0.82)
     const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg'
     const path = `${created.id}/cover.${ext}`
 
     const { error: upErr } = await sb.storage.from(EV_COVERS_BUCKET).upload(path, file, {
       upsert: true,
       contentType: file.type,
-      cacheControl: '3600',
+      cacheControl: '604800',
     })
 
     if (upErr) {
@@ -4296,7 +4343,7 @@ async function confirmPhotoUpload() {
   }
 
   try {
-    const file = pendingPhotoFile
+    const file = await compressImage(pendingPhotoFile, 800, 0.85)
     const ext = file.type === 'image/png'  ? 'png'
               : file.type === 'image/webp' ? 'webp'
               : 'jpg'
@@ -4307,7 +4354,7 @@ async function confirmPhotoUpload() {
       .upload(path, file, {
         upsert: true,
         contentType: file.type,
-        cacheControl: '3600',
+        cacheControl: '604800',
       })
     if (upErr) throw upErr
 
@@ -4316,7 +4363,7 @@ async function confirmPhotoUpload() {
     })
     if (dbErr) throw dbErr
 
-    _signedUrlCache.delete(path)
+    _signedUrlCache.delete(PHOTOS_BUCKET + '|' + path)
 
     pendingPhotoFile = null
     const { data: refreshed } = await sb.from('benevoles').select('*').eq('email', CU.email).single()
@@ -5045,7 +5092,7 @@ function bSwitch(name) {
   }
 }
 
-async function handleLogout(){await sb.auth.signOut();window.location.href='index.html'}
+async function handleLogout(){try{localStorage.removeItem(_SURL_LS_KEY)}catch(e){};await sb.auth.signOut();window.location.href='index.html'}
 
 function ini(b){return((b.prenom||'?')[0]+(b.nom||'?')[0]).toUpperCase()}
 function formatDate(d){if(!d)return'';return new Date(d).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long'})}
