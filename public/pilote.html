@@ -2571,6 +2571,7 @@ async function loadAppelsPilote(){
   var el=document.getElementById('ap-list'); if(!el) return;
   await loadCompetences();
   var r=await sb.from('missions').select('*, mission_participations(id, statut, benevole_id, benevoles(prenom, nom, telephone))').order('date_mission',{ascending:true,nullsFirst:false}).order('created_at',{ascending:false});
+  var _pv={}; try{ var rv=await sb.rpc('missions_presences_validees'); (rv.data||[]).forEach(function(x){ _pv[x.mission_id+'|'+x.benevole_id]=1; }); }catch(e){ console.warn('presences validees', e); }
   if(r.error){ el.innerHTML='<div class="card"><div style="color:var(--c-gold-2);font-size:12px;">Erreur: '+r.error.message+'</div></div>'; return; }
   var list=r.data||[];
   if(list.length===0){ el.innerHTML='<div class="card"><div style="color:rgba(255,255,255,0.3);font-size:12px;font-style:italic;">Aucun appel pour le moment.</div></div>'; return; }
@@ -2578,7 +2579,7 @@ async function loadAppelsPilote(){
     var parts=m.mission_participations||[];
     var nb=parts.length;
     var objs=(m.objectifs||[]).map(function(o){ return '<div style="font-size:11px;color:rgba(255,255,255,0.55);">&#8226; '+escapeHtml(o)+'</div>'; }).join('');
-    var partRows=parts.length?parts.map(function(p){ var b=p.benevoles||{}; var tel=b.telephone?(' <span style="color:rgba(255,255,255,0.35);">'+escapeHtml(b.telephone)+'</span>'):''; return '<div style="font-size:12px;color:white;padding:3px 0;">&#8226; '+escapeHtml(((b.prenom||'')+' '+(b.nom||'')).trim()||'Benevole')+tel+'</div>'; }).join(''):'<div style="font-size:11px;color:rgba(255,255,255,0.3);">Aucun inscrit pour l\'instant.</div>';
+    var partRows=parts.length?parts.map(function(p){ var b=p.benevoles||{}; var tel=b.telephone?(' <span style="color:rgba(255,255,255,0.35);">'+escapeHtml(b.telephone)+'</span>'):''; var nomB=escapeHtml(((b.prenom||'')+' '+(b.nom||'')).trim()||'Benevole'); if(_pv[m.id+'|'+p.benevole_id]) return '<div style="font-size:12px;color:white;padding:3px 0;">&#9989; '+nomB+tel+' <span style="color:#86EFAC;font-size:10px;font-weight:700;">pr&eacute;sent &middot; points vers&eacute;s</span></div>'; return '<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:white;padding:3px 0;cursor:pointer;"><input type="checkbox" class="mp-chk" data-m="'+m.id+'" value="'+p.benevole_id+'" style="width:16px;height:16px;accent-color:#22C55E;">'+nomB+tel+'</label>'; }).join(''):'<div style="font-size:11px;color:rgba(255,255,255,0.3);">Aucun inscrit pour l\'instant.</div>';
     var dateStr=m.date_mission?new Date(m.date_mission+'T00:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}):'Date a definir';
     var heureStr=m.heure_rdv?(' &middot; '+m.heure_rdv.slice(0,5)):'';
     var isOpen=m.statut==='ouverte';
@@ -2590,11 +2591,22 @@ async function loadAppelsPilote(){
       (objs?'<div style="margin-bottom:8px;">'+objs+'</div>':'')+
       '<div style="font-size:11px;font-weight:700;color:var(--c-gold);margin-bottom:4px;">&#128101; '+nb+' inscrit'+(nb>1?'s':'')+(m.places_max?(' / '+m.places_max):'')+'</div>'+
       '<div style="margin-bottom:8px;">'+partRows+'</div>'+
+      (parts.some(function(p){ return !_pv[m.id+'|'+p.benevole_id]; })?'<button class="btn btn-sm" style="width:100%;margin-bottom:7px;background:#15803D;color:white;" onclick="validerPresences(\''+m.id+'\')">&#9989; Valider les pr&eacute;sents coch&eacute;s et attribuer les points</button>':'')+
       '<div style="display:flex;gap:7px;">'+(isOpen?'<button class="btn btn-sm" style="flex:1;background:#1f6f43;color:white;" onclick="notifyAppel(\''+m.id+'\')">&#128227; Notifier</button>':'')+'<button class="btn btn-sm btn-ghost" style="flex:1;" onclick="toggleMission(\''+m.id+'\',\''+(isOpen?'fermee':'ouverte')+'\')">'+(isOpen?'Fermer':'Rouvrir')+'</button><button class="btn btn-sm" style="background:#7a2525;color:white;" onclick="delMission(\''+m.id+'\')">Supprimer</button></div>'+
       '</div>';
   }).join('');
 }
 async function notifyAppel(id){ if(!confirm('Envoyer un email a tous les benevoles actifs pour cet appel ?')) return; showAlert('alert-appels','Envoi en cours...','s'); var r=await sb.functions.invoke('notify-appel',{ body:{ mission_id:id } }); if(r.error){ showAlert('alert-appels','Erreur envoi','e'); return; } var n=(r.data&&r.data.sent)||0; showAlert('alert-appels','Email envoye a '+n+' benevole'+(n>1?'s':''),'s'); }
+async function validerPresences(mid){
+  var ids=Array.prototype.slice.call(document.querySelectorAll('.mp-chk[data-m="'+mid+'"]:checked')).map(function(c){ return c.value; });
+  if(ids.length===0){ showAlert('alert-appels','Coche au moins un benevole present','e'); return; }
+  if(!confirm('Valider la presence de '+ids.length+' benevole'+(ids.length>1?'s':'')+' et leur attribuer les points ?')) return;
+  var r=await sb.rpc('valider_presences_mission',{ p_mission_id:mid, p_benevole_ids:ids });
+  if(r.error){ showAlert('alert-appels','Erreur: '+r.error.message,'e'); return; }
+  var d=r.data||{}; var n=d.valides||0;
+  showAlert('alert-appels','Points attribues a '+n+' benevole'+(n>1?'s':'')+(d.deja?(' ('+d.deja+' deja valide'+(d.deja>1?'s':'')+')'):''),'s');
+  loadAppelsPilote();
+}
 async function toggleMission(id,statut){ var r=await sb.from('missions').update({statut:statut}).eq('id',id); if(r.error){ showAlert('alert-appels','Erreur: '+r.error.message,'e'); return; } loadAppelsPilote(); }
 async function delMission(id){ var r=await sb.from('missions').delete().eq('id',id); if(!r.error) loadAppelsPilote(); }
 async function affecterPoste(inscriptionId, posteId, selectEl) {
