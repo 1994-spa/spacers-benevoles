@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pointage des arrivées — Spacers</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="stylesheet" href="/theme.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;min-height:100vh;background:#0C1B2E;color:white;font-family:'Sora',sans-serif;}
+  .wrap{max-width:480px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+  .top{display:flex;align-items:center;gap:10px;}
+  .top h1{flex:1;margin:0;font-size:16px;font-weight:800;}
+  .sub{font-size:11px;color:rgba(255,255,255,0.55);margin-top:2px;}
+  .btn{border:none;border-radius:50px;padding:9px 14px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;}
+  .btn-ghost{background:rgba(255,255,255,0.12);color:white;}
+  .btn-green{background:#1f9d5c;color:white;}
+  .btn-gold{background:#F5C842;color:#042C53;}
+  #reader{width:100%;border-radius:14px;overflow:hidden;background:black;min-height:200px;}
+  #count{text-align:center;font-size:13px;color:rgba(255,255,255,0.7);}
+  .card{border-radius:14px;padding:16px;}
+  .card .t{font-size:18px;font-weight:800;}
+  .card .s{font-size:13px;margin-top:4px;opacity:0.95;line-height:1.45;}
+  .info{background:rgba(255,255,255,0.08);border-radius:14px;padding:16px;font-size:13px;line-height:1.5;}
+  select{width:100%;padding:10px;border-radius:10px;border:none;font-family:inherit;font-size:13px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div style="flex:1;">
+      <h1>📷 Pointage des arrivées</h1>
+      <div class="sub" id="sub">Chargement…</div>
+    </div>
+    <button class="btn btn-ghost" onclick="quitter()">Fermer</button>
+  </div>
+  <div id="choix" style="display:none;"></div>
+  <div id="reader" style="display:none;"></div>
+  <div id="result"></div>
+  <div id="count"></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://xphuolvbamdkizydveij.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwaHVvbHZiYW1ka2l6eWR2ZWlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDQ2MDksImV4cCI6MjA5MjYyMDYwOX0.vpxV6ApwAkhlTx-LMCBZwee7LCdQGYP_5sbPMXEFFUQ'
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+let match = null, scanner = null, busy = false, last = { t: '', at: 0 }, pending = ''
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+}
+function card(bg, title, sub) {
+  return '<div class="card" style="background:' + bg + ';"><div class="t">' + title + '</div><div class="s">' + sub + '</div></div>'
+}
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector('script[data-src="' + src + '"]')) return resolve()
+    const s = document.createElement('script'); s.src = src; s.dataset.src = src
+    s.onload = () => resolve(); s.onerror = () => reject(new Error('Chargement impossible : ' + src))
+    document.head.appendChild(s)
+  })
+}
+
+async function init() {
+  const { data: { session } } = await sb.auth.getSession()
+  if (!session) { window.location.href = 'index.html'; return }
+  const { data, error } = await sb.rpc('mes_matchs_scan')
+  if (error) { document.getElementById('sub').textContent = ''; document.getElementById('result').innerHTML = card('#5c1f2b', '⚠️ Erreur', esc(error.message)); return }
+  const list = data || []
+  if (!list.length) {
+    document.getElementById('sub').textContent = ''
+    document.getElementById('result').innerHTML = '<div class="info"><b>Aucun pointage à faire aujourd\'hui.</b><br>Le scan s\'ouvre le jour du match pour le bénévole affecté à l\'accueil des bénévoles.</div>'
+    return
+  }
+  if (list.length === 1) return demarrer(list[0])
+  // Plusieurs matchs le même jour (rare) : choix
+  const el = document.getElementById('choix'); el.style.display = 'block'
+  document.getElementById('sub').textContent = 'Choisis le match'
+  el.innerHTML = '<select id="sel">' + list.map((m, i) => '<option value="' + i + '">Spacers vs ' + esc(m.adversaire) + (m.heure ? ' · ' + esc(String(m.heure).slice(0, 5)) : '') + '</option>').join('') + '</select>'
+    + '<button class="btn btn-gold" style="width:100%;margin-top:8px;" id="go">Commencer le pointage</button>'
+  document.getElementById('go').onclick = () => { el.style.display = 'none'; demarrer(list[+document.getElementById('sel').value]) }
+}
+
+async function demarrer(m) {
+  match = m
+  document.getElementById('sub').textContent = 'Spacers vs ' + (m.adversaire || '') + ' · scanne le QR de l\'accréditation ou de l\'app'
+  compteur()
+  const reader = document.getElementById('reader'); reader.style.display = 'block'
+  try {
+    await loadScript('https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js')
+    scanner = new Html5Qrcode('reader')
+    await scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 240, height: 240 } }, onScan, () => {})
+  } catch (e) {
+    document.getElementById('result').innerHTML = card('#5c1f2b', 'Caméra indisponible', esc(e.message || e) + '<br><span style="font-size:11px;opacity:0.8;">Autorise l\'accès à la caméra pour ce site, puis recharge la page.</span>')
+  }
+}
+
+async function compteur() {
+  if (!match) return
+  const { data } = await sb.rpc('compteur_pointage', { p_match_id: match.id })
+  if (data) document.getElementById('count').textContent = data.pointes + ' / ' + data.total + ' bénévoles pointés'
+}
+
+async function onScan(text) {
+  const now = Date.now()
+  if (busy || (text === last.t && now - last.at < 4000)) return
+  busy = true; last = { t: text, at: now }
+  try { await pointer(text, false) } finally { setTimeout(() => { busy = false }, 1200) }
+}
+
+async function pointer(text, faireEntrer) {
+  const el = document.getElementById('result')
+  const { data, error } = await sb.rpc('pointer_benevole', { p_token: text, p_match_id: match.id, p_faire_entrer: !!faireEntrer })
+  if (navigator.vibrate) navigator.vibrate(120)
+  if (error) { el.innerHTML = card('#5c1f2b', '⚠️ Erreur', esc(error.message)); return }
+  const r = data || {}
+  const nom = esc((r.prenom || '') + ' ' + (r.nom || ''))
+  if (r.code === 'pointe') {
+    const ok = r.statut_jour_match === 'present_ponctuel'
+    el.innerHTML = card(ok ? '#1f6f43' : '#8a5a12', (ok ? '✅ ' : '⏰ ') + nom,
+      (ok ? 'À l\'heure' : 'En retard de ' + (r.retard_min || 0) + ' min') + (r.heure_attendue ? ' · attendu à ' + esc(r.heure_attendue) : '')
+      + (r.poste ? '<br>📍 ' + esc(r.poste) : '') + (r.entre_en_jeu ? '<br>🪑 Remplaçant entré dans l\'équipe' : ''))
+  } else if (r.code === 'deja') {
+    el.innerHTML = card('#1d4f7a', 'ℹ️ ' + nom, 'Déjà pointé' + (r.pointe_le ? ' à ' + new Date(r.pointe_le).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '') + (r.poste ? ' · 📍 ' + esc(r.poste) : ''))
+  } else if (r.code === 'remplacant') {
+    pending = text
+    el.innerHTML = card('#7a5410', '🪑 ' + nom, 'Remplaçant sur ce match.'
+      + '<div style="margin-top:10px;"><button class="btn btn-green" onclick="pointer(pending, true)">➕ Le faire entrer dans l\'équipe et le pointer</button></div>')
+  } else if (r.code === 'non_inscrit') {
+    el.innerHTML = card('#5c1f2b', '✗ ' + nom, 'Pas inscrit comme disponible pour ce match.')
+  } else {
+    el.innerHTML = card('#5c1f2b', '✗ QR non reconnu', 'Ce QR ne correspond à aucun bénévole.')
+  }
+  compteur()
+}
+
+async function quitter() {
+  try { if (scanner) { await scanner.stop(); scanner.clear() } } catch (e) {}
+  window.location.href = 'dashboard.html'
+}
+
+init()
+</script>
+</body>
+</html>
