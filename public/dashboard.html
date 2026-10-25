@@ -584,6 +584,7 @@ body{font-family:'Sora',sans-serif;background:var(--c-navy);min-height:100vh;}
     <div class="t-right">
       <button class="btn-logout" onclick="openGuideBenev()" style="margin-right:6px;">?</button>
       <button id="btn-pilote-view" class="btn-pilote" onclick="window.location.href='pilote.html'" style="display:none;">🎯 Vue pilote</button>
+      <button id="btn-scan-view" class="btn-pilote" onclick="window.location.href='scan.html'" style="display:none;background:#F5C842;color:#042C53;margin-right:6px;">📷 Scanner</button>
       <button class="btn-logout" onclick="handleLogout()">✕</button>
     </div>
   </div>
@@ -3738,6 +3739,13 @@ function renderTopbar(p) {
   const btnPilote = document.getElementById('btn-pilote-view')
   if (btnPilote) {
     btnPilote.style.display = (p.role === 'admin' || p.role === 'pilote') ? 'inline-block' : 'none'
+  }
+  // Accueil bénévoles du jour : bouton de scan (droit vérifié côté serveur)
+  const btnScan = document.getElementById('btn-scan-view')
+  if (btnScan) {
+    sb.rpc('mes_matchs_scan').then(({ data }) => {
+      btnScan.style.display = (data && data.length) ? 'inline-block' : 'none'
+    }).catch(() => {})
   }
 }
 
