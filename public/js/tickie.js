@@ -168,6 +168,26 @@
       el._t = setTimeout(function () { el.classList.remove('show') }, duree)
     }
   }
+  // Fenêtre de confirmation aux couleurs de l'app (remplace la boîte du navigateur)
+  function confirmer(titre, texte, libOk) {
+    styles()
+    return new Promise(function (res) {
+      var w = document.createElement('div')
+      w.style.cssText = 'position:fixed;inset:0;z-index:10001;background:rgba(4,10,20,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;font-family:Sora,sans-serif;opacity:0;transition:opacity .25s'
+      w.innerHTML = '<div style="width:min(100%,480px);background:#13243a;border:1px solid rgba(255,255,255,.08);border-radius:24px 24px 0 0;padding:22px 20px 26px;box-sizing:border-box;transform:translateY(40px);transition:transform .35s cubic-bezier(.2,.9,.25,1.1)">'
+        + '<div style="width:40px;height:4px;border-radius:4px;background:rgba(255,255,255,.18);margin:0 auto 16px"></div>'
+        + '<div style="display:flex;gap:12px;align-items:center;margin-bottom:10px"><div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#F5C842,#FAC775);display:flex;align-items:center;justify-content:center;font-size:18px">🎟️</div>'
+        + '<div style="font-size:16px;font-weight:800;color:#fff">' + titre + '</div></div>'
+        + '<div style="font-size:13px;line-height:1.55;color:rgba(255,255,255,.72)">' + texte + '</div>'
+        + '<div style="display:flex;gap:10px;margin-top:20px"><button data-r="0" style="flex:1;border:none;border-radius:50px;padding:13px;font-family:inherit;font-size:13px;font-weight:700;background:rgba(255,255,255,.08);color:#fff;cursor:pointer">Annuler</button>'
+        + '<button data-r="1" style="flex:1;border:none;border-radius:50px;padding:13px;font-family:inherit;font-size:13px;font-weight:800;background:#F5C842;color:#042C53;cursor:pointer">' + (libOk || 'Continuer') + '</button></div></div>'
+      document.body.appendChild(w)
+      requestAnimationFrame(function () { w.style.opacity = '1'; w.firstChild.style.transform = 'translateY(0)' })
+      var fin = function (v) { w.style.opacity = '0'; setTimeout(function () { w.remove() }, 250); res(v) }
+      w.onclick = function (e) { var r = e.target.getAttribute && e.target.getAttribute('data-r'); if (r !== null && r !== undefined) fin(r === '1'); else if (e.target === w) fin(false) }
+    })
+  }
+
   var court = function (m) {
     var t = String(m || ''), j = t.match(/"message":"([^"]+)"/)
     if (j) t = t.replace(/(GET|POST|PUT) \S+ (\d{3}) \{.*$/, '($2) ') + j[1]
@@ -359,7 +379,8 @@
   }
 
   async function essai() {
-    if (!confirm('Essai : billet à TON nom sur ce match (sans mail), puis entrée et sortie au contrôle d\'accès (solde nul). Continuer ?')) return
+    var go = await confirmer('Essai d\'émission', 'Un billet <b>Invitation – Bénévoles</b> est émis à ton nom sur ce match, <b>sans mail</b>, puis une entrée et une sortie sont enregistrées au contrôle d\'accès : l\'affluence ne bouge pas.<br><br>Tu devras invalider ce billet d\'essai dans Tickie ensuite.', 'Lancer l\'essai')
+    if (!go) return
     await occupe(document.getElementById('tk-essai'), async function () {
       try {
         var d = await appel('essai', { match_id: piloteMatch().id })
