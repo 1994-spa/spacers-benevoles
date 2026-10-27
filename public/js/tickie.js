@@ -277,12 +277,12 @@
   }
 
   async function essai() {
-    if (!confirm('Émettre un billet test à TON nom sur ce match (sans mail, sans entrée), puis l\'annuler aussitôt ?')) return
+    if (!confirm('Essai : billet test à TON nom sur ce match (sans mail), entrée puis sortie au contrôle d\'accès (solde nul). Continuer ?')) return
     msg('Essai en cours…')
     try {
       var d = await appel('essai', { match_id: piloteMatch().id })
       var e = d.etapes || {}
-      msg('Client Tickie : ' + esc(e.client) + '<br>Billet : ' + esc(e.billet) + '<br>Annulation : ' + esc(e.annulation)
+      msg('Client Tickie : ' + esc(e.client) + '<br>Billet : ' + esc(e.billet) + '<br>Contrôle d\'accès : ' + esc(e.controle_acces) + '<br>Annulation : ' + esc(e.annulation)
         + (d.ok ? '<br><span style="opacity:0.8;">Vérifie dans Tickie que le client ' + esc(d.email) + ' porte bien le tag et qu\'aucun mail n\'est parti.</span>' : ''), d.ok ? 'ok' : 'e')
     } catch (e) { msg('Essai en échec : ' + esc(e.message), 'e') }
   }
