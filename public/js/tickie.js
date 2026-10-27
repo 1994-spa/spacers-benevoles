@@ -283,7 +283,7 @@
       var d = await appel('essai', { match_id: piloteMatch().id })
       var e = d.etapes || {}
       msg('Client Tickie : ' + esc(e.client) + '<br>Billet : ' + esc(e.billet) + '<br>Annulation : ' + esc(e.annulation)
-        + '<br><span style="opacity:0.8;">Vérifie dans Tickie que le client ' + esc(d.email) + ' porte bien le tag et qu\'aucun mail n\'est parti.</span>', 'ok')
+        + (d.ok ? '<br><span style="opacity:0.8;">Vérifie dans Tickie que le client ' + esc(d.email) + ' porte bien le tag et qu\'aucun mail n\'est parti.</span>' : ''), d.ok ? 'ok' : 'e')
     } catch (e) { msg('Essai en échec : ' + esc(e.message), 'e') }
   }
 
@@ -291,7 +291,7 @@
     msg('Test en cours (aucune écriture chez Tickie)…')
     try {
       var d = await appel('test', { match_id: piloteMatch().id })
-      var ok = d.api_billetterie === 'ok' && d.api_controle_acces === 'ok'
+      var ok = String(d.api_billetterie || '').indexOf('ok') === 0 && d.api_controle_acces === 'ok'
       msg('Billetterie : ' + esc(d.api_billetterie) + '<br>Contrôle d\'accès : ' + esc(d.api_controle_acces)
         + (d.scans_existants != null ? ' (' + d.scans_existants + ' scan(s) déjà sur l\'événement)' : ''), ok ? 'ok' : 'e')
     } catch (e) { msg(esc(e.message), 'e') }
