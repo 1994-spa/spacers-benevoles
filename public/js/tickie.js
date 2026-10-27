@@ -348,7 +348,7 @@
           toast(nomOk ? 'ok' : 'ko', nomOk ? 'Essai réussi' : 'Essai réussi, sauf le nom sur le billet',
             'Billet ' + esc(d.barcode || '') + ' au nom de ' + esc(d.nom || '') + ', tag « bénévoles », entrée comptée.'
             + (nomOk ? '' : '<br>' + court(e.nom))
-            + '<br>Pense à invalider ce billet d\'essai dans Tickie.')
+            + '<br>Pense à invalider ce billet d\'essai dans Tickie' + (d.ancien ? ', ainsi que l\'ancien ' + esc(d.ancien) : '') + '.')
         } else {
           var etape = ['client', 'billet', 'controle_acces'].filter(function (k) { return String(e[k] || '').indexOf('ok') !== 0 })[0]
           var lib = { client: 'Fiche client', billet: 'Émission du billet', controle_acces: 'Contrôle d\'accès' }[etape] || 'Essai'
