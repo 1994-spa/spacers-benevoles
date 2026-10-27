@@ -127,25 +127,46 @@
       '#tk-ov .tk-filtre{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}',
       '#tk-ov .tk-filtre button{border:none;border-radius:50px;padding:5px 11px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.07);color:rgba(255,255,255,.7)}',
       '#tk-ov .tk-filtre button.on{background:#F5C842;color:#042C53}',
-      '#tk-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,140%);z-index:10000;width:min(92vw,420px);box-sizing:border-box;padding:12px 18px;border-radius:16px;font-family:Sora,sans-serif;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.45);opacity:0;transition:transform .35s ease,opacity .35s ease;cursor:pointer}',
+      '#tk-toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,calc(100% + 40px));z-index:10000;width:min(92vw,420px);box-sizing:border-box;border-radius:20px;font-family:Sora,sans-serif;color:#fff;background:#13243a;border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 40px rgba(0,0,0,.5);opacity:0;transition:transform .45s cubic-bezier(.2,.9,.25,1.15),opacity .3s ease;overflow:hidden;cursor:pointer}',
       '#tk-toast.show{transform:translate(-50%,0);opacity:1}',
-      '#tk-toast.ok{background:#2f7a4a}#tk-toast.ko{background:#c0393b}#tk-toast.info{background:#1d3654}',
-      '#tk-toast .t1{font-size:13px;font-weight:700}#tk-toast .t2{font-size:11px;opacity:.88;margin-top:3px;line-height:1.45}'
+      '#tk-toast .tt{display:flex;gap:12px;align-items:flex-start;padding:14px 16px 14px 14px}',
+      '#tk-toast .ic{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800}',
+      '#tk-toast.ok .ic{background:rgba(95,211,154,.16);color:#5fd39a;box-shadow:0 0 0 4px rgba(95,211,154,.07)}',
+      '#tk-toast.ko .ic{background:rgba(255,107,107,.16);color:#ff6b6b;box-shadow:0 0 0 4px rgba(255,107,107,.07)}',
+      '#tk-toast.info .ic{background:rgba(143,195,255,.14);color:#8fc3ff}',
+      '#tk-toast.ok{border-color:rgba(95,211,154,.35)}#tk-toast.ko{border-color:rgba(255,107,107,.4)}',
+      '#tk-toast .tx{flex:1;min-width:0}',
+      '#tk-toast .t1{font-size:14px;font-weight:800;line-height:1.3}',
+      '#tk-toast.ok .t1{color:#5fd39a}#tk-toast.ko .t1{color:#ff8a8a}',
+      '#tk-toast .t2{font-size:11.5px;color:rgba(255,255,255,.72);margin-top:4px;line-height:1.5;word-break:break-word}',
+      '#tk-toast .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}',
+      '#tk-toast .chips span{font-size:11px;font-weight:700;padding:4px 9px;border-radius:50px;background:rgba(255,255,255,.07);color:#fff}',
+      '#tk-toast .cl{background:none;border:none;color:rgba(255,255,255,.4);font-size:14px;cursor:pointer;padding:0 0 0 4px;line-height:1}',
+      '#tk-toast .bar{height:3px;transform-origin:left;transform:scaleX(0)}',
+      '#tk-toast.ok .bar{background:#5fd39a}#tk-toast.ko .bar{background:#ff6b6b}#tk-toast.info .bar{background:transparent}',
+      '@keyframes tkbar{from{transform:scaleX(1)}to{transform:scaleX(0)}}'
     ].join('')
     document.head.appendChild(css)
   }
 
   // Notification qui s'efface : verte si tout va bien, rouge s'il y a un souci
-  function toast(type, titre, detail) {
+  function toast(type, titre, detail, chips) {
     styles()
     var el = document.getElementById('tk-toast')
     if (!el) { el = document.createElement('div'); el.id = 'tk-toast'; document.body.appendChild(el); el.onclick = function () { el.classList.remove('show') } }
+    var duree = type === 'ko' ? 8000 : 4500
     el.className = type
-    el.innerHTML = '<div class="t1">' + titre + '</div>' + (detail ? '<div class="t2">' + detail + '</div>' : '')
+    el.innerHTML = '<div class="tt"><div class="ic">' + (type === 'ok' ? '✓' : type === 'ko' ? '!' : '…') + '</div><div class="tx">'
+      + '<div class="t1">' + titre + '</div>' + (detail ? '<div class="t2">' + detail + '</div>' : '')
+      + (chips && chips.length ? '<div class="chips">' + chips.map(function (c) { return '<span>' + c + '</span>' }).join('') + '</div>' : '')
+      + '</div><button class="cl" aria-label="Fermer">✕</button></div><div class="bar"></div>'
     void el.offsetWidth
     el.classList.add('show')
     clearTimeout(el._t)
-    if (type !== 'info') el._t = setTimeout(function () { el.classList.remove('show') }, type === 'ko' ? 7000 : 4000)
+    if (type !== 'info') {
+      el.querySelector('.bar').style.animation = 'tkbar ' + duree + 'ms linear forwards'
+      el._t = setTimeout(function () { el.classList.remove('show') }, duree)
+    }
   }
   var court = function (m) {
     var t = String(m || ''), j = t.match(/"message":"([^"]+)"/)
@@ -331,7 +352,7 @@
       try {
         var d = await appel('test', { match_id: piloteMatch().id })
         var okB = String(d.api_billetterie || '').indexOf('ok') === 0, okA = d.api_controle_acces === 'ok'
-        if (okB && okA) toast('ok', 'Connexion Tickie OK', 'Billetterie et contrôle d\'accès répondent')
+        if (okB && okA) toast('ok', 'Connexion Tickie OK', '', ['✓ Billetterie', '✓ Contrôle d\'accès'])
         else toast('ko', 'Connexion Tickie incomplète', (okB ? '' : 'Billetterie : ' + court(d.api_billetterie) + '<br>') + (okA ? '' : 'Contrôle d\'accès : ' + court(d.api_controle_acces)))
       } catch (e) { toast('ko', 'Test impossible', court(e.message)) }
     })
@@ -346,9 +367,9 @@
         if (d.ok) {
           var nomOk = String(e.nom || '').indexOf('ok') === 0
           toast(nomOk ? 'ok' : 'ko', nomOk ? 'Essai réussi' : 'Essai réussi, sauf le nom sur le billet',
-            'Billet ' + esc(d.barcode || '') + ' au nom de ' + esc(d.nom || '') + ', tag « bénévoles », entrée comptée.'
-            + (nomOk ? '' : '<br>' + court(e.nom))
-            + '<br>Pense à invalider ce billet d\'essai dans Tickie' + (d.ancien ? ', ainsi que l\'ancien ' + esc(d.ancien) : '') + '.')
+            nomOk ? 'Billet émis et entrée comptée. Pense à invalider ce billet d\'essai dans Tickie' + (d.ancien ? ', ainsi que l\'ancien ' + esc(d.ancien) : '') + '.'
+                  : court(e.nom),
+            ['👤 ' + esc(d.nom || ''), '🎟️ ' + esc(d.barcode || ''), '🏷️ bénévoles', '✓ entrée comptée'])
         } else {
           var etape = ['client', 'billet', 'controle_acces'].filter(function (k) { return String(e[k] || '').indexOf('ok') !== 0 })[0]
           var lib = { client: 'Fiche client', billet: 'Émission du billet', controle_acces: 'Contrôle d\'accès' }[etape] || 'Essai'
