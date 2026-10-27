@@ -147,7 +147,11 @@
     clearTimeout(el._t)
     if (type !== 'info') el._t = setTimeout(function () { el.classList.remove('show') }, type === 'ko' ? 7000 : 4000)
   }
-  var court = function (m) { return esc(String(m || '').replace(/^(GET|POST|PUT) \S+ /, '').slice(0, 140)) }
+  var court = function (m) {
+    var t = String(m || ''), j = t.match(/"message":"([^"]+)"/)
+    if (j) t = t.replace(/(GET|POST|PUT) \S+ (\d{3}) \{.*$/, '($2) ') + j[1]
+    return esc(t.replace(/^(GET|POST|PUT) \S+ /, '').slice(0, 180))
+  }
 
   function injecterBouton() {
     if (document.getElementById('tickie-btn')) return
