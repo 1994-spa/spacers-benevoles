@@ -172,9 +172,10 @@ function rendre(data){
         (r.accroche ? '<p class="accroche">' + esc(r.accroche) + '</p>' : '') +
         '<p class="tarifs">' + esc(r.tarifs||'') + '</p>' +
         '<h3>Les visuels</h3>' +
-        '<div class="fichiers">' + boutonsVisuels(r) + '</div>' +
-        '<p class="astuce">Touchez un visuel pour l\'ouvrir, puis appui long pour '
-        + 'l\'enregistrer dans vos photos.</p>' +
+        (function(){ var v = boutonsVisuels(r); return v
+          ? '<div class="fichiers">' + v + '</div>' +
+            '<p class="astuce">Touchez un visuel pour l\'ouvrir, puis appui long pour l\'enregistrer dans vos photos.</p>'
+          : '<p class="astuce">Les visuels de ce match arrivent bientôt : les textes et le lien sont déjà prêts.</p>'; })() +
         '<h3>Les textes, prêts à copier</h3>' +
         blocs.map(function(b,j){
           return '<div class="bloc"><div class="t">' + esc(b[0]) + '</div>' +
