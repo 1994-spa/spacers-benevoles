@@ -89,6 +89,14 @@ var SAISON = '26-27';
    — à condition que ce domaine renvoie Access-Control-Allow-Origin. */
 var SOURCE = 'kit-benevoles.json';
 
+/* SOURCE AUTOMATIQUE : l'Edge Function kit-com lit les matchs à domicile dans
+   Tickie et ne publie que ceux dont les visuels sont déjà déposés sur
+   img.spacerstoulouse.fr. Déposer les visuels suffit donc à faire apparaître
+   un match. Le fichier kit-benevoles.json reste lu en complément : une
+   réception de même « cle » y remplace les textes automatiques (textes
+   personnalisés), et une réception absente de Tickie y reste possible. */
+var AUTO = 'https://xphuolvbamdkizydveij.supabase.co/functions/v1/kit-com';
+
 /* Repli embarqué : si le JSON n'est pas encore déposé, la page reste utile. */
 var REPLI = {"saison":"26-27","receptions":[]};
 
@@ -227,10 +235,34 @@ function repli(texte, ok){
   document.body.removeChild(z);
 }
 
-fetch(SOURCE, {cache:'no-cache'})
-  .then(function(r){ if(!r.ok) throw 0; return r.json(); })
-  .then(rendre)
-  .catch(function(){ rendre(REPLI); });
+function lire(url){
+  return fetch(url, {cache:'no-cache'})
+    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .catch(function(){ return null; });
+}
+/* Fusion : la liste automatique fait foi pour les dates, tarifs, lien et
+   visuels ; le fichier manuel peut surcharger les textes et l'accroche. */
+function fusion(auto, manuel){
+  var a = (auto && auto.receptions) || [], m = (manuel && manuel.receptions) || [];
+  var parCle = {}; m.forEach(function(r){ if(r.cle) parCle[r.cle] = r; });
+  var vus = {};
+  var recs = a.map(function(r){
+    vus[r.cle] = 1;
+    var x = parCle[r.cle]; if(!x) return r;
+    var o = {}; for(var k in r) o[k] = r[k];
+    if(x.textes) o.textes = x.textes;
+    if(x.accroche) o.accroche = x.accroche;
+    if(x.lien && !/A_CREER/.test(x.lien)) o.lien = x.lien;
+    return o;
+  });
+  m.forEach(function(r){ if(!vus[r.cle]) recs.push(r); });
+  recs.sort(function(x, y){ return String(x.date||'').localeCompare(String(y.date||'')); });
+  return {saison: SAISON, receptions: recs};
+}
+Promise.all([lire(AUTO), lire(SOURCE)]).then(function(res){
+  if(!res[0] && !res[1]) return rendre(REPLI);
+  rendre(fusion(res[0], res[1]));
+});
 </script>
 </body>
 </html>
