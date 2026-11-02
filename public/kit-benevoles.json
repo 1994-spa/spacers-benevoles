@@ -1,74 +1,97 @@
 {
   "saison": "26-27",
-  "maj": "2026-10-09",
-  "genere_par": "Cockpit Billetterie V6 · module 76 v3.9.2",
+  "maj": "2026-11-02",
+  "genere_par": "Mise à jour manuelle (données Tickie du 02/11/2026)",
   "receptions": [
     {
-      "cle": "narbonne",
-      "titre": "Match de gala vs Narbonne",
-      "competition": "Match de gala",
-      "date": "2026-10-10",
-      "dateTexte": "samedi 10 octobre",
+      "cle": "plessis",
+      "titre": "Spacer's vs Le Plessis-Robinson",
+      "competition": "Ligue A · double programme",
+      "date": "2026-11-07",
+      "dateTexte": "samedi 7 novembre",
       "heure": "18h00",
+      "portes": "13h00",
       "lieu": "Palais des Sports André-Brouat, Toulouse",
-      "tarifs": "8 € tarif unique · gratuit -8 ans",
-      "lien": "https://billetterie.spacerstoulouse.fr/s/xHJp5EIb",
+      "tarifs": "13 € plein tarif · 8 € tarif réduit · gratuit -8 ans · un billet pour les 2 matchs",
+      "accroche": "14h France Avenir 2027 vs Mulhouse, 18h Spacer's vs Le Plessis-Robinson : deux matchs, un seul billet.",
+      "lien": "https://billetterie.spacerstoulouse.fr/event/france-avenir-vs-mulhouse-spacers-vs-plessis-g7bxai",
       "visuels": {
         "post": {
-          "url": "https://img.spacerstoulouse.fr/26-27/narbonne/post.jpg",
+          "url": "https://img.spacerstoulouse.fr/26-27/plessis/post.jpg",
           "libelle": "Post 1080×1350"
         },
         "story": {
-          "url": "https://img.spacerstoulouse.fr/26-27/narbonne/story.jpg",
+          "url": "https://img.spacerstoulouse.fr/26-27/plessis/story.jpg",
           "libelle": "Story 1080×1920"
         },
         "carrousel": {
-          "url": "https://img.spacerstoulouse.fr/26-27/narbonne/carrousel.jpg",
+          "url": "https://img.spacerstoulouse.fr/26-27/plessis/carrousel.jpg",
           "libelle": "Carrousel"
         },
         "banniere": {
-          "url": "https://img.spacerstoulouse.fr/26-27/narbonne/banniere.jpg",
+          "url": "https://img.spacerstoulouse.fr/26-27/plessis/banniere.jpg",
           "libelle": "Bannière"
         }
       },
       "textes": {
-        "post": "🏐 Samedi 10 octobre, la saison reprend au Palais des Sports !\nLe Spacer's Toulouse Volley reçoit Narbonne pour le match de gala d'ouverture.\n8 € l'entrée, gratuit pour les moins de 8 ans.\n🎟️ Billets : https://billetterie.spacerstoulouse.fr/s/xHJp5EIb\nVenez remplir le Palais avec nous 💙",
-        "story": "🏐 Ce samedi, on va au volley !\nSpacer's vs Narbonne — 10 octobre, 18h\nPalais des Sports André-Brouat\nBillets 8 € : https://billetterie.spacerstoulouse.fr/s/xHJp5EIb",
-        "relance": "⏳ Plus qu'une semaine !\nSpacer's vs Narbonne, samedi 10 octobre à 18h : venez découvrir l'équipe 2026-2027.\n🎟️ 8 €, gratuit pour les moins de 8 ans : https://billetterie.spacerstoulouse.fr/s/xHJp5EIb"
+        "post": "🏐 Samedi 7 novembre, double programme au Palais des Sports !\n14h : France Avenir 2027 vs Mulhouse\n18h : le Spacer's Toulouse Volley reçoit Le Plessis-Robinson en Ligue A\nUn seul billet pour les deux matchs : 13 €, 8 € tarif réduit, gratuit pour les moins de 8 ans.\n🎟️ Billets : {lien}\nVenez remplir le Palais avec nous 💙",
+        "story": "🏐 Samedi, on va au volley !\nSpacer's vs Le Plessis-Robinson — 7 novembre, 18h\n+ France Avenir à 14h, même billet\nBillets dès 8 € : {lien}",
+        "relance": "⏳ C'est ce samedi !\nDouble programme au Palais des Sports le 7 novembre : France Avenir à 14h, puis Spacer's vs Le Plessis-Robinson à 18h.\n🎟️ Un billet pour les deux, dès 8 €, gratuit -8 ans : {lien}"
       }
     },
     {
-      "cle": "sete",
-      "titre": "Spacer's vs Arago de Sète",
-      "competition": "Ligue A · J1",
-      "date": "2026-10-17",
-      "dateTexte": "samedi 17 octobre",
+      "cle": "tours",
+      "titre": "Spacer's vs Tours VB",
+      "competition": "Ligue A · double programme",
+      "date": "2026-11-21",
+      "dateTexte": "samedi 21 novembre",
       "heure": "18h00",
+      "portes": "13h00",
       "lieu": "Palais des Sports André-Brouat, Toulouse",
-      "tarifs": "13 € plein tarif · 8 € demi-tarif · gratuit -8 ans",
-      "lien": "https://billetterie.spacerstoulouse.fr/event/spacers-vs-sete-samedi-17-octobre-0pfaxs",
+      "tarifs": "13 € plein tarif · 8 € tarif réduit · gratuit -8 ans · un billet pour les 2 matchs",
+      "accroche": "Tours, l'un des clubs les plus titrés du volley français, au Palais. En lever de rideau à 14h : France Avenir 2027 vs Chamalières.",
+      "lien": "https://billetterie.spacerstoulouse.fr/event/france-avenir-vs-chamalieres-spacers-vs-tours-905tgd",
       "visuels": {
         "post": {
-          "url": "https://img.spacerstoulouse.fr/26-27/sete/post.jpg",
+          "url": "https://img.spacerstoulouse.fr/26-27/tours/post.jpg",
           "libelle": "Post 1080×1350"
         },
         "story": {
-          "url": "https://img.spacerstoulouse.fr/26-27/sete/story.jpg",
+          "url": "https://img.spacerstoulouse.fr/26-27/tours/story.jpg",
           "libelle": "Story 1080×1920"
         },
         "carrousel": {
-          "url": "https://img.spacerstoulouse.fr/26-27/sete/carrousel.jpg",
+          "url": "https://img.spacerstoulouse.fr/26-27/tours/carrousel.jpg",
           "libelle": "Carrousel"
         },
         "banniere": {
-          "url": "https://img.spacerstoulouse.fr/26-27/sete/banniere.jpg",
+          "url": "https://img.spacerstoulouse.fr/26-27/tours/banniere.jpg",
           "libelle": "Bannière"
         }
       },
       "textes": {
-        "post": "🏐 Le championnat reprend au Palais des Sports !\nSamedi 17 octobre à 18h, le Spacer's Toulouse Volley reçoit Arago de Sète pour la 1re journée de Ligue A à domicile.\n13 € plein tarif, 8 € demi-tarif, gratuit pour les moins de 8 ans.\n🎟️ Billets : https://billetterie.spacerstoulouse.fr/event/spacers-vs-sete-samedi-17-octobre-0pfaxs\nOn compte sur vous pour faire vibrer le Palais 💙",
-        "story": "🏐 Samedi, on va au volley !\nSpacer's vs Sète — 17 octobre, 18h\nPalais des Sports André-Brouat\nBillets dès 8 € : https://billetterie.spacerstoulouse.fr/event/spacers-vs-sete-samedi-17-octobre-0pfaxs",
-        "relance": "⏳ Plus qu'une semaine !\nSpacer's vs Arago de Sète, samedi 17 octobre à 18h : premier match de championnat à la maison.\n🎟️ Dès 8 €, gratuit pour les moins de 8 ans : https://billetterie.spacerstoulouse.fr/event/spacers-vs-sete-samedi-17-octobre-0pfaxs"
+        "post": "🏐 Grosse affiche samedi 21 novembre au Palais des Sports !\nLe Spacer's Toulouse Volley reçoit Tours, l'un des clubs les plus titrés du volley français, à 18h.\nEn lever de rideau à 14h : France Avenir 2027 vs Chamalières.\nUn seul billet pour les deux matchs : 13 €, 8 € tarif réduit, gratuit pour les moins de 8 ans.\n🃏 Nouveau : chaque billet révèle une carte de l'Album Spacers 26-27.\n🎟️ Billets : {lien}",
+        "story": "🏐 Samedi, Tours au Palais !\nSpacer's vs Tours — 21 novembre, 18h\n+ France Avenir à 14h, même billet\nBillets dès 8 € : {lien}",
+        "relance": "⏳ Plus que quelques jours !\nSpacer's vs Tours samedi 21 novembre à 18h, France Avenir à 14h : une affiche de prestige à vivre au plus près du terrain.\n🎟️ Un billet pour les deux, dès 8 €, gratuit -8 ans : {lien}"
+      }
+    },
+    {
+      "cle": "paris",
+      "titre": "Spacer's vs Paris Volley",
+      "competition": "Ligue A · double programme",
+      "date": "2026-11-28",
+      "dateTexte": "samedi 28 novembre",
+      "heure": "18h00",
+      "portes": "13h00",
+      "lieu": "Palais des Sports André-Brouat, Toulouse",
+      "tarifs": "13 € plein tarif · 8 € tarif réduit · gratuit -8 ans · un billet pour les 2 matchs",
+      "accroche": "Paris, l'un des clubs historiques du volley français, pour le dernier match avant la trêve. En lever de rideau à 14h : France Avenir 2027 vs Cannes.",
+      "lien": "https://billetterie.spacerstoulouse.fr/event/france-avenir-vs-cannes-spacers-vs-paris-7ujueu",
+      "visuels": {},
+      "textes": {
+        "post": "🏐 Dernier match avant la trêve, samedi 28 novembre au Palais des Sports !\nLe Spacer's Toulouse Volley reçoit Paris Volley à 18h, après France Avenir 2027 vs Cannes à 14h.\nUn seul billet pour les deux matchs : 13 €, 8 € tarif réduit, gratuit pour les moins de 8 ans.\n🎟️ Billets : {lien}\nOn a besoin de vous pour faire trembler les tribunes 🔥",
+        "story": "🏐 Samedi, Paris au Palais !\nSpacer's vs Paris — 28 novembre, 18h\n+ France Avenir à 14h, même billet\nBillets dès 8 € : {lien}",
+        "relance": "⏳ Dernier match de l'année au Palais !\nSpacer's vs Paris Volley samedi 28 novembre à 18h, France Avenir à 14h.\n🎟️ Un billet pour les deux, dès 8 €, gratuit -8 ans : {lien}"
       }
     }
   ]
