@@ -1,7 +1,7 @@
 {
   "saison": "26-27",
-  "maj": "2026-11-02",
-  "genere_par": "Mise à jour manuelle (données Tickie du 02/11/2026)",
+  "maj": "2026-11-20",
+  "genere_par": "Mise à jour manuelle du 20/11/2026 (visuels Paris et Nice, bucket spacers-visuels)",
   "receptions": [
     {
       "cle": "plessis",
@@ -87,11 +87,72 @@
       "tarifs": "13 € plein tarif · 8 € tarif réduit · gratuit -8 ans · un billet pour les 2 matchs",
       "accroche": "Paris, l'un des clubs historiques du volley français, pour le dernier match avant la trêve. En lever de rideau à 14h : France Avenir 2027 vs Cannes.",
       "lien": "https://billetterie.spacerstoulouse.fr/event/france-avenir-vs-cannes-spacers-vs-paris-7ujueu",
-      "visuels": {},
+      "visuels": {
+        "post": {
+          "url": "https://img.spacerstoulouse.fr/26-27/Paris/post.jpg",
+          "libelle": "Post 1080×1350"
+        },
+        "story": {
+          "url": "https://img.spacerstoulouse.fr/26-27/Paris/story.jpg",
+          "libelle": "Story 1080×1920"
+        },
+        "carrousel": {
+          "url": "https://img.spacerstoulouse.fr/26-27/Paris/carrousel.jpg",
+          "libelle": "Carrousel"
+        },
+        "banniere": {
+          "url": "https://img.spacerstoulouse.fr/26-27/Paris/banniere.jpg",
+          "libelle": "Bannière"
+        },
+        "affiche": {
+          "url": "https://img.spacerstoulouse.fr/26-27/Paris/affiche-a4.pdf",
+          "libelle": "Affiche A4"
+        }
+      },
       "textes": {
         "post": "🏐 Dernier match avant la trêve, samedi 28 novembre au Palais des Sports !\nLe Spacer's Toulouse Volley reçoit Paris Volley à 18h, après France Avenir 2027 vs Cannes à 14h.\nUn seul billet pour les deux matchs : 13 €, 8 € tarif réduit, gratuit pour les moins de 8 ans.\n🎟️ Billets : {lien}\nOn a besoin de vous pour faire trembler les tribunes 🔥",
         "story": "🏐 Samedi, Paris au Palais !\nSpacer's vs Paris — 28 novembre, 18h\n+ France Avenir à 14h, même billet\nBillets dès 8 € : {lien}",
         "relance": "⏳ Dernier match de l'année au Palais !\nSpacer's vs Paris Volley samedi 28 novembre à 18h, France Avenir à 14h.\n🎟️ Un billet pour les deux, dès 8 €, gratuit -8 ans : {lien}"
+      }
+    },
+    {
+      "cle": "nice",
+      "titre": "Spacer's vs Nice",
+      "competition": "Ligue A · double programme",
+      "date": "2026-12-05",
+      "dateTexte": "samedi 5 décembre",
+      "heure": "18h00",
+      "portes": "13h00",
+      "lieu": "Palais des Sports André-Brouat, Toulouse",
+      "tarifs": "13 € plein tarif · 8 € tarif réduit · gratuit -8 ans · un billet pour les 2 matchs",
+      "accroche": "Nice au Palais des Sports. En lever de rideau à 14h : France Avenir 2027 vs Nantes.",
+      "lien": "https://billetterie.spacerstoulouse.fr/event/france-avenir-vs-nantes-spacers-vs-nice-mfrbr1",
+      "visuels": {
+        "post": {
+          "url": "https://img.spacerstoulouse.fr/26-27/Nice/post.jpg",
+          "libelle": "Post 1080×1350"
+        },
+        "story": {
+          "url": "https://img.spacerstoulouse.fr/26-27/Nice/story.jpg",
+          "libelle": "Story 1080×1920"
+        },
+        "carrousel": {
+          "url": "https://img.spacerstoulouse.fr/26-27/Nice/carrousel.jpg",
+          "libelle": "Carrousel"
+        },
+        "banniere": {
+          "url": "https://img.spacerstoulouse.fr/26-27/Nice/banniere.jpg",
+          "libelle": "Bannière"
+        },
+        "affiche": {
+          "url": "https://img.spacerstoulouse.fr/26-27/Nice/affiche-a4.pdf",
+          "libelle": "Affiche A4"
+        }
+      },
+      "textes": {
+        "post": "🏐 Samedi 5 décembre, double programme au Palais des Sports !\n14h : France Avenir 2027 vs Nantes\n18h : le Spacer's Toulouse Volley reçoit Nice en Ligue A\nUn seul billet pour les deux matchs : 13 €, 8 € tarif réduit, gratuit pour les moins de 8 ans.\n🎟️ Billets : {lien}\nVenez remplir le Palais avec nous 💙",
+        "story": "🏐 Samedi, Nice au Palais !\nSpacer's vs Nice — 5 décembre, 18h\n+ France Avenir à 14h, même billet\nBillets dès 8 € : {lien}",
+        "relance": "⏳ C'est ce samedi !\nSpacer's vs Nice samedi 5 décembre à 18h, France Avenir 2027 vs Nantes à 14h.\n🎟️ Un billet pour les deux, dès 8 €, gratuit -8 ans : {lien}"
       }
     }
   ]
