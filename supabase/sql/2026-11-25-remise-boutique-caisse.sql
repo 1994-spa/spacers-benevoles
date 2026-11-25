@@ -151,3 +151,49 @@ revoke all on function public.boutique_liste_benevoles(text) from public, authen
 revoke all on function public.boutique_enregistrer_remises(text, jsonb) from public, authenticated;
 grant execute on function public.boutique_liste_benevoles(text) to anon, service_role;
 grant execute on function public.boutique_enregistrer_remises(text, jsonb) to anon, service_role;
+
+-- 5. Appairage du CRM Boutique ---------------------------------
+-- Remet la cle partagee UNE fois, contre un code a usage unique et a duree
+-- limitee : evite toute copie manuelle de la cle dans Apps Script.
+-- Pour emettre un nouveau code (remplacer <empreinte> par le SHA-256 du code) :
+--   insert into public._boutique_appairage (code_hash, expire_le)
+--   values ('<empreinte>', now() + interval '48 hours');
+create table if not exists public._boutique_appairage (
+  code_hash  text primary key,
+  expire_le  timestamptz not null,
+  utilise_le timestamptz,
+  cree_le    timestamptz not null default now()
+);
+alter table public._boutique_appairage enable row level security;
+revoke all on public._boutique_appairage from public, anon, authenticated;
+
+create or replace function public.boutique_appairer(p_code text)
+returns jsonb
+language plpgsql
+security definer
+set search_path to 'public'
+as $$
+declare
+  v_hash text;
+begin
+  if p_code is null or length(p_code) < 32 then
+    return jsonb_build_object('ok', false, 'code', 'code_invalide');
+  end if;
+  v_hash := encode(sha256(convert_to(p_code, 'UTF8')), 'hex');
+
+  update public._boutique_appairage
+     set utilise_le = now()
+   where code_hash = v_hash
+     and utilise_le is null
+     and expire_le > now();
+  if not found then
+    return jsonb_build_object('ok', false, 'code', 'code_expire_ou_deja_utilise');
+  end if;
+
+  return jsonb_build_object('ok', true,
+    'cle', (select s.value from public._app_secrets s where s.key = 'boutique_cle'));
+end;
+$$;
+
+revoke all on function public.boutique_appairer(text) from public, authenticated;
+grant execute on function public.boutique_appairer(text) to anon, service_role;
