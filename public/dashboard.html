@@ -4036,6 +4036,14 @@ async function setDispo(matchId,statut,btn) {
 }
 
 // -- POINTS ---------------------------------------------------
+// Avantage de statut : remise boutique du Palais (Satellite 10 %, Etoile 20 %, Galaxie 30 %) - pas de debit de points
+function avantageBoutiqueHtml(pts){
+  const pi = palierInfo(pts)
+  const pct = {satellite:10,etoile:20,galaxie:30}[pi.cur.code]
+  if (!pct) return ''
+  return `<div style="background:linear-gradient(120deg,#0a3a68,#15518c);border:1px solid rgba(245,200,66,0.45);border-radius:14px;padding:14px;margin-bottom:12px;display:flex;gap:11px;align-items:flex-start;"><span style="font-size:22px;">🛍️</span><div><div style="font-size:13px;font-weight:700;color:var(--c-gold-light);">Ton avantage ${pi.cur.e} ${pi.cur.l} : −${pct} % à la boutique du Palais</div><div style="font-size:11px;color:rgba(255,255,255,0.8);margin-top:4px;line-height:1.45;">Valable toute la saison, les soirs de match. Présente ton accréditation et cet écran au stand boutique pour en profiter. Non valable sur la boutique en ligne.</div></div></div>`
+}
+
 function palierInfo(pts){
   pts = pts || 0
   const P=[{code:'comete',l:'Comète',e:'☄️',s:0},{code:'satellite',l:'Satellite',e:'🛰️',s:300},{code:'etoile',l:'Étoile',e:'⭐',s:700},{code:'galaxie',l:'Galaxie',e:'🌌',s:1500}]
@@ -4052,7 +4060,7 @@ async function loadPoints() {
   const pi = palierInfo(pts)
   const ladder = pi.P.map(t=>`<div style="flex:1;text-align:center;padding:10px 4px;border-radius:12px;${t.code===pi.cur.code?'background:rgba(245,200,66,0.16);border:1px solid rgba(245,200,66,0.45);':'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);'}"><div style="font-size:17px;">${t.e}</div><div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.85);margin-top:2px;">${t.l}</div><div style="font-size:9px;color:${t.code===pi.cur.code?'var(--c-gold-light)':'rgba(255,255,255,0.5)'};">${t.s}</div></div>`).join('')
   const nextTxt = pi.nxt ? `Plus que <b style="color:var(--c-gold-light);">${pi.avant} pts</b> avant ${pi.nxt.e} ${pi.nxt.l}` : 'Palier maximum atteint 🏆'
-  const LOTS={satellite:'−10 % boutique',etoile:'−20 % boutique + un bon cadeau',galaxie:'−30 % boutique + écharpe + 2 places match'}
+  const LOTS={satellite:'−10 % à la boutique du Palais',etoile:'−20 % boutique + un bon cadeau',galaxie:'−30 % boutique + écharpe + 2 places match'}
   const teaser = pi.nxt && LOTS[pi.nxt.code] ? `<div style="background:linear-gradient(120deg,#0a3a68,#15518c);border:1px solid rgba(245,200,66,0.3);border-radius:14px;padding:14px;display:flex;gap:11px;align-items:center;margin-top:12px;"><span style="font-size:22px;">🎁</span><p style="font-size:12px;color:rgba(255,255,255,0.85);margin:0;line-height:1.4;">Au prochain palier <b style="color:var(--c-gold-light);">${pi.nxt.e} ${pi.nxt.l}</b> : <b style="color:var(--c-gold-light);">${LOTS[pi.nxt.code]}</b>.</p></div>` : ''
   const bareme = [['📲','Inscription sur l\'appli','+30'],['🏐','Présence confirmée','+50'],['⏱️','Ponctualité','+20'],['🤝','Aide hors match','+30'],['🎉','Proposer un événement','+60'],['👥','Parrainage','+60'],['🏅','Badge 5 matchs','+100'],['🏆','Badge 10 matchs','+150']].map(([i,l,v])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--c-cream);font-size:13px;"><div style="display:flex;gap:8px;align-items:center;"><span>${i}</span><span style="color:#243b5a;font-weight:500;">${l}</span></div><strong style="color:var(--c-action);">${v} pts</strong></div>`).join('')
 
@@ -4067,6 +4075,7 @@ async function loadPoints() {
       <div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:8px;">${nextTxt}</div>
       <div style="display:flex;gap:6px;margin-top:13px;">${ladder}</div>
     </div>
+    ${avantageBoutiqueHtml(pts)}
     <div style="background:white;border-radius:14px;padding:15px;margin-bottom:12px;">
       <div style="font-size:14px;font-weight:700;color:var(--c-navy-2);margin-bottom:8px;">Comment gagner des points</div>
       ${bareme}
@@ -4405,7 +4414,7 @@ function formatFileSize(bytes) {
 // -------------------------------------------------
 
 const PALIERS = [
-  { pts: 200, valeur: 10, min: 50, label: '-10€ sur 50€', desc: 'Code de réduction boutique Spacers · panier = 50€' }
+  { pts: 200, valeur: 10, min: 50, label: '-10€ sur 50€', desc: 'Code de réduction boutique en ligne Spacers · panier = 50€' }
 ]
 const BOUTIQUE_URL = 'https://sportapproved.fr/349-spacer-s-toulouse-volley'
 
@@ -4468,6 +4477,8 @@ async function loadReward() {
         </div>`
     })
   }
+
+  if (ptsTotal >= 300) html += `<div class="sec">🛍️ Mon avantage de palier</div>` + avantageBoutiqueHtml(ptsTotal)
 
   html += `<div class="sec">🎁 Catalogue des cadeaux</div>`
   PALIERS.forEach(p => {
@@ -5424,6 +5435,13 @@ init()
 // ============================================================
 (function () {
   const ANNOUNCEMENTS = [
+    {
+      id: 'remise-boutique-satellite-2026-11',
+      title: '🛍️ Nouveau : −10 % à la boutique du Palais',
+      body: "Dès le palier 🛰️ Satellite (300 pts), tu profites de −10 % toute la saison à la boutique du Palais, les soirs de match. Présente ton accréditation au stand.",
+      target: '#bn-points',
+      cta: { label: 'Voir mes points', open: 'points' },
+    },
     {
       id: 'push-notifs-2026-07',
       title: '🔔 Nouveau : les notifications',
